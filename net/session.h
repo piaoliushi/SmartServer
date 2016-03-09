@@ -105,14 +105,6 @@ namespace net
 		virtual void start_handler_mp3_data_ex(boost::uint8_t nChannel,unsigned char *curData,int nDataLen){};
 		//-------------------------------------------transmitter--------------------------------//
 		virtual void  handler_transmitter_data(DevMonitorDataPtr curDataPtr){};
-		//virtual bool start_turn_on(string sDevId,string sUser,e_ErrorCode &opResult,TurnOn_Type eType=HIGH_POWER_ON){return false;}
-		//virtual bool start_turn_off(string sDevId,string sUser,e_ErrorCode &opResult){return false;};
-		//升功率
-		//virtual bool upper_power(string sDevId,string sUser,e_ErrorCode &opResult){return false;}
-		//降功率
-		//virtual bool lower_power(string sDevId,string sUser,e_ErrorCode &opResult){return false;}
-		//--------------------------------------------antenna----------------------------------//
-		//virtual bool switch_antenna_pos(string sDevId,bool bHost,string sUser,e_ErrorCode &opResult){return false;}
 		//-------------------------------------------client-------------------------------------//
 		virtual void connect(std::string hostname,unsigned short port,bool bReconnect=false){};
 		virtual void udp_connect(std::string hostname,unsigned short port){};
