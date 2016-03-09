@@ -58,9 +58,7 @@ namespace net
 		void move_w_ptr(int nlen);
 		void move_r_ptr(int nlen);
 		int  valid_msg_len();
-		unsigned char* r_ptr();
-
-
+        unsigned char* r_ptr();
 	private:
 		vector<unsigned char>    data_;
 		size_t          w_pos_;
