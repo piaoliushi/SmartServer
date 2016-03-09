@@ -143,3 +143,8 @@ INCLUDEPATH += /usr/local/postgresql_arm_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/arm_build/include
 }
 INCLUDEPATH += /usr/local/boost_1_48_0
+
+OTHER_FILES +=
+
+RESOURCES += \
+    image/resource.qrc

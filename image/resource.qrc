@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/new/images">
+        <file alias="alarm.png">alarm.png</file>
+        <file alias="device.png">device.png</file>
+        <file alias="link.png">link.png</file>
+        <file alias="network.png">network.png</file>
+        <file alias="power.png">power.png</file>
+        <file alias="servermonitor.png">servermonitor.png</file>
+        <file alias="shuidi.png">shuidi.png</file>
+        <file alias="state.png">state.png</file>
+        <file alias="system.png">system.png</file>
+        <file alias="users.png">users.png</file>
+    </qresource>
+</RCC>
