@@ -2,32 +2,46 @@
 #include "ui_mainwindow.h"
 #include <QTimer>
 #include <QDateTime>
+#include <QDesktopWidget>
 #include <time.h>
+#include "qsysteminfopage.h"
+#include "qsvcstatepage.h"
+#include "qdevstatepage.h"
+#include "qclientstatepage.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    d_Notify(parent)
 {
-     setWindowFlags(Qt::FramelessWindowHint);
+    setWindowFlags(Qt::FramelessWindowHint);
     ui->setupUi(this);
-    QTimer *pTime = new QTimer(this);
-    connect(pTime,SIGNAL(timeout()),this,SLOT(timeUpdate()));
-    pTime->start(1000);
-    connect(ui->tbServer,SIGNAL(clicked()),this,SLOT(testSetTime()));
 
-    ui->lbDatetime->setStyleSheet("color:#7dc5ec;");
+    d_pSvcStatePage = new QSvcStatePage(d_Notify,this);
+    ui->swContainter->addWidget(d_pSvcStatePage);
+
+    d_pDevStatePage = new QDevStatePage(d_Notify,this);
+    ui->swContainter->addWidget(d_pDevStatePage);
+
+    d_pClientStatePage = new QClientStatePage(d_Notify,this);
+    ui->swContainter->addWidget(d_pClientStatePage);
+
+    d_pSystemInfoPage = new QSystemInfoPage(this);
+    ui->swContainter->addWidget(d_pSystemInfoPage);
+
+    connect(ui->tbServer,SIGNAL(clicked()),this,SLOT(ShowSvcStatePage()));
+    connect(ui->tbDeviceState,SIGNAL(clicked()),this,SLOT(ShowDevStatePage()));
+    connect(ui->tbOnlineUser,SIGNAL(clicked()),this,SLOT(ShowClientStatePage()));
+    connect(ui->tbSystem,SIGNAL(clicked()),this,SLOT(ShowSystemInfoPage()));
+
+    ui->tbServer->setChecked(true);
+    ShowSvcStatePage();
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-void MainWindow::timeUpdate()
-{
-    QDateTime current_date_time = QDateTime::currentDateTime();
-    QString current_date = current_date_time.toString("yyyy-MM-dd hh:mm:ss");
-
-    ui->lbDatetime->setText(current_date);
 }
 
 void MainWindow::testSetTime()
@@ -45,5 +59,20 @@ void MainWindow::testSetTime()
     int nRt = stime(&t);
     if(nRt>0)
         return;
+}
 
+void MainWindow::ShowSvcStatePage(){
+    ui->swContainter->setCurrentWidget(d_pSvcStatePage);
+}
+
+void MainWindow::ShowDevStatePage(){
+    ui->swContainter->setCurrentWidget(d_pDevStatePage);
+}
+
+void MainWindow::ShowClientStatePage(){
+    ui->swContainter->setCurrentWidget(d_pClientStatePage);
+}
+
+void MainWindow::ShowSystemInfoPage(){
+    ui->swContainter->setCurrentWidget(d_pSystemInfoPage);
 }

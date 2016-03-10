@@ -50,7 +50,11 @@ SOURCES += main.cpp\
     qnotifyhandler.cpp \
     LocalConfig.cpp \
     StationConfig.cpp \
-    net/server/local_server.cpp
+    net/server/local_server.cpp \
+    qsvcstatepage.cpp \
+    qdevstatepage.cpp \
+    qclientstatepage.cpp \
+    qsysteminfopage.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -104,7 +108,11 @@ HEADERS  += \
     StructDef.h \
     LocalConfig.h \
     StationConfig.h \
-    net/server/local_server.h
+    net/server/local_server.h \
+    qsvcstatepage.h \
+    qdevstatepage.h \
+    qclientstatepage.h \
+    qsysteminfopage.h
 
 FORMS    += mainwindow.ui
 

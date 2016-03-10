@@ -3,12 +3,14 @@
 #include <QTextCodec>
 #include <QPalette>
 #include <QStyleFactory>
+#include <QWSServer>
 #define BOOST_NETWORK_NO_LIB
 
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    //QWSServer::setCursorVisible(false);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
@@ -37,9 +39,12 @@ int main(int argc, char *argv[])
 
     QApplication::setPalette(pal);
 
+    QFont font  = a.font();
+    font.setPointSize(16);
+    a.setFont(font);
+
 
     MainWindow w;
-    //w.show();
     w.showMaximized();
     return a.exec();
 }

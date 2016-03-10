@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>499</width>
+    <width>477</width>
     <height>266</height>
    </rect>
   </property>
@@ -16,13 +16,13 @@
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <property name="margin">
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="spacing">
      <number>0</number>
     </property>
-    <item row="0" column="0">
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item row="0" column="0" rowspan="2" colspan="2">
+     <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -36,7 +36,7 @@
           <property name="minimumSize">
            <size>
             <width>64</width>
-            <height>48</height>
+            <height>0</height>
            </size>
           </property>
           <property name="font">
@@ -51,13 +51,19 @@
            <string/>
           </property>
           <property name="styleSheet">
-           <string notr="true">QToolButton{
-	border:none;
-}
-QToolButton:pressed
-{
-	background:#80eaea;
-}</string>
+           <string notr="true">QToolButton{  
+border:none;  
+padding:0px;
+ }  
+
+QToolButton:checked{
+border:none; 
+padding:0px;
+border-top-left-radius:5px;  
+border-bottom-left-radius:5px;
+background:#586f6f;
+} 
+</string>
           </property>
           <property name="text">
            <string>服务状态</string>
@@ -91,7 +97,7 @@ QToolButton:pressed
           <property name="minimumSize">
            <size>
             <width>64</width>
-            <height>48</height>
+            <height>0</height>
            </size>
           </property>
           <property name="font">
@@ -103,13 +109,18 @@ QToolButton:pressed
            <enum>Qt::NoFocus</enum>
           </property>
           <property name="styleSheet">
-           <string notr="true">QToolButton{
-	border:none;
-}
-QToolButton:pressed
-{
-	background:#80eaea;
-}</string>
+           <string notr="true">QToolButton{  
+border:none;  
+padding:0px;
+ }  
+
+QToolButton:checked{
+border:none; 
+padding:0px;
+border-top-left-radius:5px;  
+border-bottom-left-radius:5px;
+background:#586f6f;
+} </string>
           </property>
           <property name="text">
            <string>设备状态</string>
@@ -154,6 +165,21 @@ QToolButton:pressed
           <property name="focusPolicy">
            <enum>Qt::NoFocus</enum>
           </property>
+          <property name="styleSheet">
+           <string notr="true">QToolButton{  
+border:none;  
+padding:0px;
+ }  
+
+QToolButton:checked{
+border:none; 
+padding:0px;
+border-top-left-radius:5px;  
+border-bottom-left-radius:5px;
+background:#586f6f;
+} 
+</string>
+          </property>
           <property name="text">
            <string>在线用户</string>
           </property>
@@ -186,7 +212,7 @@ QToolButton:pressed
           <property name="minimumSize">
            <size>
             <width>64</width>
-            <height>48</height>
+            <height>0</height>
            </size>
           </property>
           <property name="font">
@@ -197,8 +223,22 @@ QToolButton:pressed
           <property name="focusPolicy">
            <enum>Qt::NoFocus</enum>
           </property>
+          <property name="styleSheet">
+           <string notr="true">QToolButton{  
+border:none;  
+padding:0px;
+ }  
+
+QToolButton:checked{
+border:none; 
+padding:0px;
+border-top-left-radius:5px;  
+border-bottom-left-radius:5px;
+background:#586f6f;
+} </string>
+          </property>
           <property name="text">
-           <string>系统设置</string>
+           <string>系统信息</string>
           </property>
           <property name="icon">
            <iconset resource="image/resource.qrc">
@@ -227,50 +267,25 @@ QToolButton:pressed
        </layout>
       </item>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_2">
-        <property name="spacing">
+       <widget class="QStackedWidget" name="swContainter">
+        <property name="styleSheet">
+         <string notr="true">background:#586f6f;</string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
          <number>0</number>
         </property>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <property name="spacing">
-           <number>6</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="lbDatetime">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QStackedWidget" name="swContainter">
-          <property name="currentIndex">
-           <number>1</number>
-          </property>
-          <widget class="QWidget" name="page"/>
-          <widget class="QWidget" name="page_2"/>
-         </widget>
-        </item>
-       </layout>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="page"/>
+        <widget class="QWidget" name="page_2"/>
+       </widget>
       </item>
      </layout>
     </item>
