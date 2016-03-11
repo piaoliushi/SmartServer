@@ -18,26 +18,17 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     QHBoxLayout *pHLyt = new QHBoxLayout();
     QVBoxLayout *pVMainLyt = new QVBoxLayout();
 
-    QSpacerItem *pLeftTopSpace = new QSpacerItem(20, 0, QSizePolicy::Expanding, QSizePolicy::Maximum);
+    QSpacerItem *pLeftTopSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Maximum);
     d_plbDateTime = new QLabel(this);
-    d_plbDateTime->setFixedSize(200,20);
+    d_plbDateTime->setFixedSize(245,20);
     d_plbDateTime->setStyleSheet(tr("font: 18pt; color:#45c9d5;"));
     pTopLyt->addSpacerItem(pLeftTopSpace);
     pTopLyt->addWidget(d_plbDateTime);
 
     pVMainLyt->addLayout(pTopLyt);
 
-   QSpacerItem *pSpaceTop = new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+   QSpacerItem *pSpaceTop = new QSpacerItem(40, 40, QSizePolicy::Fixed, QSizePolicy::Fixed);
    pVMainLyt->addSpacerItem(pSpaceTop);
-   setLayout(pVMainLyt);
-   QTimer *pTime = new QTimer(this);
-   connect(pTime,SIGNAL(timeout()),this,SLOT(timeUpdate()));
-   pTime->start(1000);
-   return;
-
-
-    //pTopLyt->setAlignment(Qt::AlignLeft);//Qt::AlignTop|Qt::AlignRight|Qt::AlignAbsolute
-    /*pVMainLyt->setContentsMargins(2,0,2,0);
 
     QSpacerItem *pSpaceLeft = new QSpacerItem(20, 20, QSizePolicy::Fixed, QSizePolicy::Maximum);
     pHLyt->addSpacerItem(pSpaceLeft);
@@ -47,7 +38,7 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     pSvcStateLabel->setFixedSize(80,30);
     pGridLayout->addWidget(pSvcStateLabel,0,0,1,1);
 
-    d_pSvcStateValueLabel = new QLabel(QObject::tr("已停止654654654"));
+    d_pSvcStateValueLabel = new QLabel(QObject::tr("已停止"));
     d_pSvcStateValueLabel->setFixedHeight(30);
     d_pSvcStateValueLabel->setStyleSheet(tr("font: 18pt; color:rgb(117,250,0);"));
     pGridLayout->addWidget(d_pSvcStateValueLabel,0,1,1,1);
@@ -73,28 +64,16 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     pHLyt->addLayout(pGridLayout);
     QSpacerItem *pRightSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Maximum);
     pHLyt->addSpacerItem(pRightSpace);
-
     pVMainLyt->addLayout(pHLyt);
-
-    QSpacerItem *pBottomSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Maximum);
+    QSpacerItem *pBottomSpace = new QSpacerItem(20, 20, QSizePolicy::Maximum, QSizePolicy::Expanding);
     pVMainLyt->addSpacerItem(pBottomSpace);
-    //QSpacerItem *pLeftSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    //pVLeftLyt->addSpacerItem(pLeftSpacer);
-    //pVLeftLyt->setAlignment(Qt::AlignTop);
-    //pHLyt->addLayout(pVLeftLyt);
-    //QSpacerItem *pMidSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-    //pHLyt->addSpacerItem(pMidSpacer);
-    //pHLyt->addLayout(pRightLyt);
-
-    //pGridLayout->setContentsMargins(50,80,0,0);
-
-    setLayout(pVMainLyt);//pHLyt
+    setLayout(pVMainLyt);
 
     QTimer *pTime = new QTimer(this);
     connect(pTime,SIGNAL(timeout()),this,SLOT(timeUpdate()));
     pTime->start(1000);
     connect(&m_Notify,SIGNAL(S_OnConnected(QString,int)),this,SLOT(OnDevConnect(QString,int)));
-*/
+
 }
 
 QSvcStatePage::~QSvcStatePage()
@@ -175,6 +154,6 @@ void QSvcStatePage::timeUpdate()
 {
     QDateTime current_date_time = QDateTime::currentDateTime();
     QLocale lo = QLocale::Chinese;
-    QString current_date = lo.toString(current_date_time,"yyyy-MM-dd hh:mm:ss ddd");
+    QString current_date = lo.toString(current_date_time,"yyyy-MM-dd hh:mm:ss dddd");
     d_plbDateTime->setText(current_date);
 }

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -54,7 +54,8 @@ SOURCES += main.cpp\
     qsvcstatepage.cpp \
     qdevstatepage.cpp \
     qclientstatepage.cpp \
-    qsysteminfopage.cpp
+    qsysteminfopage.cpp \
+    nettool.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -112,7 +113,8 @@ HEADERS  += \
     qsvcstatepage.h \
     qdevstatepage.h \
     qclientstatepage.h \
-    qsysteminfopage.h
+    qsysteminfopage.h \
+    nettool.h
 
 FORMS    += mainwindow.ui
 

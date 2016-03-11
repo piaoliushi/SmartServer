@@ -31,6 +31,7 @@ public slots:
 	void moidfyParm();
 	void setAutoStart(bool is_auto_start);
 	bool isAutoStart();
+   // int    get_gw_ip(char *eth, char *ipaddr);
 private:
 	QLineEdit *d_svcNumber;
 	QLineEdit *d_svcPort;
