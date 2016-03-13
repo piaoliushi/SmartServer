@@ -1,7 +1,9 @@
 #include "qsvcstatepage.h"
 #include <QGridLayout>
+#include <QDebug>
 #include<QMessageBox>
 #include <QDateTime>
+#include <QCoreApplication>
 #include <QLocale>
 #include "./net/SvcMgr.h"
 #include "./net/config.h"
@@ -74,6 +76,7 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     pTime->start(1000);
     connect(&m_Notify,SIGNAL(S_OnConnected(QString,int)),this,SLOT(OnDevConnect(QString,int)));
 
+    StartSvc();
 }
 
 QSvcStatePage::~QSvcStatePage()
@@ -87,18 +90,17 @@ bool QSvcStatePage::IsStart()
 }
 void QSvcStatePage::StartSvc()
 {
-    /*if(m_IsRunning==false)
+  if(m_IsRunning==false)
     {
-        setCursor(Qt::WaitCursor);
-
         QString AppDir = QCoreApplication::applicationDirPath();
-        AppDir.append("/ServerLocalConfig.xml");
-        if(!GetInst(LocalConfig).load_local_config(AppDir.toLocal8Bit().constData()))
+        AppDir.append("/ServerLocalConfig_1.xml");
+
+        if(!GetInst(LocalConfig).load_local_config(AppDir.toLatin1().constData()))
         {
             return;
         }
 
-        if(GetInst(DataBaseManager).OpenDb(GetInst(LocalConfig).database_ip(),
+        if(GetInst(DbManager).OpenDb(GetInst(LocalConfig).database_ip(),
             "LsmpDataBase",
             GetInst(LocalConfig).database_user(),
             GetInst(LocalConfig).database_password(),1,GetInst(LocalConfig).database_drivername()))
@@ -116,24 +118,23 @@ void QSvcStatePage::StartSvc()
         GetInst(net::SvcMgr).set_notify(&m_Notify);
         GetInst(net::SvcMgr).Start();
         m_IsRunning=true;
-        pSvcStateValueLabel->setText(tr("正在运行"));
-        pStartBt->setText(tr("停止服务"));
+       // pSvcStateValueLabel->setText(tr("正在运行"));
+       // pStartBt->setText(tr("停止服务"));
 
-        emit updateMenu();
+        //emit updateMenu();
     }
     else
     {
         setCursor(Qt::WaitCursor);
         GetInst(net::SvcMgr).Stop();
-        GetInst(DataBaseManager).CloseDb();//清理数据库
+        GetInst(DbManager).CloseDb();//清理数据库
         m_IsRunning=false;
-        pSvcStateValueLabel->setText(tr("已停止"));
-        pStartBt->setText(tr("启动服务"));
-        emit updateMenu();
-        emit updateDevList(false);
+        //pSvcStateValueLabel->setText(tr("已停止"));
+        //pStartBt->setText(tr("启动服务"));
+        //emit updateMenu();
+        //emit updateDevList(false);
     }
 
-    setCursor(Qt::ArrowCursor);*/
 }
 
 void QSvcStatePage::OnDevConnect(QString sDevId,int nResult)//const char* sDevId,

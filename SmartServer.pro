@@ -55,7 +55,8 @@ SOURCES += main.cpp\
     qdevstatepage.cpp \
     qclientstatepage.cpp \
     qsysteminfopage.cpp \
-    nettool.cpp
+    nettool.cpp \
+    utility.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -114,7 +115,12 @@ HEADERS  += \
     qdevstatepage.h \
     qclientstatepage.h \
     qsysteminfopage.h \
-    nettool.h
+    nettool.h \
+    rapidxml/rapidxml_utils.hpp \
+    rapidxml/rapidxml_print.hpp \
+    rapidxml/rapidxml_iterators.hpp \
+    rapidxml/rapidxml.hpp \
+    utility.h
 
 FORMS    += mainwindow.ui
 
@@ -154,7 +160,8 @@ INCLUDEPATH += /usr/local/protobuf-2.6.1/arm_build/include
 }
 INCLUDEPATH += /usr/local/boost_1_48_0
 
-OTHER_FILES +=
+OTHER_FILES += \
+    rapidxml/manual.html
 
 RESOURCES += \
     image/resource.qrc

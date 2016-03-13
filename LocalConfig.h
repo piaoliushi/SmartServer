@@ -11,7 +11,7 @@ public:
 	LocalConfig(void);
 	~LocalConfig(void);
 public:
-	bool load_local_config(const char* sFileName);
+    bool load_local_config(const char* sFileName);
 	
 	string local_station_id()const{return local_station_id_;}
 	string local_dev_server_number()const{return local_dev_server_id_;}
@@ -59,8 +59,8 @@ public:
 	bool writeSwitchPar(const char* sFileName,const string sTransmitterId,bool bUse,string switchPower,
 		                string detectCount="2",string maxDetect="5");
 
-	int HexChar(char src);
-	int StrToHex(string str,unsigned char* Data);
+    //int HexChar(char src);
+    //int StrToHex(string str,unsigned char* Data);
 	void transmitter_cmd(string sTransmitterId,CommandAttribute& cmd);//读取配置的命令
 
 private:
