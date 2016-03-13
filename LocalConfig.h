@@ -53,14 +53,8 @@ public:
 	string alarm_svc_ip(){return alarm_center_svc_ip_;}
 	unsigned short alarm_svc_port(){return alarm_center_svc_port_;}
 
-
 	bool writeSmsParToXml(const char* sFileName,bool bUse,string comId,int baudRate,string smsCenterNumber);
 	
-	bool writeSwitchPar(const char* sFileName,const string sTransmitterId,bool bUse,string switchPower,
-		                string detectCount="2",string maxDetect="5");
-
-    //int HexChar(char src);
-    //int StrToHex(string str,unsigned char* Data);
 	void transmitter_cmd(string sTransmitterId,CommandAttribute& cmd);//读取配置的命令
 
 private:

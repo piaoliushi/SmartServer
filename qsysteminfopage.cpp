@@ -165,18 +165,7 @@ void QSystemInfoPage::transmitterChanged(const QString sTrsmitNumber)
 
 void QSystemInfoPage::moidfyParm()
 {
-    QString sCurTrsmitId = d_Transmitters->currentText();
-    QString sSwitchPower = d_PowerLimit->text();
-    bool bUse=false;
-    if(d_UseAutoSwitch->checkState()==Qt::Checked)
-        bUse=true;
-    QString AppDir = QCoreApplication::applicationDirPath();
-    AppDir.append("/ServerLocalConfig.xml");
-    if(!GetInst(LocalConfig).writeSwitchPar(AppDir.toLocal8Bit().constData(),sCurTrsmitId.toLocal8Bit().constData()
-                                            ,bUse,sSwitchPower.toLocal8Bit().constData()))
-        QMessageBox::information(this,tr("注意"),tr("保存自动倒备机配置参数失败，请检查！"));
-    else
-        QMessageBox::information(this,tr("提示"),tr("保存参数成功！"));
+
 }
 
 void QSystemInfoPage::saveCurConfig()

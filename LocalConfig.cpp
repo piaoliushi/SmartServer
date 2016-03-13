@@ -81,7 +81,6 @@ bool LocalConfig::load_local_config(const char* sFileName)
             db_ip_ = xml_database->first_attribute("ip")->value();
             db_usr_ = xml_database->first_attribute("user")->value();
             db_psw_ = xml_database->first_attribute("password")->value();
-            // db_driver_  = xml_database->first_attribute("drivername")->value();
         }
         else
             return false;
@@ -476,45 +475,6 @@ bool LocalConfig::writeSmsParToXml(const char* sFileName,bool bUse,string comId,
     }*/
     return false;
 }
-
-bool LocalConfig::writeSwitchPar(const char* sFileName,const string sTransmitterId,bool bUse,
-                                 string switchPower,string detectCount,string maxDetect)
-{
-    /*TiXmlDocument xml_config(sFileName);
-
-    if (!xml_config.LoadFile())
-        return false;
-    TiXmlElement* root = xml_config.FirstChildElement("service");
-    if(root!=NULL)
-    {
-        TiXmlElement* xml_transmitter = root->FirstChildElement("transmitter");
-        while(xml_transmitter!=0)
-        {
-            string devId = xml_transmitter->Attribute("id");
-            if(!devId.empty()&& sTransmitterId==devId)
-            {
-                pTransmitterPropertyExPtr pCurTransmitter =  transmitter_property_ex(devId);
-                //倒机功率设定
-                TiXmlElement* xml_property = xml_transmitter->FirstChildElement("auto_switch");//switch_power_lower_limit_value
-                if(xml_property)
-                {
-                    xml_property->SetAttribute("use",bUse);
-                    xml_property->SetAttribute("limit_value",switchPower.c_str());
-                }
-                if(pCurTransmitter)
-                {
-                    pCurTransmitter->is_auto_switch_transmitter = bUse;
-                    pCurTransmitter->switch_power_lower_limit_value = atof(switchPower.c_str());
-                }
-            }
-            xml_transmitter=xml_transmitter->NextSiblingElement("transmitter");
-        }
-        return xml_config.SaveFile();
-    }*/
-    return false;
-}
-
-
 
 void LocalConfig::transmitter_cmd( string sTransmitterId,CommandAttribute& cmd )
 {
