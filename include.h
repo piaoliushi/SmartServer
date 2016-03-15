@@ -1,6 +1,7 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
+#define  BOOST_NETWORK_NO_LIB
 #include <string>
 #include <stdexcept>
 #include <algorithm>
@@ -31,6 +32,18 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/threadpool.hpp>
 #include <boost/smart_ptr/detail/atomic_count.hpp>
+#include <boost/network/include/http/server.hpp>
+#include <boost/network/protocol/http/response.hpp>
+#include <boost/network/tags.hpp>
+#include <boost/network/message_fwd.hpp>
+#include <boost/network/message/wrappers.hpp>
+#include <boost/network/uri/detail/uri_parts.hpp>
+#include <boost/network/message/directives.hpp>
+#include <boost/network/message/transformers.hpp>
+#include <boost/network/protocol/http/request.hpp>
+#include <boost/network/protocol/http/server/sync_server.hpp>
+#include <boost/network/protocol/http/server/async_server.hpp>
+#include <boost/network/utils/thread_pool.hpp>
 #include "./net/config.h"
 //#include "MsgDefine.h"
 #endif

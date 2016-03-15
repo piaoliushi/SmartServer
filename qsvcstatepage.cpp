@@ -100,7 +100,7 @@ void QSvcStatePage::StartSvc()
             return;
         }
 
-        if(GetInst(DbManager).OpenDb(GetInst(LocalConfig).database_ip(),
+        /*if(GetInst(DbManager).OpenDb(GetInst(LocalConfig).database_ip(),
             "LsmpDataBase",
             GetInst(LocalConfig).database_user(),
             GetInst(LocalConfig).database_password(),1,GetInst(LocalConfig).database_drivername()))
@@ -113,7 +113,7 @@ void QSvcStatePage::StartSvc()
             setCursor(Qt::ArrowCursor);
             QMessageBox::information(this,tr("提示"),tr("打开数据库失败,请检查数据库配置是否正确!!!"));
             return;
-        }
+        }*/
 
         GetInst(net::SvcMgr).set_notify(&m_Notify);
         GetInst(net::SvcMgr).Start();

@@ -2,8 +2,12 @@
 #include "server_work.h"
 #include "./http/RequestHandler.h"
 #include "./http/RequestHandlerFactory.h"
+using boost::asio::ip::tcp;
+//namespace net = boost::network;
+namespace http = boost::network::http;
+namespace utils = boost::network::utils;
 
-struct test_handler {
+struct web_handler {
     /* when there are many request at the same time, can put the request into a queue, then let another thread process it.
      * or maybe need to call http::client to connect to other server, and get response.
      */ 
@@ -20,36 +24,40 @@ namespace net
 		: _taskqueueptr(new TaskQueue<msgPointer>)//创建一个任务队列
 		, _workerptr(new server_work((*_taskqueueptr.get())))//创建一个用户任务
         , _serverptr(new LocalServer(port, (*_taskqueueptr.get())))//创建一个服务
-		, _thread_pool(2)
-	{
-		_listenthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunNetListen, this)));
-		_workthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunTasks, this)));
-	}
+        //, _thread_pool(2)
+    {
+        _web_handler = new web_handler;
+        http::async_server<web_handler>::options options(*_web_handler);
+        options.address("192.168.1.192")
+                .port("8080")
+                .io_service(boost::make_shared<boost::asio::io_service>())
+                .thread_pool(boost::make_shared<boost::network::utils::thread_pool>(2))
+                .reuse_address(true);
+        _httpserverptr = hx_http_server_ptr(new hx_http_server(options));
+
+        _listenthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunNetListen, this)));
+        _workthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunTasks, this)));
+        _httpthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunHttpServer,this)));
+
+    }
 
 	ServerMgr::~ServerMgr() 
 	{
+        if(_httpserverptr)
+            _httpserverptr->stop();
 		_workerptr->stop();
 		//_serverptr->stop();
 		_taskqueueptr->ExitNotifyAll();
 		_listenthreadptr->join();
 		_workthreadptr->join();
+
+        _httpthreadptr->join();
 	}
 
 	void ServerMgr::RunNetListen()
 	{
 		if (_serverptr)
 			_serverptr->run();
-
-		_p_test_handler = new test_handler;
-		std::string port = "8000";
-
-		test_handler   handler;
-		//hx_http_server xx("localhost",8000,handler,_thread_pool,http::_reuse_address = true);
-		//_httpserverptr.reset(new hx_http_server("localhost", port, *_p_test_handler, _thread_pool,true));
-		//hx_http_server xx;//("localhost", port, *_p_test_handler)
-		//server instance(,
-		//	http::_reuse_address = true);
-		//instance.run();
 	}
 
 	void ServerMgr::RunTasks()
@@ -57,6 +65,13 @@ namespace net
 		if (_workerptr)
 			_workerptr->run();
 	}
+
+    void ServerMgr::RunHttpServer()
+    {
+        if(_httpserverptr)
+            _httpserverptr->run();
+    }
+
 	//用户登录
 	void ServerMgr::Login(session_ptr ch_ptr,string usr,string psw,LoginAck &loginAck)
 	{

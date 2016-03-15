@@ -4,7 +4,6 @@
 #include <QPalette>
 #include <QStyleFactory>
 #include <QWSServer>
-#define BOOST_NETWORK_NO_LIB
 
 
 int main(int argc, char *argv[])

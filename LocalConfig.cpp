@@ -45,6 +45,7 @@ bool LocalConfig::load_local_config(const char* sFileName)
 {
     file<>   fdoc(sFileName);
     xml_document<>   xml_config;
+    const char *p;
     xml_config.parse<0>(fdoc.data());
     xml_node<>* root = xml_config.first_node("service");
     if(root!=NULL)
@@ -194,67 +195,67 @@ bool LocalConfig::load_local_config(const char* sFileName)
                 //查询超时次数
                 xml_node<>* xml_property = xml_device->first_node("query_timeout_count");
                 if(xml_property)
-                    tmpPropertyEx->query_timeout_count = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->query_timeout_count = strtol(xml_property->value(),NULL,10);
                 //查询指令间隔
                 xml_property = xml_device->first_node("query_interval");
                 if(xml_property)
-                    tmpPropertyEx->query_interval = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->query_interval = strtol(xml_property->value(),NULL,10);
                 //连接定时器间隔（自动重连机制）
                 xml_property = xml_device->first_node("connect_timer_interval");
                 if(xml_property)
-                    tmpPropertyEx->connect_timer_interval = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->connect_timer_interval = strtol(xml_property->value(),NULL,10);
                 //网络连接超时时长
                 xml_property = xml_device->first_node("connect_timeout_duration");
                 if(xml_property)
-                    tmpPropertyEx->connect_timeout_duration = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->connect_timeout_duration = strtol(xml_property->value(),NULL,10);
                 //开机最大检测次数
                 xml_property = xml_device->first_node("run_detect_max_count");
                 if(xml_property)
-                    tmpPropertyEx->run_detect_max_count = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->run_detect_max_count = strtol(xml_property->value(),NULL,10);
                 //关机最大检测次数
                 xml_property = xml_device->first_node("shutdown_detect_max_count");
                 if(xml_property)
-                    tmpPropertyEx->shutdown_detect_max_count = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->shutdown_detect_max_count = strtol(xml_property->value(),NULL,10);
                 //数据保存间隔
                 xml_property = xml_device->first_node("data_save_interval");
                 if(xml_property)
-                    tmpPropertyEx->data_save_interval = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->data_save_interval = strtol(xml_property->value(),NULL,10);
                 //报警检测最大次数
                 xml_property = xml_device->first_node("alarm_detect_max_count");
                 if(xml_property)
-                    tmpPropertyEx->alarm_detect_max_count = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->alarm_detect_max_count = strtol(xml_property->value(),NULL,10);
                 //命令超时间隔
                 xml_property = xml_device->first_node("cmd_timeout_interval");
                 if(xml_property)
-                    tmpPropertyEx->cmd_timeout_interval = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->cmd_timeout_interval = strtol(xml_property->value(),NULL,10);
                 //命令执行超时时长
                 xml_property = xml_device->first_node("cmd_excut_timeout_duration");
                 if(xml_property)
-                    tmpPropertyEx->cmd_excut_timeout_duration = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->cmd_excut_timeout_duration = strtol(xml_property->value(),NULL,10);
                 //多查询指令发送间隔
                 xml_property = xml_device->first_node("multi_query_send_interval");
                 if(xml_property)
-                    tmpPropertyEx->multi_query_send_interval = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->multi_query_send_interval = strtol(xml_property->value(),NULL,10);
                 //功率零值设定
                 xml_property = xml_device->first_node("zero_power_value");
                 if(xml_property)
-                    tmpPropertyEx->zero_power_value = strtod(xml_property->value(),NULL);//atof(xml_property->GetText());
+                    tmpPropertyEx->zero_power_value = strtod(xml_property->value(),NULL);
                 //9033A电压矫正系数
                 xml_property = xml_device->first_node("ubb_ratio_value");
                 if(xml_property)
-                    tmpPropertyEx->ubb_ratio_value = strtod(xml_property->value(),NULL);//atof(xml_property->GetText());
+                    tmpPropertyEx->ubb_ratio_value = strtod(xml_property->value(),NULL);
                 //9033A电流矫正系数
                 xml_property = xml_device->first_node("ibb_ratio_value");
                 if(xml_property)
-                    tmpPropertyEx->ibb_ratio_value = strtod(xml_property->value(),NULL);//atof(xml_property->GetText());
+                    tmpPropertyEx->ibb_ratio_value = strtod(xml_property->value(),NULL);
                 //9033A电流量程范围
                 xml_property = xml_device->first_node("i0_range_value");
                 if(xml_property)
-                    tmpPropertyEx->i0_range_value = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->i0_range_value = strtol(xml_property->value(),NULL,10);
                 //9033A电压量程范围
                 xml_property = xml_device->first_node("u0_range_value");
                 if(xml_property)
-                    tmpPropertyEx->u0_range_value = strtol(xml_property->value(),NULL,10);//atoi(xml_property->GetText());
+                    tmpPropertyEx->u0_range_value = strtol(xml_property->value(),NULL,10);
 
                 xml_property = xml_device->first_node("query_command_define");
                 CommandAttribute cmd;

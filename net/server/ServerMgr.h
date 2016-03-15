@@ -4,12 +4,13 @@
 #pragma once
 
 #include "../io_service_pool.h"
-#include <boost/network/include/http/server.hpp>
-#include <boost/network/uri.hpp>
+//#include <boost/network/include/http/server.hpp>
+//#include <boost/network/uri.hpp>
 #include "local_server.h"
 #include "./http/CommonPrecomp.h"
 
 class server_work;
+struct _web_handler;
 namespace net
 {
 	
@@ -21,6 +22,7 @@ namespace net
 
 		void RunNetListen();
 		void RunTasks();
+        void RunHttpServer();
 		//用户登录
 		void Login(session_ptr ch_ptr,string usr,string psw,LoginAck &loginAck);
 		//用户注销
@@ -58,9 +60,10 @@ namespace net
 		boost::shared_ptr<server_work> _workerptr;//当前用户任务
         boost::shared_ptr<LocalServer> _serverptr;//服务对象
 
+        boost::shared_ptr<boost::thread> _httpthreadptr;//工作线程
 		hx_http_server_ptr   _httpserverptr;//http服务对象
-		test_handler        *_p_test_handler;
-		utils::thread_pool   _thread_pool;
+        web_handler           * _web_handler;
+        //utils::thread_pool   _thread_pool;
 	};
 }
 

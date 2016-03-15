@@ -1,6 +1,6 @@
 #ifndef _REQUEST_HANDLER_H_
 #define _REQUEST_HANDLER_H_
-
+#include"../../../protocol/bohui_protocol.h"
 
 class request_handler
 {
@@ -27,6 +27,7 @@ private:
 	std::string content_;
 	std::size_t content_length_;
 	std::size_t read_content_length_;
+    Bohui_Protocol  bohui_protocol_;
 
 private:
 	static hx_http_server::response_header common_headers[3];

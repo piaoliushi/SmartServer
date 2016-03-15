@@ -8,7 +8,6 @@ class request_handler_factory : public boost::serialization::singleton<request_h
 public:
 	request_handler_ptr create();
 	void destroy(request_handler* handler);
-
 	~request_handler_factory();
 
 private:

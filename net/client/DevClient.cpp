@@ -55,6 +55,7 @@ namespace net
 	//连接所有设备
 	void DevClient::connect_all()
 	{
+        return;
 		string sLocalStationId = GetInst(LocalConfig).local_station_id();
 		boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
 
@@ -75,26 +76,16 @@ namespace net
 					new_session->udp_connect((*modle_iter).sModIP,(*modle_iter).nModPort);
 			}
 
- 			//#pragma pack(push,1)
-// 			struct ss{
-// // 				unsigned     zz:1;
-// // 				unsigned   yy:15;
-// //				unsigned     pp:1;
-// 				unsigned   xx;//:15
-// 
-// 			};
-//  			//#pragma pack(pop)
-//  			int xx = sizeof(struct ss);
 			//session_ptr new_session(new device_session(io_service_pool_.get_io_service(),taskwork_,(*modle_iter)));
 			//new_session->connect("192.168.1.140",2580);
 			return;
 		}
 
 		//连接级联服务器
-		connect_relay_server();
+        //connect_relay_server();
 
 		//连接告警决策服务器
-		connect_alarm_server();
+        //connect_alarm_server();
 	}
 
 	void DevClient::disconnect_all()

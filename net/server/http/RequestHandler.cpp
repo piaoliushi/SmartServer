@@ -24,23 +24,25 @@ void request_handler::start(const hx_http_server::request &request, hx_http_serv
 			boost::find_if(request.headers, is_content_length());
 		if (found == request.headers.end()) 
 		{
-			connection->set_status(hx_http_server::connection::bad_request);
+            connection->set_status(hx_http_server::connection::bad_request);
 			connection->set_headers(boost::make_iterator_range(common_headers, common_headers+3));
 			connection->write(bad_request, boost::bind(&request_handler::write_callback, this, _1));
 			return;
 		}
 
-		uri_ = http::destination(request);
+        uri_ = http::destination(request);
 		content_length_ = boost::lexical_cast<std::size_t>(found->value);
-
 		connection->read(boost::bind(&request_handler::read_callback, this, _1, _2, _3, _4));
 		return;
 	} 
 	else 
 	{
-		connection->set_status(hx_http_server::connection::bad_request);
-		connection->set_headers(boost::make_iterator_range(common_headers, common_headers+3));
-		connection->write(bad_request, boost::bind(&request_handler::write_callback, this, _1));
+        std::string response_body ="Hello,World!";
+        connection->set_status(hx_http_server::connection::ok);
+        common_headers[2].value = boost::lexical_cast<std::string>(response_body.size());
+        connection->set_headers(boost::make_iterator_range(common_headers, common_headers + 3));
+        connection->write(response_body, boost::bind(&request_handler::write_callback, this, _1));
+
 	}
 }
 
@@ -62,16 +64,19 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
 		return;
 	}
 
-	if ("/videoProcessing/start" == uri_)
+    if ("/" == uri_)
 	{
 		// todo: decode the body(content) by creating a message of application logic layer
-		std::string response_body = "<Message Code=\"0000\" Descript=\"OK.\"></Message>";
+        std::string response_body;
 
 		std::vector<hx_http_server::response_header> headers(common_headers, common_headers+3);
 		headers[2].value = boost::lexical_cast<std::string>(response_body.size());
 		connection->set_status(hx_http_server::connection::ok);
 		connection->set_headers(boost::make_iterator_range(headers.begin(), headers.end()));
-		connection->write(response_body, boost::bind(&request_handler::write_callback, this, _1));
+        if(bohui_protocol_.parseDataFromStr(content_,response_body))
+            connection->write(response_body, boost::bind(&request_handler::write_callback, this, _1));
+        else
+            connection->write(bad_request, boost::bind(&request_handler::write_callback, this, _1));
 	}
 	else
 	{

@@ -22,13 +22,8 @@ SOURCES += main.cpp\
     net/server/ServerMgr.cpp \
     net/server/connect_subSvc_handler.cpp \
     net/server/connect_handler.cpp \
-    net/server/http/request_parser.cpp \
     net/server/http/RequestHandlerFactory.cpp \
     net/server/http/RequestHandler.cpp \
-    net/server/http/request_handler.cpp \
-    net/server/http/reply.cpp \
-    net/server/http/mime_types.cpp \
-    net/server/http/connection.cpp \
     net/server/http/CommonPrecomp.cpp \
     net/client/SvcClient.cpp \
     net/client/MsgHandleAgentImpl.cpp \
@@ -56,7 +51,8 @@ SOURCES += main.cpp\
     qclientstatepage.cpp \
     qsysteminfopage.cpp \
     nettool.cpp \
-    utility.cpp
+    utility.cpp \
+    protocol/bohui_protocol.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -73,16 +69,8 @@ HEADERS  += \
     net/server/ServerMgr.h \
     net/server/connect_subSvc_handler.h \
     net/server/connect_handler.h \
-    net/server/http/server.hpp \
-    net/server/http/request_parser.hpp \
     net/server/http/RequestHandlerFactory.h \
     net/server/http/RequestHandler.h \
-    net/server/http/request_handler.hpp \
-    net/server/http/request.hpp \
-    net/server/http/reply.hpp \
-    net/server/http/mime_types.hpp \
-    net/server/http/header.hpp \
-    net/server/http/connection.hpp \
     net/server/http/CommonPrecomp.h \
     net/client/SvcClient.h \
     net/client/MsgHandleAgentImpl.h \
@@ -120,7 +108,9 @@ HEADERS  += \
     rapidxml/rapidxml_print.hpp \
     rapidxml/rapidxml_iterators.hpp \
     rapidxml/rapidxml.hpp \
-    utility.h
+    utility.h \
+    protocol/bohui_protocol.h \
+    protocol/bohui_const_define.h
 
 FORMS    += mainwindow.ui
 
