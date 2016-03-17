@@ -57,7 +57,7 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
 	}
 
 	read_content_length_ += bytes_transferred;
-	content_ += std::string(input.begin(), input.end());
+    content_ += std::string(input.begin(), bytes_transferred);
 	if (read_content_length_ < content_length_)
 	{
 		connection->read(boost::bind(&request_handler::read_callback, this, _1, _2, _3, _4));
@@ -66,23 +66,24 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
 
     if ("/" == uri_)
 	{
-		// todo: decode the body(content) by creating a message of application logic layer
-        std::string response_body;
-
-		std::vector<hx_http_server::response_header> headers(common_headers, common_headers+3);
-		headers[2].value = boost::lexical_cast<std::string>(response_body.size());
-		connection->set_status(hx_http_server::connection::ok);
-		connection->set_headers(boost::make_iterator_range(headers.begin(), headers.end()));
+        string response_body;
         if(bohui_protocol_.parseDataFromStr(content_,response_body))
+        {
+            connection->set_status(hx_http_server::connection::ok);
+            common_headers[2].value = boost::lexical_cast<std::string>(response_body.size());
+            connection->set_headers(boost::make_iterator_range(common_headers, common_headers + 3));
             connection->write(response_body, boost::bind(&request_handler::write_callback, this, _1));
+        }
         else
             connection->write(bad_request, boost::bind(&request_handler::write_callback, this, _1));
 	}
 	else
 	{
 		connection->set_status(hx_http_server::connection::bad_request);
+        connection->set_status(hx_http_server::connection::ok);
+        common_headers[2].value = boost::lexical_cast<std::string>(bad_request.size());
 		connection->set_headers(boost::make_iterator_range(common_headers, common_headers+3));
-		connection->write(bad_request, boost::bind(&request_handler::write_callback, this, _1));
+        connection->write(bad_request, boost::bind(&request_handler::write_callback, this, _1));
 	}
 }
 

@@ -24,7 +24,6 @@ namespace net
 		: _taskqueueptr(new TaskQueue<msgPointer>)//创建一个任务队列
 		, _workerptr(new server_work((*_taskqueueptr.get())))//创建一个用户任务
         , _serverptr(new LocalServer(port, (*_taskqueueptr.get())))//创建一个服务
-        //, _thread_pool(2)
     {
         _web_handler = new web_handler;
         http::async_server<web_handler>::options options(*_web_handler);

@@ -25,6 +25,7 @@ public:
 private:
 	std::string uri_;
 	std::string content_;
+    //std::string response_body_;
 	std::size_t content_length_;
 	std::size_t read_content_length_;
     Bohui_Protocol  bohui_protocol_;
