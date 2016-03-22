@@ -1,9 +1,15 @@
 #include "bohui_protocol.h"
+#include "./net/config.h"
+#include "LocalConfig.h"
 #include "bohui_const_define.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 #include<time.h>
 using namespace std;
+
+string  Bohui_Protocol::SrcCode = GetInst(LocalConfig).local_station_id();
+
+
 Bohui_Protocol::Bohui_Protocol()
 {
 }
@@ -11,33 +17,49 @@ Bohui_Protocol::Bohui_Protocol()
 
 bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody)
 {
-    int nMsgId=-1;
+    int nMsgId=-100;
     int nPriority=0;
     try
     {
         xml_document<>   xml_doc;
         xml_doc.parse<0>(const_cast<char*>(strMsg.c_str()));
+        xml_node<> *rootNode = xml_doc.first_node("Msg");
+        //检查xml头
+        if(_checkXmlHeader(xml_doc,nMsgId,nPriority,rootNode)==true)
+        {
+            xml_node<> *requestNode = rootNode->first_node("Request");
+            if(requestNode!=NULL)
+            {
+                int nRsltValue=0;
+                string cmdType = requestNode->first_attribute("Type")->value();
+                if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_AlarmTimeSet])
+                     _setAlarmTime(requestNode,nRsltValue);
+                else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_AlarmParamSet])
+                    _setAlarmParam(requestNode,nRsltValue);
 
-        if(_checkXmlHeader(xml_doc,nMsgId,nPriority)==true)
-            createResponseMsg(nMsgId,0,8,responseBody);
-        else
-            createResponseMsg(nMsgId,10,0,responseBody);
+                createResponseMsg(nMsgId,nRsltValue,cmdType.c_str(),responseBody);
+            }else
+                createResponseMsg(nMsgId,11,CONST_STR_BOHUI_TYPE[BH_POTO_XmlContentError],responseBody);
+        }
+        else {
+            //xml内容解析错误（SrcCode，MsgId等）
+            createResponseMsg(nMsgId,11,CONST_STR_BOHUI_TYPE[BH_POTO_XmlContentError],responseBody);
+        }
     }
     catch(...)
     {
-         createResponseMsg(nMsgId,8,0,responseBody);
-        return true;
+        //xml载入异常，replyID=-100(暂定，待修改),vlaue=10(xml解析错误),
+         createResponseMsg(nMsgId,10,CONST_STR_BOHUI_TYPE[BH_POTO_XmlParseError],responseBody);
     }
 
     return true;
 
 }
 
-bool Bohui_Protocol::_checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &priority)
+bool Bohui_Protocol::_checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &priority,xml_node<> *rootNode)
 {
     try
     {
-        xml_node<> *rootNode = xmlMsg.first_node("Msg");
         if(rootNode!=NULL)
         {
             string sVer = rootNode->first_attribute("Version")->value();
@@ -55,7 +77,7 @@ bool Bohui_Protocol::_checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &pri
 }
 
 //创建回复消息
-bool Bohui_Protocol::createResponseMsg(int nReplyId,int nValue,int nCmdType,string &responseBody)
+bool Bohui_Protocol::createResponseMsg(int nReplyId,int nValue,const char* nCmdType,string &responseBody)
 {
     xml_document<> xml_responseMsg;
     //本地MsgId暂时固定为0
@@ -63,33 +85,30 @@ bool Bohui_Protocol::createResponseMsg(int nReplyId,int nValue,int nCmdType,stri
     if(msgRootNode!=NULL)
     {
         xml_node<> *xml_resps = xml_responseMsg.allocate_node(node_element,"Response");
-        xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Type",CONST_STR_BOHUI_TYPE[nCmdType]));
+        msgRootNode->append_node(xml_resps);
+        xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Type",nCmdType));//CONST_STR_BOHUI_TYPE[nCmdType]
         if(nValue==0)
         {
-            switch(nCmdType)
-            {
-            case BH_POTO_ManualPowerControl:
-                break;
-            case BH_POTO_TransmitterQuery:
-                break;
-            case BH_POTO_AlarmSwitchSet:
-                break;
-            default:{
-                xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Value",xml_responseMsg.allocate_string(boost::lexical_cast<std::string>(5).c_str())));
-                xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Desc","失败"));
-                break;
-            }
-            }
+            int rsltValue = 0;
+            if(strcmp(nCmdType,CONST_STR_BOHUI_TYPE[0])==0)
+                _execTsmtQueryCmd(msgRootNode,rsltValue);
+            else if(strcmp(nCmdType,CONST_STR_BOHUI_TYPE[1])==0)
+                _execEnvMonQueryCmd(msgRootNode,rsltValue);
+            else if(strcmp(nCmdType,CONST_STR_BOHUI_TYPE[2])==0)
+                _execLinkDevQueryCmd(msgRootNode,rsltValue);
+
+            xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Value",xml_responseMsg.allocate_string(boost::lexical_cast<std::string>(rsltValue).c_str())));
+
         }
         else
-        {
             xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Value",xml_responseMsg.allocate_string(boost::lexical_cast<std::string>(nValue).c_str())));
-            xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Desc","失败"));
-        }
+
+
+        xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Desc",CONST_STR_RESPONSE_VALUE_DESC[nValue]));
         xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Comment",""));
-        msgRootNode->append_node(xml_resps);
-        rapidxml::print(std::back_inserter(responseBody), xml_responseMsg);
     }
+
+   rapidxml::print(std::back_inserter(responseBody), xml_responseMsg, 0);
 
    return true;
 }
@@ -132,6 +151,36 @@ xml_node<>*  Bohui_Protocol::_createResponseXmlHeader(xml_document<>  &xmlMsg,in
 bool Bohui_Protocol::_createResponseXmlBody(string &sXmlBody,int nType)
 {
     return false;
+}
+
+//查询发射机信息
+void Bohui_Protocol::_execTsmtQueryCmd(xml_node<> *rootNode,int  &nValue)
+{
+    nValue = 13;
+}
+
+//查询动环信息
+void Bohui_Protocol::_execEnvMonQueryCmd(xml_node<> *rootNode,int  &nValue)
+{
+nValue = 2;
+}
+
+//查询链路设备信息
+void Bohui_Protocol::_execLinkDevQueryCmd(xml_node<> *rootNode,int  &nValue)
+{
+nValue = 3;
+}
+
+//设置告警运行图
+void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
+{
+
+}
+
+//设置告警门限
+void Bohui_Protocol::_setAlarmParam(xml_node<> *rootNode,int &nValue)
+{
+
 }
 
 bool Bohui_Protocol::_parse_ManualPowerControl_xml(xml_document<> &xmlMsg,int &nMsgId,string &responseBody)

@@ -15,7 +15,10 @@ StationConfig::~StationConfig(void)
 //加载某台站配置信息
 bool StationConfig::load_station_config()
 {
-	mapTransmitterInfo.clear();
+    mapModleInfo.clear();
+    if(!GetInst(DataBaseOperation).GetAllDevInfo(mapModleInfo))
+        return false;
+    /*mapTransmitterInfo.clear();
 	mapAntennaInfo.clear();
 	mapAssociateInfo.clear();
 	mapModleInfo.clear();
@@ -46,7 +49,7 @@ bool StationConfig::load_station_config()
 		return false;
 
     if(!GetInst(DbManager).GetConnectMediaDevInfo(cur_station_id,cur_devSvc_id,vecMediaDevInfo))
-		return false;
+        return false;*/
 
 	return true;
 }

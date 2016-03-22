@@ -6,7 +6,7 @@
 #include "../SvcMgr.h"
 #include "../../DataType.h"
 #include "../../LocalConfig.h"
-#include "../../database/dbmanager.h"
+//#include "../../database/dbmanager.h"
 #include "../../protocol/protocol.pb.h"
 //#include <glog\logging.h>
 #include <stdio.h>

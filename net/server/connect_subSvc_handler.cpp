@@ -1,6 +1,7 @@
 #include "connect_subSvc_handler.h"
 #include "../SvcMgr.h"
 #include "../../LocalConfig.h"
+#include "../../database/DataBaseOperation.h"
 //接受下级服务器主动连接上来的handler
 //与下级服务器建立心跳保持机制
 //注意：下级服务器主动连接上级服务器，等待上级服务器发送注册请求，上级服务器缓存下级服务器提交的所有
@@ -234,7 +235,7 @@ namespace net
 		//判断是否保存数据
 		if(curData->edevtype()!=AUDIO)	{
 			if(is_need_save_data(curData->sdevid())){
-                GetInst(DbManager).SaveTransmitterMonitoringData(curData);
+                //GetInst(DataBaseOperation).SaveDeviceMonitoringData(curData);
 			}
 		}
 		task_count_decrease();
@@ -491,12 +492,12 @@ namespace net
 			curTm.tm_mon-=1;
 			//记录数据库
 			if(pDevAlarm->edevtype()==TRANSMITTER){
-                GetInst(DbManager).AddTransmitterAlarm(&curTm,pDevAlarm->sstationid(),pDevAlarm->sdevid(),
-															 nCellid,(*iter_cell_alarm).ccellstatus());//ltime
+                //GetInst(DbManager).AddTransmitterAlarm(&curTm,pDevAlarm->sstationid(),pDevAlarm->sdevid(),
+                //											 nCellid,(*iter_cell_alarm).ccellstatus());//ltime
 			}
 			else	{
-                GetInst(DbManager).AddOthDevAlarm(&curTm,pDevAlarm->sstationid(),pDevAlarm->sdevid(),
-														nCellid,(*iter_cell_alarm).ccellstatus());//ltime
+                //GetInst(DbManager).AddOthDevAlarm(&curTm,pDevAlarm->sstationid(),pDevAlarm->sdevid(),
+                //										nCellid,(*iter_cell_alarm).ccellstatus());//ltime
 			}
 			mapStrItemAlarmStartTime[pDevAlarm->sdevid()][nCellid] = std::pair<int,string>((*iter_cell_alarm).ccellstatus(),sCellAlarmStartTm);//*ltime
 		}
@@ -529,14 +530,14 @@ namespace net
 			//记录数据库
 			if(pDevAlarm->edevtype()==TRANSMITTER)
 			{
-                GetInst(DbManager).UpdateTransmitterAlarmEndTime(&endTm,startTm,//mapItemAlarmStartTime[pDevAlarm->sdevid()][nCellid].second,
-																	   pDevAlarm->sstationid(),pDevAlarm->sdevid(),nCellid);
+                //GetInst(DbManager).UpdateTransmitterAlarmEndTime(&endTm,startTm,//mapItemAlarmStartTime[pDevAlarm->sdevid()][nCellid].second,
+                //													   pDevAlarm->sstationid(),pDevAlarm->sdevid(),nCellid);
 				mapStrItemAlarmStartTime[pDevAlarm->sdevid()].erase(nCellid);
 			}
 			else
 			{
-                GetInst(DbManager).UpdateOthDevAlarm(&endTm,startTm,//mapItemAlarmStartTime[pDevAlarm->sdevid()][nCellid].second,
-														pDevAlarm->sstationid(),pDevAlarm->sdevid(),nCellid);
+                //GetInst(DbManager).UpdateOthDevAlarm(&endTm,startTm,//mapItemAlarmStartTime[pDevAlarm->sdevid()][nCellid].second,
+                //										pDevAlarm->sstationid(),pDevAlarm->sdevid(),nCellid);
 				mapStrItemAlarmStartTime[pDevAlarm->sdevid()].erase(nCellid);
 			}
 

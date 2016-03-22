@@ -29,6 +29,9 @@ private:
 
     QLabel   *d_pOnlineDevValueLabel;
     QLabel   *d_pSvcStateValueLabel;
+    QLabel   *d_pHttpServerStateValueLabel;
+    QLabel   *d_pDatabaseStateValueLabel;
+
     QLabel   *d_plbDateTime;
 };
 

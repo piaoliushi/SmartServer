@@ -278,7 +278,7 @@ typedef struct
 	map<int,DevParamerMonitorItem> mapMonitorItem;//对应的监控项信息
 }DevBaseInfo;
 
-typedef struct
+/*typedef struct
 {
 	string sStationNumber;//台站编号
 	string sModleNumber;//
@@ -290,7 +290,7 @@ typedef struct
 	int    nConnectType;//连接属性
 	string sNote;
 	map<string,DevParamerInfo> mapDevInfo;//模块对应设备信息
-}ModleInfo;
+}ModleInfo;*/
 
 
 struct TransmitterPropertyEx

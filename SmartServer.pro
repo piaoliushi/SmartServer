@@ -41,7 +41,6 @@ SOURCES += main.cpp\
     net/client/dev_message/base_message.cpp \
     net/client/dev_message/104/iec104.cpp \
     protocol/protocol.pb.cc \
-    database/dbmanager.cpp \
     qnotifyhandler.cpp \
     LocalConfig.cpp \
     StationConfig.cpp \
@@ -52,7 +51,8 @@ SOURCES += main.cpp\
     qsysteminfopage.cpp \
     nettool.cpp \
     utility.cpp \
-    protocol/bohui_protocol.cpp
+    protocol/bohui_protocol.cpp \
+    database/DataBaseOperation.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -93,7 +93,6 @@ HEADERS  += \
     include.h \
     ErrorCode.h \
     DataType.h \
-    database/dbmanager.h \
     qnotifyhandler.h \
     StructDef.h \
     LocalConfig.h \
@@ -110,7 +109,9 @@ HEADERS  += \
     rapidxml/rapidxml.hpp \
     utility.h \
     protocol/bohui_protocol.h \
-    protocol/bohui_const_define.h
+    protocol/bohui_const_define.h \
+    database/DataBaseOperation.h \
+    DataTypeDefine.h
 
 FORMS    += mainwindow.ui
 

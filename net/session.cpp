@@ -300,13 +300,9 @@ namespace net
 					GetInst(LocalConfig).sms_use())
 				{
 					string sCenterId = GetInst(LocalConfig).sms_center_number();
-					//扩平台需要，暂时删去
-					//GetInst(CSmsTraffic).SendSMSContent(sCenterId,smsInfo[i].sPhoneNumber,sContent);
-					//LOG(INFO)<<"短信已发送,接收电话："<<smsInfo[i].sPhoneNumber<<"-发送内容："<<sContent;
-					continue;
 				}
-				
-                GetInst(DbManager).WriteCallTask(smsInfo[i].sPhoneNumber,sContent,nAlarmLevel);
+                //发送短信2016-3-22
+                //GetInst(DbManager).WriteCallTask(smsInfo[i].sPhoneNumber,sContent,nAlarmLevel);
 			}
 		}
 	}

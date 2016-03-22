@@ -1,6 +1,6 @@
 #include "connect_handler.h"
 #include "../../LocalConfig.h"
-#include "../../database/dbmanager.h"
+//#include "../../database/dbmanager.h"
 namespace net
 {
 	connect_handler::connect_handler(boost::asio::io_service& io_service, 
@@ -136,10 +136,10 @@ namespace net
 	{
 		dutyLogAckMsgPtr dutyAck(new DutyLogAck);
 		std::string sstationid = GetInst(LocalConfig).local_station_id();
-        if(!GetInst(DbManager).AddDutyLog(sstationid,sUserId,sContent,nType))
-			dutyAck->set_eresult(EC_FAILED);
-		else 
-			dutyAck->set_eresult(EC_OK);
+        //if(!GetInst(DbManager).AddDutyLog(sstationid,sUserId,sContent,nType))
+        //	dutyAck->set_eresult(EC_FAILED);
+        //else
+        //	dutyAck->set_eresult(EC_OK);
 		sendMessage(MSG_DUTY_LOG_ACK,dutyAck);
 	}
 	//查岗响应

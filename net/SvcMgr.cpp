@@ -1,6 +1,6 @@
 #include "SvcMgr.h"
 #include "../net/client/DevClientMgr.h"
-#include "./database/dbmanager.h"
+//#include "./database/dbmanager.h"
 #include <QMessageBox>
 #include "LocalConfig.h"
 namespace net

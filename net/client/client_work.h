@@ -8,7 +8,7 @@
 #include "../session.h"
  #include "../../protocol/protocol.pb.h"
  #include "../config.h"
- #include "../../database/dbmanager.h"
+ //#include "../../database/dbmanager.h"
 #include "../SvcMgr.h"
 #include "../../LocalConfig.h"
 //#include "connect_handler.h"

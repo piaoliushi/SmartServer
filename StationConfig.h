@@ -2,8 +2,10 @@
 #define STATION_CONFIG
 #pragma once
 
-#include "./database/dbmanager.h"
+//#include "./database/dbmanager.h"
+#include "./database/DataBaseOperation.h"
 #include "DataType.h"
+#include "DataTypeDefine.h"
 #include <map>
 using namespace std;
 //#include "./message/protocol.pb.h"
@@ -27,7 +29,7 @@ public:
 	 //获得指定number的天线信息指针
 	 AntennaInformation* get_antenna_ptr_by_id(string sAntennaNumber);
 	 //所有协议转换器信息
-	 vector<ModleInfo>& get_Modle();
+     vector<ModleInfo>& get_Modle();
 	 //获得所有发射机代理信息
 	 vector<ModleInfo>& get_transmitter_agent();
 	 //获得天线关联信息
@@ -59,8 +61,8 @@ public:
 	 bool get_media_dev_info(int ndevAddr,MediaDeviceParamInfo& mediaDevInfo);
 private:
 	vector<TransmitterInformation>mapTransmitterInfo;//台站id为索引
-	vector<AntennaInformation> mapAntennaInfo;//台站id为索引
-	vector<AssociateInfo> mapAssociateInfo;//台站id为索引
+    vector<AntennaInformation> mapAntennaInfo;//台站id为索引
+    vector<AssociateInfo> mapAssociateInfo;//台站id为索引
 	vector<ModleInfo> mapModleInfo;
 	vector<ModleInfo> mapTransmitAgentInfo;//发射机代理
 	vector<MediaDeviceParamInfo> vecUploadDevInfo;//上传设备

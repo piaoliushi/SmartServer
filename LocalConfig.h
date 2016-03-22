@@ -58,6 +58,7 @@ public:
 	void transmitter_cmd(string sTransmitterId,CommandAttribute& cmd);//读取配置的命令
 
 private:
+    string src_code_;//本平台唯一id
 	string local_station_id_;   //本平台id
 	string local_dev_server_id_;//本监测服务id
 	string local_station_name_; //平台名称

@@ -38,14 +38,10 @@ LocalConfig::~LocalConfig(void)
 {
 }
 
-#include <QString>
-#include <QDebug>
-#include <QCoreApplication>
 bool LocalConfig::load_local_config(const char* sFileName)
 {
     file<>   fdoc(sFileName);
     xml_document<>   xml_config;
-    const char *p;
     xml_config.parse<0>(fdoc.data());
     xml_node<>* root = xml_config.first_node("service");
     if(root!=NULL)
@@ -399,48 +395,29 @@ pMoxaPropertyExPtr  LocalConfig::moxa_property_ex(string sMoxaId)
 bool LocalConfig::writeLocalParToXml(const char* sFileName,string stationId,string stationName,string svcId,
                                      unsigned short svcPort,string dbIp,string dbUser)
 {
-    /*TiXmlDocument xml_config(sFileName);
 
-    if (!xml_config.LoadFile())
-        return false;
-    TiXmlElement* root = xml_config.FirstChildElement("service");
+    file<>   fdoc(sFileName);
+    xml_document<>   xml_config;
+    xml_config.parse<0>(fdoc.data());
+    xml_node<>* root = xml_config.first_node("service");
     if(root!=NULL)
     {
-        TiXmlElement* xml_station = root->FirstChildElement("station" );
+        xml_node<> *xml_station = root->first_node("station");
         if(xml_station!=NULL)
         {
-            local_station_id_ =stationId;
-            xml_station->SetAttribute("id",stationId.c_str());
-            local_station_name_ = stationName;
-            xml_station->SetAttribute("name",stationName.c_str());
-            local_dev_server_id_ = svcId;
-            xml_station->SetAttribute("dev_server_id",svcId.c_str());
+            local_station_id_ = xml_station->first_attribute("id")->value();
+            local_station_name_ = xml_station->first_attribute("name")->value();
+            local_dev_server_id_ = xml_station->first_attribute("dev_server_id")->value();
+            xml_station->remove_attribute(xml_station->first_attribute("id"));
+            xml_station->insert_attribute(xml_station->first_attribute("name"),xml_config.allocate_attribute("id","ET000001"));
+
         }
         else
             return false;
+    }
+    std::ofstream out(sFileName);
+    out << xml_config;
 
-        TiXmlElement* xml_database = root->FirstChildElement("database" );
-        if(xml_database!=NULL)
-        {
-            db_ip_ = dbIp;
-            xml_database->SetAttribute("ip",dbIp.c_str());
-            db_usr_ = dbUser;
-            xml_database->SetAttribute("user",dbUser.c_str());
-        }
-        else
-            return false;
-
-        TiXmlElement* xml_server = root->FirstChildElement("server" );
-        if(xml_server!=NULL)
-        {
-            local_port_ = svcPort;
-            xml_server->SetAttribute("port",svcPort);
-        }
-        else
-            return false;
-
-        xml_config.SaveFile();
-    }*/
     return true;
 }
 

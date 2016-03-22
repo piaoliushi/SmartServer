@@ -5,7 +5,7 @@
 #include "../qnotifyhandler.h"
 #include "./client/DevClientMgr.h"
 #include"./server/ServerMgr.h"
-#include "../database/dbmanager.h"
+//#include "../database/dbmanager.h"
 #include "include.h"
 //#include "RecordAgent.h"
 namespace net

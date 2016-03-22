@@ -29,6 +29,10 @@ typedef enum
     BH_POTO_LinkDevQualityReport=17,      //链路指标上报
     BH_POTO_LinkDevAlarmReport =18,       //链路告警上报
 
+
+    BH_POTO_XmlParseError=19,//xml解析出错
+    BH_POTO_XmlContentError=20,//xml内容错误
+
 } BH_MSG_ID_DEF;
 
 const char CONST_STR_BOHUI_TYPE[][32] = { "TransmitterQuery","EnvMonDevQuery","LinkDevQuery"
@@ -36,7 +40,12 @@ const char CONST_STR_BOHUI_TYPE[][32] = { "TransmitterQuery","EnvMonDevQuery","L
                                           "AlarmParamSet","AlarmSwitchSetE","AlarmParamSetE","AlarmSwitchSetD",
                                           "AlarmParamSetD","CmdStatusReport","QualityRealtimeReport","QualityAlarmReport",
                                           "CommunicationReport","EnvQualityRealtimeReport","EnvAlarmReport","LinkDevQualityReport",
-                                          "LinkDevAlarmReport"};
+                                          "LinkDevAlarmReport","XmlParseError","XmlContentError"};
+
+const char CONST_STR_RESPONSE_VALUE_DESC[][32] = { "成功","删除的任务不存在","没有权限"
+                                                                    "内部错误","省监管平台未找到","用户名密码错",
+                                          "资源不足","任务冲突","XML解析错误","XML内容错误",
+                                          "任务执行异常","没有检索到数据"};
 
 
 

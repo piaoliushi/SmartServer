@@ -7,6 +7,7 @@
 #include "device_message.h"
 #include "../session.h"
 #include "../../DataType.h"
+#include "../../DataTypeDefine.h"
 //#include "../../DevAgent.h"
 #include "MsgHandleAgent.h"
 using boost::asio::io_service;
@@ -95,7 +96,7 @@ namespace net
 		void handle_connected(const boost::system::error_code& error);
 		void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);//通用消息头（分消息head，body）
 		void handle_read_body(const boost::system::error_code& error, size_t bytes_transferred);//通用消息体
-		void handle_udp_read(const boost::system::error_code& error,size_t bytes_transferred);//udp接收回掉
+        void handle_udp_read(const boost::system::error_code& error,size_t bytes_transferred);//udp接收回调
 		void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
 		virtual void handle_write(const boost::system::error_code& error,size_t bytes_transferred);
 		

@@ -30,12 +30,12 @@ namespace net
 	{
 		//获得网络协议转换器相关配置
 		moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos.sModleNumber);
-		map<string,DevParamerInfo>::iterator iter = modleInfos.mapDevInfo.begin();
-		for(;iter!=modleInfos.mapDevInfo.end();++iter)
+        map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
+        for(;iter!=modleInfos.mapDevInfo.end();++iter)
 		{	
 			map<int,double> itemRadio;
-			map<int,DevParamerMonitorItem>::iterator iterItem = iter->second.mapMonitorItem.begin();
-			for(;iterItem!=iter->second.mapMonitorItem.end();++iterItem)
+            map<int,DeviceMonitorItem>::iterator iterItem = iter->second.map_MonitorItem.begin();
+            for(;iterItem!=iter->second.map_MonitorItem.end();++iterItem)
 			{
 				itemRadio.insert(pair<int,double>(iterItem->first,iterItem->second.dRatio));
 			}
