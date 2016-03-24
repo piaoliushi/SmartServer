@@ -3,6 +3,7 @@
 #include <QDebug>
 #include<QMessageBox>
 #include <QDateTime>
+#include <QTimer>
 #include <QCoreApplication>
 #include <QLocale>
 #include <QSqlDatabase>
@@ -10,6 +11,8 @@
 #include "./net/config.h"
 #include "StationConfig.h"
 #include "LocalConfig.h"
+
+using namespace db;
 
 QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     : QWidget(parent)
@@ -135,7 +138,7 @@ void QSvcStatePage::StartSvc()
     else
     {
         GetInst(net::SvcMgr).Stop();
-        GetInst(DataBaseOperation).CloseDb();//清理数据库
+       // GetInst(DataBaseOperation).CloseDb();//清理数据库
         m_IsRunning=false;
         d_pSvcStateValueLabel->setText(tr("已停止"));
         emit updateDevList(false);

@@ -2,6 +2,9 @@
 #include "server_work.h"
 #include "./http/RequestHandler.h"
 #include "./http/RequestHandlerFactory.h"
+
+#include <boost/network/protocol/http/client.hpp>
+
 using boost::asio::ip::tcp;
 //namespace net = boost::network;
 namespace http = boost::network::http;
@@ -27,7 +30,7 @@ namespace net
     {
         _web_handler = new web_handler;
         http::async_server<web_handler>::options options(*_web_handler);
-        options.address("127.0.0.1")
+        options.address("192.168.1.192")
                 .port("8080")
                 .io_service(boost::make_shared<boost::asio::io_service>())
                 .thread_pool(boost::make_shared<boost::network::utils::thread_pool>(2))

@@ -1,6 +1,7 @@
 #include "StationConfig.h"
 #include "LocalConfig.h"
 #include "./net/config.h"
+using namespace db;
 StationConfig::StationConfig(void)
 {
 
@@ -84,24 +85,24 @@ vector<ModleInfo>& StationConfig::get_Modle()
 }
 
 //获得发射机代理设备
-vector<ModleInfo>& StationConfig::get_transmitter_agent()
+/*vector<ModleInfo>& StationConfig::get_transmitter_agent()
 {
 	return mapTransmitAgentInfo;
-}
+}*/
 
 //获得发射机代理ip
 bool StationConfig::get_transmitter_agent_endpoint_by_id(string sTransmitterId,string &sIp,int &nPort)
 {
-	for(int i=0;i<mapTransmitAgentInfo.size();++i)
+/*	for(int i=0;i<mapTransmitAgentInfo.size();++i)
 	{
 		if(mapTransmitAgentInfo[i].mapDevInfo.find(sTransmitterId)!=
 			mapTransmitAgentInfo[i].mapDevInfo.end())
 		{
-			sIp = mapTransmitAgentInfo[i].sModIP;
-			nPort = mapTransmitAgentInfo[i].nModPort;
+            //sIp = mapTransmitAgentInfo[i].sModIP;
+            //nPort = mapTransmitAgentInfo[i].nModPort;
 			return true;
 		}
-	}
+    }*/
 
 	return false;
 }
@@ -230,22 +231,22 @@ AssociateInfo* StationConfig::get_antenna_associate_info_by_backup(string sBacku
 //查找other设备对应的串口服务器id
 string StationConfig::get_modle_id_by_devid(string sStationId,string sDevId)
 {
-	for(int i=0;i<mapModleInfo.size();++i)
+/*	for(int i=0;i<mapModleInfo.size();++i)
 	{
 		if(mapModleInfo[i].mapDevInfo.find(sDevId)!=mapModleInfo[i].mapDevInfo.end())
 			return mapModleInfo[i].sModleNumber;
-	}
-	return "";
+    }*/
+    return "";
 }
 
 //查找发射机代理设备管理器对应的串口服务器id
 string StationConfig::get_transmitter_id_by_agent(string sStationId,string sDevId)
 {
-	for(int i=0;i<mapTransmitAgentInfo.size();++i)
+/*	for(int i=0;i<mapTransmitAgentInfo.size();++i)
 	{
 		if(mapTransmitAgentInfo[i].mapDevInfo.find(sDevId)!=mapTransmitAgentInfo[i].mapDevInfo.end())
 			return mapTransmitAgentInfo[i].sModleNumber;
-	}
+    }*/
 	return "";
 }
 

@@ -92,7 +92,7 @@ void QDevStatePage::LoadDevToList()
 		nTransmitter=nrow;
 	}
 
-	vector<ModleInfo>& vModle = GetInst(StationConfig).get_Modle();
+    /*vector<ModleInfo>& vModle = GetInst(StationConfig).get_Modle();
 	vector<ModleInfo>::iterator Modleiter = vModle.begin();
 	for(;Modleiter != vModle.end();Modleiter++)
 	{
@@ -111,7 +111,7 @@ void QDevStatePage::LoadDevToList()
 			pDevList->setItem(nrow,5,new QTableWidgetItem(tr("未知")));
 			m_mapListItems[QString::fromLocal8Bit((*iter).first.c_str())]=nrow;//(*Modleiter).sModleNumber.c_str()
 		}
-	}
+    }*/
 
 	int nDevNum = pDevList->rowCount();
 	pDevSize->setText(QString(tr("设备数：%1")).arg(nDevNum));

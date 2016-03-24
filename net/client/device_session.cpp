@@ -29,7 +29,7 @@ namespace net
 		,task_count_(0)
 	{
 		//获得网络协议转换器相关配置
-		moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos.sModleNumber);
+        /*moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos.sModleNumber);
         map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
         for(;iter!=modleInfos.mapDevInfo.end();++iter)
 		{	
@@ -41,31 +41,17 @@ namespace net
 			}
 
 			//------------------ new code -----------------------------------------//
-			HMsgHandlePtr pars_agent = HMsgHandlePtr(new MsgHandleAgent(this,io_service));
-			boost::shared_ptr<CommandAttribute> tmpCommand(new CommandAttribute);
-			pars_agent->Init((*iter).second.nDevProtocol,(*iter).second.nSubProtocol,(*iter).second.nDevAddr,itemRadio);
+            //HMsgHandlePtr pars_agent = HMsgHandlePtr(new MsgHandleAgent(this,io_service));
+            //boost::shared_ptr<CommandAttribute> tmpCommand(new CommandAttribute);
+            //pars_agent->Init((*iter).second.nDevProtocol,(*iter).second.nSubProtocol,(*iter).second.iDevAddress,itemRadio);
 
 
 			pTransmitterPropertyExPtr dev_config_ptr = GetInst(LocalConfig).transmitter_property_ex((*iter).first);
 					
-            //pars_agent->DevAgent()->HxSetAttribute(dev_config_ptr->u0_range_value,dev_config_ptr->i0_range_value,
-            //									   dev_config_ptr->ubb_ratio_value,dev_config_ptr->ibb_ratio_value);
-			
 			//保存moxa下的设备自定义配置信息
 			run_config_ptr[(*iter).first]=dev_config_ptr;
-            //pars_agent->DevAgent()->HxGetAllCmd(*tmpCommand);
-// 
-// 			//增加读配置文件获取命令回复长度...
-// 			if(dev_config_ptr->cmd_ack_length_by_id.size()>0)
-// 			{
-// 				for(int nCmdCount = 0;nCmdCount<tmpCommand->queryComm.size();++nCmdCount)
-// 					tmpCommand->queryComm[nCmdCount].ackLen = dev_config_ptr->cmd_ack_length_by_id[nCmdCount];
-// 			}
-			CommandUnit  commUnit;
-			commUnit.ackLen=2;
 
-			tmpCommand->queryComm.push_back(commUnit);//测试代码---------------delete later
-			dev_agent_and_com[iter->first]=pair<CommandAttrPtr,HMsgHandlePtr>(tmpCommand,pars_agent);
+            //dev_agent_and_com[iter->first]=pair<CommandAttrPtr,HMsgHandlePtr>(tmpCommand,pars_agent);
 
 			//报警项初始化
             map<int,std::pair<int,unsigned int> > devAlarmItem;
@@ -74,7 +60,7 @@ namespace net
 			tmLastSaveTime.insert(std::make_pair(iter->first,time(0)));
 		}
 	  cur_dev_id_ = dev_agent_and_com.begin()->first;
-
+*/
 
 	}
 
@@ -89,13 +75,13 @@ namespace net
 
 		if(modleInfos.mapDevInfo.find(iId)!=modleInfos.mapDevInfo.end())
 		{
-			devInfo.mapMonitorItem = modleInfos.mapDevInfo[iId].mapMonitorItem;
-			devInfo.nDevType = modleInfos.mapDevInfo[iId].nDevType;
-			devInfo.sDevName = modleInfos.mapDevInfo[iId].sDevName;
-			devInfo.sDevNum = modleInfos.mapDevInfo[iId].sDevNum;
-			devInfo.sDevNum = modleInfos.mapDevInfo[iId].sStationNumber;
-			devInfo.nCommType = modleInfos.mapDevInfo[iId].nCommType;//主被动连接
-			devInfo.nConnectType =modleInfos.mapDevInfo[iId].nConnectType;//连接方式0：tcp
+           // devInfo.mapMonitorItem = modleInfos.mapDevInfo[iId].map_MonitorItem;
+           // devInfo.nDevType = modleInfos.mapDevInfo[iId].iDevType;
+            //devInfo.sDevName = modleInfos.mapDevInfo[iId].sDevName;
+            //devInfo.sDevNum = modleInfos.mapDevInfo[iId].sDevNum;
+            //devInfo.sDevNum = modleInfos.mapDevInfo[iId].sStationNumber;
+            //devInfo.nCommType = modleInfos.mapDevInfo[iId].nCommType;//主被动连接
+            //devInfo.nConnectType =modleInfos.mapDevInfo[iId].nConnectType;//连接方式0：tcp
 		}
 	}
 
@@ -134,22 +120,22 @@ namespace net
 
 	void device_session::set_con_state(con_state curState)
 	{
-		boost::recursive_mutex::scoped_lock llock(con_state_mutex_);
+        /*boost::recursive_mutex::scoped_lock llock(con_state_mutex_);
 		if(othdev_con_state_!=curState)
 		{
 			othdev_con_state_ = curState;
 			//GetInst(SvcMgr).get_notify()->OnConnected(this->modleInfos.sModleNumber,othdev_con_state_);
-			map<string,DevParamerInfo>::iterator iter = modleInfos.mapDevInfo.begin();
+            map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
 			for(;iter!=modleInfos.mapDevInfo.end();++iter)
 			{
 				//广播设备状态到在线客户端
-				send_net_state_message(modleInfos.sStationNumber,(*iter).first
-										,(*iter).second.sDevName,(e_DevType)((*iter).second.nDevType)
+                send_net_state_message("1000",(*iter).first
+                                        ,(*iter).second.sDevName,(e_DevType)((*iter).second.iDevType)
 										,othdev_con_state_);
 				GetInst(SvcMgr).get_notify()->OnConnected((*iter).first,othdev_con_state_);
 			}
 
-		}
+        }*/
 	}
 
 	//获得发射机报警状态
@@ -280,8 +266,8 @@ namespace net
 					this,boost::asio::placeholders::error)); 
 			}else{
 				usocket().open(udp::v4());
-				const udp::endpoint local_endpoint = udp::endpoint(udp::v4(),modleInfos.nModPort);
-				usocket().bind(local_endpoint);
+                //const udp::endpoint local_endpoint = udp::endpoint(udp::v4(),modleInfos.netMode.ilocal_port);
+                //usocket().bind(local_endpoint);
 				boost::system::error_code err= boost::system::error_code();
 				handle_connected(err);
 			}
@@ -353,9 +339,9 @@ namespace net
 				command_timeout_count_ = 0;
 				cur_msg_q_id_ = 0;
 				//发送清零数据给客户端,该设备可能连接异常
-				DevMonitorDataPtr curData_ptr(new Data);
-				send_monitor_data_message(modleInfos.sStationNumber,cur_dev_id_,(e_DevType)modleInfos.mapDevInfo[cur_dev_id_].nDevType
-					,curData_ptr,modleInfos.mapDevInfo[cur_dev_id_].mapMonitorItem);
+                //DevMonitorDataPtr curData_ptr(new Data);
+                //send_monitor_data_message(modleInfos.sStationNumber,cur_dev_id_,(e_DevType)modleInfos.mapDevInfo[cur_dev_id_].nDevType
+                //	,curData_ptr,modleInfos.mapDevInfo[cur_dev_id_].mapMonitorItem);
 				
 				cur_dev_id_ = next_dev_id();
 				if(dev_agent_and_com[cur_dev_id_].first->queryComm[cur_msg_q_id_].commandLen>0){
@@ -465,8 +451,8 @@ namespace net
 	{
 		if(is_need_save_data(sDevId))
 		{
-            GetInst(DbManager).SaveOthDevMonitoringData(modleInfos.sStationNumber,
-					sDevId,modleInfos.mapDevInfo[sDevId].mapMonitorItem,curDataPtr);
+            //GetInst(DbManager).SaveOthDevMonitoringData(modleInfos.sStationNumber,
+            //		sDevId,modleInfos.mapDevInfo[sDevId].mapMonitorItem,curDataPtr);
 		}
 
 	}
@@ -487,9 +473,9 @@ namespace net
 	//是否在监测时间段
 	bool device_session::is_monitor_time(string sDevId)
 	{
-		time_t curTime = time(0);
+        /*time_t curTime = time(0);
 		tm *pCurTime = localtime(&curTime);
-		vector<MonitorScheduler>::iterator witer = modleInfos.mapDevInfo[sDevId].vecMonitorScheduler.begin();
+        vector<MonitorScheduler>::iterator witer = modleInfos.mapDevInfo[sDevId].vMonitorSch.begin();
 		for(;witer!=modleInfos.mapDevInfo[sDevId].vecMonitorScheduler.end();++witer)
 		{
 			if(((*witer).nMonitorDay+1)%7 == pCurTime->tm_wday && 
@@ -505,14 +491,14 @@ namespace net
 				if(tmCur>=tmStart && tmCur<=tmEnd)
 					return true;
 			}
-		}
+        }*/
 
 		return false;
 	}
 
 	void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 	{
-		boost::recursive_mutex::scoped_lock lock(data_deal_mutex);
+        /*boost::recursive_mutex::scoped_lock lock(data_deal_mutex);
 
 		bool bIsMonitorTime = is_monitor_time(sDevId);
 		//打包发送客户端
@@ -527,13 +513,13 @@ namespace net
 		if(bIsMonitorTime)
 			save_monitor_record(sDevId,curDataPtr);
 		//任务数递减
-		task_count_decrease();
+        task_count_decrease();*/
 		return;
 	}
 
 	void device_session::clear_dev_alarm(string sDevId)
 	{
-		boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
+        /*boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
 		if(mapItemAlarmStartTime.size()>0)
 		{
 
@@ -567,7 +553,7 @@ namespace net
 					,(*iter).second.sMonitoringName
 					,(e_DevType)modleInfos.mapDevInfo[sDevId].nDevType
 					,resume_normal,alramTm,mapItemAlarmStartTime[sDevId].size());
-			}
+            }
 		}
 
 		if(mapItemAlarmRecord.size()>0)
@@ -575,7 +561,7 @@ namespace net
             map<string,map<int,std::pair<int,unsigned int> > >::iterator iter = mapItemAlarmRecord.find(sDevId);
 			if(iter!=mapItemAlarmRecord.end())
 				mapItemAlarmRecord.erase(iter);   //报警记录清除
-		}
+        }*/
 
 	}
 
@@ -1024,7 +1010,7 @@ namespace net
 	{
 		//非检测时间段不进行报警检测...
 
-		DevParamerInfo info_;
+        /*DevParamerInfo info_;
 		map<string,DevParamerInfo>::iterator iter = modleInfos.mapDevInfo.find(sDevId);
 		if(iter== modleInfos.mapDevInfo.end())
 			return;
@@ -1112,7 +1098,7 @@ namespace net
 
 				}
 			}
-		}
+        }*/
 	}
 	
 	void device_session::sendSmsToUsers(int nLevel,string &sContent)

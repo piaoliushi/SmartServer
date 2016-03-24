@@ -16,8 +16,8 @@ typedef enum
 
     BH_POTO_AlarmSwitchSetE=7,           //动环告警开关设置
     BH_POTO_AlarmParamSetE=8,           //动环告警门限参数设置
-    BH_POTO_AlarmSwitchSetD=9,           //动环告警开关设置
-    BH_POTO_AlarmParamSetD=10,         //动环告警门限参数设置
+    BH_POTO_AlarmSwitchSetD=9,           //链路告警开关设置
+    BH_POTO_AlarmParamSetD=10,         //链路告警门限参数设置
 
 
     BH_POTO_CmdStatusReport=11,         //控制指令执行结果上报
@@ -35,17 +35,19 @@ typedef enum
 
 } BH_MSG_ID_DEF;
 
-const char CONST_STR_BOHUI_TYPE[][32] = { "TransmitterQuery","EnvMonDevQuery","LinkDevQuery"
+const char CONST_STR_BOHUI_TYPE[][32] = { "TransmitterQuery","EnvMonDevQuery","LinkDevQuery",
                                                                     "ManualPowerControl","AlarmTimeSet","AlarmSwitchSet",
                                           "AlarmParamSet","AlarmSwitchSetE","AlarmParamSetE","AlarmSwitchSetD",
                                           "AlarmParamSetD","CmdStatusReport","QualityRealtimeReport","QualityAlarmReport",
                                           "CommunicationReport","EnvQualityRealtimeReport","EnvAlarmReport","LinkDevQualityReport",
                                           "LinkDevAlarmReport","XmlParseError","XmlContentError"};
 
-const char CONST_STR_RESPONSE_VALUE_DESC[][32] = { "成功","删除的任务不存在","没有权限"
+const char CONST_STR_RESPONSE_VALUE_DESC[][64] = { "成功","删除的任务不存在","没有权限",
                                                                     "内部错误","省监管平台未找到","用户名密码错",
-                                          "资源不足","任务冲突","XML解析错误","XML内容错误",
+                                          "资源不足","任务冲突"," "," ","XML解析错误","XML内容错误",
                                           "任务执行异常","没有检索到数据"};
+
+const char DEVICE_TYPE_XML_DESC[][32]={"Transmitter","EnvMonDev","DevList"};
 
 
 

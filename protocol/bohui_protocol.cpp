@@ -1,12 +1,13 @@
 #include "bohui_protocol.h"
 #include "./net/config.h"
 #include "LocalConfig.h"
+#include "StationConfig.h"
 #include "bohui_const_define.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 #include<time.h>
 using namespace std;
-
+using namespace db;
 string  Bohui_Protocol::SrcCode = GetInst(LocalConfig).local_station_id();
 
 
@@ -33,9 +34,19 @@ bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody)
                 int nRsltValue=0;
                 string cmdType = requestNode->first_attribute("Type")->value();
                 if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_AlarmTimeSet])
-                     _setAlarmTime(requestNode,nRsltValue);
+                     _setAlarmTime(requestNode,nRsltValue);//发射机告警运行图设置
                 else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_AlarmParamSet])
-                    _setAlarmParam(requestNode,nRsltValue);
+                    _setAlarmParam(BH_POTO_AlarmSwitchSet,requestNode,nRsltValue); //发射机告警门限参数设置
+                else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_AlarmSwitchSet])
+                    _setAlarmSwitchSetParam(BH_POTO_AlarmSwitchSet,requestNode,nRsltValue);//发射机告警开关设置
+                else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_AlarmParamSetE])
+                    _setAlarmParam(BH_POTO_AlarmParamSetE,requestNode,nRsltValue); //动环告警门限参数设置
+                else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_AlarmSwitchSetE])
+                    _setAlarmSwitchSetParam(BH_POTO_AlarmSwitchSetE,requestNode,nRsltValue);//动环告警开关设置
+                else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_AlarmParamSetD])
+                    _setAlarmParam(BH_POTO_AlarmParamSetD,requestNode,nRsltValue); //链路告警门限参数设置
+                else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_AlarmSwitchSetD])
+                    _setAlarmSwitchSetParam(BH_POTO_AlarmSwitchSetD,requestNode,nRsltValue);//链路告警开关设置
 
                 createResponseMsg(nMsgId,nRsltValue,cmdType.c_str(),responseBody);
             }else
@@ -89,21 +100,22 @@ bool Bohui_Protocol::createResponseMsg(int nReplyId,int nValue,const char* nCmdT
         xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Type",nCmdType));//CONST_STR_BOHUI_TYPE[nCmdType]
         if(nValue==0)
         {
-            int rsltValue = 0;
+           // int rsltValue = 0;
             if(strcmp(nCmdType,CONST_STR_BOHUI_TYPE[0])==0)
-                _execTsmtQueryCmd(msgRootNode,rsltValue);
+                _execTsmtQueryCmd(xml_responseMsg,msgRootNode,nValue);//查询发射机信息
             else if(strcmp(nCmdType,CONST_STR_BOHUI_TYPE[1])==0)
-                _execEnvMonQueryCmd(msgRootNode,rsltValue);
+                _execEnvMonQueryCmd(xml_responseMsg,msgRootNode,nValue);//查询动环设备信息
             else if(strcmp(nCmdType,CONST_STR_BOHUI_TYPE[2])==0)
-                _execLinkDevQueryCmd(msgRootNode,rsltValue);
+                _execLinkDevQueryCmd(xml_responseMsg,msgRootNode,nValue);//查询链路设备信息
 
-            xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Value",xml_responseMsg.allocate_string(boost::lexical_cast<std::string>(rsltValue).c_str())));
+            xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Value",xml_responseMsg.allocate_string(boost::lexical_cast<std::string>(nValue).c_str())));
 
         }
         else
             xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Value",xml_responseMsg.allocate_string(boost::lexical_cast<std::string>(nValue).c_str())));
 
 
+        //string ss  = CONST_STR_RESPONSE_VALUE_DESC[9];
         xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Desc",CONST_STR_RESPONSE_VALUE_DESC[nValue]));
         xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Comment",""));
     }
@@ -154,21 +166,128 @@ bool Bohui_Protocol::_createResponseXmlBody(string &sXmlBody,int nType)
 }
 
 //查询发射机信息
-void Bohui_Protocol::_execTsmtQueryCmd(xml_node<> *rootNode,int  &nValue)
+void Bohui_Protocol::_execTsmtQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue)
 {
-    nValue = 13;
+     nValue = 13;
+    _query_devinfo_from_config(xml_doc,BH_POTO_TransmitterQuery,rootNode,nValue);
+
 }
 
 //查询动环信息
-void Bohui_Protocol::_execEnvMonQueryCmd(xml_node<> *rootNode,int  &nValue)
+void Bohui_Protocol::_execEnvMonQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue)
 {
-nValue = 2;
+    nValue = 13;
+   _query_devinfo_from_config(xml_doc,BH_POTO_EnvMonDevQuery,rootNode,nValue);
 }
 
 //查询链路设备信息
-void Bohui_Protocol::_execLinkDevQueryCmd(xml_node<> *rootNode,int  &nValue)
+void Bohui_Protocol::_execLinkDevQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue)
 {
-nValue = 3;
+    nValue = 13;
+   _query_devinfo_from_config(xml_doc,BH_POTO_LinkDevQuery,rootNode,nValue);
+}
+
+//从配置数据中获得查询信息
+void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nDevType,xml_node<> *rootNode,int  &nValue)
+{
+
+    xml_node<> *xml_resps_info = xml_doc.allocate_node(node_element,"ResponseInfo");
+    rootNode->append_node(xml_resps_info);
+     xml_node<> *xml_linkdev_list=NULL;
+     xml_node<> *xml_device=NULL;
+    vector<ModleInfo> &mapModleInfo = GetInst(StationConfig).get_Modle();
+    int nDevSize = mapModleInfo.size();
+    for(int nIndex=0;nIndex<nDevSize;++nIndex)
+    {
+
+        map<string,DeviceInfo>::iterator iter = mapModleInfo[nIndex].mapDevInfo.begin();
+        if(iter!=mapModleInfo[nIndex].mapDevInfo.end())
+            nValue=12;
+        for(;iter!=mapModleInfo[nIndex].mapDevInfo.end();++iter)
+        {
+            xml_linkdev_list=NULL;
+            xml_device=NULL;
+            //类型分类判断
+            int temType=(*iter).second.iDevType;
+            if(temType>DEVICE_TRANSMITTER && temType<DEVICE_GS_RECIVE)
+                temType = BH_POTO_EnvMonDevQuery;//动环设备
+            else if(temType>=DEVICE_GS_RECIVE)
+                temType = BH_POTO_LinkDevQuery;     //链路设备
+            else if(temType==DEVICE_TRANSMITTER)
+                temType = BH_POTO_TransmitterQuery;//发射机设备
+
+            if(nDevType!=temType)
+                continue;
+            if(nDevType==BH_POTO_LinkDevQuery)
+            {
+                xml_linkdev_list = xml_resps_info->first_node("DevList");
+                bool bFind=false;
+                while(xml_linkdev_list!=NULL){
+                   int nValue =  strtol(xml_linkdev_list->first_attribute("Type")->value(),NULL,10);
+                   if(nValue == (*iter).second.iDevType){
+                       bFind=true;
+                       break;
+                   }
+                    xml_linkdev_list = xml_linkdev_list->next_sibling("DevList");
+                }
+                if(bFind==false){
+                    xml_linkdev_list = xml_doc.allocate_node(node_element,DEVICE_TYPE_XML_DESC[nDevType]);
+                    xml_resps_info->append_node(xml_linkdev_list);
+                    xml_linkdev_list->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>( (*iter).second.iDevType).c_str())));
+                    xml_linkdev_list->append_attribute(xml_doc.allocate_attribute("Desc"," "));//链路设备名称暂略
+                }
+                xml_device = xml_doc.allocate_node(node_element,"Dev");
+                xml_linkdev_list->append_node(xml_device);
+                xml_device->append_attribute(xml_doc.allocate_attribute("DevID",(*iter).second.sDevNum.c_str()));
+                xml_device->append_attribute(xml_doc.allocate_attribute("DevName",(*iter).second.sDevName.c_str()));
+            }else{
+
+                xml_device = xml_doc.allocate_node(node_element,DEVICE_TYPE_XML_DESC[nDevType]);
+                xml_resps_info->append_node(xml_device);
+                xml_device->append_attribute(xml_doc.allocate_attribute("ID",(*iter).second.sDevNum.c_str()));
+                xml_device->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>( (*iter).second.iDevType).c_str())));//链路设备名称暂略
+                xml_device->append_attribute(xml_doc.allocate_attribute("Name",(*iter).second.sDevName.c_str()));
+            }
+
+            //频率属性
+            map<string,DevProperty>::iterator iter_propty =  (*iter).second.map_DevProperty.find("Freq");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("Freq",(*iter_propty).second.property_value.c_str()));
+            //功率属性(W)
+            iter_propty =  (*iter).second.map_DevProperty.find("Power");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("Power",(*iter_propty).second.property_value.c_str()));
+            //主备机标识
+            iter_propty =  (*iter).second.map_DevProperty.find("Standby");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("Standby",(*iter_propty).second.property_value.c_str()));
+            //型号
+            iter_propty =  (*iter).second.map_DevProperty.find("Model");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("Model",(*iter_propty).second.property_value.c_str()));
+            //分组ID
+            iter_propty =  (*iter).second.map_DevProperty.find("GroupID");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("GroupID",(*iter_propty).second.property_value.c_str()));
+            //分组名称
+            iter_propty =  (*iter).second.map_DevProperty.find("GroupName");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("GroupName",(*iter_propty).second.property_value.c_str()));
+            //节点名称
+            iter_propty =  (*iter).second.map_DevProperty.find("NodeName");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("NodeName",(*iter_propty).second.property_value.c_str()));
+            //制造商
+            iter_propty =  (*iter).second.map_DevProperty.find("Manufacturer");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("Manufacturer",(*iter_propty).second.property_value.c_str()));
+            //设备描述
+            iter_propty =  (*iter).second.map_DevProperty.find("Desc");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("Desc",(*iter_propty).second.property_value.c_str()));
+        }
+    }
+
 }
 
 //设置告警运行图
@@ -178,9 +297,23 @@ void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
 }
 
 //设置告警门限
-void Bohui_Protocol::_setAlarmParam(xml_node<> *rootNode,int &nValue)
+void Bohui_Protocol::_setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValue)
 {
+    vector<string> vecDeviceNumber;//保存影响的设备ID集合
+    if (GetInst(DataBaseOperation).SetAlarmLimit(nDevType,rootNode,nValue,vecDeviceNumber)==true)
+    {
+        // 通知设备服务......
+    }
+}
 
+//告警开关设置
+void Bohui_Protocol::_setAlarmSwitchSetParam(int nDevType,xml_node<> *rootNode,int &nValue)
+{
+    vector<string> vecDeviceNumber;//保存影响的设备ID集合
+    if (GetInst(DataBaseOperation).SetEnableAlarm(nDevType,rootNode,nValue,vecDeviceNumber)==true)
+    {
+        // 通知设备服务......
+    }
 }
 
 bool Bohui_Protocol::_parse_ManualPowerControl_xml(xml_document<> &xmlMsg,int &nMsgId,string &responseBody)

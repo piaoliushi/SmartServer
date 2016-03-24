@@ -156,7 +156,7 @@ namespace net
 	//add by lk subServer expand
     int LocalServer::remove_subServer_connection_handler(session_ptr ch_ptr)
 	{
-		boost::recursive_mutex::scoped_lock lock(subServer_mutex_);
+        /*boost::recursive_mutex::scoped_lock lock(subServer_mutex_);
 		std::map<session_ptr,HandlerKey>::iterator iter = subServer_session_pool_.find(ch_ptr);
 		if(iter!=subServer_session_pool_.end())
 		{
@@ -181,7 +181,7 @@ namespace net
 			subServer_session_pool_.erase(iter);
 			cout<<"remove:"<<remote_add.address().to_string()<<":"<<remote_add.port()<<endl;
 			return 0;
-		}
+        }*/
 		return -1;
 	}
 
@@ -248,7 +248,7 @@ namespace net
 	//如果为下级台站服务器，则不做权限验证
     void LocalServer::user_login(session_ptr ch_ptr,string sUser,string sPassword,LoginAck &loginAck)
 	{
-		loginAck.set_eresult(EC_FAILED);
+        /*loginAck.set_eresult(EC_FAILED);
 		boost::recursive_mutex::scoped_lock lock(mutex_);
 		std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.begin();
 		for(;iter!=session_pool_.end();++iter)
@@ -427,7 +427,7 @@ namespace net
 			}
 
 		}
-
+*/
 		return ;
 	}
 
@@ -483,7 +483,7 @@ namespace net
 	//签到签退操作
     void LocalServer::handSignInAndOut(session_ptr ch_ptr,bool bIsIn,time_t &curTm,const UserInformation &sUser,e_ErrorCode &eError)
 	{
-		boost::recursive_mutex::scoped_lock lock(sign_mutex_);
+    /*	boost::recursive_mutex::scoped_lock lock(sign_mutex_);
 		bool bfind=false;
 		std::vector<UserSignInInfo>::iterator iter=sign_in_users_.begin();
 		for(;iter!=sign_in_users_.end();++iter)
@@ -516,7 +516,7 @@ namespace net
 					time_t curTm = time(0);
 					tm ltimeE = *(localtime(&curTm));
                     if(!GetInst(DbManager).AddSignout((*iter).UsrInfo.sStationNumber,(*iter).UsrInfo.sNumber,&ltimeS,&ltimeE))
-						return;
+                        return;
 
 					notify_other_client_signin_result(ch_ptr,1,*iter);
 
@@ -549,7 +549,7 @@ namespace net
 				//没找到该用户
 				eError = EC_USR_NOT_FOUND;
 			}
-		}
+        }*/
 	}
 
     void LocalServer::notify_other_client_signin_result(session_ptr ch_ptr,int bIn,const UserSignInInfo &sSignUser)
@@ -582,7 +582,7 @@ namespace net
     void LocalServer::user_handover(session_ptr ch_ptr,string sCurUsr,string sNewUser,
 					           string sNewPassword,const string &sContents,LoginAck &loginAck)
 	{
-		loginAck.set_eresult(EC_FAILED);
+    /*	loginAck.set_eresult(EC_FAILED);
 		boost::recursive_mutex::scoped_lock lock(mutex_);
 		std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.find(ch_ptr);
 		if(iter!=session_pool_.end())
@@ -621,14 +621,14 @@ namespace net
 						return;
 				}
 			}
-		}
+        }*/
 	}
 
 	//用户签到
     void LocalServer::user_signin_out(session_ptr ch_ptr,string sSignInUsr,string sSignInPsw
 		                         ,signInOutAckMsgPtr signinPtr,int bIn)
 	{
-		e_ErrorCode eErrorCode = EC_FAILED;
+        /*e_ErrorCode eErrorCode = EC_FAILED;
 		signinPtr->set_issignin(bIn);
 		//找到此连接并判断此用户是否合法
 		UserInformation tmpUser;
@@ -659,14 +659,14 @@ namespace net
 					signinPtr->mutable_cusersinfo()->set_usrheadship(QString::fromLocal8Bit(tmpUser.sHeadship.c_str()).toUtf8().data());
 				}
 			}
-		}
+        }*/
 	}
 
 	//本台站客户端提出查岗请求
     void LocalServer::check_working(session_ptr ch_ptr,checkWorkingReqMsgPtr pCheckWorkReq,
 							   checkWorkingAckMsgPtr &checkWorkingAck)
 	{
-		map_checkworking_childs_.clear();
+        /*map_checkworking_childs_.clear();
         const google::protobuf::RepeatedPtrField<std::string> vChildStation = pCheckWorkReq->schildnumber();
         google::protobuf::RepeatedPtrField<std::string>::const_iterator iter_child = vChildStation.begin();
 		for(;iter_child!=vChildStation.end();++iter_child)
@@ -693,7 +693,7 @@ namespace net
 			//分发查岗请求到下级服务器
 			(*iter).first->sendMessage(MSG_CHECK_WORKING_REQ,pCheckWorkReq);
 		}
-
+*/
 	}
 
 	//上级查岗(查找是否有本台站，有则广播查岗请求给在线客户端，否则继续传给下一级台站)
@@ -723,7 +723,7 @@ namespace net
 	//本级客户端回复查岗结果（全部转发给上级服务器）
     void LocalServer::check_working_result_notify(session_ptr ch_ptr,checkWorkingNotifyMsgPtr pcheckWorkResult)
 	{
-		string sStation = pcheckWorkResult->sstationnumber();
+    /*	string sStation = pcheckWorkResult->sstationnumber();
         std::map<string,pair<time_t,bool> >::iterator iter_find = map_checkworking_childs_.find(sStation);
 		if(sStation==GetInst(LocalConfig).local_station_id()||
 			iter_find==map_checkworking_childs_.end())
@@ -744,7 +744,7 @@ namespace net
 				map_checkworking_childs_[(*iter_find).first].second = true;
 				BroadcastMessage(MSG_CHECK_WORKING_NOTIFY,pcheckWorkResult);
 			}
-		}
+        }*/
 	}
 
 	//sUser：台站id，sPassword：服务id
@@ -918,7 +918,7 @@ namespace net
 	//收集本平台所有设备状态信息
     void  LocalServer::get_local_station_dev_status(loginAckMsgPtr &statusMsgPtr)
 	{
-        vector<pair<string,string> > debnumber;
+       /* vector<pair<string,string> > debnumber;
 		string cur_station_id = GetInst(LocalConfig).local_station_id();
 		string cur_devSvc_id = GetInst(LocalConfig).local_dev_server_number();
 		//需要排除没有使用设备
@@ -980,7 +980,7 @@ namespace net
 					}
 				}
 			}
-		}
+        }*/
 	}
 
     void LocalServer::start_accept()

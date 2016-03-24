@@ -18,7 +18,7 @@ request_handler::~request_handler()
 
 void request_handler::start(const hx_http_server::request &request, hx_http_server::connection_ptr connection)
 {
-	if (request.method == "POST") 
+    if (request.method == "POST")
 	{
 		hx_http_server::request::headers_container_type::iterator found =
 			boost::find_if(request.headers, is_content_length());
@@ -73,6 +73,7 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
             common_headers[2].value = boost::lexical_cast<std::string>(response_body.size());
             connection->set_headers(boost::make_iterator_range(common_headers, common_headers + 3));
             connection->write(response_body, boost::bind(&request_handler::write_callback, this, _1));
+            cout<<response_body.c_str()<<endl;
         }
         else
             connection->write(bad_request, boost::bind(&request_handler::write_callback, this, _1));

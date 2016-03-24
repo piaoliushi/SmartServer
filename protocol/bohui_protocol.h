@@ -7,8 +7,6 @@
 using namespace rapidxml;
 using namespace std;
 
-
-
 class Bohui_Protocol
 {
 public:
@@ -27,25 +25,25 @@ protected:
     bool  _createResponseXmlBody(string &sXmlBody,int nType);
 
     //查询发射机信息
-    void _execTsmtQueryCmd(xml_node<> *rootNode,int  &nValue);
+    void _execTsmtQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue);
 
     //查询动环信息
-    void _execEnvMonQueryCmd(xml_node<> *rootNode,int  &nValue);
+    void _execEnvMonQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue);
 
     //查询链路设备信息
-    void _execLinkDevQueryCmd(xml_node<> *rootNode,int  &nValue);
+    void _execLinkDevQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue);
 
     //设置告警运行图
     void _setAlarmTime(xml_node<> *rootNode,int &nValue);
 
     //设置告警门限
-    void _setAlarmParam(xml_node<> *rootNode,int &nValue);
+    void _setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValue);
 
-    //查询发射机信息
-    //void _execTsmtQueryCmd(xml_node<> *rootNode,string &responseBody);
+    //告警开关设置
+    void _setAlarmSwitchSetParam(int nDevType,xml_node<> *rootNode,int &nValue);
 
-    //查询发射机信息
-   // void _execTsmtQueryCmd(xml_node<> *rootNode,string &responseBody);
+    //从配置数据中获得查询信息
+    void _query_devinfo_from_config(xml_document<> &xml_doc,int nDevType,xml_node<> *rootNode,int  &nValue);
 private:
     static  string  SrcCode;
 };

@@ -7,7 +7,6 @@
 QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
 TARGET = SmartServer
 TEMPLATE = app
 
@@ -105,19 +104,19 @@ HEADERS  += \
     nettool.h \
     rapidxml/rapidxml_utils.hpp \
     rapidxml/rapidxml_print.hpp \
-    rapidxml/rapidxml_iterators.hpp \
     rapidxml/rapidxml.hpp \
     utility.h \
     protocol/bohui_protocol.h \
     protocol/bohui_const_define.h \
-    database/DataBaseOperation.h \
-    DataTypeDefine.h
+    DataTypeDefine.h \
+    database/DataBaseOperation.h
 
 FORMS    += mainwindow.ui
 
 
 
 linux-g++ {
+
 LIBS += /usr/local/boost_1_48_0/boost_sdk_ubuntu/lib/libboost_system-mt.a
 LIBS += /usr/local/boost_1_48_0/boost_sdk_ubuntu/lib/libboost_thread-mt.a
 LIBS += /usr/local/boost_1_48_0/boost_sdk_ubuntu/lib/libboost_date_time-mt.a

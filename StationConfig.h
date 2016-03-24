@@ -5,7 +5,7 @@
 //#include "./database/dbmanager.h"
 #include "./database/DataBaseOperation.h"
 #include "DataType.h"
-#include "DataTypeDefine.h"
+//#include "DataTypeDefine.h"
 #include <map>
 using namespace std;
 //#include "./message/protocol.pb.h"
@@ -31,7 +31,7 @@ public:
 	 //所有协议转换器信息
      vector<ModleInfo>& get_Modle();
 	 //获得所有发射机代理信息
-	 vector<ModleInfo>& get_transmitter_agent();
+     //vector<ModleInfo>& get_transmitter_agent();
 	 //获得天线关联信息
 	 AssociateInfo* get_antenna_associate_info(string sAntennaNumber);
 	 //获得天线关联信息
@@ -63,8 +63,8 @@ private:
 	vector<TransmitterInformation>mapTransmitterInfo;//台站id为索引
     vector<AntennaInformation> mapAntennaInfo;//台站id为索引
     vector<AssociateInfo> mapAssociateInfo;//台站id为索引
-	vector<ModleInfo> mapModleInfo;
-	vector<ModleInfo> mapTransmitAgentInfo;//发射机代理
+    vector<ModleInfo> mapModleInfo;
+    //vector<ModleInfo> mapTransmitAgentInfo;//发射机代理
 	vector<MediaDeviceParamInfo> vecUploadDevInfo;//上传设备
 	vector<MediaDeviceParamInfo> vecMediaDevInfo;//主动连接媒体设备
 	vector<SendMSInfo> vSmsInfo;
