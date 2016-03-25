@@ -5,8 +5,11 @@
 #include "../DataType.h"
 #include <vector>
 using namespace std;
-namespace net
+namespace hx_net
 {
+//typedef boost::shared_ptr<dev_upload_message> uploadMsgPtr;
+    typedef boost::shared_ptr<std::vector<unsigned char> > unchar_ptr;
+
 	typedef boost::shared_ptr<google::protobuf::Message>  googleMsgPtr;
 	typedef boost::weak_ptr<google::protobuf::Message>    googleMsgWeakPtr;
 

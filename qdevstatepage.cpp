@@ -141,7 +141,7 @@ void QDevStatePage::OnDevConnect(QString sDevId,int nResult)
 		break;
 	}
 
-	int nConSize =   GetInst(net::SvcMgr).get_modle_online_count();
+    int nConSize =   GetInst(hx_net::SvcMgr).get_modle_online_count();
 	if(nConSize<0)
 		nConSize=0;
 	pDevConSize->setText(QString(tr("已连接：%1")).arg(nConSize));

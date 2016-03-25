@@ -2,16 +2,20 @@
 #define SERVER_MGR_H
 
 #pragma once
-
-#include "../io_service_pool.h"
-//#include <boost/network/include/http/server.hpp>
-//#include <boost/network/uri.hpp>
-#include "local_server.h"
 #include "./http/CommonPrecomp.h"
+//#include <boost/network/protocol/http/server.hpp>
+#include "../io_service_pool.h"
+#include "local_server.h"
+//#include <boost/network/protocol/http/server.hpp>
+//struct web_handler;
+//typedef boost::network::http::async_server<web_handler> hx_http_server;
+//typedef boost::shared_ptr<hx_http_server>  hx_http_server_ptr;
 
 class server_work;
-struct _web_handler;
-namespace net
+//struct _web_handler;
+//class web_handler;
+//class hx_http_server;//hx_http_server_ptr
+namespace hx_net
 {
 	
 	class ServerMgr
@@ -53,6 +57,9 @@ namespace net
 		//上级查岗
 		void check_station_working(checkWorkingReqMsgPtr pcheckWork);
 
+        //发送http通知
+        void send_http_message();
+
 	private:
 		boost::shared_ptr<boost::thread> _listenthreadptr;//网络监听线程
 		boost::shared_ptr<boost::thread> _workthreadptr;//工作线程
@@ -61,9 +68,10 @@ namespace net
         boost::shared_ptr<LocalServer> _serverptr;//服务对象
 
         boost::shared_ptr<boost::thread> _httpthreadptr;//工作线程
-		hx_http_server_ptr   _httpserverptr;//http服务对象
+        hx_http_server   *_httpserverptr;//http服务对象hx_http_server_ptr
         web_handler           * _web_handler;
-        //utils::thread_pool   _thread_pool;
+
+        //hx_http_client_ptr   _httpclientptr;//http客户端对象
 	};
 }
 

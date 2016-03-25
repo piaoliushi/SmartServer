@@ -4,9 +4,9 @@
 #include "./dev_message/Eda_message.h"
 #include "./dev_message/Electric_message.h"
 
-namespace net
+namespace hx_net
 {
-	MsgHandleAgentImpl::MsgHandleAgentImpl(session *pSession,boost::asio::io_service& io_service)
+    MsgHandleAgentImpl::MsgHandleAgentImpl(net_session *pSession,boost::asio::io_service& io_service)
 		:m_pSessionPtr(pSession)
 		,m_pbaseMsg(0)
 		,m_io_service(io_service)

@@ -1,9 +1,9 @@
 #include "Hx_message.h"
-namespace net
+namespace hx_net
 {
 
 
-	Hx_message::Hx_message(session *pSession)
+    Hx_message::Hx_message(net_session *pSession)
 		:m_pSession(pSession)
 	{
 	}

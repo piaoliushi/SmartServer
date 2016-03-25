@@ -1,19 +1,13 @@
+
 #include "ServerMgr.h"
-#include "server_work.h"
+//#include "./http/CommonPrecomp.h"
 #include "./http/RequestHandler.h"
 #include "./http/RequestHandlerFactory.h"
-
-#include <boost/network/protocol/http/client.hpp>
-
-using boost::asio::ip::tcp;
-//namespace net = boost::network;
-namespace http = boost::network::http;
-namespace utils = boost::network::utils;
-
+#include "server_work.h"
 struct web_handler {
     /* when there are many request at the same time, can put the request into a queue, then let another thread process it.
      * or maybe need to call http::client to connect to other server, and get response.
-     */ 
+     */
     void operator()(const hx_http_server::request &request, hx_http_server::connection_ptr connection)
     {
         request_handler_ptr request_handler_ = request_handler_factory::get_mutable_instance().create();
@@ -21,13 +15,14 @@ struct web_handler {
     }
 };
 
-namespace net
+namespace hx_net
 {
 	ServerMgr::ServerMgr(int port)
 		: _taskqueueptr(new TaskQueue<msgPointer>)//创建一个任务队列
 		, _workerptr(new server_work((*_taskqueueptr.get())))//创建一个用户任务
         , _serverptr(new LocalServer(port, (*_taskqueueptr.get())))//创建一个服务
     {
+        //_httpclientptr = hx_http_client_ptr(new hx_http_client);
         _web_handler = new web_handler;
         http::async_server<web_handler>::options options(*_web_handler);
         options.address("192.168.1.192")
@@ -35,11 +30,13 @@ namespace net
                 .io_service(boost::make_shared<boost::asio::io_service>())
                 .thread_pool(boost::make_shared<boost::network::utils::thread_pool>(2))
                 .reuse_address(true);
-        _httpserverptr = hx_http_server_ptr(new hx_http_server(options));
+        _httpserverptr = new hx_http_server(options);//hx_http_server_ptr(
 
         _listenthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunNetListen, this)));
         _workthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunTasks, this)));
         _httpthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunHttpServer,this)));
+
+
 
     }
 
@@ -146,4 +143,13 @@ namespace net
 		if(_serverptr)
 			_serverptr->check_station_working(pcheckWork);
 	}
+
+    //发送http通知
+    void ServerMgr::send_http_message()
+    {
+        //if(_httpclientptr)
+        //{
+
+        //}
+    }
 }

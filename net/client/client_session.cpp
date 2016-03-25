@@ -10,11 +10,11 @@
 #include "../../LocalConfig.h"
 #include "../SvcMgr.h"
 //#include <glog/logging.h>
-namespace net
+namespace hx_net
 {
 	client_session::client_session(boost::asio::io_service& io_service, 
 		TaskQueue<msgPointer>& taskwork)
-		:session(io_service)
+        :net_session(io_service)
 #ifdef USE_CLIENT_STRAND
 		, strand_(io_service)
 #endif 
@@ -333,7 +333,7 @@ namespace net
 #ifdef USE_STRAND
 			strand_.wrap(
 #endif
-			boost::bind(&session::handle_read_head, shared_from_this(),
+            boost::bind(&net_session::handle_read_head, shared_from_this(),
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred)
 #ifdef USE_STRAND
@@ -367,7 +367,7 @@ namespace net
 					strand_.wrap
 					(
 #endif // USE_STRAND
-					boost::bind(&session::handle_read_body, shared_from_this(),
+                    boost::bind(&net_session::handle_read_body, shared_from_this(),
 					boost::asio::placeholders::error,
 					boost::asio::placeholders::bytes_transferred)
 #ifdef USE_STRAND
@@ -424,7 +424,7 @@ namespace net
 			(
 			socket(),
 			boost::asio::buffer(&(msgPtr->data()[0]),msgPtr->length()),
-			boost::bind(&session::handle_write,shared_from_this(),
+            boost::bind(&net_session::handle_write,shared_from_this(),
 			boost::asio::placeholders::error,boost::asio::placeholders::bytes_transferred)
 			);
 	}

@@ -1,9 +1,9 @@
 #include "Envir_message.h"
 
-namespace net
+namespace hx_net
 {
 
-	Envir_message::Envir_message(session *pSession)
+    Envir_message::Envir_message(net_session *pSession)
 		:m_pSession(pSession)
 	{
 	}

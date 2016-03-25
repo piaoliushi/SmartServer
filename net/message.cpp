@@ -1,8 +1,8 @@
 #include "message.h"
-#include "session.h"
+#include "net_session.h"
 
 
-namespace net
+namespace hx_net
 {
 	message::message(void)
 		:body_length_(0)

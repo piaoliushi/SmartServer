@@ -2,7 +2,7 @@
 #define TASKQUEUE_H
 
 #include "include.h"
-namespace net
+namespace hx_net
 {
 	template<typename Task>
 	class TaskQueue

@@ -6,14 +6,14 @@
 #include "include.h"
 #include "message.h"
 #include "taskqueue.h"
-#include "session.h"
+#include "net_session.h"
 #include "Worker.h"
 #include "config.h"
 
 using boost::asio::ip::tcp;
 using namespace std;
 
-namespace net
+namespace hx_net
 {
 	class io_service_pool:private boost::noncopyable//禁止拷贝构造
 	{

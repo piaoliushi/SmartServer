@@ -5,11 +5,12 @@
 
 #include <vector>
 //#include "DevAgent.h"
-#include "../session.h"
+//#include "../net_session.h"
 #include "../../DataType.h"
+#include "../net_session.h"
 using namespace std;
 
-namespace net
+namespace hx_net
 {
 	class othdev_message;
 	typedef boost::shared_ptr<othdev_message> othdevMsgPtr;
@@ -18,8 +19,11 @@ namespace net
 	typedef boost::shared_ptr<MsgHandleAgent>        HMsgHandlePtr;
 //	typedef boost::shared_ptr<HDevAgent>                   HDevAgentPtr;
 	typedef boost::shared_ptr<CommandAttribute>    CommandAttrPtr;
-	class session;
-	typedef boost::shared_ptr<session> session_ptr;
+    //class session;
+    //typedef boost::shared_ptr<net_session> session_ptr;
+    class net_session;
+    typedef boost::shared_ptr<net_session>  session_ptr;
+    //typedef boost::weak_ptr<net_session>    session_weak_ptr;
 	class othdev_message
 	{
 	public:
@@ -32,8 +36,8 @@ namespace net
 			r_pos_=0;
 		}
 
-		void   setsession(const session_ptr& _session);
-		void   getsession(session_ptr& _session);
+        void   setsession(const session_ptr& _session);
+        void   getsession(session_ptr& _session);
 
         //int check_normal_msg_header(HDevAgentPtr agentPtr,int msgLen,CmdType cmdType=CMD_QUERY,int number=0);
 		
@@ -63,7 +67,7 @@ namespace net
 		vector<unsigned char>    data_;
 		size_t          w_pos_;
 		size_t          r_pos_;
-		boost::weak_ptr<session> session_;
+        boost::weak_ptr<net_session>    session_;
 	};
 }
 

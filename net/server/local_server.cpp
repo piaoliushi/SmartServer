@@ -13,7 +13,7 @@
 /////////////////////////////////////////////////////////////////////////////////
 // 设备监测服务类，给客户端提供数据服务，接受下级服务提交的数据
 
-namespace net
+namespace hx_net
 {
     LocalServer::LocalServer(short port,TaskQueue<msgPointer>& taskwork,size_t io_service_pool_size/*=4*/)
 		:io_service_pool_(io_service_pool_size)//设置io pool尺寸

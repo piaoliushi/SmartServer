@@ -1,4 +1,4 @@
-#include "session.h"
+#include "net_session.h"
 #include "../StationConfig.h"
 #include "SvcMgr.h"
 #include "LocalConfig.h"
@@ -9,10 +9,10 @@
         完成消息的插队，验证，通知派发操作。
 *
 *************************************************************************/
-namespace net
+namespace hx_net
 {
 
-	session::session(boost::asio::io_service& io_service)
+    net_session::net_session(boost::asio::io_service& io_service)
 		:socket_(io_service)
 		,udp_socket_(io_service)
 		,bTcp_(true)
@@ -20,44 +20,44 @@ namespace net
 
 	}
 
-	session::~session(void)
+    net_session::~net_session(void)
 	{
 
 	}
 
-	tcp::socket& session::socket()
+    tcp::socket& net_session::socket()
 	{
 		boost::mutex::scoped_lock lock(socket_mutex_);
 		//socket_.set_option(tcp::no_delay(true));
 		return socket_;
 	}
 
-	udp::socket& session::usocket()
+    udp::socket& net_session::usocket()
 	{
 		boost::mutex::scoped_lock(socket_mutex_);
 		return udp_socket_;
 	}
 	
-	bool  session::is_tcp()
+    bool  net_session::is_tcp()
 	{
 		return bTcp_;
 	}
 
-	void session::set_tcp(bool bTcp)
+    void net_session::set_tcp(bool bTcp)
 	{
 		bTcp_ = bTcp;
 	}
-	tcp::endpoint session::get_addr()
+    tcp::endpoint net_session::get_addr()
 	{
 		return socket().remote_endpoint();
 	}
 
-	udp::endpoint session::get_udp_addr()
+    udp::endpoint net_session::get_udp_addr()
 	{
 		return usocket().remote_endpoint();
 	}
 
-	void session::close_i()
+    void net_session::close_i()
 	{
 		boost::system::error_code ignored_ec;
 		boost::mutex::scoped_lock lock(socket_mutex_);
@@ -73,29 +73,29 @@ namespace net
 
 	}
 
-	void session::handle_read_body(const boost::system::error_code& error,
+    void net_session::handle_read_body(const boost::system::error_code& error,
 		size_t bytes_transferred)
 	{
 	}
 
-	void session::handle_read_head(const boost::system::error_code& error,
+    void net_session::handle_read_head(const boost::system::error_code& error,
 		size_t bytes_transferred)
 	{
 		
 	}
 
-	bool session::sendMessage(e_MsgType _type,googleMsgPtr gMsgPtr)//google::protobuf::Message *
+    bool net_session::sendMessage(e_MsgType _type,googleMsgPtr gMsgPtr)//google::protobuf::Message *
 	{
 		return false;
 	}
 
 
-	void session::handle_write(const boost::system::error_code& error,size_t bytes_transferred)
+    void net_session::handle_write(const boost::system::error_code& error,size_t bytes_transferred)
 	{
 	}
 	
 	//打包发送实时多媒体数据（汇鑫760音频）
-	void session::send_monitor_data_message(string sStationid,string sDevid,e_DevType devType,
+    void net_session::send_monitor_data_message(string sStationid,string sDevid,e_DevType devType,
 											unchar_ptr curData,DevParamerMonitorItem &mapMonitorItem)
 	{
 		devDataNfyMsgPtr dev_cur_data_ptr(new DevDataNotify);
@@ -133,7 +133,7 @@ namespace net
 		GetInst(SvcMgr).send_monitor_data_to_client(sStationid,sDevid,dev_cur_data_ptr,dev_cur_data_tosvr_ptr);
 	}
 	//打包发送761数据（Mp3）
-	void session::send_monitor_data_message_ex(string sStationid,string sDevid,e_DevType devType,
+    void net_session::send_monitor_data_message_ex(string sStationid,string sDevid,e_DevType devType,
 								unsigned char *curData,int nDataLen,DevParamerMonitorItem &mapMonitorItem)
 	{
 		devDataNfyMsgPtr dev_cur_data_ptr(new DevDataNotify);
@@ -170,7 +170,7 @@ namespace net
 	}
 
 	//打包发送实时数据消息
-	void session::send_monitor_data_message(string sStationid,string sDevid,e_DevType devType,
+    void net_session::send_monitor_data_message(string sStationid,string sDevid,e_DevType devType,
 											DevMonitorDataPtr curData,map<int,DevParamerMonitorItem> &mapMonitorItem)
 	{
 		devDataNfyMsgPtr dev_cur_data_ptr(new DevDataNotify);
@@ -223,7 +223,7 @@ namespace net
 	}
 
 	//打包发送设备连接状态消息
-	void session::send_net_state_message(string sStationid,string sDevid,string sDevName,e_DevType devType,
+    void net_session::send_net_state_message(string sStationid,string sDevid,string sDevName,e_DevType devType,
 		                                 con_state netState)
 	{
 		devNetNfyMsgPtr  dev_net_nfy_ptr(new DevNetStatusNotify);
@@ -237,7 +237,7 @@ namespace net
 		GetInst(SvcMgr).send_dev_net_state_to_client(sStationid,sDevid,dev_net_nfy_ptr);
 	}
 
-	void session::send_work_state_message( string sStationid,string sDevid,string sDevName,e_DevType devType, dev_run_state runState )
+    void net_session::send_work_state_message( string sStationid,string sDevid,string sDevName,e_DevType devType, dev_run_state runState )
 	{
 		devWorkNfyMsgPtr dev_run_nfy_ptr(new DevWorkStatusNotify);// dev_run_nfy;
 		DevWorkStatus *dev_n_s = dev_run_nfy_ptr->add_cdevcurworkstatus();
@@ -250,7 +250,7 @@ namespace net
 		GetInst(SvcMgr).send_dev_work_state_to_client(sStationid,sDevid,dev_run_nfy_ptr);
 	}
 	
-	void session::send_alarm_state_message(string sStationid,string sDevid,string sDevName,
+    void net_session::send_alarm_state_message(string sStationid,string sDevid,string sDevName,
 										   int nCellId,string sCellName,e_DevType devType,dev_alarm_state alarmState,
 		                                   string sStartTime,int alarmCount)
 	{
@@ -271,7 +271,7 @@ namespace net
 		GetInst(SvcMgr).send_dev_alarm_state_to_client(sStationid,sDevid,dev_alarm_nfy_ptr);
 	}
 
-	void session::send_command_execute_result_message(string sStationid,string sDevid,e_DevType devType,string sDevName,
+    void net_session::send_command_execute_result_message(string sStationid,string sDevid,e_DevType devType,string sDevName,
 													  string sUsrName,e_MsgType nMsgType,e_ErrorCode eResult)
 	{
 		devCommdRsltPtr ackMsgPtr(new DeviceCommandResultNotify);
@@ -286,7 +286,7 @@ namespace net
 	}
  
 	//判断是否发短信与打电话
-	void session::sendSmsAndCallPhone(int nAlarmLevel,string sContent)
+    void net_session::sendSmsAndCallPhone(int nAlarmLevel,string sContent)
 	{
 
 		vector<SendMSInfo>& smsInfo=GetInst(StationConfig).get_sms_user_info();

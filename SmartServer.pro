@@ -14,7 +14,6 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     net/SvcMgr.cpp \
-    net/session.cpp \
     net/message.cpp \
     net/io_service_pool.cpp \
     net/server/server_work.cpp \
@@ -51,7 +50,8 @@ SOURCES += main.cpp\
     nettool.cpp \
     utility.cpp \
     protocol/bohui_protocol.cpp \
-    database/DataBaseOperation.cpp
+    database/DataBaseOperation.cpp \
+    net/net_session.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -60,7 +60,6 @@ HEADERS  += \
     net/taskqueue.h \
     net/SvcMgr.h \
     net/share_ptr_object_define.h \
-    net/session.h \
     net/message.h \
     net/io_service_pool.h \
     net/config.h \
@@ -109,11 +108,12 @@ HEADERS  += \
     protocol/bohui_protocol.h \
     protocol/bohui_const_define.h \
     DataTypeDefine.h \
-    database/DataBaseOperation.h
+    database/DataBaseOperation.h \
+    net/net_session.h
 
 FORMS    += mainwindow.ui
 
-
+DEFINES+=BOOST_NETWORK_NO_LIB
 
 linux-g++ {
 

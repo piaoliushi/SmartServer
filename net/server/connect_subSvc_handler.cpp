@@ -6,11 +6,11 @@
 //与下级服务器建立心跳保持机制
 //注意：下级服务器主动连接上级服务器，等待上级服务器发送注册请求，上级服务器缓存下级服务器提交的所有
 //       设备状态信息并发送给上级服务器与在线客户端。
-namespace net
+namespace hx_net
 {
 	connect_subsvc_handler::connect_subsvc_handler(boost::asio::io_service& io_service, 
         TaskQueue<msgPointer>& taskwork,LocalServer &srv)
-		:session(io_service)
+        :net_session(io_service)
 		,h_b_timer_(io_service) 
 #ifdef USE_CLIENT_STRAND
 		, strand_(io_service)
@@ -553,7 +553,7 @@ namespace net
 #ifdef USE_STRAND
 			strand_.wrap(
 #endif
-			boost::bind(&session::handle_read_head, shared_from_this(),
+            boost::bind(&net_session::handle_read_head, shared_from_this(),
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred)
 #ifdef USE_STRAND
@@ -589,7 +589,7 @@ namespace net
 					strand_.wrap
 					(
 #endif // USE_STRAND
-					boost::bind(&session::handle_read_body, shared_from_this(),
+                    boost::bind(&net_session::handle_read_body, shared_from_this(),
 					boost::asio::placeholders::error,
 					boost::asio::placeholders::bytes_transferred)
 #ifdef USE_STRAND
@@ -640,7 +640,7 @@ namespace net
 		boost::asio::async_write
 			(socket(),
 			boost::asio::buffer(&(msgPtr->data()[0]),msgPtr->length()),
-			boost::bind(&session::handle_write,shared_from_this(),
+            boost::bind(&net_session::handle_write,shared_from_this(),
 			boost::asio::placeholders::error,boost::asio::placeholders::bytes_transferred)
 			);
 	}

@@ -3,12 +3,12 @@
 //#include "othdev_session.h"
 #include "./dev_message/base_message.h"
 
-namespace net
+namespace hx_net
 {
 	class MsgHandleAgentImpl
 	{
 	public:
-		MsgHandleAgentImpl(session *pSession,boost::asio::io_service& io_service);
+        MsgHandleAgentImpl(net_session *pSession,boost::asio::io_service& io_service);
 		~MsgHandleAgentImpl(void);
 	public:
 		bool Init(Protocol protocol,int Subprotocol,int DevCode,map<int,double> &itemRatio);
@@ -33,7 +33,7 @@ namespace net
 	public:
 		Protocol      m_CurProtocol;
 		base_message *m_pbaseMsg;
-		session      *m_pSessionPtr;
+        net_session      *m_pSessionPtr;
 		boost::asio::io_service    &m_io_service;
 	};
 }

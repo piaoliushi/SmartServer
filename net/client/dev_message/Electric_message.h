@@ -3,12 +3,12 @@
 #include "./104/iec104.h"
 //using namespace std;
 
-namespace net
+namespace hx_net
 {
 	class Electric_message:public base_message
 	{
 	public:
-		Electric_message(session *pSession,boost::asio::io_service& io_service);
+        Electric_message(net_session *pSession,boost::asio::io_service& io_service);
 		~Electric_message(void);
 	public:
 		void SetSubPro(int subprotocol);
@@ -35,7 +35,7 @@ namespace net
 		void test_time_event(const boost::system::error_code& error);
 	private:
 		ElectricSubProtocol m_Subprotocol;//设备子协议号
-		session *m_pSession;//关联连接对象
+        net_session *m_pSession;//关联连接对象
 		int      m_DevAddr;//设备地址
 		bool  m_Register;
 		boost::asio::deadline_timer     d_test_send_timer_;//连接定时器

@@ -6,11 +6,11 @@
 #include "../../StationConfig.h"
 //#include "../sms/SmsTraffic.h"
 
-namespace net
+namespace hx_net
 {
 	device_session::device_session(boost::asio::io_service& io_service, 
 		TaskQueue<msgPointer>& taskwork,ModleInfo & modinfo)
-		:session(io_service)
+        :net_session(io_service)
 		,taskwork_(taskwork)
 #ifdef USE_CLIENT_STRAND
 		, strand_(io_service)
@@ -374,7 +374,7 @@ namespace net
 #ifdef USE_STRAND
 				strand_.wrap(
 #endif
-				boost::bind(&session::handle_write,shared_from_this(),
+                boost::bind(&net_session::handle_write,shared_from_this(),
 				boost::asio::placeholders::error,
 				boost::asio::placeholders::bytes_transferred)
 #ifdef USE_STRAND
@@ -390,7 +390,7 @@ namespace net
 #ifdef USE_STRAND
 				strand_.wrap(
 #endif
-				boost::bind(&session::handle_write,shared_from_this(),
+                boost::bind(&net_session::handle_write,shared_from_this(),
 				boost::asio::placeholders::error,
 				boost::asio::placeholders::bytes_transferred)
 #ifdef USE_STRAND

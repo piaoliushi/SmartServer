@@ -1,9 +1,9 @@
 #include "Electric_message.h"
 #include "./104/iec104_types.h"
 #include "./104/iec104.h"
-namespace net
+namespace hx_net
 {
-	Electric_message::Electric_message(session *pSession,boost::asio::io_service& io_service)
+    Electric_message::Electric_message(net_session *pSession,boost::asio::io_service& io_service)
 		:m_pSession(pSession)
 		,d_test_send_timer_(io_service)
 		,d_interrogation_send_timer_(io_service)

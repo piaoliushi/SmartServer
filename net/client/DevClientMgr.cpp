@@ -8,13 +8,19 @@
 #include "client_work.h"
 //#include "../../DataType.h"
 //#include <glog/logging.h>
-namespace net
+#include <boost/network/protocol/http.hpp>
+//using namespace boost::network::http;
+//typedef  boost::shared_ptr<client>  hx_http_client_ptr;
+namespace hx_net
 {
 	DevClientMgr::DevClientMgr()
 		: _taskqueueptr(new TaskQueue<msgPointer>)//创建一个任务队列
 		, _workerptr(new client_work((*_taskqueueptr.get()),2))//创建一个用户任务
 		, _devclientptr(new DevClient((*_taskqueueptr.get()),2))//创建一个服务
 	{
+        http::client::request  request("http://192.168.1.47/AuthenService.asmx/Test");
+        std::string  content = "hello word!";
+
 		_listenthreadptr.reset(new boost::thread(boost::bind(&DevClientMgr::RunNetListen, this)));
 		_workthreadptr.reset(new boost::thread(boost::bind(&DevClientMgr::RunTasks, this)));
 	}

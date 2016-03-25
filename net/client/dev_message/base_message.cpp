@@ -1,6 +1,6 @@
 #include "base_message.h"
 
-namespace net
+namespace hx_net
 {
 
 	base_message::base_message(void)

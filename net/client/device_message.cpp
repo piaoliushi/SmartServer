@@ -1,6 +1,6 @@
 #include "device_message.h"
 #include "MsgHandleAgent.h"
-namespace net
+namespace hx_net
 {
 	othdev_message::othdev_message(int nSize)
 		:data_(nSize)

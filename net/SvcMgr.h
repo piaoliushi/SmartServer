@@ -8,7 +8,7 @@
 //#include "../database/dbmanager.h"
 #include "include.h"
 //#include "RecordAgent.h"
-namespace net
+namespace hx_net
 {
 	//typedef boost::shared_ptr<RecordAgent>  pRecordAgentPtr;
 	class SvcMgr

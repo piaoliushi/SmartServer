@@ -3,15 +3,15 @@
 
 #pragma once
 
-#include "../session.h"
+#include "../net_session.h"
 #include "../taskqueue.h"
 #include "../message.h"
 #include "local_server.h"
 #include "../share_ptr_object_define.h"
 using boost::asio::ip::tcp;
-namespace net
+namespace hx_net
 {
-	class connect_subsvc_handler:public session
+    class connect_subsvc_handler:public net_session
 	{
 	public:	
 		connect_subsvc_handler(boost::asio::io_service& io_service, 

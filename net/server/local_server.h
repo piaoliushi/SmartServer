@@ -6,7 +6,7 @@
 #include "../share_ptr_object_define.h"
 using boost::asio::ip::tcp;
 
-namespace net
+namespace hx_net
 {
 	struct HandlerKey
 	{

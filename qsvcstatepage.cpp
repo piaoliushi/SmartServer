@@ -128,8 +128,8 @@ void QSvcStatePage::StartSvc()
             return;
         }
 
-        GetInst(net::SvcMgr).set_notify(&m_Notify);
-        GetInst(net::SvcMgr).Start();
+        GetInst(hx_net::SvcMgr).set_notify(&m_Notify);
+        GetInst(hx_net::SvcMgr).Start();
         m_IsRunning=true;
         d_pSvcStateValueLabel->setText(tr("正在运行"));
         d_pHttpServerStateValueLabel->setText("正在运行");
@@ -137,7 +137,7 @@ void QSvcStatePage::StartSvc()
     }
     else
     {
-        GetInst(net::SvcMgr).Stop();
+        GetInst(hx_net::SvcMgr).Stop();
        // GetInst(DataBaseOperation).CloseDb();//清理数据库
         m_IsRunning=false;
         d_pSvcStateValueLabel->setText(tr("已停止"));

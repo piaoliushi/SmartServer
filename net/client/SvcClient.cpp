@@ -4,7 +4,7 @@
 //#include "Antenna_session.h"
 #include "StationConfig.h"
 //#include "othdev_session.h"
-namespace net
+namespace hx_net
 {
 	SvcClient::SvcClient(TaskQueue<msgPointer>& taskwork,size_t io_service_pool_size/* =4 */)
 		:io_service_pool_(io_service_pool_size)

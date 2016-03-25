@@ -9,7 +9,7 @@ using boost::asio::ip::tcp;
 
 
 
-namespace net
+namespace hx_net
 {
 	class SvcClient
 	{

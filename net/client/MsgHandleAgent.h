@@ -5,14 +5,14 @@
 #include "include.h"
 using namespace std;
 
-namespace net
+namespace hx_net
 {
 	class session;
 	class MsgHandleAgentImpl;
 	class MsgHandleAgent
 	{
 	public:
-		MsgHandleAgent(session *conPtr,boost::asio::io_service& io_service);
+        MsgHandleAgent(net_session *conPtr,boost::asio::io_service& io_service);
 		~MsgHandleAgent(void);
 	public:
 		bool Init(int protocol,int Subprotocol,int DevCode,map<int,double> &itemRatio);

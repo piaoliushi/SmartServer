@@ -1,7 +1,7 @@
 #include "io_service_pool.h"
 
 
-namespace net
+namespace hx_net
 {
 	io_service_pool::io_service_pool(size_t pool_size)
 		:next_io_service_(0)

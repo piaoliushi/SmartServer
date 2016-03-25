@@ -3,7 +3,7 @@
 //#include "./database/dbmanager.h"
 #include <QMessageBox>
 #include "LocalConfig.h"
-namespace net
+namespace hx_net
 {
 	SvcMgr::SvcMgr(void)
 		:notify_handler_ptr_(NULL)

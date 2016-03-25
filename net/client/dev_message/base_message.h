@@ -3,7 +3,7 @@
 #include "../device_message.h"
 using namespace std;
 
-namespace net
+namespace hx_net
 {
 	#define  Getbit(x,n)  ((x>>n) & 0x01)
 	class base_message

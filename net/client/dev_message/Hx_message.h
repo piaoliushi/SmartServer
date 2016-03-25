@@ -2,7 +2,7 @@
 #include "base_message.h"
 using namespace std;
 
-namespace net
+namespace hx_net
 {
 	typedef struct tagDataMgr
 	{
@@ -17,7 +17,7 @@ namespace net
 	class Hx_message:public base_message
 	{
 	public:
-		Hx_message(session *pSession=NULL);
+        Hx_message(net_session *pSession=NULL);
 		~Hx_message(void);
 	public:
 		void SetSubPro(int subprotocol);
@@ -45,7 +45,7 @@ namespace net
 		bool itemIsAlarm(int nAlarmS,int itemId,dev_alarm_state &alarm_state);
 	private:
 		HxSubPrototcol m_Subprotocol;
-		session *m_pSession;
+        net_session *m_pSession;
 		hxDataMgrParamPtr  m_ParamPtr; 
 		int           m_DevAddr;//设备地址
 		map<int,int>  m_mapAlarm;//当前报警

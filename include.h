@@ -1,7 +1,7 @@
 #ifndef INCLUDE_H
 #define INCLUDE_H
 
-#define  BOOST_NETWORK_NO_LIB
+//#define  BOOST_NETWORK_NO_LIB
 #include <string>
 #include <stdexcept>
 #include <algorithm>

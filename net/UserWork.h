@@ -6,10 +6,10 @@
 #include "message.h"
 #include "Worker.h"
 #include "taskqueue.h"
-#include "session.h"
+#include "net_session.h"
 #include "./protocol/protocol.pb.h"
 
-using namespace net;
+using namespace hx_net;
 
 class UserWork: public Worker<msgPointer>
 {

@@ -1,11 +1,11 @@
 #include "connect_handler.h"
 #include "../../LocalConfig.h"
 //#include "../../database/dbmanager.h"
-namespace net
+namespace hx_net
 {
 	connect_handler::connect_handler(boost::asio::io_service& io_service, 
         TaskQueue<msgPointer>& taskwork,LocalServer &srv)
-		:session(io_service)
+        :net_session(io_service)
 		,h_b_timer_(io_service)
 #ifdef USE_CLIENT_STRAND
 		, strand_(io_service)
@@ -165,7 +165,7 @@ namespace net
 #ifdef USE_STRAND
 			strand_.wrap(
 #endif
-			boost::bind(&session::handle_read_head, shared_from_this(),
+            boost::bind(&net_session::handle_read_head, shared_from_this(),
 			boost::asio::placeholders::error,
 			boost::asio::placeholders::bytes_transferred)
 #ifdef USE_STRAND
@@ -201,7 +201,7 @@ namespace net
 					strand_.wrap
 					(
 #endif // USE_STRAND
-					boost::bind(&session::handle_read_body, shared_from_this(),
+                    boost::bind(&net_session::handle_read_body, shared_from_this(),
 					boost::asio::placeholders::error,
 					boost::asio::placeholders::bytes_transferred)
 #ifdef USE_STRAND
@@ -250,7 +250,7 @@ namespace net
 		boost::asio::async_write
 			(socket(),
 			boost::asio::buffer(checkMsg,strlen(checkMsg)+1),
-			boost::bind(&session::handle_write,shared_from_this(),
+            boost::bind(&net_session::handle_write,shared_from_this(),
 			boost::asio::placeholders::error,boost::asio::placeholders::bytes_transferred)
 			);
 	}
@@ -269,7 +269,7 @@ namespace net
 		boost::asio::async_write
 			(socket(),
 			boost::asio::buffer(&(msgPtr->data()[0]),msgPtr->length()),
-			boost::bind(&session::handle_write,shared_from_this(),
+            boost::bind(&net_session::handle_write,shared_from_this(),
 			boost::asio::placeholders::error,boost::asio::placeholders::bytes_transferred)
 			);
 	}

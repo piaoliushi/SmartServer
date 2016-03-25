@@ -7,7 +7,7 @@
 //        完成，直到stop方法被调用，工作线程结束
 //
 #include "taskqueue.h"
-namespace net
+namespace hx_net
 {
 	template <typename Task>
 	class Worker

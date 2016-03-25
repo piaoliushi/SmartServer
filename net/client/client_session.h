@@ -3,12 +3,12 @@
 #pragma once
 #include "../taskqueue.h"
 #include "../message.h"
-#include "../session.h"
+#include "../net_session.h"
 #include "../../qnotifyhandler.h"
 using boost::asio::ip::tcp;
-namespace net
+namespace hx_net
 {	
-	class client_session :public session
+    class client_session :public net_session
 	{
 	public:
 

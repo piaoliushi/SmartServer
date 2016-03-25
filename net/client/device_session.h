@@ -5,7 +5,7 @@
 #include "../taskqueue.h"
 #include "../message.h"
 #include "device_message.h"
-#include "../session.h"
+#include "../net_session.h"
 #include "../../DataType.h"
 #include "../../DataTypeDefine.h"
 //#include "../../DevAgent.h"
@@ -13,9 +13,9 @@
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
 
-namespace net
+namespace hx_net
 {
-	class device_session:public session
+    class device_session:public net_session
 	{
 	public:
 		device_session(boost::asio::io_service& io_service, 

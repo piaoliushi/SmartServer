@@ -1,8 +1,8 @@
-#ifndef SESSION_H
-#define SESSION_H
+#ifndef NET_SESSION_H
+#define NET_SESSION_H
 #include "taskqueue.h"
 #include "message.h"
-#include "./server/dev_upload_message.h"
+//#include "./server/dev_upload_message.h"
 #include "./client/device_message.h"
 #include "share_ptr_object_define.h"
 #include <string>
@@ -11,14 +11,20 @@
 using boost::asio::ip::tcp;
 using boost::asio::ip::udp;
 using namespace std;
-namespace net
+namespace hx_net
 {		
-	class session: public boost::enable_shared_from_this<session>
+    class net_session;
+    typedef boost::shared_ptr<net_session>  session_ptr;
+    typedef boost::weak_ptr<net_session>    session_weak_ptr;
+
+    class message;
+    typedef boost::shared_ptr<message> msgPointer;
+    class net_session: public boost::enable_shared_from_this<net_session>
 	{
 	public:
 
-		session(boost::asio::io_service& io_service);
-		virtual ~session(void);
+        net_session(boost::asio::io_service& io_service);
+        virtual ~net_session(void);
 		virtual Dev_Type dev_type(){return DEV_NODEFIN;}
 		virtual void dev_base_info(DevBaseInfo& devInfo,string iId="local"){};
 		virtual bool is_contain_dev(string sDevId){return false;}
@@ -127,7 +133,8 @@ namespace net
 		udp::socket                     udp_socket_;
 		bool                            bTcp_;//是否为tcp连接
 		boost::mutex          socket_mutex_;
-	};
+    };
+
 }
 
 #endif

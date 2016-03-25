@@ -2,12 +2,12 @@
 #include "base_message.h"
 using namespace std;
 
-namespace net
+namespace hx_net
 {
 	class Envir_message:public base_message
 	{
 	public:
-		Envir_message(session *pSession=NULL);
+        Envir_message(net_session *pSession=NULL);
 		~Envir_message(void);
 	public:
 		void SetSubPro(int subprotocol);
@@ -20,7 +20,7 @@ namespace net
 		int  parse_AC103CTR_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
 	private:
 		SgSubProtocol m_Subprotocol;//设备子协议号
-		session *m_pSession;//关联连接对象
+        net_session *m_pSession;//关联连接对象
 		int           m_DevAddr;//设备地址
 	};
 }

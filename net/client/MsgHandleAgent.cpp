@@ -1,8 +1,8 @@
 #include "MsgHandleAgent.h"
 #include "MsgHandleAgentImpl.h"
-namespace net
+namespace hx_net
 {
-	MsgHandleAgent::MsgHandleAgent(session *conPtr,boost::asio::io_service& io_service)
+    MsgHandleAgent::MsgHandleAgent(net_session *conPtr,boost::asio::io_service& io_service)
 		:m_msgImpl( new MsgHandleAgentImpl(conPtr,io_service))
 	{
 	}

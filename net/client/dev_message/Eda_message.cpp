@@ -1,9 +1,9 @@
 #include "Eda_message.h"
 
-namespace net
+namespace hx_net
 {
 
-	Eda_message::Eda_message(session *pSession)
+    Eda_message::Eda_message(net_session *pSession)
 		:m_pSession(pSession)
 	{
 	}

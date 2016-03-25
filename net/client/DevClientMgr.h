@@ -4,12 +4,19 @@
 #pragma once
 
 #include "../io_service_pool.h"
+#include <boost/shared_ptr.hpp>
 //UserWork
 #include "DevClient.h"
 //#include "SvcClient.h"
 //#include "../../DataType.h"
+//#define     http_client;
+using namespace boost::network::http;
+
+//typedef  http::client   hx_http_client;
+
 class client_work;
-namespace net
+class client;
+namespace hx_net
 {
 	
 	class DevClientMgr
@@ -64,6 +71,8 @@ namespace net
 		boost::shared_ptr<TaskQueue<msgPointer> > _taskqueueptr;//任务队列
 		boost::shared_ptr<client_work> _workerptr;//当前用户任务UserWork
 		boost::shared_ptr<DevClient> _devclientptr;//设备服务对象
+
+        client  *_pHttpClient;
 	};
 }
 #endif

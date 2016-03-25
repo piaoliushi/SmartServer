@@ -5,7 +5,7 @@
 #include "../message.h"
 #include "../Worker.h"
 #include "../taskqueue.h"
-#include "../session.h"
+#include "../net_session.h"
  #include "../../protocol/protocol.pb.h"
  #include "../config.h"
  //#include "../../database/dbmanager.h"
@@ -13,7 +13,7 @@
 #include "../../LocalConfig.h"
 //#include "connect_handler.h"
 #include <QString>
-using namespace net;
+using namespace hx_net;
 class client_work:public Worker<msgPointer> 
 {
 public:

@@ -6,11 +6,12 @@
 #include "include.h"
 #include "./protocol/protocol.pb.h"
 #include "share_ptr_object_define.h"
+#include "net_session.h"
 typedef std::vector<boost::uint8_t> data_buffer;
-namespace net
+namespace hx_net
 {
-	class session;
-	typedef boost::shared_ptr<session> session_ptr;
+    class net_session;
+    typedef boost::shared_ptr<net_session> session_ptr;
 	class connect_handler;
 	typedef boost::shared_ptr<connect_handler> connect_handler_ptr;
 
@@ -60,7 +61,8 @@ namespace net
 	private:
 		data_buffer              data_;
 		size_t                   body_length_;
-		boost::weak_ptr<session> session_;
+        boost::weak_ptr<net_session> session_;
+        //session_weak_ptr session_;
 		packHeadPtr              msg_;
 
 		//flash 沙箱验证

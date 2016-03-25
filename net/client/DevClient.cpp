@@ -13,7 +13,7 @@
 //@
 //@增加汇鑫发射机数据管理器(该管理器可以连接1-2部发射机或993采集器与1部汇鑫天线控制器),本管理对象需区分该设备连接所
 //关联的设备信息,自动区分无需连接的设备,自动装载需要连接的设备.
-namespace net
+namespace hx_net
 {
 	DevClient::DevClient(TaskQueue<msgPointer>& taskwork,size_t io_service_pool_size/* =4 */)
 		:io_service_pool_(io_service_pool_size)
