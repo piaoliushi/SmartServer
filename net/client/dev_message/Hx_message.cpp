@@ -282,7 +282,7 @@ namespace hx_net
 
 		case 0x11://查询数据回复
 			{
-				data_ptr->sId = sDevId;//保存当前设备id
+                //data_ptr->sId = sDevId;//保存当前设备id
                 //if(Agent()->HxPaseData(data_ptr.get(),(LPBYTE)(data+16),nDataLen-31)<0)
 				{
 					//LOG(ERROR)<<"查询回复数据解析出错--Data:";
@@ -415,27 +415,27 @@ namespace hx_net
 				switch(nChnnel)
 				{
 				case 1:
-					if (curDataPtr->datainfoBuf[2].fValue==1.0f)
+                    if (curDataPtr->mValues[2].fValue==1.0f)
 						return true;
 					break;
 				case 2:
-					if (curDataPtr->datainfoBuf[5].fValue==1.0f)
+                    if (curDataPtr->mValues[5].fValue==1.0f)
 						return true;
 					break;
 				case 3:
-					if (curDataPtr->datainfoBuf[8].fValue==1.0f)
+                    if (curDataPtr->mValues[8].fValue==1.0f)
 						return true;
 					break;
 				case 4:
-					if (curDataPtr->datainfoBuf[11].fValue==1.0f)
+                    if (curDataPtr->mValues[11].fValue==1.0f)
 						return true;
 					break;
 				case 5:
-					if (curDataPtr->datainfoBuf[14].fValue==1.0f)
+                    if (curDataPtr->mValues[14].fValue==1.0f)
 						return true;
 					break;
 				case 6:
-					if (curDataPtr->datainfoBuf[17].fValue==1.0f)
+                    if (curDataPtr->mValues[17].fValue==1.0f)
 						return true;
 					break;
 
@@ -628,7 +628,7 @@ namespace hx_net
 		case 0x22://监测数据
 			{
                 int nResult;// = On761Data(data_ptr,data,nDataLen);//Agent()->HxPaseData(data_ptr.get(),data,nDataLen);
-				if(nResult==0 && data_ptr->Length>0)
+                if(nResult==0 && data_ptr->mValues.size()>0)
 				{
 					if(m_pSession)
 						m_pSession->start_handler_data(data_ptr,false);
@@ -666,7 +666,7 @@ namespace hx_net
 		{
 		case 0x22:
             int nResult;// = Agent()->HxPaseData(data_ptr.get(),data,nDataLen);
-			if(nResult==0 && data_ptr->Length>0)
+            if(nResult==0 && data_ptr->mValues.size()>0)
 			{
 				if(m_pSession)
 					m_pSession->start_handler_data(data_ptr);
@@ -685,7 +685,7 @@ namespace hx_net
 		{
 		case 0x11:
             int nResult;// = Agent()->HxPaseData(data_ptr.get(),data,nDataLen);
-			if(nResult==0 && data_ptr->Length>0)
+            if(nResult==0 && data_ptr->mValues.size()>0)
 			{
 				if(m_pSession)
 					m_pSession->start_handler_data(data_ptr);

@@ -9,7 +9,7 @@
 namespace hx_net
 {
 	device_session::device_session(boost::asio::io_service& io_service, 
-		TaskQueue<msgPointer>& taskwork,ModleInfo & modinfo)
+        TaskQueue<msgPointer>& taskwork,ModleInfo & modinfo,http_request_session_ptr &httpPtr)
         :net_session(io_service)
 		,taskwork_(taskwork)
 #ifdef USE_CLIENT_STRAND
@@ -27,6 +27,7 @@ namespace hx_net
 		,command_timeout_count_(0)
 		,stop_flag_(false)
 		,task_count_(0)
+        ,http_ptr_(httpPtr)
 	{
 		//获得网络协议转换器相关配置
         /*moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos.sModleNumber);
@@ -496,73 +497,40 @@ namespace hx_net
 		return false;
 	}
 
+    //2016-3-31------处理设备数据----完成
 	void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 	{
-        /*boost::recursive_mutex::scoped_lock lock(data_deal_mutex);
+        boost::recursive_mutex::scoped_lock lock(data_deal_mutex);
 
 		bool bIsMonitorTime = is_monitor_time(sDevId);
 		//打包发送客户端
-		send_monitor_data_message(modleInfos.sStationNumber,sDevId,(e_DevType)modleInfos.mapDevInfo[sDevId].nDevType
-								  ,curDataPtr,modleInfos.mapDevInfo[sDevId].mapMonitorItem);
+        send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,(e_DevType)modleInfos.mapDevInfo[sDevId].iDevType
+                                  ,curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
 		//检测当前报警状态
-		if(bIsMonitorTime)
-			check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
-		else
-			clear_dev_alarm(sDevId);
+        check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
 		//如果在监测时间段则保存当前记录
 		if(bIsMonitorTime)
 			save_monitor_record(sDevId,curDataPtr);
 		//任务数递减
-        task_count_decrease();*/
+        task_count_decrease();
 		return;
 	}
 
 	void device_session::clear_dev_alarm(string sDevId)
 	{
-        /*boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
-		if(mapItemAlarmStartTime.size()>0)
-		{
+        boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
 
-			map<int,DevParamerMonitorItem>::iterator iter = modleInfos.mapDevInfo[sDevId].mapMonitorItem.begin();
-			for(;iter!=modleInfos.mapDevInfo[sDevId].mapMonitorItem.end();++iter)
-			{
-				if((*iter).second.bAlarmEnable!=true)
-					continue;
-				if(mapItemAlarmRecord[sDevId].find((*iter).first)==mapItemAlarmRecord[sDevId].end())
-					continue;
-				time_t curTime = time(0);
-				tm *ltime = localtime(&curTime);//恢复时间
-                GetInst(DbManager).UpdateTransmitterAlarmEndTime(ltime,
-					mapItemAlarmStartTime[sDevId][(*iter).first].second,modleInfos.mapDevInfo[sDevId].sStationNumber,
-					modleInfos.mapDevInfo[sDevId].sDevNum,(*iter).first);
+        map<int,map<int,CurItemAlarmInfo> >::iterator iter = mapItemAlarm[sDevId].begin();
+        for(;iter!=mapItemAlarm[sDevId].end();++iter) {
+            map<int,CurItemAlarmInfo>::iterator typeIter = iter->second.begin();
+            for(;iter!=mapItemAlarm[sDevId].end();++iter) {
+                //写入恢复记录,通知客户端
+                //.......
 
-				//移除该报警项
-				mapItemAlarmStartTime[sDevId].erase((*iter).first);
-
-				//通知客户端(报警恢复通知客户端)
-				//广播设备监控量报警到客户端
-				std::string alramTm = str(boost::format("%1%/%2%/%3% %4%:%5%:%6%")
-														%(ltime->tm_year+1900)
-														%(ltime->tm_mon+1)
-														%ltime->tm_mday
-														%ltime->tm_hour
-														%ltime->tm_min
-														%ltime->tm_sec);
-				send_alarm_state_message(modleInfos.sStationNumber,sDevId
-					,modleInfos.mapDevInfo[sDevId].sDevName,(*iter).second.nMonitoringIndex
-					,(*iter).second.sMonitoringName
-					,(e_DevType)modleInfos.mapDevInfo[sDevId].nDevType
-					,resume_normal,alramTm,mapItemAlarmStartTime[sDevId].size());
             }
-		}
-
-		if(mapItemAlarmRecord.size()>0)
-		{
-            map<string,map<int,std::pair<int,unsigned int> > >::iterator iter = mapItemAlarmRecord.find(sDevId);
-			if(iter!=mapItemAlarmRecord.end())
-				mapItemAlarmRecord.erase(iter);   //报警记录清除
-        }*/
-
+            iter->second.clear();
+        }
+        mapItemAlarm[sDevId].clear();
 	}
 
 	void device_session::handle_connected(const boost::system::error_code& error)
@@ -850,255 +818,144 @@ namespace hx_net
 		}
 	}
 
+    void  device_session::record_alarm_and_notify(string &devId,float fValue,DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm)
+    {
+        //广播设备监控量报警到客户端
+        /*std::string alramTm = str(boost::format("%1%/%2%/%3% %4%:%5%:%6%")
+                                                %(ltime.tm_year+1900)
+                                                %(ltime.tm_mon+1)
+                                                %ltime.tm_mday
+                                                %ltime.tm_hour
+                                                %ltime.tm_min
+                                                %ltime.tm_sec);
+        double limitValue = (curState==lower_alarm)?(*iter).second.dLowerLimit:(*iter).second.dUpperLimit;
+        string sAlarm_Cell_Name = str(boost::format("%1%<当前值:%2%--门限值:%3%>")
+            %(*iter).second.sMonitoringName
+            %dbValue
+            %limitValue); //用于发送到客户端的监控量名称+告警显示2016-1-5
+        send_alarm_state_message(TransmitterInfo.sStationNumber,TransmitterInfo.sNumber
+            ,TransmitterInfo.sProgramName,(*iter).second.nMonitoringIndex
+            ,sAlarm_Cell_Name//(*iter).second.sMonitoringName
+            ,TRANSMITTER,curState,alramTm,mapItemAlarmStartTime.size());
+        //根据报警等级确定是否进行短信通知用户
 
-	bool device_session::ItemValueIsAlarm(string devId,float fValue,DevParamerMonitorItem &ItemInfo
-		                                  ,dev_alarm_state &alarm_state)
-	{
-		if(ItemInfo.nMonitoringType == 0)//模拟量
-		{
-			if(fValue > ItemInfo.dUpperLimit)
-			{
-				if(mapItemAlarmRecord[devId].find(ItemInfo.nMonitoringIndex)!=mapItemAlarmRecord[devId].end())
-				{
-					if(mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].first == 0){
+        string sAlarmContent = str(boost::format("%1%%2%%3%<当前值:%4%--门限值:%5%>[时间:%6%]")
+            %TransmitterInfo.sProgramName
+            %(*iter).second.sMonitoringName
+            %CONST_STR_ALARM_CONTENT[(int)curState]
+            %dbValue
+            %limitValue
+            %alramTm
+            );*/
+    }
 
-						if(mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second == 
-							run_config_ptr[devId]->alarm_detect_max_count){//是否大于最大检测次数
-							alarm_state = upper_alarm;
-							++mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second;
-							return true;
-						}
-						else	{
-								if(mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second>=run_config_ptr[devId]->alarm_detect_max_count+1)
-								mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second=run_config_ptr[devId]->alarm_detect_max_count+1;
-							else
-								++mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second;
-						}
-					}
-					else{//第一次数据超上限
-						mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].first = 0;
-						mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second = 1;
+    void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorItem &ItemInfo)
+    {
+        boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
+        //遍历监控量告警配置
+        for(int nIndex=0;nIndex<ItemInfo.vItemAlarm.size();++nIndex)
+        {
+            if(ItemInfo.vItemAlarm[nIndex].bIsAlarm==false)
+                continue;
+            CurItemAlarmInfo  tmp_alarm_info;
+            int iLimittype = ItemInfo.vItemAlarm[nIndex].iLimittype;
+            bool  bIsAlarm=false;
+            if(ItemInfo.iItemType == ITEM_ANALOG){//模拟量
+                //上限,上上限告警
+                if(iLimittype == ALARM_UPPER || iLimittype == ALARM_UP_UPPER) {
+                    if(fValue > ItemInfo.vItemAlarm[nIndex].fLimitvalue)
+                        bIsAlarm=true;
+                }else{//下限,下下限告警
+                    if(fValue > ItemInfo.vItemAlarm[nIndex].fLimitvalue)
+                        bIsAlarm=true;
+                }
+            }else{//状态量
+                if(fValue == ItemInfo.vItemAlarm[nIndex].fLimitvalue)
+                    bIsAlarm=true;
+            }
 
-						//同时记录首次告警时间以及告警状态----2015-7-28
-						time_t curTime = time(0);
-						tm *ltime = localtime(&curTime);
-						mapItemAlarmStartTime[devId][ItemInfo.nMonitoringIndex]=std::pair<int,tm>(upper_alarm,*ltime);
-					}
-				}
-				else
-				{
-					//无报警则添加该报警项
-					mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].first=0;
-					mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second=1;
-					//同时记录首次告警时间以及告警状态----2015-7-28
-					time_t curTime = time(0);
-					tm *ltime = localtime(&curTime);
-					mapItemAlarmStartTime[devId][ItemInfo.nMonitoringIndex]=std::pair<int,tm>(upper_alarm,*ltime);
-				}
-			}
-			else if(fValue < ItemInfo.dLowerLimit)
-			{
-				if(mapItemAlarmRecord[devId].find(ItemInfo.nMonitoringIndex)!=mapItemAlarmRecord[devId].end())
-				{
-					if(mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].first == 1){
-						if(mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second == 
-							run_config_ptr[devId]->alarm_detect_max_count){
-							alarm_state = lower_alarm;
-							++mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second;
-							return true;
-						}
-						else
-						{
-							
-							if(mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second>=
-								run_config_ptr[devId]->alarm_detect_max_count+1)
-								mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second=run_config_ptr[devId]->alarm_detect_max_count+1;
-							else
-								++mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second;
-						}
-					}
-					else{//第一次数据低于下限
-						mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].first = 1;
-						mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second = 1;
-						//同时记录首次告警时间以及告警状态----2015-7-28
-						time_t curTime = time(0);
-						tm *ltime = localtime(&curTime);
-						mapItemAlarmStartTime[devId][ItemInfo.nMonitoringIndex]=std::pair<int,tm>(lower_alarm,*ltime);
-					}
-				}
-				else{//无报警则添加该报警项
-					mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].first=1;
-					mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second=1;
-					//同时记录首次告警时间以及告警状态----2015-7-28
-					time_t curTime = time(0);
-					tm *ltime = localtime(&curTime);
-					mapItemAlarmStartTime[devId][ItemInfo.nMonitoringIndex]=std::pair<int,tm>(lower_alarm,*ltime);
-				}
-			}else{//查找此报警是否已经存在
-				if(mapItemAlarmRecord[devId].find(ItemInfo.nMonitoringIndex)!=mapItemAlarmRecord[devId].end()){
-					
-					
-					if(mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second>=run_config_ptr[devId]->alarm_detect_max_count)
-						alarm_state = resume_normal;
-					mapItemAlarmRecord[devId].erase(ItemInfo.nMonitoringIndex);
-				}
-			}
-
-		}
-		else //状态量
-		{
-			//报警
-			if(fValue==ItemInfo.dLowerLimit)//以下限指示来确定报警值
-			{
-				//判断当前item是否在报警
-				if(mapItemAlarmRecord[devId].find(ItemInfo.nMonitoringIndex)
-					!=mapItemAlarmRecord[devId].end()){
-					//是否达到检测次数(2次)
-					if(mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second==
-						run_config_ptr[devId]->alarm_detect_max_count){
-						alarm_state = state_alarm;
-						++mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second;
-						cout<<"devId:"<<devId<<"-second->"<<mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second<<endl;
-						return true;
-					}
-					else{
-						if(mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second>=
-							run_config_ptr[devId]->alarm_detect_max_count+1)
-							mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second=run_config_ptr[devId]->alarm_detect_max_count+1;
-						else
-							++mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second;
-					}
-				}
-				else{//若当前是越下限或低功率报警,则修改后越上限报警
-					mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].first=0;
-					mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second=1;
-					//同时记录首次告警时间以及告警状态----2015-7-28
-					time_t curTime = time(0);
-					tm *ltime = localtime(&curTime);
-					mapItemAlarmStartTime[devId][ItemInfo.nMonitoringIndex]=std::pair<int,tm>(state_alarm,*ltime);
-				}
-			}
-			else{
-				//查找此报警是否已经存在
-				if(mapItemAlarmRecord[devId].find(ItemInfo.nMonitoringIndex)
-					!=mapItemAlarmRecord[devId].end()){
-
-				  if(mapItemAlarmRecord[devId][ItemInfo.nMonitoringIndex].second>=run_config_ptr[devId]->alarm_detect_max_count)
-						alarm_state = resume_normal;
-				  else
-				  {
-					  //移除该报警项
-					  mapItemAlarmStartTime[devId].erase(ItemInfo.nMonitoringIndex);
-				  }
-					mapItemAlarmRecord[devId].erase(ItemInfo.nMonitoringIndex);
-					//alarm_state = resume_normal;
-				}
-			}
-		}
-		return false;
-	}
+            if(bIsAlarm == true){
+                //判断该监控项是否在告警
+                map<int,map<int,CurItemAlarmInfo> >::iterator findIter = mapItemAlarm[devId].find(ItemInfo.iItemIndex);
+                if(findIter != mapItemAlarm[devId].end()){
+                    //判断该告警类型是否在告警
+                    map<int,CurItemAlarmInfo>::iterator alarm_type_findIter = mapItemAlarm[devId][ItemInfo.iItemIndex].find(iLimittype);
+                    if(alarm_type_findIter != mapItemAlarm[devId][ItemInfo.iItemIndex].end()){
+                            //计算持续时间,判断进行告警
+                        time_t curTime = time(0);
+                        double  dtime_during = difftime( curTime, alarm_type_findIter->second.startTime );
+                        if(dtime_during>=ItemInfo.vItemAlarm[nIndex].iDelaytime){
+                            //存储告警,通知告警,联动告警
+                            //.......
+                        }
+                    }else{ //没有找到,增加该告警类型
+                        tmp_alarm_info.nAlarmId = 1000;//需修改
+                        tmp_alarm_info.startTime = time(0);//记录时间
+                        tmp_alarm_info.nType = iLimittype;//告警类型
+                        mapItemAlarm[devId][ItemInfo.iItemIndex][iLimittype] = tmp_alarm_info;
+                        //存储告警,通知告警,联动告警
+                        //........
+                    }
+                }else {
+                    //没有找到增加该告警监控项
+                    tmp_alarm_info.nAlarmId = 1000;//需修改
+                    tmp_alarm_info.startTime = time(0);//记录时间
+                    tmp_alarm_info.nType = iLimittype;//告警类型
+                    map<int,CurItemAlarmInfo>  tmTypeAlarm;
+                    tmTypeAlarm[iLimittype] = tmp_alarm_info;
+                    mapItemAlarm[devId][ItemInfo.iItemIndex] = tmTypeAlarm;
+                    //存储告警,通知客户端,联动告警
+                    //........
+                }
+            }else {
+                //当前没有告警,判断是否存在此告警,确定是否需要恢复,移除该告警
+                map<int,map<int,CurItemAlarmInfo> >::iterator findIter = mapItemAlarm[devId].find(ItemInfo.iItemIndex);
+                //查找是否有该监控项
+                if(findIter != mapItemAlarm[devId].end()){
+                    map<int,CurItemAlarmInfo>::iterator findTypeIter =  findIter->second.find(iLimittype);
+                    if(findTypeIter != findIter->second.end()){
+                        time_t curTime = time(0);
+                        double  dtime_during = difftime( curTime, findTypeIter->second.startTime );
+                        if(dtime_during>=ItemInfo.vItemAlarm[nIndex].iResumetime){
+                            //存储告警恢复,通知客户端,移除该告警
+                            //.......
+                            findIter->second.erase(findTypeIter);//移除该告警类型告警
+                            if( findIter->second.size()<=0)
+                                mapItemAlarm[devId].erase(findIter);//如果监控项告警为空,则移除该监控量告警
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 	//清除所有报警状态
 	void device_session::clear_all_alarm()
 	{
 		boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
-		mapItemAlarmStartTime.clear();//报警项开始时间清除
-		mapItemAlarmRecord.clear();   //报警记录清除
+        //mapItemAlarmStartTime.clear();//报警项开始时间清除
+        //mapItemAlarmRecord.clear();   //报警记录清除
 	}
 
 	void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,bool bMonitor)
 	{
-		//非检测时间段不进行报警检测...
+        //非检测时间段不进行报警检测,同时清除当前告警
+        if(bMonitor!=true){
+            clear_dev_alarm(sDevId);
+            return;
+        }
 
-        /*DevParamerInfo info_;
-		map<string,DevParamerInfo>::iterator iter = modleInfos.mapDevInfo.find(sDevId);
-		if(iter== modleInfos.mapDevInfo.end())
-			return;
+        map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.find(sDevId);
+        if(iter== modleInfos.mapDevInfo.end())
+            return;
 
-		boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
-		map<int,DevParamerMonitorItem>::iterator iterItem = iter->second.mapMonitorItem.begin();
-		for(;iterItem!=iter->second.mapMonitorItem.end();++iterItem)
-		{
-			if(!(*iterItem).second.bAlarmEnable)
-				continue;
-			//数据没有更新或没有抵达则不进行告警判断
-			if(curDataPtr->datainfoBuf[(*iterItem).first].bUpdate==false)
-				continue;
+        map<int,DeviceMonitorItem>::iterator iterItem = iter->second.map_MonitorItem.begin();
+        for(;iterItem!=iter->second.map_MonitorItem.end();++iterItem)
+        {
+            double dbValue =curDataPtr->mValues[iterItem->first].fValue;
+            parse_item_alarm(sDevId,dbValue,iterItem->second);
+        }
 
-			dev_alarm_state curState = invalid_alarm;
-			double dbValue =curDataPtr->datainfoBuf[(*iterItem).first].fValue;
-			if(ItemValueIsAlarm(sDevId,dbValue,(*iterItem).second,curState))
-			{
-				//有报警产生，存数据库，并通知客户端
-				//记录数据库
-				//time_t curTime = time(0);
-				//tm *ltime = localtime(&curTime);
-				tm ltime = mapItemAlarmStartTime[sDevId][(*iterItem).first].second;
-                GetInst(DbManager).AddOthDevAlarm(&ltime,iter->second.sStationNumber,
-					                                    iter->second.sDevNum,(*iterItem).first,curState);
-				//mapItemAlarmStartTime[sDevId][(*iterItem).first] = std::pair<int,tm>(curState,*ltime);
-				
-				if(bMonitor==true)//如果在监测时间段则通知客户端
-				{
-					//分发设备监控量报警到客户端
-					std::string alramTm = str(boost::format("%1%/%2%/%3% %4%:%5%:%6%")
-																	%(ltime.tm_year+1900)
-																	%(ltime.tm_mon+1)
-																	%ltime.tm_mday
-																	%ltime.tm_hour
-																	%ltime.tm_min
-																	%ltime.tm_sec);
-					send_alarm_state_message(modleInfos.sStationNumber,sDevId
-										,(*iter).second.sDevName,(*iterItem).second.nMonitoringIndex
-										,(*iterItem).second.sMonitoringName
-										,(e_DevType)modleInfos.mapDevInfo[sDevId].nDevType
-										,curState,alramTm,mapItemAlarmStartTime[sDevId].size());
-					//根据报警等级确定是否进行短信通知用户
-					string sAlarmContent = str(boost::format("%1%%2%%3%[时间:%4%]")
-												%(*iter).second.sDevName
-												%(*iterItem).second.sMonitoringName
-												%CONST_STR_ALARM_CONTENT[(int)curState]
-												%alramTm
-												);
-					sendSmsAndCallPhone((*iterItem).second.nAlarmLevel,sAlarmContent);
-				}
-			}
-			else
-			{
-				if(curState == resume_normal)
-				{
-					time_t curTime = time(0);
-					tm *ltime = localtime(&curTime);//恢复时间
-					//报警恢复，存数据库，并通知客户端
-                    GetInst(DbManager).UpdateOthDevAlarm(ltime,mapItemAlarmStartTime[sDevId][(*iterItem).first].second,
-						                                       iter->second.sStationNumber,iter->second.sDevNum,(*iterItem).first);
-					//移除该报警项
-					mapItemAlarmStartTime[sDevId].erase((*iterItem).first);
-					//广播设备监控量报警到客户端
-					std::string alramTm = str(boost::format("%1%/%2%/%3% %4%:%5%:%6%")
-													%(ltime->tm_year+1900)
-													%(ltime->tm_mon+1)
-													%ltime->tm_mday
-													%ltime->tm_hour
-													%ltime->tm_min
-													%ltime->tm_sec);
-					send_alarm_state_message(modleInfos.sStationNumber,sDevId
-											,(*iter).second.sDevName,(*iterItem).second.nMonitoringIndex
-											,(*iterItem).second.sMonitoringName
-											,(e_DevType)modleInfos.mapDevInfo[sDevId].nDevType
-											,curState,alramTm,mapItemAlarmStartTime[sDevId].size());
-
-					string sAlarmContent = str(boost::format("%1%%2%%3%[时间:%4%]")
-												%(*iter).second.sDevName
-												%(*iterItem).second.sMonitoringName
-												%CONST_STR_ALARM_CONTENT[(int)curState]
-												%alramTm
-												);
-					sendSmsAndCallPhone((*iterItem).second.nAlarmLevel,sAlarmContent);
-
-				}
-			}
-        }*/
 	}
 	
 	void device_session::sendSmsToUsers(int nLevel,string &sContent)

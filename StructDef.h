@@ -25,16 +25,7 @@ typedef enum CMDTYPE
 }CmdType,*pCmdType;
 
 //单个数据结构
-typedef struct DATA_INFO_TAG
-{
-    DATA_INFO_TAG()
-	{
-		bUpdate=true;
-	}
-	bool          bType;//数据类型: false表示模拟量，true表示状态量
-	float         fValue;//当bType为true表示状态量时，dValue == 1.0，界面亮绿灯，反之红灯。
-	bool          bUpdate;//是否已经更新（适应多指令分数据段解析）
-}DataInfo,*pDataInfo;
+
 
 typedef struct CMDUnit
 {
@@ -63,13 +54,16 @@ typedef struct
 	int ninterval;                     //命令之间发送时间间隔(ms)
 }CommandAttribute;
 
+
 //
-typedef struct DATA_TAG
+/*typedef struct DATA_TAG
 {
 	DataInfo datainfoBuf[400];
 	int Length;//数据个数
 	string sId;//设备Id
-}Data,*pData;
+
+}Data,*pData;*/
+
 
 typedef struct
 {
@@ -78,12 +72,12 @@ typedef struct
 	int uiLength;  // 00 00 00 08 整个数据包的长度，包括该命令头部分.
 }AckHeader,*pAckHeader;
 
-typedef struct DZDATA_TAG
+/*typedef struct DZDATA_TAG
 {
 	AckHeader     cmd;
 	int Length;//数据个数
 	DataInfo datainfoBuf[220];
-}DzData,*pDzData;
+}DzData,*pDzData;*/
 ////协议类型
 typedef enum PROTOCOL
 {

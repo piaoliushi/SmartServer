@@ -300,7 +300,7 @@ void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
 void Bohui_Protocol::_setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValue)
 {
     vector<string> vecDeviceNumber;//保存影响的设备ID集合
-    if (GetInst(DataBaseOperation).SetAlarmLimit(nDevType,rootNode,nValue,vecDeviceNumber)==true)
+    if (GetInst(DataBaseOperation).SetAlarmLimit(rootNode,nValue,vecDeviceNumber)==true)//nDevType,
     {
         // 通知设备服务......
     }
@@ -310,7 +310,7 @@ void Bohui_Protocol::_setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValu
 void Bohui_Protocol::_setAlarmSwitchSetParam(int nDevType,xml_node<> *rootNode,int &nValue)
 {
     vector<string> vecDeviceNumber;//保存影响的设备ID集合
-    if (GetInst(DataBaseOperation).SetEnableAlarm(nDevType,rootNode,nValue,vecDeviceNumber)==true)
+    if (GetInst(DataBaseOperation).SetEnableAlarm(rootNode,nValue,vecDeviceNumber)==true)//nDevType,
     {
         // 通知设备服务......
     }

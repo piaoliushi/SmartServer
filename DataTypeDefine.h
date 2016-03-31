@@ -29,6 +29,14 @@ enum DEVType
 
 };
 
+#define    ITEM_ANALOG   0  //模拟量
+#define    ITEM_DIGITAL    1  //数字量
+
+#define    CON_MOD_NET   1 //网口
+#define    CON_MOD_COM  0 //串口
+
+#define    NET_MOD_TCP   0
+#define    NET_MOD_UDP   1
 
 //运行图结构
 typedef struct
@@ -49,6 +57,7 @@ typedef struct
     bool   bUseP2;
     string sParam2;
 }CmdParam;
+
 typedef struct
 {
     int gid;
@@ -61,17 +70,7 @@ typedef struct
     int iHasParam;
     CmdParam cParam;
 }Command_Scheduler;
-typedef struct
-{
-    int iItemIndex;
-    string sItemName;
-    double dRatio;
-    int iItemType;
-    int iItemvalueType;
-    bool bAlarmEnable;
-    bool bUpload;
-    string sUnit;
-}DeviceMonitorItem;
+
 typedef struct
 {
     string property_num;
@@ -88,6 +87,7 @@ typedef struct
     int    iremote_port;
     int    ilink_type;
 }NetCommunicationMode;
+
 typedef struct
 {
     int    icomport;
@@ -96,11 +96,13 @@ typedef struct
     int    istop_bit;
     int    iparity_bit;
 }ComCommunicationMode;
+
 typedef struct
 {
     string strParamValue;
     int    iParamType;
 }ActionParam;
+
 typedef struct
 {
     string strActionNum;
@@ -109,18 +111,29 @@ typedef struct
     int    iIshaveParam;
     map<int,ActionParam> map_Params;
 }LinkAction;
+
+#define    ALARM_UPPER            0
+#define    ALARM_LOWER           1
+#define    ALARM_UP_UPPER      2
+#define    ALARM_LOW_LOWER   3
+#define    ALARM_SWITCH          4
+
+
 typedef struct
 {
-    int iItemid;
-    double fLimitvalue;
-    int iAlarmlevel;
-    int iLimittype;
-    int iLinkageEnable;
-    int iDelaytime;
-    int iAlarmtype;
-    string strLinkageRoleNumber;
-    vector<LinkAction> vLinkAction;
+    int iItemid;            //告警id
+    double fLimitvalue;//门限值
+    int iAlarmlevel;      //告警等级
+    int iLimittype;        //0:上限,1:下线,2:上上限,3:下下限,4:状态量
+    int iLinkageEnable;//联动标志
+    int iDelaytime;       //告警延迟(秒)
+    int iResumetime;   //恢复延迟(秒)
+    int iAlarmtype;       //0:监控量,1:设备
+    string strLinkageRoleNumber;//联动角色
+    bool  bIsAlarm;
+    vector<LinkAction> vLinkAction;//联动动作
 }Alarm_config;
+
 typedef struct
 {
     int iWeek;
@@ -128,6 +141,7 @@ typedef struct
     tm  tStartTime;
     tm  tEndTime;
 }Record_Scheduler;
+
 typedef struct
 {
     string sPrgNum;
@@ -137,6 +151,19 @@ typedef struct
     map<int,vector<Record_Scheduler> > map_PrgRecord_Sch;
     map<int,vector<Monitoring_Scheduler> > map_MonitorSch;
 }ProgamConfig;
+
+typedef struct
+{
+    int iItemIndex;
+    string sItemName;
+    double dRatio;
+    int iItemType;//0:模拟量,1:状态量
+    int iItemvalueType;//值类型
+    bool bAlarmEnable;
+    bool bUpload;
+    string sUnit;//单位
+    vector<Alarm_config>  vItemAlarm;
+}DeviceMonitorItem;
 
 typedef struct
 {
@@ -154,17 +181,17 @@ typedef struct
     map<int,DeviceMonitorItem>        map_MonitorItem;//设备监控量
     vector<Monitoring_Scheduler>      vMonitorSch;  //监控计划
     vector<Command_Scheduler>       vCommSch;   //控制计划
-    map<string,DevProperty>                              map_DevProperty;//设备属性列表
-    map<int,Alarm_config>                                 map_AlarmConfig;//设备告警配置
+    map<string,DevProperty>                  map_DevProperty;//设备属性列表
+    map<int,Alarm_config >                    map_AlarmConfig;//设备告警配置
 }DeviceInfo,*pDeviceInfo;
 
 typedef struct
 {
     string    sModleNumber;
-    int    iCommunicationMode;//连接类型
-    NetCommunicationMode netMode;
+    int    iCommunicationMode;//连接类型0:网口,1:串口
+    NetCommunicationMode   netMode;
     ComCommunicationMode comMode;
-    map<string,DeviceInfo>   mapDevInfo;
+    map<string,DeviceInfo>    mapDevInfo;
 }ModleInfo;
 
 typedef struct
@@ -180,4 +207,30 @@ typedef struct
     tm tMonitoringTime;
     double dMonitoringValue;
 }MonitorItemRecord;
+
+typedef struct
+{
+    unsigned long long  nAlarmId;   //告警id
+    int           nType;      //告警类型
+    time_t     startTime; //开始时间
+    int           nDuring;    //持续时间
+}CurItemAlarmInfo;
+
+typedef struct DATA_INFO_TAG
+{
+    DATA_INFO_TAG()
+    {
+        bUpdate=true;
+    }
+    bool       bType;//数据类型: false表示模拟量，true表示状态量
+    float       fValue;//当bType为true表示状态量时，dValue == 1.0，界面亮绿灯，反之红灯。
+    bool       bUpdate;//是否已经更新（适应多指令分数据段解析）
+}DataInfo,*pDataInfo;
+
+typedef struct
+{
+     map<int,DataInfo> mValues;
+}Data,pData;
+
+
 #endif

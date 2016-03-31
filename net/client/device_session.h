@@ -10,6 +10,7 @@
 #include "../../DataTypeDefine.h"
 //#include "../../DevAgent.h"
 #include "MsgHandleAgent.h"
+#include "http_request_session.h"
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
 
@@ -19,7 +20,7 @@ namespace hx_net
 	{
 	public:
 		device_session(boost::asio::io_service& io_service, 
-			TaskQueue<msgPointer>& taskwork,ModleInfo & modinfo);
+            TaskQueue<msgPointer>& taskwork,ModleInfo & modinfo,http_request_session_ptr &httpPtr);
 		~device_session();
 		Dev_Type dev_type(){return DEV_OTHER;}
 		void dev_base_info(DevBaseInfo& devInfo,string iId="local");
@@ -68,8 +69,8 @@ namespace hx_net
 		bool is_stop();
         void close_all();
 		//判断监测量是否报警
-		bool ItemValueIsAlarm(string devId,float fValue,DevParamerMonitorItem &ItemInfo,
-			                                            dev_alarm_state &alarm_state);
+        //bool ItemValueIsAlarm(string devId,float fValue,DevParamerMonitorItem &ItemInfo,
+        //	                                            dev_alarm_state &alarm_state);
 		void check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,bool bMonitor);
 
 		void save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtr);
@@ -89,9 +90,14 @@ namespace hx_net
 		//是否在监测时间段
 		bool is_monitor_time(string sDevId);
 
-		void sendSmsToUsers(int nLevel,string &sContent);
+        void sendSmsToUsers(int nLevel,string &sContent);
 
-		bool excute_general_command(int cmdType,devCommdMsgPtr lpParam,e_ErrorCode &opResult);
+        bool  excute_general_command(int cmdType,devCommdMsgPtr lpParam,e_ErrorCode &opResult);
+
+
+        //-------2016-3-30------------------------//
+        void  parse_item_alarm(string devId,float fValue,DeviceMonitorItem &ItemInfo);
+        void  record_alarm_and_notify(string &devId,float fValue,DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm);
 	public:	
 		void handle_connected(const boost::system::error_code& error);
 		void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);//通用消息头（分消息head，body）
@@ -122,6 +128,9 @@ namespace hx_net
 		boost::recursive_mutex          alarm_state_mutex;
         map<string,map<int,std::pair<int,tm> > >           mapItemAlarmStartTime;//报警项报警开始时间
         map<string,map<int,std::pair<int,unsigned int> > > mapItemAlarmRecord;
+        //devid<itemid<alarmid,info>>>
+        map<string ,map<int,map<int,CurItemAlarmInfo> > > mapItemAlarm;//设备监控量告警信息
+
 		map<string,time_t>                               tmLastSaveTime;
         map<string,pair<CommandAttrPtr,HMsgHandlePtr> >   dev_agent_and_com;//add by lk 2013-11-26
 		string                                           cur_dev_id_;//当前查询设备id
@@ -137,6 +146,8 @@ namespace hx_net
 #ifdef USE_STRAND
 		io_service::strand              strand_;   //消息头与消息体同步
 #endif
+
+        http_request_session_ptr   &http_ptr_;
 	};
 }
 #endif

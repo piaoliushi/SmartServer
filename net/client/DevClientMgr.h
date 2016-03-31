@@ -71,8 +71,6 @@ namespace hx_net
 		boost::shared_ptr<TaskQueue<msgPointer> > _taskqueueptr;//任务队列
 		boost::shared_ptr<client_work> _workerptr;//当前用户任务UserWork
 		boost::shared_ptr<DevClient> _devclientptr;//设备服务对象
-
-        client  *_pHttpClient;
 	};
 }
 #endif

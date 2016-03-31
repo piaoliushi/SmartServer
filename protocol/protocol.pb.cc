@@ -250,11 +250,12 @@ void protobuf_AssignDesc_protocol_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DevAlarmStatus));
   DevAlarmStatus_eCellAlarmMsg_descriptor_ = DevAlarmStatus_descriptor_->nested_type(0);
-  static const int DevAlarmStatus_eCellAlarmMsg_offsets_[4] = {
+  static const int DevAlarmStatus_eCellAlarmMsg_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, scellid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, scellname_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, ccellstatus_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, sstarttime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, sdesp_),
   };
   DevAlarmStatus_eCellAlarmMsg_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -782,105 +783,105 @@ void protobuf_AddDesc_protocol_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\016protocol.proto\"\210\002\n\rDevDataNotify\022\022\n\nsS"
+    "\n\016protocol.proto\"\374\001\n\rDevDataNotify\022\022\n\nsS"
     "tationId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010sDevNa"
-    "me\030\003 \001(\t\022\034\n\010eDevType\030\004 \001(\0162\n.e_DevType\022*"
-    "\n\tcCellData\030\005 \003(\0132\027.DevDataNotify.eCellM"
-    "sg\032w\n\010eCellMsg\022\017\n\007sCellId\030\001 \002(\t\022\036\n\teCell"
-    "Type\030\002 \002(\0162\013.e_CellType\022\021\n\tsCellName\030\003 \001"
-    "(\t\022\022\n\nsCellValue\030\004 \001(\t\022\023\n\013bAudioValue\030\005 "
-    "\001(\014\"\311\001\n\014DevNetStatus\022\022\n\nsStationId\030\001 \002(\t"
-    "\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010sDevName\030\003 \001(\t\022\034\n\010eD"
-    "evType\030\004 \001(\0162\n.e_DevType\022-\n\neNetStatus\030\005"
-    " \001(\0162\031.DevNetStatus.e_NetStatus\"6\n\013e_Net"
-    "Status\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\016\n\nCONNE"
-    "CTING\020\002\"=\n\022DevNetStatusNotify\022\'\n\020cDevCur"
-    "NetStatus\030\001 \003(\0132\r.DevNetStatus\"\205\002\n\rDevWo"
-    "rkStatus\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002"
-    " \002(\t\022\020\n\010sDevName\030\003 \001(\t\022\034\n\010eDevType\030\004 \001(\016"
-    "2\n.e_DevType\0220\n\013eWorkStatus\030\005 \001(\0162\033.DevW"
-    "orkStatus.e_WorkStatus\"n\n\014e_WorkStatus\022\n"
-    "\n\006RUNING\020\000\022\014\n\010SHUTDOWN\020\001\022\020\n\014ANTENNA_HOST"
-    "\020\002\022\022\n\016ANTENNA_BACKUP\020\003\022\r\n\tDETECTING\020\004\022\017\n"
-    "\013DEV_UNKNOWN\020\005\"@\n\023DevWorkStatusNotify\022)\n"
-    "\021cDevCurWorkStatus\030\001 \003(\0132\016.DevWorkStatus"
-    "\"\232\002\n\016DevAlarmStatus\022\022\n\nsStationId\030\001 \002(\t\022"
-    "\016\n\006sDevId\030\002 \002(\t\022\020\n\010sDevName\030\003 \001(\t\022\034\n\010eDe"
-    "vType\030\004 \001(\0162\n.e_DevType\022\023\n\013nAlarmCount\030\005"
-    " \001(\005\0221\n\ncCellAlarm\030\006 \003(\0132\035.DevAlarmStatu"
-    "s.eCellAlarmMsg\032l\n\reCellAlarmMsg\022\017\n\007sCel"
-    "lId\030\001 \002(\t\022\021\n\tsCellName\030\002 \001(\t\022#\n\013cCellSta"
-    "tus\030\003 \001(\0162\016.e_AlarmStatus\022\022\n\nsStartTime\030"
-    "\004 \001(\t\"C\n\024DevAlarmStatusNotify\022+\n\022cDevCur"
-    "AlarmStatus\030\001 \003(\0132\017.DevAlarmStatus\"-\n\010Lo"
-    "ginReq\022\020\n\010sUsrName\030\001 \001(\t\022\017\n\007sUsrPsw\030\002 \001("
-    "\t\"^\n\013HandOverReq\022\023\n\013sCurUsrName\030\001 \001(\t\022\023\n"
-    "\013sNewUsrName\030\002 \001(\t\022\022\n\nsNewUsrPsw\030\003 \001(\t\022\021"
-    "\n\tsContents\030\004 \001(\t\"D\n\nDutyLogReq\022\025\n\rsCurU"
-    "srNumber\030\001 \001(\t\022\020\n\010sContent\030\002 \001(\t\022\r\n\005nTyp"
-    "e\030\003 \001(\005\"+\n\nDutyLogAck\022\035\n\007eResult\030\001 \001(\0162\014"
-    ".e_ErrorCode\"\226\001\n\016UserSigninInfo\022\021\n\teUsrL"
-    "evel\030\001 \001(\005\022\021\n\tUsrNumber\030\002 \001(\t\022\017\n\007UsrName"
-    "\030\003 \001(\t\022\024\n\014UsrJobNumber\030\004 \001(\t\022\023\n\013UsrHeads"
-    "hip\030\005 \001(\t\022\016\n\006UsrPsw\030\006 \001(\t\022\022\n\nSignInTime\030"
-    "\007 \001(\t\"l\n\010UserInfo\022\021\n\teUsrLevel\030\001 \001(\005\022\021\n\t"
-    "UsrNumber\030\002 \001(\t\022\017\n\007UsrName\030\003 \001(\t\022\024\n\014UsrJ"
-    "obNumber\030\004 \001(\t\022\023\n\013UsrHeadship\030\005 \001(\t\"\340\002\n\010"
-    "LoginAck\022\035\n\007eResult\030\001 \001(\0162\014.e_ErrorCode\022"
-    "\021\n\teUsrLevel\030\002 \001(\005\022\021\n\tUsrNumber\030\003 \001(\t\022\017\n"
-    "\007UsrName\030\004 \001(\t\022\024\n\014UsrJobNumber\030\005 \001(\t\022\023\n\013"
-    "UsrHeadship\030\006 \001(\t\022\'\n\020cDevCurNetStatus\030\007 "
-    "\003(\0132\r.DevNetStatus\022)\n\021cDevCurWorkStatus\030"
-    "\010 \003(\0132\016.DevWorkStatus\022+\n\022cDevCurAlarmSta"
-    "tus\030\t \003(\0132\017.DevAlarmStatus\022\016\n\006UsrPsw\030\n \001"
-    "(\t\022\"\n\tSignUsers\030\013 \003(\0132\017.UserSigninInfo\022\036"
-    "\n\013AllUserInfo\030\014 \003(\0132\t.UserInfo\"I\n\014SignIn"
-    "OutReq\022\020\n\010IsSignIn\030\001 \001(\005\022\023\n\013sSignInName\030"
-    "\002 \001(\t\022\022\n\nsSignInPsw\030\003 \001(\t\"d\n\014SignInOutAc"
-    "k\022\020\n\010IsSignIn\030\001 \001(\005\022\035\n\007eResult\030\002 \001(\0162\014.e"
-    "_ErrorCode\022#\n\ncUsersInfo\030\003 \001(\0132\017.UserSig"
-    "ninInfo\"=\n\023StationWorkingState\022\026\n\016sStati"
-    "onNumber\030\001 \001(\t\022\016\n\006nState\030\002 \001(\005\".\n\026CheckS"
-    "tationWorkingReq\022\024\n\014sChildNumber\030\001 \003(\t\")"
-    "\n\026CheckStationWorkingAck\022\017\n\007nResult\030\001 \001("
-    "\005\"m\n\032CheackStationWorkingNotify\022\017\n\007nResu"
-    "lt\030\001 \001(\005\022\023\n\013sUserNumber\030\002 \001(\t\022\021\n\tsUserNa"
-    "me\030\003 \001(\t\022\026\n\016sStationNumber\030\004 \001(\t\".\n\tLogo"
-    "utReq\022\020\n\010sUsrName\030\001 \001(\t\022\017\n\007sUsrPsw\030\002 \001(\t"
-    "\"*\n\tLogoutAck\022\035\n\007eResult\030\001 \001(\0162\014.e_Error"
-    "Code\"c\n\014TurnOnDevMsg\022\022\n\nsStationId\030\001 \002(\t"
-    "\022\016\n\006sDevId\030\002 \002(\t\022\034\n\010eDevType\030\003 \001(\0162\n.e_D"
-    "evType\022\021\n\tsOperUser\030\004 \001(\t\"d\n\rTurnOffDevM"
-    "sg\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\034"
-    "\n\010eDevType\030\003 \001(\0162\n.e_DevType\022\021\n\tsOperUse"
-    "r\030\004 \001(\t\"7\n\014CommandParam\022\022\n\nsParamName\030\001 "
-    "\001(\t\022\023\n\013sParamValue\030\002 \001(\t\"\231\001\n\020DeviceComma"
-    "ndMsg\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002("
-    "\t\022\020\n\010sDevName\030\003 \001(\t\022\034\n\010eDevType\030\004 \001(\0162\n."
-    "e_DevType\022\021\n\tsOperUser\030\005 \001(\t\022\036\n\007cParams\030"
-    "\006 \003(\0132\r.CommandParam\"\302\001\n\031DeviceCommandRe"
-    "sultNotify\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId"
-    "\030\002 \002(\t\022\034\n\010eDevType\030\003 \001(\0162\n.e_DevType\022\020\n\010"
-    "sDevName\030\004 \001(\t\022\036\n\010eErrorId\030\005 \001(\0162\014.e_Err"
-    "orCode\022\021\n\tsOperUser\030\006 \001(\t\022\036\n\007cParams\030\007 \003"
-    "(\0132\r.CommandParam*\315\003\n\013e_ErrorCode\022\t\n\005EC_"
-    "OK\020\000\022\r\n\tEC_FAILED\020\001\022\024\n\020EC_USR_NOT_FOUND\020"
-    "\002\022\031\n\025EC_USR_NOT_PERMISSION\020\003\022\024\n\020EC_USR_P"
-    "SW_ERROR\020\004\022\027\n\023EC_USR_REPEAT_LOGIN\020\005\022\020\n\014E"
-    "C_NET_ERROR\020\006\022\024\n\020EC_LOGOUT_FAILED\020\007\022\027\n\023E"
-    "C_CONFIGREQ_FAILED\020\010\022\024\n\020EC_TURNON_FAILED"
-    "\020\t\022\025\n\021EC_TURNOFF_FAILED\020\n\022\032\n\026EC_ANTENNA_"
-    "HTOB_FAILED\020\013\022\032\n\026EC_ANTENNA_BTOH_FAILED\020"
-    "\014\022\027\n\023EC_DEVICE_NOT_FOUND\020\r\022\022\n\016EC_OBJECT_"
-    "NULL\020\016\022\023\n\017EC_OPR_ON_GOING\020\017\022\032\n\026EC_SEND_S"
-    "MS_MSG_FAILED\020\020\022\027\n\023EC_DEV_DISCONNECTED\020\021"
-    "\022\027\n\023EC_CMD_SEND_SUCCEED\020\022\022\016\n\nEC_UNKNOWN\020"
-    "\023*%\n\ne_CellType\022\013\n\007DIGITAL\020\000\022\n\n\006ANALOG\020\001"
-    "*s\n\te_DevType\022\017\n\013TRANSMITTER\020\000\022\013\n\007ANTENN"
-    "A\020\001\022\014\n\010ELCPOWER\020\002\022\t\n\005ENVIR\020\003\022\014\n\010SECURITY"
-    "\020\004\022\t\n\005AUDIO\020\005\022\013\n\007PROGRAM\020\006\022\t\n\005VIDEO\020\007*H\n"
-    "\re_AlarmStatus\022\t\n\005UPPER\020\000\022\t\n\005LOWER\020\001\022\t\n\005"
-    "STATE\020\002\022\n\n\006RESUME\020\003\022\n\n\006DEVICE\020\004", 3951);
+    "me\030\003 \001(\t\022\020\n\010eDevType\030\004 \001(\005\022*\n\tcCellData\030"
+    "\005 \003(\0132\027.DevDataNotify.eCellMsg\032w\n\010eCellM"
+    "sg\022\017\n\007sCellId\030\001 \002(\t\022\036\n\teCellType\030\002 \002(\0162\013"
+    ".e_CellType\022\021\n\tsCellName\030\003 \001(\t\022\022\n\nsCellV"
+    "alue\030\004 \001(\t\022\023\n\013bAudioValue\030\005 \001(\014\"\275\001\n\014DevN"
+    "etStatus\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002"
+    " \002(\t\022\020\n\010sDevName\030\003 \001(\t\022\020\n\010eDevType\030\004 \001(\005"
+    "\022-\n\neNetStatus\030\005 \001(\0162\031.DevNetStatus.e_Ne"
+    "tStatus\"6\n\013e_NetStatus\022\n\n\006ONLINE\020\000\022\013\n\007OF"
+    "FLINE\020\001\022\016\n\nCONNECTING\020\002\"=\n\022DevNetStatusN"
+    "otify\022\'\n\020cDevCurNetStatus\030\001 \003(\0132\r.DevNet"
+    "Status\"\371\001\n\rDevWorkStatus\022\022\n\nsStationId\030\001"
+    " \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010sDevName\030\003 \001(\t\022\020"
+    "\n\010eDevType\030\004 \001(\005\0220\n\013eWorkStatus\030\005 \001(\0162\033."
+    "DevWorkStatus.e_WorkStatus\"n\n\014e_WorkStat"
+    "us\022\n\n\006RUNING\020\000\022\014\n\010SHUTDOWN\020\001\022\020\n\014ANTENNA_"
+    "HOST\020\002\022\022\n\016ANTENNA_BACKUP\020\003\022\r\n\tDETECTING\020"
+    "\004\022\017\n\013DEV_UNKNOWN\020\005\"@\n\023DevWorkStatusNotif"
+    "y\022)\n\021cDevCurWorkStatus\030\001 \003(\0132\016.DevWorkSt"
+    "atus\"\235\002\n\016DevAlarmStatus\022\022\n\nsStationId\030\001 "
+    "\002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010sDevName\030\003 \001(\t\022\020\n"
+    "\010eDevType\030\004 \001(\005\022\023\n\013nAlarmCount\030\005 \001(\005\0221\n\n"
+    "cCellAlarm\030\006 \003(\0132\035.DevAlarmStatus.eCellA"
+    "larmMsg\032{\n\reCellAlarmMsg\022\017\n\007sCellId\030\001 \002("
+    "\t\022\021\n\tsCellName\030\002 \001(\t\022#\n\013cCellStatus\030\003 \001("
+    "\0162\016.e_AlarmStatus\022\022\n\nsStartTime\030\004 \001(\t\022\r\n"
+    "\005sDesp\030\005 \001(\t\"C\n\024DevAlarmStatusNotify\022+\n\022"
+    "cDevCurAlarmStatus\030\001 \003(\0132\017.DevAlarmStatu"
+    "s\"-\n\010LoginReq\022\020\n\010sUsrName\030\001 \001(\t\022\017\n\007sUsrP"
+    "sw\030\002 \001(\t\"^\n\013HandOverReq\022\023\n\013sCurUsrName\030\001"
+    " \001(\t\022\023\n\013sNewUsrName\030\002 \001(\t\022\022\n\nsNewUsrPsw\030"
+    "\003 \001(\t\022\021\n\tsContents\030\004 \001(\t\"D\n\nDutyLogReq\022\025"
+    "\n\rsCurUsrNumber\030\001 \001(\t\022\020\n\010sContent\030\002 \001(\t\022"
+    "\r\n\005nType\030\003 \001(\005\"+\n\nDutyLogAck\022\035\n\007eResult\030"
+    "\001 \001(\0162\014.e_ErrorCode\"\226\001\n\016UserSigninInfo\022\021"
+    "\n\teUsrLevel\030\001 \001(\005\022\021\n\tUsrNumber\030\002 \001(\t\022\017\n\007"
+    "UsrName\030\003 \001(\t\022\024\n\014UsrJobNumber\030\004 \001(\t\022\023\n\013U"
+    "srHeadship\030\005 \001(\t\022\016\n\006UsrPsw\030\006 \001(\t\022\022\n\nSign"
+    "InTime\030\007 \001(\t\"l\n\010UserInfo\022\021\n\teUsrLevel\030\001 "
+    "\001(\005\022\021\n\tUsrNumber\030\002 \001(\t\022\017\n\007UsrName\030\003 \001(\t\022"
+    "\024\n\014UsrJobNumber\030\004 \001(\t\022\023\n\013UsrHeadship\030\005 \001"
+    "(\t\"\340\002\n\010LoginAck\022\035\n\007eResult\030\001 \001(\0162\014.e_Err"
+    "orCode\022\021\n\teUsrLevel\030\002 \001(\005\022\021\n\tUsrNumber\030\003"
+    " \001(\t\022\017\n\007UsrName\030\004 \001(\t\022\024\n\014UsrJobNumber\030\005 "
+    "\001(\t\022\023\n\013UsrHeadship\030\006 \001(\t\022\'\n\020cDevCurNetSt"
+    "atus\030\007 \003(\0132\r.DevNetStatus\022)\n\021cDevCurWork"
+    "Status\030\010 \003(\0132\016.DevWorkStatus\022+\n\022cDevCurA"
+    "larmStatus\030\t \003(\0132\017.DevAlarmStatus\022\016\n\006Usr"
+    "Psw\030\n \001(\t\022\"\n\tSignUsers\030\013 \003(\0132\017.UserSigni"
+    "nInfo\022\036\n\013AllUserInfo\030\014 \003(\0132\t.UserInfo\"I\n"
+    "\014SignInOutReq\022\020\n\010IsSignIn\030\001 \001(\005\022\023\n\013sSign"
+    "InName\030\002 \001(\t\022\022\n\nsSignInPsw\030\003 \001(\t\"d\n\014Sign"
+    "InOutAck\022\020\n\010IsSignIn\030\001 \001(\005\022\035\n\007eResult\030\002 "
+    "\001(\0162\014.e_ErrorCode\022#\n\ncUsersInfo\030\003 \001(\0132\017."
+    "UserSigninInfo\"=\n\023StationWorkingState\022\026\n"
+    "\016sStationNumber\030\001 \001(\t\022\016\n\006nState\030\002 \001(\005\".\n"
+    "\026CheckStationWorkingReq\022\024\n\014sChildNumber\030"
+    "\001 \003(\t\")\n\026CheckStationWorkingAck\022\017\n\007nResu"
+    "lt\030\001 \001(\005\"m\n\032CheackStationWorkingNotify\022\017"
+    "\n\007nResult\030\001 \001(\005\022\023\n\013sUserNumber\030\002 \001(\t\022\021\n\t"
+    "sUserName\030\003 \001(\t\022\026\n\016sStationNumber\030\004 \001(\t\""
+    ".\n\tLogoutReq\022\020\n\010sUsrName\030\001 \001(\t\022\017\n\007sUsrPs"
+    "w\030\002 \001(\t\"*\n\tLogoutAck\022\035\n\007eResult\030\001 \001(\0162\014."
+    "e_ErrorCode\"c\n\014TurnOnDevMsg\022\022\n\nsStationI"
+    "d\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\034\n\010eDevType\030\003 \001("
+    "\0162\n.e_DevType\022\021\n\tsOperUser\030\004 \001(\t\"d\n\rTurn"
+    "OffDevMsg\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030"
+    "\002 \002(\t\022\034\n\010eDevType\030\003 \001(\0162\n.e_DevType\022\021\n\ts"
+    "OperUser\030\004 \001(\t\"7\n\014CommandParam\022\022\n\nsParam"
+    "Name\030\001 \001(\t\022\023\n\013sParamValue\030\002 \001(\t\"\231\001\n\020Devi"
+    "ceCommandMsg\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDev"
+    "Id\030\002 \002(\t\022\020\n\010sDevName\030\003 \001(\t\022\034\n\010eDevType\030\004"
+    " \001(\0162\n.e_DevType\022\021\n\tsOperUser\030\005 \001(\t\022\036\n\007c"
+    "Params\030\006 \003(\0132\r.CommandParam\"\302\001\n\031DeviceCo"
+    "mmandResultNotify\022\022\n\nsStationId\030\001 \002(\t\022\016\n"
+    "\006sDevId\030\002 \002(\t\022\034\n\010eDevType\030\003 \001(\0162\n.e_DevT"
+    "ype\022\020\n\010sDevName\030\004 \001(\t\022\036\n\010eErrorId\030\005 \001(\0162"
+    "\014.e_ErrorCode\022\021\n\tsOperUser\030\006 \001(\t\022\036\n\007cPar"
+    "ams\030\007 \003(\0132\r.CommandParam*\315\003\n\013e_ErrorCode"
+    "\022\t\n\005EC_OK\020\000\022\r\n\tEC_FAILED\020\001\022\024\n\020EC_USR_NOT"
+    "_FOUND\020\002\022\031\n\025EC_USR_NOT_PERMISSION\020\003\022\024\n\020E"
+    "C_USR_PSW_ERROR\020\004\022\027\n\023EC_USR_REPEAT_LOGIN"
+    "\020\005\022\020\n\014EC_NET_ERROR\020\006\022\024\n\020EC_LOGOUT_FAILED"
+    "\020\007\022\027\n\023EC_CONFIGREQ_FAILED\020\010\022\024\n\020EC_TURNON"
+    "_FAILED\020\t\022\025\n\021EC_TURNOFF_FAILED\020\n\022\032\n\026EC_A"
+    "NTENNA_HTOB_FAILED\020\013\022\032\n\026EC_ANTENNA_BTOH_"
+    "FAILED\020\014\022\027\n\023EC_DEVICE_NOT_FOUND\020\r\022\022\n\016EC_"
+    "OBJECT_NULL\020\016\022\023\n\017EC_OPR_ON_GOING\020\017\022\032\n\026EC"
+    "_SEND_SMS_MSG_FAILED\020\020\022\027\n\023EC_DEV_DISCONN"
+    "ECTED\020\021\022\027\n\023EC_CMD_SEND_SUCCEED\020\022\022\016\n\nEC_U"
+    "NKNOWN\020\023*%\n\ne_CellType\022\013\n\007DIGITAL\020\000\022\n\n\006A"
+    "NALOG\020\001*s\n\te_DevType\022\017\n\013TRANSMITTER\020\000\022\013\n"
+    "\007ANTENNA\020\001\022\014\n\010ELCPOWER\020\002\022\t\n\005ENVIR\020\003\022\014\n\010S"
+    "ECURITY\020\004\022\t\n\005AUDIO\020\005\022\013\n\007PROGRAM\020\006\022\t\n\005VID"
+    "EO\020\007*b\n\re_AlarmStatus\022\t\n\005UPPER\020\000\022\n\n\006UPUP"
+    "ER\020\001\022\t\n\005LOWER\020\002\022\014\n\010LOWLOWER\020\003\022\t\n\005STATE\020\004"
+    "\022\n\n\006DEVICE\020\005\022\n\n\006RESUME\020\006", 3944);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
   DevDataNotify::default_instance_ = new DevDataNotify();
@@ -1027,6 +1028,8 @@ bool e_AlarmStatus_IsValid(int value) {
     case 2:
     case 3:
     case 4:
+    case 5:
+    case 6:
       return true;
     default:
       return false;
@@ -1650,19 +1653,14 @@ bool DevDataNotify::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .e_DevType eDevType = 4;
+      // optional int32 eDevType = 4;
       case 4: {
         if (tag == 32) {
          parse_eDevType:
-          int value;
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
-                 input, &value)));
-          if (::e_DevType_IsValid(value)) {
-            set_edevtype(static_cast< ::e_DevType >(value));
-          } else {
-            mutable_unknown_fields()->AddVarint(4, value);
-          }
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &edevtype_)));
+          set_has_edevtype();
         } else {
           goto handle_unusual;
         }
@@ -1739,10 +1737,9 @@ void DevDataNotify::SerializeWithCachedSizes(
       3, this->sdevname(), output);
   }
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   if (has_edevtype()) {
-    ::google::protobuf::internal::WireFormatLite::WriteEnum(
-      4, this->edevtype(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->edevtype(), output);
   }
 
   // repeated .DevDataNotify.eCellMsg cCellData = 5;
@@ -1794,10 +1791,9 @@ void DevDataNotify::SerializeWithCachedSizes(
         3, this->sdevname(), target);
   }
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   if (has_edevtype()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
-      4, this->edevtype(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->edevtype(), target);
   }
 
   // repeated .DevDataNotify.eCellMsg cCellData = 5;
@@ -1840,10 +1836,11 @@ int DevDataNotify::ByteSize() const {
           this->sdevname());
     }
 
-    // optional .e_DevType eDevType = 4;
+    // optional int32 eDevType = 4;
     if (has_edevtype()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::EnumSize(this->edevtype());
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->edevtype());
     }
 
   }
@@ -2136,19 +2133,14 @@ bool DevNetStatus::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .e_DevType eDevType = 4;
+      // optional int32 eDevType = 4;
       case 4: {
         if (tag == 32) {
          parse_eDevType:
-          int value;
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
-                 input, &value)));
-          if (::e_DevType_IsValid(value)) {
-            set_edevtype(static_cast< ::e_DevType >(value));
-          } else {
-            mutable_unknown_fields()->AddVarint(4, value);
-          }
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &edevtype_)));
+          set_has_edevtype();
         } else {
           goto handle_unusual;
         }
@@ -2231,10 +2223,9 @@ void DevNetStatus::SerializeWithCachedSizes(
       3, this->sdevname(), output);
   }
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   if (has_edevtype()) {
-    ::google::protobuf::internal::WireFormatLite::WriteEnum(
-      4, this->edevtype(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->edevtype(), output);
   }
 
   // optional .DevNetStatus.e_NetStatus eNetStatus = 5;
@@ -2286,10 +2277,9 @@ void DevNetStatus::SerializeWithCachedSizes(
         3, this->sdevname(), target);
   }
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   if (has_edevtype()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
-      4, this->edevtype(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->edevtype(), target);
   }
 
   // optional .DevNetStatus.e_NetStatus eNetStatus = 5;
@@ -2331,10 +2321,11 @@ int DevNetStatus::ByteSize() const {
           this->sdevname());
     }
 
-    // optional .e_DevType eDevType = 4;
+    // optional int32 eDevType = 4;
     if (has_edevtype()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::EnumSize(this->edevtype());
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->edevtype());
     }
 
     // optional .DevNetStatus.e_NetStatus eNetStatus = 5;
@@ -2852,19 +2843,14 @@ bool DevWorkStatus::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .e_DevType eDevType = 4;
+      // optional int32 eDevType = 4;
       case 4: {
         if (tag == 32) {
          parse_eDevType:
-          int value;
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
-                 input, &value)));
-          if (::e_DevType_IsValid(value)) {
-            set_edevtype(static_cast< ::e_DevType >(value));
-          } else {
-            mutable_unknown_fields()->AddVarint(4, value);
-          }
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &edevtype_)));
+          set_has_edevtype();
         } else {
           goto handle_unusual;
         }
@@ -2947,10 +2933,9 @@ void DevWorkStatus::SerializeWithCachedSizes(
       3, this->sdevname(), output);
   }
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   if (has_edevtype()) {
-    ::google::protobuf::internal::WireFormatLite::WriteEnum(
-      4, this->edevtype(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->edevtype(), output);
   }
 
   // optional .DevWorkStatus.e_WorkStatus eWorkStatus = 5;
@@ -3002,10 +2987,9 @@ void DevWorkStatus::SerializeWithCachedSizes(
         3, this->sdevname(), target);
   }
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   if (has_edevtype()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
-      4, this->edevtype(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->edevtype(), target);
   }
 
   // optional .DevWorkStatus.e_WorkStatus eWorkStatus = 5;
@@ -3047,10 +3031,11 @@ int DevWorkStatus::ByteSize() const {
           this->sdevname());
     }
 
-    // optional .e_DevType eDevType = 4;
+    // optional int32 eDevType = 4;
     if (has_edevtype()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::EnumSize(this->edevtype());
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->edevtype());
     }
 
     // optional .DevWorkStatus.e_WorkStatus eWorkStatus = 5;
@@ -3372,6 +3357,7 @@ const int DevAlarmStatus_eCellAlarmMsg::kSCellIdFieldNumber;
 const int DevAlarmStatus_eCellAlarmMsg::kSCellNameFieldNumber;
 const int DevAlarmStatus_eCellAlarmMsg::kCCellStatusFieldNumber;
 const int DevAlarmStatus_eCellAlarmMsg::kSStartTimeFieldNumber;
+const int DevAlarmStatus_eCellAlarmMsg::kSDespFieldNumber;
 #endif  // !_MSC_VER
 
 DevAlarmStatus_eCellAlarmMsg::DevAlarmStatus_eCellAlarmMsg()
@@ -3397,6 +3383,7 @@ void DevAlarmStatus_eCellAlarmMsg::SharedCtor() {
   scellname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ccellstatus_ = 0;
   sstarttime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  sdesp_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -3414,6 +3401,9 @@ void DevAlarmStatus_eCellAlarmMsg::SharedDtor() {
   }
   if (sstarttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete sstarttime_;
+  }
+  if (sdesp_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sdesp_;
   }
   if (this != default_instance_) {
   }
@@ -3441,7 +3431,7 @@ DevAlarmStatus_eCellAlarmMsg* DevAlarmStatus_eCellAlarmMsg::New() const {
 }
 
 void DevAlarmStatus_eCellAlarmMsg::Clear() {
-  if (_has_bits_[0 / 32] & 15) {
+  if (_has_bits_[0 / 32] & 31) {
     if (has_scellid()) {
       if (scellid_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         scellid_->clear();
@@ -3456,6 +3446,11 @@ void DevAlarmStatus_eCellAlarmMsg::Clear() {
     if (has_sstarttime()) {
       if (sstarttime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         sstarttime_->clear();
+      }
+    }
+    if (has_sdesp()) {
+      if (sdesp_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        sdesp_->clear();
       }
     }
   }
@@ -3539,6 +3534,23 @@ bool DevAlarmStatus_eCellAlarmMsg::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(42)) goto parse_sDesp;
+        break;
+      }
+
+      // optional string sDesp = 5;
+      case 5: {
+        if (tag == 42) {
+         parse_sDesp:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_sdesp()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->sdesp().data(), this->sdesp().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "sdesp");
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -3604,6 +3616,16 @@ void DevAlarmStatus_eCellAlarmMsg::SerializeWithCachedSizes(
       4, this->sstarttime(), output);
   }
 
+  // optional string sDesp = 5;
+  if (has_sdesp()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sdesp().data(), this->sdesp().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sdesp");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      5, this->sdesp(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -3653,6 +3675,17 @@ void DevAlarmStatus_eCellAlarmMsg::SerializeWithCachedSizes(
         4, this->sstarttime(), target);
   }
 
+  // optional string sDesp = 5;
+  if (has_sdesp()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sdesp().data(), this->sdesp().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sdesp");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        5, this->sdesp(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -3690,6 +3723,13 @@ int DevAlarmStatus_eCellAlarmMsg::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->sstarttime());
+    }
+
+    // optional string sDesp = 5;
+    if (has_sdesp()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->sdesp());
     }
 
   }
@@ -3731,6 +3771,9 @@ void DevAlarmStatus_eCellAlarmMsg::MergeFrom(const DevAlarmStatus_eCellAlarmMsg&
     if (from.has_sstarttime()) {
       set_sstarttime(from.sstarttime());
     }
+    if (from.has_sdesp()) {
+      set_sdesp(from.sdesp());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -3759,6 +3802,7 @@ void DevAlarmStatus_eCellAlarmMsg::Swap(DevAlarmStatus_eCellAlarmMsg* other) {
     std::swap(scellname_, other->scellname_);
     std::swap(ccellstatus_, other->ccellstatus_);
     std::swap(sstarttime_, other->sstarttime_);
+    std::swap(sdesp_, other->sdesp_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -3950,19 +3994,14 @@ bool DevAlarmStatus::MergePartialFromCodedStream(
         break;
       }
 
-      // optional .e_DevType eDevType = 4;
+      // optional int32 eDevType = 4;
       case 4: {
         if (tag == 32) {
          parse_eDevType:
-          int value;
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
-                 input, &value)));
-          if (::e_DevType_IsValid(value)) {
-            set_edevtype(static_cast< ::e_DevType >(value));
-          } else {
-            mutable_unknown_fields()->AddVarint(4, value);
-          }
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &edevtype_)));
+          set_has_edevtype();
         } else {
           goto handle_unusual;
         }
@@ -4054,10 +4093,9 @@ void DevAlarmStatus::SerializeWithCachedSizes(
       3, this->sdevname(), output);
   }
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   if (has_edevtype()) {
-    ::google::protobuf::internal::WireFormatLite::WriteEnum(
-      4, this->edevtype(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->edevtype(), output);
   }
 
   // optional int32 nAlarmCount = 5;
@@ -4114,10 +4152,9 @@ void DevAlarmStatus::SerializeWithCachedSizes(
         3, this->sdevname(), target);
   }
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   if (has_edevtype()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
-      4, this->edevtype(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->edevtype(), target);
   }
 
   // optional int32 nAlarmCount = 5;
@@ -4165,10 +4202,11 @@ int DevAlarmStatus::ByteSize() const {
           this->sdevname());
     }
 
-    // optional .e_DevType eDevType = 4;
+    // optional int32 eDevType = 4;
     if (has_edevtype()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::EnumSize(this->edevtype());
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->edevtype());
     }
 
     // optional int32 nAlarmCount = 5;

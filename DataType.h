@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include "StructDef.h"
+#include "DataTypeDefine.h"
 #include <boost/shared_ptr.hpp>
 using namespace std;
 

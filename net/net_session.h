@@ -78,29 +78,29 @@ namespace hx_net
 		virtual	bool  sendMessage(e_MsgType _type,googleMsgPtr gMsgPtr);
 		virtual bool sendRawMessage(unsigned char * data_,int nDatalen){return false;};
 		//打包发送实时多媒体数据（汇鑫760音频）
-		virtual void send_monitor_data_message(string sStationid,string sDevid,e_DevType devType,
-			                                   unchar_ptr curData,DevParamerMonitorItem &mapMonitorItem);
+        virtual void send_monitor_data_message(string sStationid,string sDevid,int devType,
+                                               unchar_ptr curData,DeviceMonitorItem &mapMonitorItem);
 		//打包发送媒体数据
-		virtual void send_monitor_data_message_ex(string sStationid,string sDevid,e_DevType devType,
-								unsigned char *curData,int nDataLen,DevParamerMonitorItem &mapMonitorItem);
+        virtual void send_monitor_data_message_ex(string sStationid,string sDevid,int devType,
+                                unsigned char *curData,int nDataLen,DeviceMonitorItem &mapMonitorItem);
 		//发送实时数据消息
-		virtual void send_monitor_data_message(string sStationid,string sDevid,e_DevType devType,
-			                                   DevMonitorDataPtr curData,map<int,DevParamerMonitorItem> &mapMonitorItem);
+        virtual void send_monitor_data_message(string sStationid,string sDevid,int devType,
+                                               DevMonitorDataPtr curData,map<int,DeviceMonitorItem> &mapMonitorItem);
 		virtual void send_data_to_client(string sDevid,DevMonitorDataPtr curData){};
 		//打包发送设备连接状态消息
-		virtual void send_net_state_message(string sStationid,string sDevid,string sDevName,e_DevType devType,
+        virtual void send_net_state_message(string sStationid,string sDevid,string sDevName,int devType,
 			                                con_state netState);
 		//打包发送设备工作状态消息
-		virtual void send_work_state_message(string sStationid,string sDevid,string sDevName,e_DevType devType,
+        virtual void send_work_state_message(string sStationid,string sDevid,string sDevName,int devType,
 			                                 dev_run_state runState);
 		//打包发送设备报警状态消息
-		virtual void send_alarm_state_message(string sStationid,string sDevid,string sDevName,
-											  int nCellId,string sCellName,e_DevType devType,dev_alarm_state alarmState,
-											  string sStartTime,int alarmCount);
+        virtual void send_alarm_state_message(string sStationid,string sDevid,string sDevName,
+                                              int nCellId,string sCellName,e_DevType devType,int alarmState,
+                                              string sStartTime,int alarmCount);//
 		//打包发送命令执行结果
-		virtual void send_command_execute_result_message(string sStationid,string sDevid,e_DevType devType,string sDevName,
+        virtual void send_command_execute_result_message(string sStationid,string sDevid,int devType,string sDevName,
 						                                 string sUsrName,e_MsgType nMsgType,e_ErrorCode eResult);
-		virtual void excute_result_notify(string sDevId,e_DevType nDevType,e_MsgType oprType,int nResult){};
+        virtual void excute_result_notify(string sDevId,int nDevType,e_MsgType oprType,int nResult){};
 		//判断是否发短信与打电话
 		void sendSmsAndCallPhone(int nAlarmLevel,string sContent);
 		//开始处理监测数据

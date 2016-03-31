@@ -51,7 +51,9 @@ SOURCES += main.cpp\
     utility.cpp \
     protocol/bohui_protocol.cpp \
     database/DataBaseOperation.cpp \
-    net/net_session.cpp
+    net/net_session.cpp \
+    net/client/http_request_session.cpp \
+    net/client/urdl.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -109,11 +111,13 @@ HEADERS  += \
     protocol/bohui_const_define.h \
     DataTypeDefine.h \
     database/DataBaseOperation.h \
-    net/net_session.h
+    net/net_session.h \
+    net/client/http_request_session.h
 
 FORMS    += mainwindow.ui
 
 DEFINES+=BOOST_NETWORK_NO_LIB
+DEFINES+=URDL_DISABLE_SSL
 
 linux-g++ {
 
@@ -131,6 +135,7 @@ LIBS += /usr/local/protobuf-2.6.1/ubuntu_build/lib/libprotoc.a
 LIBS += /usr/local/protobuf-2.6.1/ubuntu_build/lib/libprotobuf-lite.a
 INCLUDEPATH += /usr/local/postgresql_ubuntu_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/ubuntu_build/include
+INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
 }
 else: {
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_system-mt.a
@@ -147,6 +152,7 @@ LIBS += /usr/local/protobuf-2.6.1/arm_build/lib/libprotoc.a
 LIBS += /usr/local/protobuf-2.6.1/arm_build/lib/libprotobuf-lite.a
 INCLUDEPATH += /usr/local/postgresql_arm_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/arm_build/include
+INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
 }
 INCLUDEPATH += /usr/local/boost_1_48_0
 

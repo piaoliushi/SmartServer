@@ -188,14 +188,16 @@ inline bool e_DevType_Parse(
 }
 enum e_AlarmStatus {
   UPPER = 0,
-  LOWER = 1,
-  STATE = 2,
-  RESUME = 3,
-  DEVICE = 4
+  UPUPER = 1,
+  LOWER = 2,
+  LOWLOWER = 3,
+  STATE = 4,
+  DEVICE = 5,
+  RESUME = 6
 };
 bool e_AlarmStatus_IsValid(int value);
 const e_AlarmStatus e_AlarmStatus_MIN = UPPER;
-const e_AlarmStatus e_AlarmStatus_MAX = DEVICE;
+const e_AlarmStatus e_AlarmStatus_MAX = RESUME;
 const int e_AlarmStatus_ARRAYSIZE = e_AlarmStatus_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* e_AlarmStatus_descriptor();
@@ -440,12 +442,12 @@ class DevDataNotify : public ::google::protobuf::Message {
   inline ::std::string* release_sdevname();
   inline void set_allocated_sdevname(::std::string* sdevname);
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   inline bool has_edevtype() const;
   inline void clear_edevtype();
   static const int kEDevTypeFieldNumber = 4;
-  inline ::e_DevType edevtype() const;
-  inline void set_edevtype(::e_DevType value);
+  inline ::google::protobuf::int32 edevtype() const;
+  inline void set_edevtype(::google::protobuf::int32 value);
 
   // repeated .DevDataNotify.eCellMsg cCellData = 5;
   inline int ccelldata_size() const;
@@ -478,7 +480,7 @@ class DevDataNotify : public ::google::protobuf::Message {
   ::std::string* sdevid_;
   ::std::string* sdevname_;
   ::google::protobuf::RepeatedPtrField< ::DevDataNotify_eCellMsg > ccelldata_;
-  int edevtype_;
+  ::google::protobuf::int32 edevtype_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
   friend void protobuf_ShutdownFile_protocol_2eproto();
@@ -602,12 +604,12 @@ class DevNetStatus : public ::google::protobuf::Message {
   inline ::std::string* release_sdevname();
   inline void set_allocated_sdevname(::std::string* sdevname);
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   inline bool has_edevtype() const;
   inline void clear_edevtype();
   static const int kEDevTypeFieldNumber = 4;
-  inline ::e_DevType edevtype() const;
-  inline void set_edevtype(::e_DevType value);
+  inline ::google::protobuf::int32 edevtype() const;
+  inline void set_edevtype(::google::protobuf::int32 value);
 
   // optional .DevNetStatus.e_NetStatus eNetStatus = 5;
   inline bool has_enetstatus() const;
@@ -636,7 +638,7 @@ class DevNetStatus : public ::google::protobuf::Message {
   ::std::string* sstationid_;
   ::std::string* sdevid_;
   ::std::string* sdevname_;
-  int edevtype_;
+  ::google::protobuf::int32 edevtype_;
   int enetstatus_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
@@ -846,12 +848,12 @@ class DevWorkStatus : public ::google::protobuf::Message {
   inline ::std::string* release_sdevname();
   inline void set_allocated_sdevname(::std::string* sdevname);
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   inline bool has_edevtype() const;
   inline void clear_edevtype();
   static const int kEDevTypeFieldNumber = 4;
-  inline ::e_DevType edevtype() const;
-  inline void set_edevtype(::e_DevType value);
+  inline ::google::protobuf::int32 edevtype() const;
+  inline void set_edevtype(::google::protobuf::int32 value);
 
   // optional .DevWorkStatus.e_WorkStatus eWorkStatus = 5;
   inline bool has_eworkstatus() const;
@@ -880,7 +882,7 @@ class DevWorkStatus : public ::google::protobuf::Message {
   ::std::string* sstationid_;
   ::std::string* sdevid_;
   ::std::string* sdevname_;
-  int edevtype_;
+  ::google::protobuf::int32 edevtype_;
   int eworkstatus_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
@@ -1069,6 +1071,18 @@ class DevAlarmStatus_eCellAlarmMsg : public ::google::protobuf::Message {
   inline ::std::string* release_sstarttime();
   inline void set_allocated_sstarttime(::std::string* sstarttime);
 
+  // optional string sDesp = 5;
+  inline bool has_sdesp() const;
+  inline void clear_sdesp();
+  static const int kSDespFieldNumber = 5;
+  inline const ::std::string& sdesp() const;
+  inline void set_sdesp(const ::std::string& value);
+  inline void set_sdesp(const char* value);
+  inline void set_sdesp(const char* value, size_t size);
+  inline ::std::string* mutable_sdesp();
+  inline ::std::string* release_sdesp();
+  inline void set_allocated_sdesp(::std::string* sdesp);
+
   // @@protoc_insertion_point(class_scope:DevAlarmStatus.eCellAlarmMsg)
  private:
   inline void set_has_scellid();
@@ -1079,6 +1093,8 @@ class DevAlarmStatus_eCellAlarmMsg : public ::google::protobuf::Message {
   inline void clear_has_ccellstatus();
   inline void set_has_sstarttime();
   inline void clear_has_sstarttime();
+  inline void set_has_sdesp();
+  inline void clear_has_sdesp();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1087,6 +1103,7 @@ class DevAlarmStatus_eCellAlarmMsg : public ::google::protobuf::Message {
   ::std::string* scellid_;
   ::std::string* scellname_;
   ::std::string* sstarttime_;
+  ::std::string* sdesp_;
   int ccellstatus_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
@@ -1188,12 +1205,12 @@ class DevAlarmStatus : public ::google::protobuf::Message {
   inline ::std::string* release_sdevname();
   inline void set_allocated_sdevname(::std::string* sdevname);
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   inline bool has_edevtype() const;
   inline void clear_edevtype();
   static const int kEDevTypeFieldNumber = 4;
-  inline ::e_DevType edevtype() const;
-  inline void set_edevtype(::e_DevType value);
+  inline ::google::protobuf::int32 edevtype() const;
+  inline void set_edevtype(::google::protobuf::int32 value);
 
   // optional int32 nAlarmCount = 5;
   inline bool has_nalarmcount() const;
@@ -1234,7 +1251,7 @@ class DevAlarmStatus : public ::google::protobuf::Message {
   ::std::string* sstationid_;
   ::std::string* sdevid_;
   ::std::string* sdevname_;
-  int edevtype_;
+  ::google::protobuf::int32 edevtype_;
   ::google::protobuf::int32 nalarmcount_;
   ::google::protobuf::RepeatedPtrField< ::DevAlarmStatus_eCellAlarmMsg > ccellalarm_;
   friend void  protobuf_AddDesc_protocol_2eproto();
@@ -4279,7 +4296,7 @@ inline void DevDataNotify::set_allocated_sdevname(::std::string* sdevname) {
   // @@protoc_insertion_point(field_set_allocated:DevDataNotify.sDevName)
 }
 
-// optional .e_DevType eDevType = 4;
+// optional int32 eDevType = 4;
 inline bool DevDataNotify::has_edevtype() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -4293,12 +4310,11 @@ inline void DevDataNotify::clear_edevtype() {
   edevtype_ = 0;
   clear_has_edevtype();
 }
-inline ::e_DevType DevDataNotify::edevtype() const {
+inline ::google::protobuf::int32 DevDataNotify::edevtype() const {
   // @@protoc_insertion_point(field_get:DevDataNotify.eDevType)
-  return static_cast< ::e_DevType >(edevtype_);
+  return edevtype_;
 }
-inline void DevDataNotify::set_edevtype(::e_DevType value) {
-  assert(::e_DevType_IsValid(value));
+inline void DevDataNotify::set_edevtype(::google::protobuf::int32 value) {
   set_has_edevtype();
   edevtype_ = value;
   // @@protoc_insertion_point(field_set:DevDataNotify.eDevType)
@@ -4566,7 +4582,7 @@ inline void DevNetStatus::set_allocated_sdevname(::std::string* sdevname) {
   // @@protoc_insertion_point(field_set_allocated:DevNetStatus.sDevName)
 }
 
-// optional .e_DevType eDevType = 4;
+// optional int32 eDevType = 4;
 inline bool DevNetStatus::has_edevtype() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -4580,12 +4596,11 @@ inline void DevNetStatus::clear_edevtype() {
   edevtype_ = 0;
   clear_has_edevtype();
 }
-inline ::e_DevType DevNetStatus::edevtype() const {
+inline ::google::protobuf::int32 DevNetStatus::edevtype() const {
   // @@protoc_insertion_point(field_get:DevNetStatus.eDevType)
-  return static_cast< ::e_DevType >(edevtype_);
+  return edevtype_;
 }
-inline void DevNetStatus::set_edevtype(::e_DevType value) {
-  assert(::e_DevType_IsValid(value));
+inline void DevNetStatus::set_edevtype(::google::protobuf::int32 value) {
   set_has_edevtype();
   edevtype_ = value;
   // @@protoc_insertion_point(field_set:DevNetStatus.eDevType)
@@ -4882,7 +4897,7 @@ inline void DevWorkStatus::set_allocated_sdevname(::std::string* sdevname) {
   // @@protoc_insertion_point(field_set_allocated:DevWorkStatus.sDevName)
 }
 
-// optional .e_DevType eDevType = 4;
+// optional int32 eDevType = 4;
 inline bool DevWorkStatus::has_edevtype() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -4896,12 +4911,11 @@ inline void DevWorkStatus::clear_edevtype() {
   edevtype_ = 0;
   clear_has_edevtype();
 }
-inline ::e_DevType DevWorkStatus::edevtype() const {
+inline ::google::protobuf::int32 DevWorkStatus::edevtype() const {
   // @@protoc_insertion_point(field_get:DevWorkStatus.eDevType)
-  return static_cast< ::e_DevType >(edevtype_);
+  return edevtype_;
 }
-inline void DevWorkStatus::set_edevtype(::e_DevType value) {
-  assert(::e_DevType_IsValid(value));
+inline void DevWorkStatus::set_edevtype(::google::protobuf::int32 value) {
   set_has_edevtype();
   edevtype_ = value;
   // @@protoc_insertion_point(field_set:DevWorkStatus.eDevType)
@@ -5223,6 +5237,82 @@ inline void DevAlarmStatus_eCellAlarmMsg::set_allocated_sstarttime(::std::string
   // @@protoc_insertion_point(field_set_allocated:DevAlarmStatus.eCellAlarmMsg.sStartTime)
 }
 
+// optional string sDesp = 5;
+inline bool DevAlarmStatus_eCellAlarmMsg::has_sdesp() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void DevAlarmStatus_eCellAlarmMsg::set_has_sdesp() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void DevAlarmStatus_eCellAlarmMsg::clear_has_sdesp() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void DevAlarmStatus_eCellAlarmMsg::clear_sdesp() {
+  if (sdesp_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sdesp_->clear();
+  }
+  clear_has_sdesp();
+}
+inline const ::std::string& DevAlarmStatus_eCellAlarmMsg::sdesp() const {
+  // @@protoc_insertion_point(field_get:DevAlarmStatus.eCellAlarmMsg.sDesp)
+  return *sdesp_;
+}
+inline void DevAlarmStatus_eCellAlarmMsg::set_sdesp(const ::std::string& value) {
+  set_has_sdesp();
+  if (sdesp_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sdesp_ = new ::std::string;
+  }
+  sdesp_->assign(value);
+  // @@protoc_insertion_point(field_set:DevAlarmStatus.eCellAlarmMsg.sDesp)
+}
+inline void DevAlarmStatus_eCellAlarmMsg::set_sdesp(const char* value) {
+  set_has_sdesp();
+  if (sdesp_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sdesp_ = new ::std::string;
+  }
+  sdesp_->assign(value);
+  // @@protoc_insertion_point(field_set_char:DevAlarmStatus.eCellAlarmMsg.sDesp)
+}
+inline void DevAlarmStatus_eCellAlarmMsg::set_sdesp(const char* value, size_t size) {
+  set_has_sdesp();
+  if (sdesp_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sdesp_ = new ::std::string;
+  }
+  sdesp_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:DevAlarmStatus.eCellAlarmMsg.sDesp)
+}
+inline ::std::string* DevAlarmStatus_eCellAlarmMsg::mutable_sdesp() {
+  set_has_sdesp();
+  if (sdesp_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sdesp_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:DevAlarmStatus.eCellAlarmMsg.sDesp)
+  return sdesp_;
+}
+inline ::std::string* DevAlarmStatus_eCellAlarmMsg::release_sdesp() {
+  clear_has_sdesp();
+  if (sdesp_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = sdesp_;
+    sdesp_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void DevAlarmStatus_eCellAlarmMsg::set_allocated_sdesp(::std::string* sdesp) {
+  if (sdesp_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sdesp_;
+  }
+  if (sdesp) {
+    set_has_sdesp();
+    sdesp_ = sdesp;
+  } else {
+    clear_has_sdesp();
+    sdesp_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:DevAlarmStatus.eCellAlarmMsg.sDesp)
+}
+
 // -------------------------------------------------------------------
 
 // DevAlarmStatus
@@ -5455,7 +5545,7 @@ inline void DevAlarmStatus::set_allocated_sdevname(::std::string* sdevname) {
   // @@protoc_insertion_point(field_set_allocated:DevAlarmStatus.sDevName)
 }
 
-// optional .e_DevType eDevType = 4;
+// optional int32 eDevType = 4;
 inline bool DevAlarmStatus::has_edevtype() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -5469,12 +5559,11 @@ inline void DevAlarmStatus::clear_edevtype() {
   edevtype_ = 0;
   clear_has_edevtype();
 }
-inline ::e_DevType DevAlarmStatus::edevtype() const {
+inline ::google::protobuf::int32 DevAlarmStatus::edevtype() const {
   // @@protoc_insertion_point(field_get:DevAlarmStatus.eDevType)
-  return static_cast< ::e_DevType >(edevtype_);
+  return edevtype_;
 }
-inline void DevAlarmStatus::set_edevtype(::e_DevType value) {
-  assert(::e_DevType_IsValid(value));
+inline void DevAlarmStatus::set_edevtype(::google::protobuf::int32 value) {
   set_has_edevtype();
   edevtype_ = value;
   // @@protoc_insertion_point(field_set:DevAlarmStatus.eDevType)

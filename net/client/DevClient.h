@@ -5,6 +5,8 @@
 
 #include "../io_service_pool.h"
 #include "../../qnotifyhandler.h"
+//#include <urdl/read_stream.hpp>
+#include "http_request_session.h"
 using boost::asio::ip::tcp;
 
 namespace hx_net
@@ -85,6 +87,8 @@ namespace hx_net
 		//---------------------------end-----------------------------------------------------//
 		//是否是通过上级平台直连下级平台设备
 		bool is_direct_connect_device(string sStationId,string sDevNumber);
+    protected:
+
 	private:
 		TaskQueue<msgPointer>&         taskwork_;
 		boost::recursive_mutex         device_pool_mutex_;
@@ -97,6 +101,9 @@ namespace hx_net
 //---------------alarm server---------------------------------------//
 		boost::recursive_mutex         alarm_svc_session_mutex_;//告警服务器连接器互斥量
 		session_ptr                    alarm_server_seesion_;   //告警服务连接对象
+
+
+        http_request_session_ptr      http_request_session_ptr_;
 	};
 }
 

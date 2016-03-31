@@ -95,10 +95,10 @@ namespace hx_net
 	}
 	
 	//打包发送实时多媒体数据（汇鑫760音频）
-    void net_session::send_monitor_data_message(string sStationid,string sDevid,e_DevType devType,
-											unchar_ptr curData,DevParamerMonitorItem &mapMonitorItem)
+    void net_session::send_monitor_data_message(string sStationid,string sDevid,int devType,
+                                            unchar_ptr curData,DeviceMonitorItem &mapMonitorItem)
 	{
-		devDataNfyMsgPtr dev_cur_data_ptr(new DevDataNotify);
+        /*devDataNfyMsgPtr dev_cur_data_ptr(new DevDataNotify);
 		dev_cur_data_ptr->set_edevtype(devType);
 		dev_cur_data_ptr->set_sstationid(sStationid);
 		dev_cur_data_ptr->set_sdevid(sDevid);
@@ -130,13 +130,13 @@ namespace hx_net
 				upcell->set_baudiovalue(&curData->at(0),curData->size());
 			}
 		}
-		GetInst(SvcMgr).send_monitor_data_to_client(sStationid,sDevid,dev_cur_data_ptr,dev_cur_data_tosvr_ptr);
+        GetInst(SvcMgr).send_monitor_data_to_client(sStationid,sDevid,dev_cur_data_ptr,dev_cur_data_tosvr_ptr);*/
 	}
 	//打包发送761数据（Mp3）
-    void net_session::send_monitor_data_message_ex(string sStationid,string sDevid,e_DevType devType,
-								unsigned char *curData,int nDataLen,DevParamerMonitorItem &mapMonitorItem)
+    void net_session::send_monitor_data_message_ex(string sStationid,string sDevid,int devType,
+                                unsigned char *curData,int nDataLen,DeviceMonitorItem &mapMonitorItem)
 	{
-		devDataNfyMsgPtr dev_cur_data_ptr(new DevDataNotify);
+        /*devDataNfyMsgPtr dev_cur_data_ptr(new DevDataNotify);
 		dev_cur_data_ptr->set_edevtype(devType);
 		dev_cur_data_ptr->set_sstationid(sStationid);
 		dev_cur_data_ptr->set_sdevid(sDevid);
@@ -166,12 +166,12 @@ namespace hx_net
 				upcell->set_baudiovalue(curData,nDataLen);
 			}
 		}
-		GetInst(SvcMgr).send_monitor_data_to_client(sStationid,sDevid,dev_cur_data_ptr,dev_cur_data_tosvr_ptr);
+        GetInst(SvcMgr).send_monitor_data_to_client(sStationid,sDevid,dev_cur_data_ptr,dev_cur_data_tosvr_ptr);*/
 	}
 
 	//打包发送实时数据消息
-    void net_session::send_monitor_data_message(string sStationid,string sDevid,e_DevType devType,
-											DevMonitorDataPtr curData,map<int,DevParamerMonitorItem> &mapMonitorItem)
+    void net_session::send_monitor_data_message(string sStationid,string sDevid,int devType,
+                                            DevMonitorDataPtr curData,map<int,DeviceMonitorItem> &mapMonitorItem)
 	{
 		devDataNfyMsgPtr dev_cur_data_ptr(new DevDataNotify);
 		dev_cur_data_ptr->set_edevtype(devType);
@@ -187,43 +187,35 @@ namespace hx_net
 			dev_cur_data_tosvr_ptr->set_sdevid(sDevid);
 		}
 
-		map<int,DevParamerMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
+        map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
 		for(;cell_iter!=mapMonitorItem.end();++cell_iter)
 		{
-			int cellId = (*cell_iter).first;
-			
+			int cellId = (*cell_iter).first;			
 			//未更新的监测量
-			if(curData->datainfoBuf[cellId].bUpdate==false)
+            if(curData->mValues[cellId].bUpdate==false)
 				continue;
 
 			DevDataNotify_eCellMsg *cell = dev_cur_data_ptr->add_ccelldata();
-			cell->set_ecelltype((e_CellType)(*cell_iter).second.nMonitoringType);
-			cell->set_scellid(boost::lexical_cast<string>((*cell_iter).second.nMonitoringIndex));
-			cell->set_scellname(QString::fromLocal8Bit((*cell_iter).second.sMonitoringName.c_str()).toUtf8().data());
+            cell->set_ecelltype((e_CellType)(*cell_iter).second.iItemType);
+            cell->set_scellid(boost::lexical_cast<string>((*cell_iter).second.iItemIndex));
+            cell->set_scellname((*cell_iter).second.sItemName.c_str());
 			
-			string  sValue = str(boost::format("%.2f")%curData->datainfoBuf[cellId].fValue);
+            string  sValue = str(boost::format("%.2f")%curData->mValues[cellId].fValue);
 			cell->set_scellvalue(sValue);
 
-			if(dev_cur_data_tosvr_ptr!=0)
-			{
-				if((*cell_iter).second.bIsUpload==true)
-				{
+            if(dev_cur_data_tosvr_ptr!=0){
+                if((*cell_iter).second.bUpload==true){
 					DevDataNotify_eCellMsg *upcell = dev_cur_data_tosvr_ptr->add_ccelldata();
-					upcell->set_ecelltype((e_CellType)(*cell_iter).second.nMonitoringType);
-					upcell->set_scellid(boost::lexical_cast<string>((*cell_iter).second.nMonitoringIndex));
-					upcell->set_scellname(QString::fromLocal8Bit((*cell_iter).second.sMonitoringName.c_str()).toUtf8().data());
-					string  sValue = str(boost::format("%.2f")%curData->datainfoBuf[(*cell_iter).first].fValue);
-					upcell->set_scellvalue(sValue);
+                    upcell->CopyFrom(*cell);
 				}
 			}
-
 		}
 
 		GetInst(SvcMgr).send_monitor_data_to_client(sStationid,sDevid,dev_cur_data_ptr,dev_cur_data_tosvr_ptr);
 	}
 
 	//打包发送设备连接状态消息
-    void net_session::send_net_state_message(string sStationid,string sDevid,string sDevName,e_DevType devType,
+    void net_session::send_net_state_message(string sStationid,string sDevid,string sDevName,int devType,
 		                                 con_state netState)
 	{
 		devNetNfyMsgPtr  dev_net_nfy_ptr(new DevNetStatusNotify);
@@ -237,7 +229,7 @@ namespace hx_net
 		GetInst(SvcMgr).send_dev_net_state_to_client(sStationid,sDevid,dev_net_nfy_ptr);
 	}
 
-    void net_session::send_work_state_message( string sStationid,string sDevid,string sDevName,e_DevType devType, dev_run_state runState )
+    void net_session::send_work_state_message( string sStationid,string sDevid,string sDevName,int devType, dev_run_state runState )
 	{
 		devWorkNfyMsgPtr dev_run_nfy_ptr(new DevWorkStatusNotify);// dev_run_nfy;
 		DevWorkStatus *dev_n_s = dev_run_nfy_ptr->add_cdevcurworkstatus();
@@ -251,36 +243,35 @@ namespace hx_net
 	}
 	
     void net_session::send_alarm_state_message(string sStationid,string sDevid,string sDevName,
-										   int nCellId,string sCellName,e_DevType devType,dev_alarm_state alarmState,
-		                                   string sStartTime,int alarmCount)
+                                           int nCellId,string sCellName,e_DevType devType,int  alarmState,
+                                           string sStartTime,int alarmCount)//
 	{
 		devAlarmNfyMsgPtr dev_alarm_nfy_ptr(new DevAlarmStatusNotify);
 		DevAlarmStatus *dev_n_s = dev_alarm_nfy_ptr->add_cdevcuralarmstatus();
 		dev_n_s->set_edevtype(devType);
-		dev_n_s->set_sstationid(sStationid);
 		dev_n_s->set_sdevid(sDevid);
-		dev_n_s->set_sdevname(QString::fromLocal8Bit(sDevName.c_str()).toUtf8().data());
+        dev_n_s->set_sdevname(sDevName.c_str());
 		dev_n_s->set_nalarmcount(alarmCount);
 		DevAlarmStatus_eCellAlarmMsg *dev_cell_alarm = dev_n_s->add_ccellalarm();
 		std::string scellid = str(boost::format("%1%")%nCellId);
 		dev_cell_alarm->set_scellid(scellid);
-		dev_cell_alarm->set_scellname(QString::fromLocal8Bit(sCellName.c_str()).toUtf8().data());
+        dev_cell_alarm->set_scellname(sCellName.c_str());
 		dev_cell_alarm->set_sstarttime(sStartTime);
 		dev_cell_alarm->set_ccellstatus((e_AlarmStatus)alarmState);
 
 		GetInst(SvcMgr).send_dev_alarm_state_to_client(sStationid,sDevid,dev_alarm_nfy_ptr);
 	}
 
-    void net_session::send_command_execute_result_message(string sStationid,string sDevid,e_DevType devType,string sDevName,
+    void net_session::send_command_execute_result_message(string sStationid,string sDevid,int devType,string sDevName,
 													  string sUsrName,e_MsgType nMsgType,e_ErrorCode eResult)
 	{
 		devCommdRsltPtr ackMsgPtr(new DeviceCommandResultNotify);
 		ackMsgPtr->set_sstationid(sStationid);
 		ackMsgPtr->set_sdevid(sDevid);
-		ackMsgPtr->set_sdevname(QString::fromLocal8Bit(sDevName.c_str()).toUtf8().data());
-		ackMsgPtr->set_edevtype(devType);
+        ackMsgPtr->set_sdevname(sDevName.c_str());
+        ackMsgPtr->set_edevtype((e_DevType)devType);
 		ackMsgPtr->set_eerrorid(eResult);
-		ackMsgPtr->set_soperuser(QString::fromLocal8Bit(sUsrName.c_str()).toUtf8().data());
+        ackMsgPtr->set_soperuser(sUsrName.c_str());
 
 		GetInst(SvcMgr).send_command_execute_result(sStationid,sDevid,nMsgType,ackMsgPtr);
 	}

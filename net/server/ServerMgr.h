@@ -3,13 +3,8 @@
 
 #pragma once
 #include "./http/CommonPrecomp.h"
-//#include <boost/network/protocol/http/server.hpp>
 #include "../io_service_pool.h"
 #include "local_server.h"
-//#include <boost/network/protocol/http/server.hpp>
-//struct web_handler;
-//typedef boost::network::http::async_server<web_handler> hx_http_server;
-//typedef boost::shared_ptr<hx_http_server>  hx_http_server_ptr;
 
 class server_work;
 //struct _web_handler;
@@ -70,8 +65,6 @@ namespace hx_net
         boost::shared_ptr<boost::thread> _httpthreadptr;//工作线程
         hx_http_server   *_httpserverptr;//http服务对象hx_http_server_ptr
         web_handler           * _web_handler;
-
-        //hx_http_client_ptr   _httpclientptr;//http客户端对象
 	};
 }
 
