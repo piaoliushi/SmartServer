@@ -1,6 +1,7 @@
 #include "StationConfig.h"
 #include "LocalConfig.h"
 #include "./net/config.h"
+#include "./protocol/bohui_protocol.h"
 using namespace db;
 StationConfig::StationConfig(void)
 {
@@ -18,6 +19,8 @@ bool StationConfig::load_station_config()
 {
     mapModleInfo.clear();
     if(!GetInst(DataBaseOperation).GetAllDevInfo(mapModleInfo))
+        return false;
+    if(!GetInst(DataBaseOperation).GetDataDictionary(Bohui_Protocol::mapTypeToStr))
         return false;
     /*mapTransmitterInfo.clear();
 	mapAntennaInfo.clear();

@@ -55,5 +55,11 @@ http_request_session::http_request_session(boost::asio::io_service& io_service)
 
  }*/
 
+ //上报http消息到上级平台(数据)
+ void http_request_session::send_http_data_messge_to_platform(string sDevid,devDataNfyMsgPtr &dataPtr)
+ {
+
+ }
+
 }
 

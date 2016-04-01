@@ -22,12 +22,16 @@ public:
         int timeout=0,
         std::string link_driver="QODBC",
         std::string driverName="SQL Native Client");
+
     bool CloseDb();
     bool IsOpen();
     bool ReOpen();
 
 public:
+    //获得所有设备信息
     bool GetAllDevInfo(vector<ModleInfo>& v_Linkinfo);
+    //获得数据字典映射表(不包含设备类型字段)
+    bool GetDataDictionary(map<int,string>& mapDicry);
     //打开关闭监控量报警
     bool SetEnableMonitor(string strDevnum,int iItemIndex,bool bEnabled=true);
     bool SetEnableAlarm(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);
@@ -45,15 +49,15 @@ public:
     bool AddItemEndAlarmRecord(time_t endTime,unsigned long long irecordid);
 
     //添加历史记录
-    bool AddItemMonitorRecord(string strDevnum,time_t savetime,Data* pdata);
+    bool AddItemMonitorRecord(string strDevnum,time_t savetime,DevMonitorDataPtr pdata);
     bool SetAlarmLimit(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);//0上，1下
     bool SetAlarmTime(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);
 private:
 
-    bool GetDevMonitorSch(string strDevnum,vector<Monitoring_Scheduler>& vMonitorSch);
+    bool GetDevMonitorSch(string strDevnum,map<int,vector<Monitoring_Scheduler> >& mapMonitorSch);
     bool GetCmdParam(string strCmdnum,CmdParam& param);
     bool GetCmd(string strDevnum,vector<Command_Scheduler>& vcmdsch);
-    bool GetDevMonItem(string strDevnum,map<int,DeviceMonitorItem>& map_item);
+    bool GetDevMonItem(string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item);
     bool GetDevProperty(string strDevnum,map<string,DevProperty>& map_property);
     bool GetNetProperty(string strConTypeNumber,NetCommunicationMode& nmode);
     bool GetComProperty(string strConTypeNumber,ComCommunicationMode& cmode);

@@ -178,9 +178,8 @@ namespace hx_net
 		dev_cur_data_ptr->set_sstationid(sStationid);
 		dev_cur_data_ptr->set_sdevid(sDevid);
 
-		devDataNfyMsgPtr dev_cur_data_tosvr_ptr;
-		if(GetInst(LocalConfig).upload_use()==true)
-		{
+        devDataNfyMsgPtr dev_cur_data_tosvr_ptr;
+        if(GetInst(LocalConfig).upload_use()==true){
 			dev_cur_data_tosvr_ptr = devDataNfyMsgPtr(new DevDataNotify);
 			dev_cur_data_tosvr_ptr->set_edevtype(devType);
 			dev_cur_data_tosvr_ptr->set_sstationid(sStationid);
@@ -188,21 +187,17 @@ namespace hx_net
 		}
 
         map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
-		for(;cell_iter!=mapMonitorItem.end();++cell_iter)
-		{
+        for(;cell_iter!=mapMonitorItem.end();++cell_iter){
 			int cellId = (*cell_iter).first;			
 			//未更新的监测量
             if(curData->mValues[cellId].bUpdate==false)
 				continue;
-
 			DevDataNotify_eCellMsg *cell = dev_cur_data_ptr->add_ccelldata();
             cell->set_ecelltype((e_CellType)(*cell_iter).second.iItemType);
             cell->set_scellid(boost::lexical_cast<string>((*cell_iter).second.iItemIndex));
             cell->set_scellname((*cell_iter).second.sItemName.c_str());
-			
             string  sValue = str(boost::format("%.2f")%curData->mValues[cellId].fValue);
 			cell->set_scellvalue(sValue);
-
             if(dev_cur_data_tosvr_ptr!=0){
                 if((*cell_iter).second.bUpload==true){
 					DevDataNotify_eCellMsg *upcell = dev_cur_data_tosvr_ptr->add_ccelldata();
@@ -212,6 +207,8 @@ namespace hx_net
 		}
 
 		GetInst(SvcMgr).send_monitor_data_to_client(sStationid,sDevid,dev_cur_data_ptr,dev_cur_data_tosvr_ptr);
+
+
 	}
 
 	//打包发送设备连接状态消息

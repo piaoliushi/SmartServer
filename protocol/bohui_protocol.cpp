@@ -9,7 +9,7 @@
 using namespace std;
 using namespace db;
 string  Bohui_Protocol::SrcCode = GetInst(LocalConfig).local_station_id();
-
+map<int,string> Bohui_Protocol::mapTypeToStr= map<int,string>();
 
 Bohui_Protocol::Bohui_Protocol()
 {
@@ -115,7 +115,6 @@ bool Bohui_Protocol::createResponseMsg(int nReplyId,int nValue,const char* nCmdT
             xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Value",xml_responseMsg.allocate_string(boost::lexical_cast<std::string>(nValue).c_str())));
 
 
-        //string ss  = CONST_STR_RESPONSE_VALUE_DESC[9];
         xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Desc",CONST_STR_RESPONSE_VALUE_DESC[nValue]));
         xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Comment",""));
     }
@@ -123,6 +122,102 @@ bool Bohui_Protocol::createResponseMsg(int nReplyId,int nValue,const char* nCmdT
    rapidxml::print(std::back_inserter(responseBody), xml_responseMsg, 0);
 
    return true;
+}
+
+//创建上报数据消息
+bool Bohui_Protocol::createReportDataMsg(int nReplyId,int nCmdType,string sDevId,int nDevType,DevMonitorDataPtr curData,
+                         map<int,DeviceMonitorItem> &mapMonitorItem,string &reportBody)
+{
+    xml_document<> xml_reportMsg;
+    //本地MsgId暂时固定为2
+    time_t curTime = time(0);
+    tm *local_time = localtime(&curTime);
+    static  char str_time[64];
+    strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+
+
+    xml_node<> *msgRootNode = _createResponseXmlHeader(xml_reportMsg,2,-1);
+    if(msgRootNode!=NULL)
+    {
+        xml_node<> *xml_resps = xml_reportMsg.allocate_node(node_element,CONST_STR_BOHUI_TYPE[nCmdType]);
+        msgRootNode->append_node(xml_resps);
+        xml_node<> *xml_Quality = NULL;
+        if(BH_POTO_QualityRealtimeReport == nCmdType){
+            xml_Quality = xml_reportMsg.allocate_node(node_element,"Quality");
+            xml_Quality->append_attribute(xml_reportMsg.allocate_attribute("TransmitterID",xml_reportMsg.allocate_string(sDevId.c_str())));
+            xml_Quality->append_attribute(xml_reportMsg.allocate_attribute("CheckTime",xml_reportMsg.allocate_string(str_time)));
+            xml_resps->append_node(xml_Quality);
+
+            map<int,DataInfo>::iterator iter  = curData->mValues.begin();
+            for(;iter!=curData->mValues.end();++iter){
+                    xml_node<> *xml_Quality_Index = xml_reportMsg.allocate_node(node_element,"QualityIndex ");
+                    xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",boost::lexical_cast<std::string>(mapMonitorItem[iter->first].iTargetId).c_str()));
+                    xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleType",boost::lexical_cast<std::string>(mapMonitorItem[iter->first].iModTypeId).c_str()));
+                    xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleID",boost::lexical_cast<std::string>(mapMonitorItem[iter->first].iModDevId).c_str()));
+                    float curValue = iter->second.fValue;
+                    xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",boost::lexical_cast<std::string>(curValue).c_str()));
+                    xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[mapMonitorItem[iter->first].iTargetId]).c_str()));
+                    xml_Quality->append_node(xml_Quality_Index);
+            }
+
+        }else if(BH_POTO_EnvQualityRealtimeReport == nCmdType){
+            switch (nDevType) {
+            case 1://电力仪
+                break;
+            case 2://温湿度
+                break;
+            case 3://烟雾
+                break;
+            case 4://水禁
+                break;
+            case 5://空调
+                break;
+            case 6://GPS传感器
+                break;
+            }
+        }
+    }
+
+    rapidxml::print(std::back_inserter(reportBody), xml_reportMsg, 0);
+    return true;
+}
+
+//创建上报告警消息
+bool Bohui_Protocol::createReportAlarmDataMsg(int nReplyId,int nCmdType,string sDevId,CurItemAlarmInfo &alarmInfo,int nMod,
+                                string &sReason,string &reportBody)
+{
+    xml_document<> xml_reportMsg;
+    //本地MsgId暂时固定为2
+    xml_node<> *msgRootNode = _createResponseXmlHeader(xml_reportMsg,2,-1);
+    if(msgRootNode!=NULL)
+    {
+        xml_node<> *xml_resps = xml_reportMsg.allocate_node(node_element,CONST_STR_BOHUI_TYPE[nCmdType]);
+        msgRootNode->append_node(xml_resps);
+        xml_node<> *xml_Alarm = NULL;
+        if(BH_POTO_QualityAlarmReport == nCmdType){
+            xml_Alarm = xml_reportMsg.allocate_node(node_element,"QualityAlarm");
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("TransmitterID",xml_reportMsg.allocate_string(sDevId.c_str())));
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("ModuleType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(alarmInfo.nModuleType).c_str())));
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("ModuleID",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(alarmInfo.nModuleId).c_str())));
+        }else if(BH_POTO_EnvAlarmReport == nCmdType){//
+           xml_Alarm =  xml_reportMsg.allocate_node(node_element,"Alarm");
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("DevID",xml_reportMsg.allocate_string(sDevId.c_str())));
+        }
+        xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("AlarmID",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(alarmInfo.nAlarmId).c_str())));
+        xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Mode",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(nMod).c_str())));
+        xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(alarmInfo.nType).c_str())));
+        xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Desc",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[alarmInfo.nType]).c_str())));
+        xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Reason",xml_reportMsg.allocate_string(sReason.c_str())));
+        tm * local_time = localtime(&(alarmInfo.startTime));
+        static  char str_time[64];
+        strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+        xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("CheckTime",xml_reportMsg.allocate_string(str_time)));
+
+        xml_resps->append_node(xml_Alarm);
+    }
+
+     rapidxml::print(std::back_inserter(reportBody), xml_reportMsg, 0);
+     return true;
 }
 
 //生成xml头

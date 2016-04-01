@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <boost/shared_ptr.hpp>
 using namespace std;
 
 
@@ -35,8 +36,12 @@ enum DEVType
 #define    CON_MOD_NET   1 //网口
 #define    CON_MOD_COM  0 //串口
 
-#define    NET_MOD_TCP   0
-#define    NET_MOD_UDP   1
+#define    NET_MOD_TCP   0 //TCP
+#define    NET_MOD_UDP   1 //UDP
+
+#define    RUN_TIME_DAY        0 //运行图-天
+#define    RUN_TIME_WEEK      1 //运行图-星期
+#define    RUN_TIME_MONTH    2 //运行图-月
 
 //运行图结构
 typedef struct
@@ -46,9 +51,9 @@ typedef struct
     int      iMonitorWeek;   //星期(1-7）
     int      iMonitorMonth;  //月（0-12，0=all）
     int      iMonitorDay;      //日(1-31)
-    tm      tStartTime;        //开始时间
-    tm      tEndTime;          //结束时间
-    tm      tAlarmEndTime;     //月运行计划终止日期
+    time_t      tStartTime;        //开始时间
+    time_t      tEndTime;          //结束时间
+    time_t      tAlarmEndTime;     //月运行计划终止日期
 }Monitoring_Scheduler;
 
 typedef struct
@@ -65,8 +70,8 @@ typedef struct
     int iWeek;
     int      iMonitorMonth;  //月（0-12，0=all）
     int      iMonitorDay;      //日(1-31)
-    tm       tCmdEndTime;     //月运行计划终止日期
-    tm tExecuteTime;
+    time_t       tCmdEndTime;     //月运行计划终止日期
+    time_t  tExecuteTime;
     int iHasParam;
     CmdParam cParam;
 }Command_Scheduler;
@@ -121,7 +126,7 @@ typedef struct
 
 typedef struct
 {
-    int iItemid;            //告警id
+    int iAlarmid;            //告警类型id
     double fLimitvalue;//门限值
     int iAlarmlevel;      //告警等级
     int iLimittype;        //0:上限,1:下线,2:上上限,3:下下限,4:状态量
@@ -138,8 +143,8 @@ typedef struct
 {
     int iWeek;
     int iUse;
-    tm  tStartTime;
-    tm  tEndTime;
+    time_t  tStartTime;
+    time_t  tEndTime;
 }Record_Scheduler;
 
 typedef struct
@@ -162,6 +167,9 @@ typedef struct
     bool bAlarmEnable;
     bool bUpload;
     string sUnit;//单位
+    int  iTargetId;
+    int  iModTypeId;
+    int iModDevId;
     vector<Alarm_config>  vItemAlarm;
 }DeviceMonitorItem;
 
@@ -179,8 +187,8 @@ typedef struct
     int      iChanSize;//通道数
     int      iAddressCode;//地址码
     map<int,DeviceMonitorItem>        map_MonitorItem;//设备监控量
-    vector<Monitoring_Scheduler>      vMonitorSch;  //监控计划
-    vector<Command_Scheduler>       vCommSch;   //控制计划
+    map<int,vector<Monitoring_Scheduler> >      vMonitorSch;  //监控计划
+    vector<Command_Scheduler>           vCommSch;   //控制计划
     map<string,DevProperty>                  map_DevProperty;//设备属性列表
     map<int,Alarm_config >                    map_AlarmConfig;//设备告警配置
 }DeviceInfo,*pDeviceInfo;
@@ -204,7 +212,7 @@ typedef struct
 }DevAlarmRecord;
 typedef struct
 {
-    tm tMonitoringTime;
+    time_t tMonitoringTime;
     double dMonitoringValue;
 }MonitorItemRecord;
 
@@ -213,7 +221,9 @@ typedef struct
     unsigned long long  nAlarmId;   //告警id
     int           nType;      //告警类型
     time_t     startTime; //开始时间
-    int           nDuring;    //持续时间
+    int           nTargetId; //指标id
+    int           nModuleId;//模块id
+    int           nModuleType;//模块type
 }CurItemAlarmInfo;
 
 typedef struct DATA_INFO_TAG
@@ -231,6 +241,6 @@ typedef struct
 {
      map<int,DataInfo> mValues;
 }Data,pData;
-
+typedef boost::shared_ptr<Data> DevMonitorDataPtr;
 
 #endif

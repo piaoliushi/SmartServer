@@ -4,8 +4,9 @@
 #include "../SvcMgr.h"
 #include "../../LocalConfig.h"
 #include "../../StationConfig.h"
+#include "../../database/DataBaseOperation.h"
 //#include "../sms/SmsTraffic.h"
-
+using namespace db;
 namespace hx_net
 {
 	device_session::device_session(boost::asio::io_service& io_service, 
@@ -151,12 +152,9 @@ namespace hx_net
 	void device_session::connect(std::string hostname,unsigned short port,bool bReconnect)
 	{	
 		if(is_connected())
-		{
-			//std::string id = str(boost::format("%1%:%2%")%hostname%port);
-			//std::cout<<id<<"is connected!!"<<std::endl;
 			return;
-		}
-		set_stop(false);
+
+        set_stop(false);
 
 		boost::system::error_code ec;     
 		tcp::resolver::query query(hostname, boost::lexical_cast<std::string, unsigned short>(port));     
@@ -450,11 +448,13 @@ namespace hx_net
 	//判断是否保存当前记录
 	void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtr)
 	{
-		if(is_need_save_data(sDevId))
-		{
-            //GetInst(DbManager).SaveOthDevMonitoringData(modleInfos.sStationNumber,
-            //		sDevId,modleInfos.mapDevInfo[sDevId].mapMonitorItem,curDataPtr);
-		}
+        time_t tmCurTime;
+        time(&tmCurTime);
+        double ninterval = difftime(tmCurTime,tmLastSaveTime[sDevId]);
+        if(ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
+            return ;
+        if(GetInst(DataBaseOperation).AddItemMonitorRecord(sDevId,tmCurTime,curDataPtr))
+            tmLastSaveTime[sDevId] = tmCurTime;
 
 	}
 
@@ -471,41 +471,59 @@ namespace hx_net
 	}
 
 
-	//是否在监测时间段
+    //是否在监测时间段--------2016-4-1 ----完成
 	bool device_session::is_monitor_time(string sDevId)
 	{
-        /*time_t curTime = time(0);
-		tm *pCurTime = localtime(&curTime);
-        vector<MonitorScheduler>::iterator witer = modleInfos.mapDevInfo[sDevId].vMonitorSch.begin();
-		for(;witer!=modleInfos.mapDevInfo[sDevId].vecMonitorScheduler.end();++witer)
-		{
-			if(((*witer).nMonitorDay+1)%7 == pCurTime->tm_wday && 
-				(*witer).bEnable == true){
-				unsigned long tmStart = (*witer).tmStartTime.tm_hour*3600+
-					(*witer).tmStartTime.tm_min*60+
-					(*witer).tmStartTime.tm_sec;
-				unsigned long tmEnd   = (*witer).tmCloseTime.tm_hour*3600+
-					(*witer).tmCloseTime.tm_min*60+
-					(*witer).tmCloseTime.tm_sec;
-				unsigned long tmCur   =  pCurTime->tm_hour*3600+pCurTime->tm_min*60+pCurTime->tm_sec;
+        time_t curTime = time(0);
+        tm *pCurTime = localtime(&curTime);
+        //运行图----天
+        map<int,vector<Monitoring_Scheduler> >::iterator day_iter = modleInfos.mapDevInfo[sDevId].vMonitorSch.find(RUN_TIME_DAY);
+        if(day_iter!=modleInfos.mapDevInfo[sDevId].vMonitorSch.end()){
+            vector<Monitoring_Scheduler>::iterator iter = day_iter->second.begin();
+            for(;iter!=day_iter->second.end();++iter){
+                if(curTime>=(*iter).tStartTime && curTime<(*iter).tEndTime){
+                    return (*iter).bMonitorFlag;
+                }
+            }
+        }
+        //运行图----星期
+        map<int,vector<Monitoring_Scheduler> >::iterator week_iter = modleInfos.mapDevInfo[sDevId].vMonitorSch.find(RUN_TIME_WEEK);
+        if(week_iter!=modleInfos.mapDevInfo[sDevId].vMonitorSch.end()){
+            vector<Monitoring_Scheduler>::iterator iter = week_iter->second.begin();
+            for(;iter!=week_iter->second.end();++iter){
+                if((pCurTime->tm_wday+1)== (*iter).iMonitorWeek){
+                    if(curTime>=(*iter).tStartTime && curTime<(*iter).tEndTime){
+                        return (*iter).bMonitorFlag;
+                    }
+                }
+            }
+        }
+        //运行图----月
+        map<int,vector<Monitoring_Scheduler> >::iterator month_iter = modleInfos.mapDevInfo[sDevId].vMonitorSch.find(RUN_TIME_MONTH);
+        if(month_iter!=modleInfos.mapDevInfo[sDevId].vMonitorSch.end()){
+            vector<Monitoring_Scheduler>::iterator iter = month_iter->second.begin();
+            for(;iter!=month_iter->second.end();++iter){
+                if((pCurTime->tm_mday)== (*iter).iMonitorDay){
+                    if(curTime>=(*iter).tStartTime && curTime<(*iter).tEndTime){
+                        return (*iter).bMonitorFlag;
+                    }
+                }
+            }
+        }
 
-				if(tmCur>=tmStart && tmCur<=tmEnd)
-					return true;
-			}
-        }*/
-
-		return false;
-	}
+        return true;
+    }
 
     //2016-3-31------处理设备数据----完成
 	void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 	{
         boost::recursive_mutex::scoped_lock lock(data_deal_mutex);
-
+        //是否在运行图时间
 		bool bIsMonitorTime = is_monitor_time(sDevId);
 		//打包发送客户端
-        send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,(e_DevType)modleInfos.mapDevInfo[sDevId].iDevType
-                                  ,curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
+        send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos.mapDevInfo[sDevId].iDevType
+                                                    ,curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
+        //http_ptr_->send_http_data_messge_to_platform();
 		//检测当前报警状态
         check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
 		//如果在监测时间段则保存当前记录

@@ -9,8 +9,9 @@
 #include <vector>
 #include <map>
 #include "StructDef.h"
+
 #include "DataTypeDefine.h"
-#include <boost/shared_ptr.hpp>
+
 using namespace std;
 
 enum dev_alarm_state
@@ -371,7 +372,7 @@ struct TransmitterPropertyEx
 
 };
 typedef boost::shared_ptr<TransmitterPropertyEx> pTransmitterPropertyExPtr;
-typedef boost::shared_ptr<Data> DevMonitorDataPtr;
+//typedef boost::shared_ptr<Data> DevMonitorDataPtr;
 
 
 struct MoxaPropertyEx

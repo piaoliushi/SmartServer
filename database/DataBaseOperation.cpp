@@ -68,6 +68,27 @@ bool DataBaseOperation::ReOpen()
     return true;
 }
 
+//获得数据字典映射表
+bool DataBaseOperation::GetDataDictionary(map<int,string>& mapDicry)
+{
+    if(!IsOpen())
+    {
+        std::cout<<"数据库未打开"<<std::endl;
+        return false;
+    }
+    QSqlQuery query;
+    QString strSql=QString("select code,name from data_dictionary where type='IndexType' union select alarmswitch,alarmswitchname from alarm_switch");
+   query.prepare(strSql);
+   if(!query.exec())
+   {
+       return false;
+   }
+   while(query.next())
+   {
+       mapDicry[query.value(0).toInt()] = query.value(1).toString().toStdString();
+   }
+    return true;
+}
 
 bool DataBaseOperation::GetDevInfo( string strDevnum,DeviceInfo& device )
 {
@@ -77,7 +98,7 @@ bool DataBaseOperation::GetDevInfo( string strDevnum,DeviceInfo& device )
         return false;
     }
     QSqlQuery devquery;
-    QString strSql=QString("select a.DeviceNumber,a.AssociateNumber,a.DeviceName,a.DeviceType,a.IsAssociate,a.IsMultiChannel,a.ChannelSize,a.IsUse,a.AddressCode,b.MainCategoryNumber,b.SubCategoryNumber\
+    QString strSql=QString("select a.DeviceNumber,a.AssociateNumber,a.DeviceName,a.DeviceType,a.IsAssociate,a.IsMultiChannel,a.ChannelSize,a.IsUse,a.AddressCode,b.MainCategoryNumber,b.SubCategoryNumber,a.ProtocolNumber\
                            from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and b.ProtocolNumber=a.ProtocolNumber").arg(QString::fromStdString(strDevnum));
     devquery.prepare(strSql);
     if(devquery.exec())
@@ -95,8 +116,8 @@ bool DataBaseOperation::GetDevInfo( string strDevnum,DeviceInfo& device )
             device.iAddressCode = devquery.value(8).toInt();
             device.nDevProtocol = devquery.value(9).toInt();
             device.nSubProtocol = devquery.value(10).toInt();
-
-            GetDevMonItem(strDevnum,device.map_MonitorItem);
+            QString sprotoclnum = devquery.value(2).toString();
+            GetDevMonItem(strDevnum,sprotoclnum,device.map_MonitorItem);
             GetDevMonitorSch(strDevnum,device.vMonitorSch);
             GetCmd(strDevnum,device.vCommSch);
             GetDevProperty(strDevnum,device.map_DevProperty);
@@ -183,7 +204,7 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
 
     return true;
 }
-bool DataBaseOperation::GetDevMonitorSch( string strDevnum,vector<Monitoring_Scheduler>& vMonitorSch )
+bool DataBaseOperation::GetDevMonitorSch( string strDevnum,map<int,vector<Monitoring_Scheduler> >& mapMonitorSch )
 {
     if(!IsOpen())
     {
@@ -200,33 +221,14 @@ bool DataBaseOperation::GetDevMonitorSch( string strDevnum,vector<Monitoring_Sch
             Monitoring_Scheduler msch;
         //	msch.gid = schquery.value(0).toInt();//"Guid"
             msch.iMonitorWeek = schquery.value(2).toInt();
-            QDateTime stime = schquery.value(4).toDateTime();
-            msch.tStartTime.tm_year = stime.date().year();
-            msch.tStartTime.tm_mon = stime.date().month();
-            msch.tStartTime.tm_mday = stime.date().day();
-            msch.tStartTime.tm_hour = stime.time().hour();
-            msch.tStartTime.tm_min = stime.time().minute();
-            msch.tStartTime.tm_sec = stime.time().second();
-
-            QDateTime etime = schquery.value(5).toDateTime();
-            msch.tEndTime.tm_year = etime.date().year();
-            msch.tEndTime.tm_mon = etime.date().month();
-            msch.tEndTime.tm_mday = etime.date().day();
-            msch.tEndTime.tm_hour = etime.time().hour();
-            msch.tEndTime.tm_min = etime.time().minute();
-            msch.tEndTime.tm_sec = etime.time().second();
-            msch.iMonitorType = schquery.value(6).toInt();
+            msch.tStartTime = schquery.value(4).toDateTime().toTime_t();
+            msch.tEndTime = schquery.value(5).toDateTime().toTime_t();
+            int iMonitorType = schquery.value(6).toInt();
             msch.iMonitorMonth = schquery.value(7).toInt();
             msch.iMonitorDay = schquery.value(8).toInt();
-            QDateTime endtime = schquery.value(9).toDateTime();
-            msch.tAlarmEndTime.tm_year = endtime.date().year();
-            msch.tAlarmEndTime.tm_mon = endtime.date().month();
-            msch.tAlarmEndTime.tm_mday = endtime.date().day();
-            msch.tAlarmEndTime.tm_hour = endtime.time().hour();
-            msch.tAlarmEndTime.tm_min = endtime.time().minute();
-            msch.tAlarmEndTime.tm_sec = endtime.time().second();
+            msch.tAlarmEndTime = schquery.value(9).toDateTime().toTime_t();
             msch.bMonitorFlag = schquery.value(10).toBool();
-            vMonitorSch.push_back(msch);
+            mapMonitorSch[iMonitorType].push_back(msch);
         }
     }
     else
@@ -282,13 +284,7 @@ bool DataBaseOperation::GetCmd( string strDevnum,vector<Command_Scheduler>& vcmd
             cmd_sch.gid = cmdschquery.value(0).toInt();
             cmd_sch.iCommandType = cmdschquery.value(1).toInt();
             cmd_sch.iWeek = cmdschquery.value(2).toInt();
-            QDateTime sttime = cmdschquery.value(3).toDateTime();
-            cmd_sch.tExecuteTime.tm_year = sttime.date().year();
-            cmd_sch.tExecuteTime.tm_mon = sttime.date().month();
-            cmd_sch.tExecuteTime.tm_mday = sttime.date().day();
-            cmd_sch.tExecuteTime.tm_hour = sttime.time().hour();
-            cmd_sch.tExecuteTime.tm_min = sttime.time().minute();
-            cmd_sch.tExecuteTime.tm_sec = sttime.time().second();
+            cmd_sch.tExecuteTime = cmdschquery.value(3).toDateTime().toTime_t();
             cmd_sch.iHasParam = cmdschquery.value(4).toInt();
             if(cmd_sch.iHasParam>=1)
             {
@@ -297,14 +293,7 @@ bool DataBaseOperation::GetCmd( string strDevnum,vector<Command_Scheduler>& vcmd
             }
             cmd_sch.iMonitorMonth = cmdschquery.value(6).toInt();
             cmd_sch.iMonitorDay = cmdschquery.value(7).toInt();
-
-            QDateTime cmdetime = cmdschquery.value(8).toDateTime();
-            cmd_sch.tCmdEndTime.tm_year = cmdetime.date().year();
-            cmd_sch.tCmdEndTime.tm_mon = cmdetime.date().month();
-            cmd_sch.tCmdEndTime.tm_mday = cmdetime.date().day();
-            cmd_sch.tCmdEndTime.tm_hour = cmdetime.time().hour();
-            cmd_sch.tCmdEndTime.tm_min = cmdetime.time().minute();
-            cmd_sch.tCmdEndTime.tm_sec = cmdetime.time().second();
+            cmd_sch.tCmdEndTime = cmdschquery.value(8).toDateTime().toTime_t();
             vcmdsch.push_back(cmd_sch);
         }
     }
@@ -316,7 +305,7 @@ bool DataBaseOperation::GetCmd( string strDevnum,vector<Command_Scheduler>& vcmd
     return true;
 }
 
-bool DataBaseOperation::GetDevMonItem( string strDevnum,map<int,DeviceMonitorItem>& map_item )
+bool DataBaseOperation::GetDevMonItem( string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item )
 {
     if(!IsOpen())
     {
@@ -324,8 +313,12 @@ bool DataBaseOperation::GetDevMonItem( string strDevnum,map<int,DeviceMonitorIte
         return false;
     }
     QSqlQuery itemschquery;
-    QString strSql=QString("select MonitoringIndex,MonitoringName,Ratio,ItemType,ItemValueType,AlarmEnable,IsUpload,UnitString from Monitoring_Device_Item \
-                           where DeviceNumber='%1'").arg(QString::fromStdString(strDevnum));
+    /*QString strSql=QString("select MonitoringIndex,MonitoringName,Ratio,ItemType,ItemValueType,AlarmEnable,IsUpload,UnitString from Monitoring_Device_Item \
+                           where DeviceNumber='%1'").arg(QString::fromStdString(strDevnum));*/
+
+    QString strSql=QString("select a.MonitoringIndex,a.MonitoringName,a.Ratio,a.ItemType,a.ItemValueType,a.AlarmEnable,a.IsUpload,a.UnitString,b.alarmtype,b.type,b.moduletype,b.moduleid \
+                           from Monitoring_Device_Item a,base_device_item b\
+                           where a.DeviceNumber='%1' and b.monitoringindex=a.monitoringindex and b.protocolnumber='%2'").arg(QString::fromStdString(strDevnum)).arg(qsPrtocolNum);
     itemschquery.prepare(strSql);
     if(itemschquery.exec())
     {
@@ -340,7 +333,11 @@ bool DataBaseOperation::GetDevMonItem( string strDevnum,map<int,DeviceMonitorIte
             item.bAlarmEnable = itemschquery.value(5).toBool();
             item.bUpload = itemschquery.value(6).toBool();
             item.sUnit = itemschquery.value(7).toString().toStdString();
-            GetItemAlarmConfig(strDevnum,item.iItemIndex,item.vItemAlarm);
+            int iAlarmid = itemschquery.value(8).toInt();
+            GetItemAlarmConfig(strDevnum,iAlarmid,item.vItemAlarm);
+            item.iTargetId = itemschquery.value(9).toInt();
+            item.iModTypeId = itemschquery.value(10).toInt();
+            item.iModDevId = itemschquery.value(11).toInt();
             map_item[item.iItemIndex] = item;
         }
     }
@@ -543,6 +540,7 @@ bool DataBaseOperation::GetAlarmConfig( string strDevnum,map<int,Alarm_config>& 
             acfig.iDelaytime = alarmconfigquery.value(6).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(7).toString().toStdString();
             acfig.iAlarmtype = alarmconfigquery.value(8).toInt();//0:监控量 1:整机
+            acfig.iAlarmid = iItemid;
             map_Alarmconfig[iItemid] = acfig;
         }
     }
@@ -564,7 +562,7 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
     }
     QSqlQuery alarmconfigquery;
     QString strSql=QString("select a.LimitValue,a.AlarmLevel,a.JumpLimitType,a.LinkageEnable,a.LinkageRoleNumber,a.delaytime,a.LinkageRoleNumber,a.alarmconfigtype \
-                           from Alarm_Item_config a where a.DeviceNumber='%1' and and a.alarmenable>0 and a.alarmconfigtype=0").arg(QString::fromStdString(strDevnum));
+                           from Alarm_Item_config a where a.DeviceNumber='%1' and monitoringindex=%2 and a.alarmenable>0 and a.alarmconfigtype=0").arg(QString::fromStdString(strDevnum)).arg(iIndex);
     alarmconfigquery.prepare(strSql);
     if(alarmconfigquery.exec())
     {
@@ -582,6 +580,7 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
             acfig.iDelaytime = alarmconfigquery.value(5).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
             acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
+            acfig.iAlarmid = iIndex;
             vAlarmconfig.push_back(acfig);
         }
     }
@@ -592,6 +591,7 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
     }
     return true;
 }
+
 bool DataBaseOperation::SetEnableMonitor( string strDevnum,int iItemIndex,bool bEnabled/*=true*/ )
 {
     if(!IsOpen())
@@ -773,7 +773,7 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
     {
         if(inquery.next())
         {
-            irecordid = inquery.value(0).toInt();
+            irecordid = inquery.value(0).toULongLong();
         }
     }
     return  true;
@@ -804,7 +804,7 @@ bool DataBaseOperation::AddItemEndAlarmRecord( time_t endTime,unsigned long long
 
     return  true;
 }
-bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,Data* pdata)
+bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,DevMonitorDataPtr pdata)
 {
     if(!IsOpen())
     {
@@ -850,13 +850,9 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
     rapidxml::xml_node<>* tranNode = root_node->first_node("TranInfo");
     if(tranNode==NULL)
     {
-         tranNode = root_node->first_node("Dev");
-           if(tranNode==NULL){
-               resValue = 11;
-               return false;
-           }
+        resValue = 11;
+        return false;
     }
-
     for(;tranNode!=NULL;tranNode=tranNode->next_sibling())
     {
         rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("ID");
@@ -868,19 +864,8 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
         QString qsTransNum = attr->value();
         boost::mutex::scoped_lock lock(db_connect_mutex_);
         QSqlDatabase::database().transaction();
-        /*QSqlQuery qsDel;
-        QString strSql=QString("delete from device_alarm_switch where devicenumber=:devicenumber");
-        qsDel.prepare(strSql);
-        qsDel.bindValue(":devicenumber",qsTransNum);
-        if(!qsDel.exec())
-        {
-            QSqlDatabase::database().rollback();
-            resValue = 3;
-            return false;
-        }*/
         rapidxml::xml_node<>* alswNode = tranNode->first_node("AlarmSwitch");
         QSqlQuery qsInsert;
-        //QString strSql=QString("insert into device_alarm_switch(devicenumber,alarmswitchtype,alarmenable) values(:devicenumber,:alarmswitchtype,:alarmenable)");
         QString strSql=QString("update alarm_item_config set alarmenable=:alarmenable where devicenumber=:devicenumber and monitoringindex=:monitoringindex");
         qsInsert.prepare(strSql);
         qsInsert.bindValue(":devicenumber",qsTransNum);
@@ -889,28 +874,9 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
             rapidxml::xml_attribute<>* atType = alswNode->first_attribute("Type");
             if(atType!=NULL)
             {
-                int itype = atoi(atType->value())+BOHUI_ALARMID_BASE;
+                int itype = atoi(atType->value());
                 QSqlQuery qsSelIndex;
-                QString strSel = QString("select top 1 monitoringindex from device_monitoring_bind_alarmswitch where devicenumber='%1' and alarmswitchindex=%2").arg(qsTransNum).arg(itype);
-                qsSelIndex.prepare(strSel);
-                if(!qsSelIndex.exec())
-                {
-                    QSqlDatabase::database().rollback();
-                    resValue = 3;
-                    return false;
-                }
-                else
-                {
-                    if(qsSelIndex.next())
-                    {
-                        qsInsert.bindValue(":monitoringindex",qsInsert.value(0).toInt());
-                    }
-                    else
-                    {
-                        qsInsert.bindValue(":monitoringindex",itype);
-                    }
-                }
-
+                qsInsert.bindValue(":monitoringindex",itype);
                 rapidxml::xml_attribute<>* atSwitch = alswNode->first_attribute("Switch");
                 int iSwitch = 1;
                 if(atSwitch)
@@ -924,16 +890,7 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
                     resValue = 3;
                     return false;
                 }
-                if(itype==BOHUI_ALARMID_BASE+12)
-                {
-                    qsInsert.bindValue(":alarmswitchtype",BOHUI_ALARMID_BASE+112);
-                    if(!qsInsert.exec())
-                    {
-                        QSqlDatabase::database().rollback();
-                        resValue = 3;
-                        return false;
-                    }
-                }
+
             }
         }
         QSqlDatabase::database().commit();
@@ -991,31 +948,17 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
             rapidxml::xml_attribute<>* atType = alswNode->first_attribute("Type");
             if(atType!=NULL)
             {
-                int itype = atoi(atType->value())+BOHUI_ALARMID_BASE;
+                int itype = atoi(atType->value());
 
-                QSqlQuery qsSelIndex;
-                QString strSel = QString("select top 1 monitoringindex from device_monitoring_bind_alarmswitch where devicenumber='%1' and alarmswitchindex=%2").arg(qsTransNum).arg(itype);
-                qsSelIndex.prepare(strSel);
-                if(!qsSelIndex.exec())
+                if(itype!=512)
                 {
-                    QSqlDatabase::database().rollback();
-                    resValue = 3;
-                    return false;
+                    qsInsert.bindValue(":alarmconfigtype",0);
                 }
                 else
                 {
-                    if(qsSelIndex.next())
-                    {
-                        qsInsert.bindValue(":monitoringindex",qsInsert.value(0).toInt());
-                        qsInsert.bindValue(":alarmconfigtype",0);
-                    }
-                    else
-                    {
-                        qsInsert.bindValue(":monitoringindex",itype);
-                        qsInsert.bindValue(":alarmconfigtype",1);
-                    }
+                    qsInsert.bindValue(":alarmconfigtype",1);
                 }
-
+                qsInsert.bindValue(":monitoringindex",itype);
                 rapidxml::xml_attribute<>* atDesc = alswNode->first_attribute("Desc");
                 rapidxml::xml_attribute<>* atnode = atDesc->next_attribute();
                 if(atnode==NULL)
@@ -1027,23 +970,17 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
                 QString qsAtrriname = atnode->name();
                 if(qsAtrriname==QString("DownThreshold"))
                 {
-                    if(itype>=BOHUI_ALARMID_BASE+21 && itype<=BOHUI_ALARMID_BASE+26)
-                        qsInsert.bindValue(":jumplimittype",3);
-                    else
                         qsInsert.bindValue(":jumplimittype",1);
                 }
                 else if(qsAtrriname==QString("UpThreshold"))
                 {
-                    if(itype>=BOHUI_ALARMID_BASE+21 && itype<=BOHUI_ALARMID_BASE+26)
-                        qsInsert.bindValue(":jumplimittype",2);
-                    else
                         qsInsert.bindValue(":jumplimittype",0);
                 }
-                if(itype!=(BOHUI_ALARMID_BASE+11) && itype!=(BOHUI_ALARMID_BASE+12))
+                if(itype!=(511) && itype!=(512))
                     qsInsert.bindValue(":limitvalue",atof(atnode->value()));
 
                 rapidxml::xml_attribute<>* atDuration=NULL;
-                if(itype==(BOHUI_ALARMID_BASE+12))
+                if(itype==512)
                 {
                     atDuration = alswNode->first_attribute("EarlyDuration");
                     if(atDuration==NULL)
@@ -1053,6 +990,14 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
                         return false;
                     }
                     qsInsert.bindValue(":delaytime",atoi(atnode->value()));
+                    atDuration = alswNode->first_attribute("DelayedDuration");
+                    if(atDuration==NULL)
+                    {
+                        QSqlDatabase::database().rollback();
+                        resValue = 11;
+                        return false;//resumeduration
+                    }
+                    qsInsert.bindValue(":resumeduration",atoi(atnode->value()));
                 }
                 else
                 {
@@ -1079,24 +1024,6 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
                     QSqlDatabase::database().rollback();
                     resValue = 3;
                     return false;
-                }
-                if(itype==(BOHUI_ALARMID_BASE+12))
-                {
-                    qsInsert.bindValue(":monitoringindex",(BOHUI_ALARMID_BASE+112));
-                    atDuration = alswNode->first_attribute("DelayedDuration");
-                    if(atDuration==NULL)
-                    {
-                        QSqlDatabase::database().rollback();
-                        resValue = 11;
-                        return false;
-                    }
-                    qsInsert.bindValue(":delaytime",atoi(atnode->value()));
-                    if(!qsInsert.exec())
-                    {
-                        QSqlDatabase::database().rollback();
-                        resValue = 3;
-                        return false;
-                    }
                 }
             }
         }

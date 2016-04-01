@@ -49,6 +49,9 @@ const char CONST_STR_RESPONSE_VALUE_DESC[][64] = { "成功","删除的任务不�
 
 const char DEVICE_TYPE_XML_DESC[][32]={"Transmitter","EnvMonDev","DevList"};
 
-
+const char TRANSMITTER_TARGET_DESC[][32] = {"频率","入射功率","反射功率","驻波比","温度","不平衡功率","模块功率","总电压",
+                                            "总电流","模块电压","模块电流","调制度","模块温度","切换模式","激励器"};
+const char DEV_DH_TARGET_DESC[][32] = {"A相电压","A相电流","B相电压","B相电流","C相电压","C相电流","AB相电压","BC相电压"
+                                       ,"CA相电压","","",""};
 
 #endif // BOHUI_CONST_DEFINE_H
