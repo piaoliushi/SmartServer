@@ -240,8 +240,8 @@ namespace hx_net
 	}
 	
     void net_session::send_alarm_state_message(string sStationid,string sDevid,string sDevName,
-                                           int nCellId,string sCellName,e_DevType devType,int  alarmState,
-                                           string sStartTime,int alarmCount)//
+                                           int nCellId,string sCellName,int devType,int  alarmState,
+                                           string sStartTime,int alarmCount)
 	{
 		devAlarmNfyMsgPtr dev_alarm_nfy_ptr(new DevAlarmStatusNotify);
 		DevAlarmStatus *dev_n_s = dev_alarm_nfy_ptr->add_cdevcuralarmstatus();

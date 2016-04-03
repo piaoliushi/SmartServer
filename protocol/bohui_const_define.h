@@ -51,7 +51,20 @@ const char DEVICE_TYPE_XML_DESC[][32]={"Transmitter","EnvMonDev","DevList"};
 
 const char TRANSMITTER_TARGET_DESC[][32] = {"频率","入射功率","反射功率","驻波比","温度","不平衡功率","模块功率","总电压",
                                             "总电流","模块电压","模块电流","调制度","模块温度","切换模式","激励器"};
-const char DEV_DH_TARGET_DESC[][32] = {"A相电压","A相电流","B相电压","B相电流","C相电压","C相电流","AB相电压","BC相电压"
-                                       ,"CA相电压","","",""};
+
+enum {
+    CMD_NODEFINE = 0,
+    CMD_AUTO_TURNON_SEND = 1,
+    CMD_MANUAL_TURNON_SEND = 2,
+    CMD_AUTO_TURNOFF_SEND = 3,
+    CMD_MANUAL_TURNOFF_SEND = 4,
+    STATE_AUTO_TURNON = 5,
+    STATE_MANUAL_TURNON = 6,
+    STATE_AUTO_TURNOFF = 7,
+    STATE_MANUAL_TURNOFF = 8,
+    STATE_ANTENNA = 13,
+};
+const char DEV_CMD_RESULT_DESC[][64] = {"自动开机命令已下发","手动开机命令已下发","自动关机命令已下发","手动关机命令已下发","自动已开机",
+                                        "手动已开机","自动已关机","手动已关机","","","","","同轴开关已转动到"};
 
 #endif // BOHUI_CONST_DEFINE_H

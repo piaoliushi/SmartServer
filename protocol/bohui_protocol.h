@@ -18,19 +18,19 @@ public:
     //创建回复消息
     bool createResponseMsg(int nReplyId,int nValue,const char* nCmdType,string &responseBody);
     //创建上报数据消息
-    bool createReportDataMsg(int nReplyId,int nCmdType,string sDevId,int nDevType,DevMonitorDataPtr curData,
+    bool createReportDataMsg(int nReplyId,string sDevId,int nDevType,DevMonitorDataPtr &curData,
                              map<int,DeviceMonitorItem> &mapMonitorItem,string &reportBody);
-    //创建上报告警消息
+    //创建上报指标告警消息
     bool createReportAlarmDataMsg(int nReplyId,int nCmdType,string sDevId,CurItemAlarmInfo &alarmInfo,int nMod,
                                   string &sReason,string &reportBody);
+    //创建控制结果上报消息
+    bool creatExcutResultReportMsg(int nReplyId,int nCmdType,string sDevId,const string &sTime,
+                                    int devState,const string &sDesc,string &reportBody);
 protected:
-    bool _parse_ManualPowerControl_xml(xml_document<> &xmlMsg,int &nMsgId,string &responseBody);
     //创建xml头信息
     xml_node<>*  _createResponseXmlHeader(xml_document<>  &xmlMsg,int nCmdId,int nReplyId);
     //检查xml头信息
     bool  _checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &priority,xml_node<> *rootNode);
-    //根据类型创建xml
-    bool  _createResponseXmlBody(string &sXmlBody,int nType);
 
     //查询发射机信息
     void _execTsmtQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue);
@@ -50,15 +50,13 @@ protected:
     //告警开关设置
     void _setAlarmSwitchSetParam(int nDevType,xml_node<> *rootNode,int &nValue);
 
-    //控制结果主动上报
-    //从配置数据中获得查询信息
-    //void _report_CmdStatusReport(xml_document<> &xml_doc,xml_node<> *rootNode,
-     //                            DevMonitorDataPtr curData,map<int,DeviceMonitorItem> &mapMonitorItem);
+    //设备手动控制(发射机)
+    void _controlDeviceCommand(int nDevType,xml_node<> *rootNode,int &nValue);
 
     //从配置数据中获得查询信息
-    void _query_devinfo_from_config(xml_document<> &xml_doc,int nDevType,xml_node<> *rootNode,int  &nValue);
+    void _query_devinfo_from_config(xml_document<> &xml_doc,int nCmdType,xml_node<> *rootNode,int  &nValue);
 public:
-    static  map<int,string>   mapTypeToStr;
+    static  map<int,pair<string,string> >   mapTypeToStr;
     static  string  SrcCode;
 
 };

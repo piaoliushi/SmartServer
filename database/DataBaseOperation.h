@@ -31,7 +31,7 @@ public:
     //获得所有设备信息
     bool GetAllDevInfo(vector<ModleInfo>& v_Linkinfo);
     //获得数据字典映射表(不包含设备类型字段)
-    bool GetDataDictionary(map<int,string>& mapDicry);
+    bool GetDataDictionary(map<int,pair<string,string> >& mapDicry);
     //打开关闭监控量报警
     bool SetEnableMonitor(string strDevnum,int iItemIndex,bool bEnabled=true);
     bool SetEnableAlarm(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);
@@ -45,7 +45,8 @@ public:
 
 
     //添加报警记录
-    bool AddItemAlarmRecord(string strDevnum,time_t startTime,int nMonitoringIndex,int alarmType,double dValue,unsigned long long& irecordid);
+    bool AddItemAlarmRecord( string strDevnum,time_t startTime,int nMonitoringIndex,int nlimitType,int nalarmTypeId,double dValue,
+                                                const string &sreason,unsigned long long& irecordid );
     bool AddItemEndAlarmRecord(time_t endTime,unsigned long long irecordid);
 
     //添加历史记录

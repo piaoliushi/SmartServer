@@ -97,7 +97,8 @@ namespace hx_net
 
         //-------2016-3-30------------------------//
         void  parse_item_alarm(string devId,float fValue,DeviceMonitorItem &ItemInfo);
-        void  record_alarm_and_notify(string &devId,float fValue,DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm);
+        void  record_alarm_and_notify(string &devId,float fValue,const float &fLimitValue,bool bMod,
+                                        DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm);
 	public:	
 		void handle_connected(const boost::system::error_code& error);
 		void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);//通用消息头（分消息head，body）
@@ -128,7 +129,7 @@ namespace hx_net
 		boost::recursive_mutex          alarm_state_mutex;
         map<string,map<int,std::pair<int,tm> > >           mapItemAlarmStartTime;//报警项报警开始时间
         map<string,map<int,std::pair<int,unsigned int> > > mapItemAlarmRecord;
-        //devid<itemid<alarmid,info>>>
+        //devid<itemid<iLimittype,info>>>
         map<string ,map<int,map<int,CurItemAlarmInfo> > > mapItemAlarm;//设备监控量告警信息
 
 		map<string,time_t>                               tmLastSaveTime;

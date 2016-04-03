@@ -123,7 +123,7 @@ typedef struct
 #define    ALARM_LOW_LOWER   3
 #define    ALARM_SWITCH          4
 
-
+const char CONST_STR_ALARM_CONTENT[][32] = {"跃上限","跃下限","跃上上限","跃下下限","报警","恢复正常"};
 typedef struct
 {
     int iAlarmid;            //告警类型id
@@ -224,6 +224,7 @@ typedef struct
     int           nTargetId; //指标id
     int           nModuleId;//模块id
     int           nModuleType;//模块type
+    int           nLimitId;//跃限类型,跃上限...
 }CurItemAlarmInfo;
 
 typedef struct DATA_INFO_TAG

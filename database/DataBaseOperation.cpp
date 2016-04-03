@@ -69,7 +69,7 @@ bool DataBaseOperation::ReOpen()
 }
 
 //获得数据字典映射表
-bool DataBaseOperation::GetDataDictionary(map<int,string>& mapDicry)
+bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicry)
 {
     if(!IsOpen())
     {
@@ -77,7 +77,7 @@ bool DataBaseOperation::GetDataDictionary(map<int,string>& mapDicry)
         return false;
     }
     QSqlQuery query;
-    QString strSql=QString("select code,name from data_dictionary where type='IndexType' union select alarmswitch,alarmswitchname from alarm_switch");
+    QString strSql=QString("select code,name,remark from data_dictionary where type='IndexType' union select alarmswitch,alarmswitchname,remark from alarm_switch");
    query.prepare(strSql);
    if(!query.exec())
    {
@@ -85,7 +85,8 @@ bool DataBaseOperation::GetDataDictionary(map<int,string>& mapDicry)
    }
    while(query.next())
    {
-       mapDicry[query.value(0).toInt()] = query.value(1).toString().toStdString();
+       mapDicry[query.value(0).toInt()] = pair<string,string>(query.value(1).toString().toStdString(),query.value(2).toString().toStdString());
+       cout<<query.value(1).toString().toStdString()<<endl;
    }
     return true;
 }
@@ -212,7 +213,7 @@ bool DataBaseOperation::GetDevMonitorSch( string strDevnum,map<int,vector<Monito
         return false;
     }
     QSqlQuery schquery;
-    QString strSql=QString("select id,ObjectNumber,WeekDay,Enable,StartTime,EndTime,datetype,month,day,alarmendtime,Enable from Monitoring_Scheduler where ObjectNumber=%1").arg(QString::fromStdString(strDevnum));
+    QString strSql=QString("select id,ObjectNumber,WeekDay,Enable,StartTime,EndTime,datetype,month,day,alarmendtime from Monitoring_Scheduler where ObjectNumber='%1'").arg(QString::fromStdString(strDevnum));
     schquery.prepare(strSql);
     if(schquery.exec())
     {
@@ -221,13 +222,14 @@ bool DataBaseOperation::GetDevMonitorSch( string strDevnum,map<int,vector<Monito
             Monitoring_Scheduler msch;
         //	msch.gid = schquery.value(0).toInt();//"Guid"
             msch.iMonitorWeek = schquery.value(2).toInt();
+            msch.bMonitorFlag = schquery.value(3).toBool();
             msch.tStartTime = schquery.value(4).toDateTime().toTime_t();
             msch.tEndTime = schquery.value(5).toDateTime().toTime_t();
             int iMonitorType = schquery.value(6).toInt();
             msch.iMonitorMonth = schquery.value(7).toInt();
             msch.iMonitorDay = schquery.value(8).toInt();
             msch.tAlarmEndTime = schquery.value(9).toDateTime().toTime_t();
-            msch.bMonitorFlag = schquery.value(10).toBool();
+
             mapMonitorSch[iMonitorType].push_back(msch);
         }
     }
@@ -357,7 +359,7 @@ bool DataBaseOperation::GetDevProperty( string strDevnum,map<string,DevProperty>
         return false;
     }
     QSqlQuery itemschquery;
-    QString strSql=QString("select a.BasePropertyNumber,a.PropertyValueType,a.PropertyValue,b.PropertylName from Device_Property_Role_Bind a,Base_Propertyb \
+    QString strSql=QString("select a.BasePropertyNumber,a.PropertyValueType,a.PropertyValue,b.PropertyName from Device_Property_Role_Bind a,Base_Property b \
                            where a.DeviceNumber='%1' and b.BasePropertyNumber=a.BasePropertyNumber").arg(QString::fromStdString(strDevnum));
     itemschquery.prepare(strSql);
     if(itemschquery.exec())
@@ -741,7 +743,8 @@ bool DataBaseOperation::UpdateItemAlarmConfigs( string strDevnum,map<int,Alarm_c
     return true;
 }
 
-bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,int nMonitoringIndex,int alarmType,double dValue,unsigned long long& irecordid )
+bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,int nMonitoringIndex,int nlimitType,int nalarmTypeId,double dValue,
+                                            const string &sreason,unsigned long long& irecordid )
 {
     if(!IsOpen())
     {
@@ -749,8 +752,8 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
         return false;
     }
     QSqlQuery inquery;
-    QString strSql=QString("insert into device_alarm_record(devicenumber,monitoringindex,alarmstarttime,alarmendtime,alarmtype,alarmvalue) values(:devicenumber,:monitoringindex,\
-                           :alarmstarttime,:alarmtype,:alarmvalue)");
+    QString strSql=QString("insert into device_alarm_record(devicenumber,monitoringindex,alarmstarttime,alarmendtime,limittype,alarmvalue,alarmtypeid,alarmreason) values(:devicenumber,:monitoringindex,\
+                           :alarmstarttime,:limittype,:alarmvalue,:alarmtypeid,:alarmreason)");
     inquery.prepare(strSql);
     inquery.bindValue(":devicenumber",QString::fromStdString(strDevnum));
     inquery.bindValue(":monitoringindex",nMonitoringIndex);
@@ -759,8 +762,10 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
     qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
     qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
     inquery.bindValue(":alarmstarttime",qdt);
-    inquery.bindValue(":alarmtype",alarmType);
+    inquery.bindValue(":limittype",nlimitType);
     inquery.bindValue(":alarmvalue",dValue);
+    inquery.bindValue(":alarmtypeid",nalarmTypeId);
+    inquery.bindValue(":alarmreason",QString::fromStdString(sreason));
     boost::mutex::scoped_lock lock(db_connect_mutex_);
     if(!inquery.exec())
     {
@@ -855,11 +860,14 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
     }
     for(;tranNode!=NULL;tranNode=tranNode->next_sibling())
     {
-        rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("ID");
+        rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("TransmitterID");
         if(attr==NULL)
         {
-            resValue = 11;
-            return false;
+            attr = tranNode->first_attribute("ID");
+            if(attr==NULL){
+                resValue = 11;
+                return false;
+            }
         }
         QString qsTransNum = attr->value();
         boost::mutex::scoped_lock lock(db_connect_mutex_);
@@ -918,11 +926,14 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
 
     for(;tranNode!=NULL;tranNode=tranNode->next_sibling())
     {
-        rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("ID");
+        rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("TransmitterID");
         if(attr==NULL)
         {
-            resValue = 11;
-            return false;
+            attr = tranNode->first_attribute("ID");
+            if(attr==NULL){
+                resValue = 11;
+                return false;
+            }
         }
         QString qsTransNum = attr->value();
         boost::mutex::scoped_lock lock(db_connect_mutex_);
@@ -1033,7 +1044,7 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
     resValue = 0;
     return true;
 }
-
+//设置发射机运行图
 bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
 {
     if(!IsOpen())

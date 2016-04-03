@@ -12,21 +12,17 @@ public:
     http_request_session(boost::asio::io_service& io_service);
     virtual ~http_request_session(void);
     //打开url
-    void open(std::string sUrl,std::string sData="",std::string sRqstType="POST");
+    void openUrl(std::string sUrl,std::string sData="",std::string sRqstType="POST");
 
     //上报http消息到上级平台(数据)
-    void send_http_data_messge_to_platform(string sDevid,devDataNfyMsgPtr &dataPtr);
+    void send_http_data_messge_to_platform(string sDevid,int nDevType,DevMonitorDataPtr &curData,
+                                           map<int,DeviceMonitorItem> &mapMonitorItem);
     //上报http消息到上级平台(执行结果)
-    void send_http_excute_result_messge_to_platform(string sDevid,devCommdRsltPtr &commdRsltPtr);
+    void send_http_excute_result_messge_to_platform(string sDevid,string &sTime,int ndevState,const string &desc);
     //上报http消息到上级平台(告警)
-    void send_http_alarm_messge_to_platform(string sDevid,devAlarmNfyMsgPtr &alarmPtr);
-    //上报http消息到上级平台(连接状态)
-    void send_http_data_messge_to_platform(string sDevid,devNetNfyMsgPtr &netPtr);
-    //http连接发送handler
-    void http_open_handler(const boost::system::error_code& ec);
-    //http发送
-    void send_http_message(string &sMessage);
-
+    void send_http_alarm_messge_to_platform(string sDevid,int nDevType,int nMod,CurItemAlarmInfo &alarmInfo,string &reason);
+    //上报http消息到上级平台(通讯异常告警)
+    void send_http_alarm_messge_to_platform(string sDevid,int nMod,CurItemAlarmInfo &alarmInfo,string &reason);
 protected:
     void  read_handler(const boost::system::error_code& ec, std::size_t length);
     void  open_handler(const boost::system::error_code& ec);
