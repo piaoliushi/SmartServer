@@ -91,7 +91,7 @@ http_request_session::http_request_session(boost::asio::io_service& io_service)
  }
 
  //上报http消息到上级平台(执行结果)
- void http_request_session::send_http_excute_result_messge_to_platform(string sDevid,string &sTime,int ndevState,const string &desc)
+ void http_request_session::send_http_excute_result_messge_to_platform(string sDevid,string sTime,int ndevState,const string &desc)
  {
      string sReportMsg;
      Bohui_Protocol  bh_ptcl;

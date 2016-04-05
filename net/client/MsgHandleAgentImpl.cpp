@@ -1,15 +1,16 @@
 #include "MsgHandleAgentImpl.h"
 #include "./dev_message/Envir_message.h"
-#include "./dev_message/Hx_message.h"
-#include "./dev_message/Eda_message.h"
+//#include "./dev_message/Hx_message.h"
+#include "./dev_message/Tsmt_message.h"
 #include "./dev_message/Electric_message.h"
 
 namespace hx_net
 {
-    MsgHandleAgentImpl::MsgHandleAgentImpl(net_session *pSession,boost::asio::io_service& io_service)
+    MsgHandleAgentImpl::MsgHandleAgentImpl(net_session *pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
 		:m_pSessionPtr(pSession)
 		,m_pbaseMsg(0)
 		,m_io_service(io_service)
+        ,m_devInfo(devInfo)
 	{
 	}
 
@@ -17,49 +18,32 @@ namespace hx_net
 	{
 	}
 
-	bool MsgHandleAgentImpl::Init(Protocol protocol,int Subprotocol,int DevCode,map<int,double> &itemRatio)
+    bool MsgHandleAgentImpl::Init()
 	{
-		switch(protocol)
+        switch(m_devInfo.iDevType)
 		{
-		case WS2032:
-			{
-				m_pbaseMsg = new Envir_message(m_pSessionPtr);
-				if(m_pbaseMsg == NULL)
-					return false;
-                //m_pbaseMsg->Agent()->HxInit(protocol,Subprotocol,DevCode,itemRatio);
+        case DEVICE_TRANSMITTER:{
+                m_pbaseMsg = new Tsmt_message(m_pSessionPtr,m_io_service,m_devInfo);
+             }
+            break;
+        case DEVICE_TEMP:
+        case DEVICE_SMOKE:
+        case DEVICE_WATER:
+        case DEVICE_AIR:{
+                m_pbaseMsg = new Envir_message(m_pSessionPtr,m_devInfo);
 			}
 			break;
-		case HUIXIN:
-			{
-				m_pbaseMsg = new Hx_message(m_pSessionPtr);
-				if(m_pbaseMsg == NULL)
-					return false;
-                //m_pbaseMsg->Agent()->HxInit(protocol,Subprotocol,DevCode,itemRatio);
+        case HUIXIN:	{
+                //m_pbaseMsg = new Hx_message(m_pSessionPtr);
 			}
 			break;
-		case EDA9033:
-			{
-				m_pbaseMsg = new Eda_message(m_pSessionPtr);
-				if(m_pbaseMsg == NULL)
-					return false;
-                //m_pbaseMsg->Agent()->HxInit(protocol,Subprotocol,DevCode,itemRatio);
-			}
-			break;
-		case ELECTRIC:
-			{
-				m_pbaseMsg = new Electric_message(m_pSessionPtr,m_io_service);
-				if(m_pbaseMsg == NULL)
-					return false;
-                //m_pbaseMsg->Agent()->HxInit(protocol,Subprotocol,DevCode,itemRatio);
+        case DEVICE_ELEC:{
+                m_pbaseMsg = new Electric_message(m_pSessionPtr,m_io_service,m_devInfo);
 			}
 			break;
 		default:
 			return false;
 		}
-		m_pbaseMsg->SetSubPro(Subprotocol);
-		m_pbaseMsg->SetAddr(DevCode);
-		m_CurProtocol = protocol;
-		
 		return true;
 	}
 
@@ -181,5 +165,19 @@ namespace hx_net
 			return ;
 		return m_pbaseMsg->getRegisterCommand(cmdUnit);
 	}
+
+    int  MsgHandleAgentImpl::cur_dev_state()
+    {
+        if(m_pbaseMsg==NULL)
+            return -1;
+        return m_pbaseMsg->cur_dev_state();
+    }
+
+    void MsgHandleAgentImpl::exec_task_now(int icmdType,int nResult)
+    {
+        if(m_pbaseMsg==NULL)
+            return ;
+        return m_pbaseMsg->exec_task_now(icmdType,nResult);
+    }
 }
 

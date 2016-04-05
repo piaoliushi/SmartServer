@@ -12,16 +12,15 @@ namespace hx_net
 		base_message(void);
 		virtual ~base_message(void);
 	public:
-		virtual void SetSubPro(int subprotocol){};
-		virtual int check_msg_header(unsigned char *data,int nDataLen){return -1;};
-		virtual int decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen){return -1;};
+        virtual void SetProtocol(int mainprotocol,int subprotocol){}
+        virtual int check_msg_header(unsigned char *data,int nDataLen){return -1;}
+        virtual int decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen){return -1;}
 		virtual int PreHandleMsg(){return -1;}
-		virtual void input_params(const vector<string> &vParam){};
+        virtual void input_params(const vector<string> &vParam){}
 		virtual bool IsStandardCommand(){return false;}
-		virtual void SetAddr(int addr){};
-		virtual void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit){};
+        virtual void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit){}
 		virtual bool isRegister(){return true;}
-		virtual void getRegisterCommand(CommandUnit &cmdUnit){};
+        virtual void getRegisterCommand(CommandUnit &cmdUnit){}
 		virtual int start(){return -1;}
 		virtual int stop(){return -1;}
 		virtual	bool is_auto_run(){return false;}
@@ -32,6 +31,9 @@ namespace hx_net
 		virtual bool ItemValueIsAlarm(DevMonitorDataPtr curDataPtr,int monitorItemId,dev_alarm_state &curState){return false;}
         //HDevAgentPtr Agent(){return dev_agent_;}
 		unsigned long CRC16_A001( unsigned char * ptr, int len );
+
+        virtual int cur_dev_state(){return -1;}
+        virtual void exec_task_now(int icmdType,int nResult){}
 	public:
         static void Char2Hex(unsigned char ch, char* szHex);
 		static void CharStr2HexStr(unsigned char const* pucCharStr, string &pszHexStr, int iSize);

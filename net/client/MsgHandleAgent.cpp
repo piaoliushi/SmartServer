@@ -2,8 +2,8 @@
 #include "MsgHandleAgentImpl.h"
 namespace hx_net
 {
-    MsgHandleAgent::MsgHandleAgent(net_session *conPtr,boost::asio::io_service& io_service)
-		:m_msgImpl( new MsgHandleAgentImpl(conPtr,io_service))
+    MsgHandleAgent::MsgHandleAgent(net_session *conPtr,boost::asio::io_service& io_service,DeviceInfo &devInfo)
+        :m_msgImpl( new MsgHandleAgentImpl(conPtr,io_service,devInfo))
 	{
 	}
 
@@ -17,11 +17,11 @@ namespace hx_net
 		}
 	}
 
-	bool MsgHandleAgent::Init(int protocol,int Subprotocol,int DevCode,map<int,double> &itemRatio)
+    bool MsgHandleAgent::Init()
 	{
 		if(m_msgImpl==NULL)
 			return false;
-		return m_msgImpl->Init((Protocol)protocol,Subprotocol,DevCode,itemRatio);
+        return m_msgImpl->Init();
 	}
 
 	bool MsgHandleAgent::Finit()
@@ -141,4 +141,18 @@ namespace hx_net
 			return ;
 		return m_msgImpl->getRegisterCommand(cmdUnit);
 	}
+
+    int  MsgHandleAgent::cur_dev_state()
+    {
+        if(m_msgImpl==NULL)
+            return -1;
+        return m_msgImpl->cur_dev_state();
+    }
+
+    void MsgHandleAgent::exec_task_now(int icmdType,int nResult)
+    {
+        if(m_msgImpl==NULL)
+            return ;
+        return m_msgImpl->exec_task_now(icmdType,nResult);
+    }
 }

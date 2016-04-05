@@ -32,10 +32,8 @@ SOURCES += main.cpp\
     net/client/DevClient.cpp \
     net/client/client_work.cpp \
     net/client/client_session.cpp \
-    net/client/dev_message/Hx_message.cpp \
     net/client/dev_message/Envir_message.cpp \
     net/client/dev_message/Electric_message.cpp \
-    net/client/dev_message/Eda_message.cpp \
     net/client/dev_message/base_message.cpp \
     net/client/dev_message/104/iec104.cpp \
     protocol/protocol.pb.cc \
@@ -53,7 +51,8 @@ SOURCES += main.cpp\
     database/DataBaseOperation.cpp \
     net/net_session.cpp \
     net/client/http_request_session.cpp \
-    net/client/urdl.cpp
+    net/client/urdl.cpp \
+    net/client/dev_message/Tsmt_message.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -81,10 +80,8 @@ HEADERS  += \
     net/client/DevClient.h \
     net/client/client_work.h \
     net/client/client_session.h \
-    net/client/dev_message/Hx_message.h \
     net/client/dev_message/Envir_message.h \
     net/client/dev_message/Electric_message.h \
-    net/client/dev_message/Eda_message.h \
     net/client/dev_message/base_message.h \
     net/client/dev_message/104/iec104_types.h \
     net/client/dev_message/104/iec104.h \
@@ -112,7 +109,8 @@ HEADERS  += \
     DataTypeDefine.h \
     database/DataBaseOperation.h \
     net/net_session.h \
-    net/client/http_request_session.h
+    net/client/http_request_session.h \
+    net/client/dev_message/Tsmt_message.h
 
 FORMS    += mainwindow.ui
 

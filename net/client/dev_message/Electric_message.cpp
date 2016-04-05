@@ -3,8 +3,9 @@
 #include "./104/iec104.h"
 namespace hx_net
 {
-    Electric_message::Electric_message(net_session *pSession,boost::asio::io_service& io_service)
+    Electric_message::Electric_message(net_session *pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
 		:m_pSession(pSession)
+        ,d_devInfo(devInfo)
 		,d_test_send_timer_(io_service)
 		,d_interrogation_send_timer_(io_service)
 		,m_Register(false)
@@ -19,76 +20,135 @@ namespace hx_net
 	{
 	}
 
-	void Electric_message::SetSubPro(int subprotocol)
-	{
-		m_Subprotocol = (ElectricSubProtocol)subprotocol;
-		switch (m_Subprotocol)
-		{
-		case ELECTRIC_101:
-			m_Register =true;
-			break;
-		case ELECTRIC_104:
-			m_Register = false;
-			break;
-		}
-	}
+    void Electric_message::SetProtocol(int mainprotocol,int subprotocol)
+    {
+        switch(mainprotocol){
+        case EDA9033:
+            break;
+        case ELECTRIC:{
+            switch (subprotocol)
+            {
+            case ELECTRIC_101:
+                m_Register =true;
+                break;
+            case ELECTRIC_104:
+                m_Register = false;
+                break;
+            }
+        }
+            break;
+        }
+
+        m_Subprotocol = subprotocol;
+        m_mainprotocol =  mainprotocol;
+
+    }
 
 	bool Electric_message::isRegister()
 	{
 		return m_Register;
 	}
 
-	int Electric_message::check_msg_header(unsigned char *data,int nDataLen)
-	{
-		switch (m_Subprotocol)
-		{
-		case ELECTRIC_104:
-			{
-				if(data[0]==START)
-				{
-					int nBodyLen = data[1];
-					if(nBodyLen < IEC_APDU_MIN || nBodyLen > IEC_APDU_MAX)
-						return -1;
-					else
-						return nBodyLen;
-				}else
-					return -1;
-			}
-		}
-		return -1;
+    int Electric_message::check_msg_header(unsigned char *data,int nDataLen)
+    {
+        switch(m_mainprotocol){
+        case EDA9033:{
+            switch (m_Subprotocol)
+            {
+            case ZXJY_BACK:
+            {
+                if(data[0]==0x00)
+                {
+                    int nBodyLen = ((data[5]<<8)|(data[4]))*((data[7]<<8)|(data[6]));
+                    if(nDataLen == nBodyLen+8)
+                        return 0;
+                }else
+                    return -1;
+            }
+            }
+        }
+            break;
+        case ELECTRIC:{
+            switch (m_Subprotocol)
+            {
+            case ELECTRIC_104: {
+                if(data[0]==START) {
+                    int nBodyLen = data[1];
+                    if(nBodyLen < IEC_APDU_MIN || nBodyLen > IEC_APDU_MAX)
+                        return -1;
+                    else
+                        return nBodyLen;
+                     }else
+                        return -1;
+                    }
+             }
+          }
+            break;
+        }
+        return -1;
 	}
 
 	int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
 	{
-		switch (m_Subprotocol)
-		{
-		case ELECTRIC_104:
-			return parse_104_data(data,data_ptr,nDataLen);
-		}
-		return -1;
+        switch(m_mainprotocol){
+        case EDA9033:
+            break;
+        case ELECTRIC:{
+               switch (m_Subprotocol)
+                {
+                 case ELECTRIC_104:
+                         return parse_104_data(data,data_ptr,nDataLen);
+                }
+             }
+            break;
+        }
+        return -1;
 	}
 
 	bool Electric_message::IsStandardCommand()
 	{
-		switch (m_Subprotocol)
-		{
-		case ELECTRIC_104:
-		case ELECTRIC_101:
-			return true;
-		}
-		return false;
+        switch(m_mainprotocol){
+        case EDA9033:{
+            switch (m_Subprotocol)
+            {
+            case Eda9003_F:
+                return false;
+            case ZXJY_BACK:
+                return true;
+            }
+            return false;
+        }
+            break;
+        case ELECTRIC:{
+            switch (m_Subprotocol)
+            {
+            case ELECTRIC_104:
+            case ELECTRIC_101:
+                return true;
+            }
+        }
+            break;
+        }
+        return false;
 	}
 	
 	void Electric_message::getRegisterCommand(CommandUnit &cmdUnit)
 	{
-		switch (m_Subprotocol)
-		{
-		case ELECTRIC_104:
-			break;
-		case ELECTRIC_101:
-			return;
-		}
-	}
+        switch(m_mainprotocol){
+        case EDA9033:
+            break;
+        case ELECTRIC:{
+            switch (m_Subprotocol)
+            {
+            case ELECTRIC_104:
+                break;
+            case ELECTRIC_101:
+                return;
+            }
+        }
+            break;
+        }
+    }
 
 
 	int Electric_message::parse_104_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)

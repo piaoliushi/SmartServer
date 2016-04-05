@@ -52,6 +52,8 @@ namespace hx_net
 		void clear_dev_alarm(string sDevId);
 		//发送消息
 		bool sendRawMessage(unsigned char * data_,int nDatalen);
+        //启动定时控制
+        void start_task_schedules_timer();
 	protected:
 		void start_read_head(int msgLen);//开始接收头
 		void start_read_body(int msgLen);//开始接收体
@@ -69,8 +71,6 @@ namespace hx_net
 		bool is_stop();
         void close_all();
 		//判断监测量是否报警
-        //bool ItemValueIsAlarm(string devId,float fValue,DevParamerMonitorItem &ItemInfo,
-        //	                                            dev_alarm_state &alarm_state);
 		void check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,bool bMonitor);
 
 		void save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtr);
@@ -99,14 +99,20 @@ namespace hx_net
         void  parse_item_alarm(string devId,float fValue,DeviceMonitorItem &ItemInfo);
         void  record_alarm_and_notify(string &devId,float fValue,const float &fLimitValue,bool bMod,
                                         DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm);
+        void set_opr_state(string sdevId,dev_opr_state curState);
+        dev_opr_state get_opr_state(string sdevId);
+
 	public:	
 		void handle_connected(const boost::system::error_code& error);
 		void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);//通用消息头（分消息head，body）
 		void handle_read_body(const boost::system::error_code& error, size_t bytes_transferred);//通用消息体
         void handle_udp_read(const boost::system::error_code& error,size_t bytes_transferred);//udp接收回调
 		void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
+        void schedules_task_time_out(const boost::system::error_code& error);
 		virtual void handle_write(const boost::system::error_code& error,size_t bytes_transferred);
-		
+       //开始执行任务
+        bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType);
+        void notify_client(string sDevId,string devName,string user,int cmdType, tm *pCurTime,int eResult);
 	private:
 		boost::mutex					stop_mutex_;
 		bool								    stop_flag_;
@@ -121,25 +127,27 @@ namespace hx_net
 		boost::asio::deadline_timer     connect_timer_;//连接定时器
 		boost::asio::deadline_timer     timeout_timer_;//连接超时定时器
 		boost::asio::deadline_timer     query_timer_;//查询定时器   
+        boost::asio::deadline_timer     schedules_task_timer_;//控制任务执行定时器
 
-		size_t                          command_timeout_count_;//命令执行超时次数
+        size_t                          query_timeout_count_;//查询命令执行超时次数
 		size_t                          cur_msg_q_id_;//当前发送的消息序号
+
 		TaskQueue<msgPointer>&          taskwork_;//任务队列应用(应修改为发射机特定任务)
 		boost::recursive_mutex          data_deal_mutex;
 		boost::recursive_mutex          alarm_state_mutex;
-        map<string,map<int,std::pair<int,tm> > >           mapItemAlarmStartTime;//报警项报警开始时间
-        map<string,map<int,std::pair<int,unsigned int> > > mapItemAlarmRecord;
-        //devid<itemid<iLimittype,info>>>
+        //map<string,map<int,std::pair<int,tm> > >           mapItemAlarmStartTime;//报警项报警开始时间
+        //map<string,map<int,std::pair<int,unsigned int> > > mapItemAlarmRecord;
+        //devid<itemid<iLimittype,info> > >
         map<string ,map<int,map<int,CurItemAlarmInfo> > > mapItemAlarm;//设备监控量告警信息
 
 		map<string,time_t>                               tmLastSaveTime;
         map<string,pair<CommandAttrPtr,HMsgHandlePtr> >   dev_agent_and_com;//add by lk 2013-11-26
 		string                                           cur_dev_id_;//当前查询设备id
 
-		ModleInfo                          &modleInfos;
-		boost::mutex                        task_mutex_;
-		int											task_count_;
-		boost::condition                  task_end_conditon_;
+        ModleInfo                          &modleInfos;
+        boost::mutex                        task_mutex_;
+        int											task_count_;
+        boost::condition                  task_end_conditon_;
 
 		map<string,pTransmitterPropertyExPtr>       run_config_ptr;//moxa下设备配置
 		pMoxaPropertyExPtr                          moxa_config_ptr;//moxa配置
@@ -149,6 +157,12 @@ namespace hx_net
 #endif
 
         http_request_session_ptr   &http_ptr_;
+
+        boost::mutex                    opr_state_mutex_;
+        map<string,dev_opr_state>                   dev_opr_state_;//设备控制命令发送状态
+        map<string,string>				   cur_opr_user_;//当前命令发起用户
+        map<string,int>                    cur_task_type_;//当前任务类型
+        //map<string,time_t>               cur_task_start_time_;//当前任务提交开始时间
 	};
 }
 #endif

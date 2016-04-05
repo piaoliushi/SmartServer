@@ -43,6 +43,11 @@ enum DEVType
 #define    RUN_TIME_WEEK      1 //运行图-星期
 #define    RUN_TIME_MONTH    2 //运行图-月
 
+
+enum _tag_CommandType{
+    DEV_TASK_TURNON  = 0,
+    DEV_TASK_TURNOFF = 1,
+};
 //运行图结构
 typedef struct
 {
@@ -65,12 +70,13 @@ typedef struct
 
 typedef struct
 {
-    int gid;
-    int iCommandType;
-    int iWeek;
+    int      gid;
+    int      iCommandType; //命令类型
+    int      iDateType;         //时间类型
+    int      iWeek;              //星期
     int      iMonitorMonth;  //月（0-12，0=all）
     int      iMonitorDay;      //日(1-31)
-    time_t       tCmdEndTime;     //月运行计划终止日期
+    time_t  tCmdEndTime;  //月运行计划终止日期
     time_t  tExecuteTime;
     int iHasParam;
     CmdParam cParam;

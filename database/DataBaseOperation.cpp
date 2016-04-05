@@ -276,7 +276,7 @@ bool DataBaseOperation::GetCmd( string strDevnum,vector<Command_Scheduler>& vcmd
         return false;
     }
     QSqlQuery cmdschquery;
-    QString strSql=QString("select id,CommandType,WeekDay,StartTime,HasParam,ParamNumber,month,day,commandendtime from Command_Scheduler where ObjectNumber='%1' and Enable=1").arg(QString::fromStdString(strDevnum));
+    QString strSql=QString("select id,CommandType,WeekDay,StartTime,HasParam,ParamNumber,month,day,commandendtime,datetype from Command_Scheduler where ObjectNumber='%1' and Enable=1").arg(QString::fromStdString(strDevnum));
     cmdschquery.prepare(strSql);
     if(cmdschquery.exec())
     {
@@ -296,6 +296,7 @@ bool DataBaseOperation::GetCmd( string strDevnum,vector<Command_Scheduler>& vcmd
             cmd_sch.iMonitorMonth = cmdschquery.value(6).toInt();
             cmd_sch.iMonitorDay = cmdschquery.value(7).toInt();
             cmd_sch.tCmdEndTime = cmdschquery.value(8).toDateTime().toTime_t();
+            cmd_sch.iDateType = cmdschquery.value(9).toInt();
             vcmdsch.push_back(cmd_sch);
         }
     }

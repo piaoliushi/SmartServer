@@ -27,7 +27,6 @@ namespace hx_net
 		void input_params(const vector<string> &vParam);
 		bool IsStandardCommand();
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
-		void SetAddr(int addr){m_DevAddr = addr;};
 		int  getChannelCount();
 		//该监控量是否属于该通道
 		bool isBelongChannel(int nChnnel,int monitorItemId);
@@ -47,7 +46,6 @@ namespace hx_net
 		HxSubPrototcol m_Subprotocol;
         net_session *m_pSession;
 		hxDataMgrParamPtr  m_ParamPtr; 
-		int           m_DevAddr;//设备地址
 		map<int,int>  m_mapAlarm;//当前报警
         map<int,std::pair<int,unsigned int> > m_mapItemAlarmRecord;
 	};

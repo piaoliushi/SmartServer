@@ -8,10 +8,10 @@ namespace hx_net
 	class MsgHandleAgentImpl
 	{
 	public:
-        MsgHandleAgentImpl(net_session *pSession,boost::asio::io_service& io_service);
+        MsgHandleAgentImpl(net_session *pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo);
 		~MsgHandleAgentImpl(void);
 	public:
-		bool Init(Protocol protocol,int Subprotocol,int DevCode,map<int,double> &itemRatio);
+        bool Init();
 		bool Finit();
 		int start();
 		int stop();
@@ -20,7 +20,6 @@ namespace hx_net
 		int  check_msg_header(unsigned char *data,int nDataLen);
 		int  decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
 		void input_params(const vector<string> &vParam);
-        //HDevAgentPtr DevAgent();
 		bool IsStandardCommand();
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
 		int getChannelCount();
@@ -30,10 +29,12 @@ namespace hx_net
 
 		bool isRegister();
 		void getRegisterCommand(CommandUnit &cmdUnit);
+        int  cur_dev_state();
+        void exec_task_now(int icmdType,int nResult);
 	public:
-		Protocol      m_CurProtocol;
 		base_message *m_pbaseMsg;
         net_session      *m_pSessionPtr;
 		boost::asio::io_service    &m_io_service;
+        DeviceInfo     &m_devInfo;
 	};
 }
