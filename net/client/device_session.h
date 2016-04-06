@@ -135,11 +135,9 @@ namespace hx_net
 		TaskQueue<msgPointer>&          taskwork_;//任务队列应用(应修改为发射机特定任务)
 		boost::recursive_mutex          data_deal_mutex;
 		boost::recursive_mutex          alarm_state_mutex;
-        //map<string,map<int,std::pair<int,tm> > >           mapItemAlarmStartTime;//报警项报警开始时间
-        //map<string,map<int,std::pair<int,unsigned int> > > mapItemAlarmRecord;
         //devid<itemid<iLimittype,info> > >
         map<string ,map<int,map<int,CurItemAlarmInfo> > > mapItemAlarm;//设备监控量告警信息
-
+        CurItemAlarmInfo  netAlarm;//通讯异常告警
 		map<string,time_t>                               tmLastSaveTime;
         map<string,pair<CommandAttrPtr,HMsgHandlePtr> >   dev_agent_and_com;//add by lk 2013-11-26
 		string                                           cur_dev_id_;//当前查询设备id
@@ -149,8 +147,8 @@ namespace hx_net
         int											task_count_;
         boost::condition                  task_end_conditon_;
 
-		map<string,pTransmitterPropertyExPtr>       run_config_ptr;//moxa下设备配置
-		pMoxaPropertyExPtr                          moxa_config_ptr;//moxa配置
+        map<string,pDevicePropertyExPtr>       run_config_ptr;//moxa下设备配置
+        pMoxaPropertyExPtr              moxa_config_ptr;//moxa配置
 
 #ifdef USE_STRAND
 		io_service::strand              strand_;   //消息头与消息体同步

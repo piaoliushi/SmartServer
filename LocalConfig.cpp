@@ -187,7 +187,7 @@ bool LocalConfig::load_local_config(const char* sFileName)
             string devId = xml_device->first_attribute("id")->value();
             if(!devId.empty())
             {
-                pTransmitterPropertyExPtr tmpPropertyEx= pTransmitterPropertyExPtr(new TransmitterPropertyEx);
+                pDevicePropertyExPtr tmpPropertyEx= pDevicePropertyExPtr(new DevicePropertyEx);
                 //查询超时次数
                 xml_node<>* xml_property = xml_device->first_node("query_timeout_count");
                 if(xml_property)
@@ -358,8 +358,8 @@ bool LocalConfig::load_local_config(const char* sFileName)
                     }
                 }
 
-                transmintters_cmd[devId] = cmd;
-                transmitters_property_Ex_[devId]=tmpPropertyEx;
+                devices_cmd_[devId] = cmd;
+                device_property_Ex_[devId]=tmpPropertyEx;
             }
 
             xml_device=xml_device->next_sibling("device");
@@ -369,15 +369,15 @@ bool LocalConfig::load_local_config(const char* sFileName)
 
     return false;
 }
-map<string,pTransmitterPropertyExPtr>& LocalConfig::transmitter_property_ex()
+map<string,pDevicePropertyExPtr>& LocalConfig::device_property_ex()
 {
-    return transmitters_property_Ex_;
+    return device_property_Ex_;
 }
-pTransmitterPropertyExPtr  LocalConfig::transmitter_property_ex(string sTransmitterId)
+pDevicePropertyExPtr  LocalConfig::device_property_ex(string sTransmitterId)
 {
-    map<string,pTransmitterPropertyExPtr>::iterator iter = transmitters_property_Ex_.find(sTransmitterId);
-    if(iter==transmitters_property_Ex_.end())
-        return pTransmitterPropertyExPtr(new TransmitterPropertyEx);
+    map<string,pDevicePropertyExPtr>::iterator iter = device_property_Ex_.find(sTransmitterId);
+    if(iter==device_property_Ex_.end())
+        return pDevicePropertyExPtr(new DevicePropertyEx);
     else
         return (*iter).second;
 }
@@ -454,10 +454,10 @@ bool LocalConfig::writeSmsParToXml(const char* sFileName,bool bUse,string comId,
     return false;
 }
 
-void LocalConfig::transmitter_cmd( string sTransmitterId,CommandAttribute& cmd )
+void LocalConfig::device_cmd( string sDevId,CommandAttribute& cmd )
 {
-    map<string,CommandAttribute>::iterator iter = transmintters_cmd.find(sTransmitterId);
-    if(iter!=transmintters_cmd.end())
+    map<string,CommandAttribute>::iterator iter = devices_cmd_.find(sDevId);
+    if(iter!=devices_cmd_.end())
     {
 
         if((*iter).second.queryComm.size()>0)

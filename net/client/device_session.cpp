@@ -33,39 +33,36 @@ device_session::device_session(boost::asio::io_service& io_service,
     ,http_ptr_(httpPtr)
 {
     //获得网络协议转换器相关配置
-    /*moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos.sModleNumber);
-        map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
-        for(;iter!=modleInfos.mapDevInfo.end();++iter)
-        {
-            map<int,double> itemRadio;
-            map<int,DeviceMonitorItem>::iterator iterItem = iter->second.map_MonitorItem.begin();
-            for(;iterItem!=iter->second.map_MonitorItem.end();++iterItem)
-            {
-                itemRadio.insert(pair<int,double>(iterItem->first,iterItem->second.dRatio));
-            }
+    moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos.sModleNumber);
+    map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
+    for(;iter!=modleInfos.mapDevInfo.end();++iter)
+    {
+        HMsgHandlePtr pars_agent = HMsgHandlePtr(new MsgHandleAgent(this,io_service,iter->second));
+        boost::shared_ptr<CommandAttribute> tmpCommand(new CommandAttribute);
 
-            //------------------ new code -----------------------------------------//
-            //HMsgHandlePtr pars_agent = HMsgHandlePtr(new MsgHandleAgent(this,io_service));
-            //boost::shared_ptr<CommandAttribute> tmpCommand(new CommandAttribute);
-            //pars_agent->Init((*iter).second.nDevProtocol,(*iter).second.nSubProtocol,(*iter).second.iDevAddress,itemRadio);
+        pDevicePropertyExPtr dev_config_ptr = GetInst(LocalConfig).device_property_ex((*iter).first);
 
-
-            pTransmitterPropertyExPtr dev_config_ptr = GetInst(LocalConfig).transmitter_property_ex((*iter).first);
-
-            //保存moxa下的设备自定义配置信息
-            run_config_ptr[(*iter).first]=dev_config_ptr;
-
-            //dev_agent_and_com[iter->first]=pair<CommandAttrPtr,HMsgHandlePtr>(tmpCommand,pars_agent);
-
-            //报警项初始化
-            map<int,std::pair<int,unsigned int> > devAlarmItem;
-            mapItemAlarmRecord.insert(std::make_pair(iter->first,devAlarmItem));
-            //定时数据保存时间初始化
-            tmLastSaveTime.insert(std::make_pair(iter->first,time(0)));
+        //保存moxa下的设备自定义配置信息
+        run_config_ptr[(*iter).first]=dev_config_ptr;
+        //获取默认命令配置
+        pars_agent->GetAllCmd(*tmpCommand);
+        //增加读配置文件获取命令回复长度...
+        if(dev_config_ptr->cmd_ack_length_by_id.size()>0)  {
+            for(int nCmdCount = 0;nCmdCount<tmpCommand->queryComm.size();++nCmdCount)
+                tmpCommand->queryComm[nCmdCount].ackLen = dev_config_ptr->cmd_ack_length_by_id[nCmdCount];
         }
-      cur_dev_id_ = dev_agent_and_com.begin()->first;
-*/
 
+        dev_agent_and_com[iter->first]=pair<CommandAttrPtr,HMsgHandlePtr>(tmpCommand,pars_agent);
+
+        //报警项初始化
+        map<int,map<int,CurItemAlarmInfo> > devAlarmItem;
+        mapItemAlarm.insert(std::make_pair(iter->first,devAlarmItem));
+        //定时数据保存时间初始化
+        tmLastSaveTime.insert(std::make_pair(iter->first,time(0)));
+    }
+    cur_dev_id_ = dev_agent_and_com.begin()->first;
+
+    netAlarm.nAlarmId = -1;//默认值
 }
 
 device_session::~device_session()
@@ -124,22 +121,36 @@ dev_run_state device_session::get_run_state()
 
 void device_session::set_con_state(con_state curState)
 {
-    /*boost::recursive_mutex::scoped_lock llock(con_state_mutex_);
+    boost::recursive_mutex::scoped_lock llock(con_state_mutex_);
         if(othdev_con_state_!=curState)
         {
             othdev_con_state_ = curState;
-            //GetInst(SvcMgr).get_notify()->OnConnected(this->modleInfos.sModleNumber,othdev_con_state_);
             map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
             for(;iter!=modleInfos.mapDevInfo.end();++iter)
             {
                 //广播设备状态到在线客户端
-                send_net_state_message("1000",(*iter).first
+                send_net_state_message(GetInst(LocalConfig).local_station_id(),(*iter).first
                                         ,(*iter).second.sDevName,(e_DevType)((*iter).second.iDevType)
                                         ,othdev_con_state_);
-                GetInst(SvcMgr).get_notify()->OnConnected((*iter).first,othdev_con_state_);
+                //GetInst(SvcMgr).get_notify()->OnConnected((*iter).first,othdev_con_state_);
+                //通知http服务器
+                if(iter->second.iDevType == DEVICE_TRANSMITTER){
+                    int nMod = (curState==con_connected)?1:0;
+                    if(netAlarm.nAlarmId==-1 && nMod==0){
+                        netAlarm.nAlarmId = time(0);
+                        netAlarm.nType = 2;//发射机断开
+                    }
+                    if(netAlarm.nAlarmId>0){
+                        string sReason;
+                        http_ptr_->send_http_alarm_messge_to_platform((*iter).first,nMod,netAlarm,sReason);
+                        if(nMod==1)
+                            netAlarm.nAlarmId=-1;
+                    }
+
+                }
             }
 
-        }*/
+        }
 }
 
 //获得发射机报警状态
@@ -904,12 +915,12 @@ void device_session::handle_read_body(const boost::system::error_code& error, si
 
 void device_session::handle_read(const boost::system::error_code& error, size_t bytes_transferred)
 {
-    /*if(!is_connected())
+    if(!is_connected())
             return;
         if(!error)
         {
             //amend by lk 2013-11-26
-            int nResult = receive_msg_ptr_->check_msg_header(dev_agent_and_com[cur_dev_id_].second->DevAgent(),
+            int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,
                                                              bytes_transferred,CMD_QUERY,cur_msg_q_id_);
             if(nResult == 0)
             {
@@ -926,7 +937,7 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
                 {
                     cur_msg_q_id_=0;
                     DevMonitorDataPtr curData_ptr(new Data);
-                    if(receive_msg_ptr_->decode_msg(dev_agent_and_com[cur_dev_id_].second->DevAgent(),curData_ptr))
+                    if(receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred))
                     {
 
                         if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
@@ -958,7 +969,7 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
             close_all();
             start_connect_timer();
             return;
-        }*/
+        }
 }
 void device_session::handle_write(const boost::system::error_code& error,size_t bytes_transferred)
 {

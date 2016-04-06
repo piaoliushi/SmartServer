@@ -78,7 +78,7 @@ bool Bohui_Protocol::_checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &pri
             string sVer = rootNode->first_attribute("Version")->value();
             msgId = strtol(rootNode->first_attribute("MsgID")->value(),NULL,10);
             priority = strtol( rootNode->first_attribute("Priority")->value(),NULL,10);
-            if(sVer=="1.0" && msgId>=0 && priority>=0)
+            if(sVer=="1" && msgId>=0 && priority>=0)
                 return true;
         }
     }
@@ -287,13 +287,19 @@ bool Bohui_Protocol::createReportAlarmDataMsg(int nReplyId,int nCmdType,string s
         xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("AlarmID",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(alarmInfo.nAlarmId).c_str())));
         xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Mode",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(nMod).c_str())));
         xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(alarmInfo.nType).c_str())));
-        xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Desc",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[alarmInfo.nType].first).c_str())));
+       if(BH_POTO_CommunicationReport == nCmdType)
+           xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Desc",xml_reportMsg.allocate_string("发射机断开")));
+       else
+           xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Desc",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[alarmInfo.nType].first).c_str())));
         if(sReason.empty()==false)
             xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Reason",xml_reportMsg.allocate_string(sReason.c_str())));
         tm * local_time = localtime(&(alarmInfo.startTime));
         static  char str_time[64];
         strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
-        xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("CheckTime",xml_reportMsg.allocate_string(str_time)));
+         if(BH_POTO_CommunicationReport == nCmdType)
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Time",xml_reportMsg.allocate_string(str_time)));
+         else
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("CheckTime",xml_reportMsg.allocate_string(str_time)));
 
         xml_resps->append_node(xml_Alarm);
     }
@@ -374,7 +380,7 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
     {
         map<string,DeviceInfo>::iterator iter = mapModleInfo[nIndex].mapDevInfo.begin();
         if(iter!=mapModleInfo[nIndex].mapDevInfo.end())
-            nValue=12;
+            nValue=0;
         for(;iter!=mapModleInfo[nIndex].mapDevInfo.end();++iter)
         {
             xml_linkdev_list=NULL;
@@ -461,6 +467,10 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
             iter_propty =  (*iter).second.map_DevProperty.find("Desc");
             if(iter_propty!= (*iter).second.map_DevProperty.end())
                 xml_device->append_attribute(xml_doc.allocate_attribute("Desc",(*iter_propty).second.property_value.c_str()));
+            //设备备注
+            iter_propty =  (*iter).second.map_DevProperty.find("Remark");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("Remark",(*iter_propty).second.property_value.c_str()));
         }
     }
 

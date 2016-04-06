@@ -181,8 +181,13 @@ typedef struct
 
 typedef struct
 {
+    string sAstNum;//关联设备编号
+    int    iChannel;//关联设备通道
+}AssDevChan;
+
+typedef struct
+{
     string sDevNum;
-    string sAstNum;//关联编号
     string sDevName;
     int     iDevType;//设备类型（0：发射机,1:天线，2：环境，3：电力，4：链路设备）
     bool   bAst;//是否关联
@@ -197,6 +202,7 @@ typedef struct
     vector<Command_Scheduler>           vCommSch;   //控制计划
     map<string,DevProperty>                  map_DevProperty;//设备属性列表
     map<int,Alarm_config >                    map_AlarmConfig;//设备告警配置
+    map<int,vector<AssDevChan> >       map_AssDevChan;//设备关联设置
 }DeviceInfo,*pDeviceInfo;
 
 typedef struct

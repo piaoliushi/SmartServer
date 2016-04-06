@@ -21,6 +21,7 @@ namespace hx_net
 		int  decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
 		void input_params(const vector<string> &vParam);
 		bool IsStandardCommand();
+        void GetAllCmd(CommandAttribute &cmdAll);
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
 		int getChannelCount();
 		bool isBelongChannel(int nChnnel,int monitorItemId);

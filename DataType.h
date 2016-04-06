@@ -295,9 +295,9 @@ typedef struct
 }ModleInfo;*/
 
 
-struct TransmitterPropertyEx
+struct DevicePropertyEx
 {
-        TransmitterPropertyEx()
+        DevicePropertyEx()
 		:query_timeout_count(6)//默认查询超时次数为3次(在查询间隔内发送两次查询指令无数据返回则断开当前网络连接)
 		,query_interval(1600)//2默认查询间隔2000耗秒
 		,connect_timer_interval(3)//默认连接间隔3秒
@@ -371,8 +371,7 @@ struct TransmitterPropertyEx
 	int     digital_detect_during_time_;//数字量检测时长
 
 };
-typedef boost::shared_ptr<TransmitterPropertyEx> pTransmitterPropertyExPtr;
-//typedef boost::shared_ptr<Data> DevMonitorDataPtr;
+typedef boost::shared_ptr<DevicePropertyEx> pDevicePropertyExPtr;
 
 
 struct MoxaPropertyEx

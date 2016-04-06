@@ -9,7 +9,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    //QWSServer::setCursorVisible(false);
+   // QWSServer::setCursorVisible(false);
     //Q_IMPORT_PLUGIN(qsqlpsql)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));

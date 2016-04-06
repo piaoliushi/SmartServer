@@ -77,6 +77,13 @@ namespace hx_net
 		return m_pbaseMsg->is_auto_run();
 	}
 
+    void MsgHandleAgentImpl::GetAllCmd(CommandAttribute &cmdAll)
+    {
+        if(m_pbaseMsg==NULL)
+            return ;
+        return m_pbaseMsg->GetAllCmd(cmdAll);
+    }
+
 	int  MsgHandleAgentImpl::check_msg_header(unsigned char *data,int nDataLen)
 	{
 		if(m_pbaseMsg==NULL)

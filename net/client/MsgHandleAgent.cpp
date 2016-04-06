@@ -101,6 +101,13 @@ namespace hx_net
 		return m_msgImpl->GetSignalCommand(lpParam,cmdUnit);
 	}
 
+    void MsgHandleAgent::GetAllCmd(CommandAttribute &cmdAll)
+    {
+        if(m_msgImpl==NULL)
+            return;
+        return m_msgImpl->GetAllCmd(cmdAll);
+    }
+
 	int MsgHandleAgent::getChannelCount()
 	{
 		if(m_msgImpl==NULL)
@@ -155,4 +162,5 @@ namespace hx_net
             return ;
         return m_msgImpl->exec_task_now(icmdType,nResult);
     }
+
 }

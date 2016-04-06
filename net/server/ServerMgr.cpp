@@ -1,6 +1,6 @@
 
 #include "ServerMgr.h"
-//#include "./http/CommonPrecomp.h"
+#include "LocalConfig.h"
 #include "./http/RequestHandler.h"
 #include "./http/RequestHandlerFactory.h"
 #include "server_work.h"

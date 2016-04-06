@@ -67,6 +67,7 @@ private:
     bool GetAlarmConfig(string strDevnum,map<int,Alarm_config>& map_Alarmconfig);
     bool GetItemAlarmConfig(string strDevnum,int iIndex,vector<Alarm_config>& vAlarmconfig);
     bool GetDevInfo(string strDevnum,DeviceInfo& device);
+    bool GetAssDevChan( QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev );
 private:
     QSqlDatabase   q_db;
     QString dsn;

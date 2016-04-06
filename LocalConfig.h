@@ -24,8 +24,8 @@ public:
 	int            heartbeat_interval()const{return hb_interval_;}
 	int            heartbeat_timeout()const{return hb_timeout_;}
 
-	map<string,pTransmitterPropertyExPtr>& transmitter_property_ex();
-	pTransmitterPropertyExPtr  transmitter_property_ex(string sTransmitterId);
+    map<string,pDevicePropertyExPtr>& device_property_ex();
+    pDevicePropertyExPtr  device_property_ex(string sTransmitterId);
 	pMoxaPropertyExPtr  moxa_property_ex(string sMoxaId);
 	bool writeLocalParToXml(const char* sFileName,string stationId,string stationName,string svcId,
 		                    unsigned short svcPort,string dbIp,string dbUser);
@@ -55,7 +55,7 @@ public:
 
 	bool writeSmsParToXml(const char* sFileName,bool bUse,string comId,int baudRate,string smsCenterNumber);
 	
-	void transmitter_cmd(string sTransmitterId,CommandAttribute& cmd);//读取配置的命令
+    void device_cmd(string sDevId,CommandAttribute& cmd);//读取配置的命令
 
 private:
     string src_code_;//本平台唯一id
@@ -93,10 +93,10 @@ private:
 	string alarm_center_svc_ip_;//告警中心服务器ip
 	unsigned short alarm_center_svc_port_;//告警中心服务器端口
 
-	map<string,pTransmitterPropertyExPtr> transmitters_property_Ex_;
+    map<string,pDevicePropertyExPtr> device_property_Ex_;
 	map<string,pMoxaPropertyExPtr> moxas_property_Ex_;
 
-	map<string,CommandAttribute> transmintters_cmd;
+    map<string,CommandAttribute> devices_cmd_;
 
 };
 #endif

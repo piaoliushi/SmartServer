@@ -140,19 +140,19 @@ void QSystemInfoPage::loadConfigData()
     d_baudRate->setCurrentIndex(d_baudRate->findText(QString::number(baudRate)));
     d_smsCenterNumber->setText(QString::fromUtf8(centerNumber.c_str()));
 
-    map<string,pTransmitterPropertyExPtr> &vTransmitter = GetInst(LocalConfig).transmitter_property_ex();
-    map<string,pTransmitterPropertyExPtr>::iterator transmitter_iter = vTransmitter.begin();
+    /*map<string,pDevicePropertyExPtr> &vTransmitter = GetInst(LocalConfig).transmitter_property_ex();
+    map<string,pDevicePropertyExPtr>::iterator transmitter_iter = vTransmitter.begin();
     for(;transmitter_iter!=vTransmitter.end();++transmitter_iter)
     {
         d_Transmitters->addItem((*transmitter_iter).first.c_str());
-    }
+    }*/
 
     d_pAutoRun->setChecked(isAutoStart());
 }
 
 void QSystemInfoPage::transmitterChanged(const QString sTrsmitNumber)
 {
-    pTransmitterPropertyExPtr curTransmitter = GetInst(LocalConfig).transmitter_property_ex(sTrsmitNumber.toStdString());
+    /*pTransmitterPropertyExPtr curTransmitter = GetInst(LocalConfig).transmitter_property_ex(sTrsmitNumber.toStdString());
     if(curTransmitter)
     {
         if(curTransmitter->is_auto_switch_transmitter)
@@ -160,7 +160,7 @@ void QSystemInfoPage::transmitterChanged(const QString sTrsmitNumber)
         else
             d_UseAutoSwitch->setCheckState(Qt::Unchecked);
         d_PowerLimit->setText(QString::number(curTransmitter->switch_power_lower_limit_value));
-    }
+    }*/
 }
 
 void QSystemInfoPage::moidfyParm()

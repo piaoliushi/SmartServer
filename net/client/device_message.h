@@ -41,9 +41,9 @@ namespace hx_net
 
         //int check_normal_msg_header(HDevAgentPtr agentPtr,int msgLen,CmdType cmdType=CMD_QUERY,int number=0);
 		
-        //int decode_msg_body(HDevAgentPtr agentPtr,pTsmtAgentMsgPtr data_ptr_,int msgLen);
+      //  int decode_msg_body(HDevAgentPtr agentPtr,pTsmtAgentMsgPtr data_ptr_,int msgLen);
 
-        //int check_msg_header(HDevAgentPtr agentPtr,int msgLen,CmdType cmdType,int number);
+      //  int check_msg_header(HDevAgentPtr agentPtr,int msgLen,CmdType cmdType,int number);
 
 		int check_normal_msg_header(HMsgHandlePtr agentPtr,int msgLen,CmdType cmdType,int number);
 

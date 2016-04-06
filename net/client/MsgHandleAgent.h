@@ -27,6 +27,7 @@ namespace hx_net
         int   PreHandleMsg();
 		bool IsStandardCommand();
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
+        void GetAllCmd(CommandAttribute &cmdAll);
         int   getChannelCount();
 		bool isBelongChannel(int nChnnel,int monitorItemId);
 		bool isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr);

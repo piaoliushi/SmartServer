@@ -18,6 +18,7 @@ namespace hx_net
 		virtual int PreHandleMsg(){return -1;}
         virtual void input_params(const vector<string> &vParam){}
 		virtual bool IsStandardCommand(){return false;}
+        virtual void GetAllCmd(CommandAttribute &cmdAll){}
         virtual void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit){}
 		virtual bool isRegister(){return true;}
         virtual void getRegisterCommand(CommandUnit &cmdUnit){}
