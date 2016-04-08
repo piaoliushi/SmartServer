@@ -21,17 +21,13 @@ QDevStatePage::QDevStatePage(QNotifyHandler &Notify,QWidget *parent)
 	QHBoxLayout *pHlyt = new QHBoxLayout();
 	  pDevSize = new QLabel(tr("设备数："));
       pHlyt->addWidget(pDevSize);
-	  pDevConSize = new QLabel(tr("已连接："));
-      pHlyt->addWidget(pDevConSize);
-	  pDevRunSize = new QLabel(tr("已运行："));
-	  pHlyt->addWidget(pDevRunSize);
 
 	 pHMainLyt->addLayout(pHlyt);
 	 pDevList = new QTableWidget(this);
 	 pDevList->setColumnCount(6);
 
 	 QStringList header; 
-	 header<<tr("类型")<<tr("ID")<<tr("名称")<<tr("IP:PORT")<<tr("连接状态")<<tr("运行状态"); 
+     header<<tr("设备名称")<<tr("IP:PORT")<<tr("当前状态");
 	 pDevList->setHorizontalHeaderLabels(header); 
 	 pDevList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	 pDevList->setSelectionBehavior ( QAbstractItemView::SelectRows); //设置选择行为，以行为单位
@@ -60,58 +56,24 @@ void QDevStatePage::LoadDevToList()
 {
 	clearDevList();
 
-	vector<TransmitterInformation>& vTransmitter = GetInst(StationConfig).get_transmitter();
-	int nTransmitter =0;
-
-	vector<TransmitterInformation>::iterator iter = vTransmitter.begin();
-	for(;iter!=vTransmitter.end();++iter)
-	{
-		if(!(*iter).IsUsed)
-			continue;
-		int nrow = pDevList->rowCount();
-		pDevList->insertRow(nrow);
-		pDevList->setItem(nrow,0,new QTableWidgetItem(QIcon(tr(":/transmitter.png")),QString(tr("发射机"))));
-		pDevList->setItem(nrow,1,new QTableWidgetItem(QString::fromLocal8Bit((*iter).sNumber.c_str())));
-		pDevList->setItem(nrow,2,new QTableWidgetItem(QString::fromLocal8Bit((*iter).sProgramName.c_str())));
-		QString sEndpoint = QString(tr("%1:%2")).arg(QString::fromLocal8Bit((*iter).sAddress.c_str()))\
-			.arg((*iter).nPort);
-		if((*iter).bUseAgent==true)
-		{
-			string sIp;
-			int nPort;
-			GetInst(StationConfig).get_transmitter_agent_endpoint_by_id((*iter).sNumber,sIp,nPort);
-			sEndpoint = QString(tr("%1:%2[代理]")).arg(QString::fromLocal8Bit(sIp.c_str())).arg(nPort);
-		}
-
-		pDevList->setItem(nrow,3,new QTableWidgetItem(sEndpoint));
-		pDevList->setItem(nrow,4,new QTableWidgetItem(QIcon(tr(":/clock.png")),tr("已断开!!!")));
-		pDevList->setItem(nrow,5,new QTableWidgetItem(tr("未知")));
-
-		m_mapListItems[QString(QString::fromLocal8Bit((*iter).sNumber.c_str()))]=nrow;
-
-		nTransmitter=nrow;
-	}
-
-    /*vector<ModleInfo>& vModle = GetInst(StationConfig).get_Modle();
+    vector<ModleInfo>& vModle = GetInst(StationConfig).get_Modle();
 	vector<ModleInfo>::iterator Modleiter = vModle.begin();
 	for(;Modleiter != vModle.end();Modleiter++)
 	{
-		map<string,DevParamerInfo>::iterator iter = (*Modleiter).mapDevInfo.begin();
+        map<string,DeviceInfo>::iterator iter = (*Modleiter).mapDevInfo.begin();
 		for(;iter!=(*Modleiter).mapDevInfo.end();++iter)
 		{	
 			int nrow = pDevList->rowCount();
 			pDevList->insertRow(nrow);
-			pDevList->setItem(nrow,0,new QTableWidgetItem(QIcon(tr(":/device_state.png")),QString::fromLocal8Bit((*Modleiter).sModName.c_str())));//QString(tr("转换模块"))
-			pDevList->setItem(nrow,1,new QTableWidgetItem(QString::fromLocal8Bit((*iter).first.c_str())));
-			pDevList->setItem(nrow,2,new QTableWidgetItem(QString::fromLocal8Bit((*iter).second.sDevName.c_str())));
-			QString sEndpoint = QString(tr("%1:%2[%3]")).arg(QString::fromLocal8Bit((*Modleiter).sModIP.c_str()))\
-				.arg((*Modleiter).nModPort).arg((*iter).second.nDevAddr);
-			pDevList->setItem(nrow,3,new QTableWidgetItem(sEndpoint));
-			pDevList->setItem(nrow,4,new QTableWidgetItem(QIcon(tr(":/clock.png")),tr("已断开!!!")));
-			pDevList->setItem(nrow,5,new QTableWidgetItem(tr("未知")));
-			m_mapListItems[QString::fromLocal8Bit((*iter).first.c_str())]=nrow;//(*Modleiter).sModleNumber.c_str()
+            pDevList->setItem(nrow,0,new QTableWidgetItem(QIcon(tr(":/device_state.png")),(*iter).second.sDevName.c_str()));//QString(tr("转换模块"))
+            QString sEndpoint = QString(tr("%1:%2[%3]")).arg((*Modleiter).netMode.strIp.c_str())\
+                .arg((*Modleiter).netMode.ilocal_port).arg((*iter).second.iAddressCode);
+            pDevList->setItem(nrow,1,new QTableWidgetItem(sEndpoint));
+            pDevList->setItem(nrow,2,new QTableWidgetItem(tr("未知")));
+
+            m_mapListItems[(*iter).first.c_str()]=nrow;
 		}
-    }*/
+    }
 
 	int nDevNum = pDevList->rowCount();
 	pDevSize->setText(QString(tr("设备数：%1")).arg(nDevNum));

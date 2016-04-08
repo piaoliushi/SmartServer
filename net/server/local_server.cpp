@@ -413,7 +413,7 @@ namespace hx_net
 										for(;iter_alarm!=vAlarmState.end();++iter_alarm)
 										{
 											if(itersNum->second != (*iter_alarm).sdevid())
-												continue;
+                                                continue;pi
 											DevAlarmStatus *pAalarmS = loginAck.add_cdevcuralarmstatus();
 											pAalarmS->CopyFrom((*iter_alarm));
 										}

@@ -5,7 +5,7 @@
 //#include "./database/dbmanager.h"
 #include "./database/DataBaseOperation.h"
 #include "DataType.h"
-//#include "DataTypeDefine.h"
+#include "DataTypeDefine.h"
 #include <map>
 using namespace std;
 //#include "./message/protocol.pb.h"
@@ -18,6 +18,8 @@ public:
 public:
 	 //加载某台站配置信息
 	 bool load_station_config();
+     //获得关联设备信息
+     DeviceInfo * get_devinfo_by_id(string sDevId);
      //获取某台站某发射机对应的天线信息
 	 AntennaInformation* get_antenna_by_host_transmitter(string sTransmitterNumber);
 	 //获取某台站的发射机信息

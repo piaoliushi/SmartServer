@@ -25,6 +25,7 @@ public slots:
     void ShowDevStatePage();
     void ShowClientStatePage();
     void ShowSystemInfoPage();
+    void OnUpdateDevList(bool bLoad);
 private:
     Ui::MainWindow *ui;
     QNotifyHandler         d_Notify;

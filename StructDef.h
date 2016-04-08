@@ -41,17 +41,19 @@ typedef struct CMDUnit
 //控制命令属性
 typedef struct
 {
-	vector<CommandUnit> queryComm;     //查询命令(可能多条)
+    /*vector<CommandUnit> queryComm;     //查询命令(可能多条)
 	vector<CommandUnit> turnonComm;    //开机命令(可能多条)
 	vector<CommandUnit> turnoffComm;   //关机命令(可能多条)
 	vector<CommandUnit> uppowerComm;   //升功率命令(可能多条)
 	vector<CommandUnit> lowpowerComm;  //降功率命令(可能多条)
 	vector<CommandUnit> resetComm;     //复位命令(可能多条)
 	vector<CommandUnit> switchComm;    //切换激励器1命令(可能多条)
-	vector<CommandUnit> switch2Comm;   //切换激励器2率命令(可能多条)
+    vector<CommandUnit> switch2Comm;   //切换激励器2率命令(可能多条)*/
 	//vector<CommandUnit> adjustDevTime; //调整设备时间
 
 	int ninterval;                     //命令之间发送时间间隔(ms)
+
+    map<int,vector<CommandUnit> > mapCommand;//命令
 }CommandAttribute;
 
 
@@ -100,9 +102,14 @@ typedef enum PROTOCOL
 	SHANGHAI_MZ             = 16,//上海明珠
 	HARRIS                           = 17, //哈里斯
 	DE_XIN                            = 18, //德芯
-	ELECTRIC                         =19  //电力规约
-
+    ELECTRIC                         =19,  //电力规约
+    ANTENNA_CONTROL          = 20 //天线控制器
 }Protocol,*pProtocol;
+
+typedef enum ANTENAPROTOCOL
+{
+    HX_MD981 = 0,
+}AntennaSubProtocol;
 
 typedef enum GMEPROTOCOL
 {
@@ -137,7 +144,8 @@ typedef enum CDPROTOCOL
 	CHENGDU_CHENGGUANG    = 2,
 	CHENGDU_KT_DIG        = 3,
 	CHENGDU_KAITENG_TV10KW= 4,
-	CHENGDU_XINGUANG      = 5
+    CHENGDU_XINGUANG      = 5,
+    CHENGDU_XINGUANG_247 = 6,
 }CdSubProtocol;
 typedef enum SGPROTOCOL
 {

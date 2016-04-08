@@ -3,6 +3,7 @@
 #include "./rapidxml/rapidxml.hpp"
 #include "./rapidxml/rapidxml_utils.hpp"
 #include "./rapidxml/rapidxml_print.hpp"
+#include "MsgDefine.h"
 #include <string.h>
 #include <iostream>
 using namespace rapidxml;
@@ -258,6 +259,7 @@ bool LocalConfig::load_local_config(const char* sFileName)
                 if(xml_property)
                 {
                     xml_node<>* xml_ack_len_property = xml_property->first_node("query_command");
+                    vector<CommandUnit> vCmd;
                     while(xml_ack_len_property)
                     {
                         int nid = strtol(xml_ack_len_property->first_attribute("id")->value(),NULL,10);
@@ -268,14 +270,17 @@ bool LocalConfig::load_local_config(const char* sFileName)
                         std::string qcmd = xml_ack_len_property->first_attribute("command")->value();
                         tmUnit.commandLen = StrToHex(qcmd,&tmUnit.commandId[0]);
 
-                        cmd.queryComm.push_back(tmUnit);
+                        vCmd.push_back(tmUnit);
                         xml_ack_len_property=xml_ack_len_property->next_sibling("query_command");
                     }
+                   // if(vCmd.size()>0)
+                        cmd.mapCommand[MSG_DEVICE_QUERY] = vCmd;
                 }
                 xml_property = xml_device->first_node("turnon_command_define");
                 if(xml_property)
                 {
                     xml_node<>* xml_ack_len_property = xml_property->first_node("turnon_command");
+                     vector<CommandUnit> vCmd;
                     while(xml_ack_len_property)
                     {
                         int nid = strtol(xml_ack_len_property->first_attribute("id")->value(),NULL,10);
@@ -285,14 +290,18 @@ bool LocalConfig::load_local_config(const char* sFileName)
                             tmUnit.ackLen = nackLen;
                         std::string qcmd = xml_ack_len_property->first_attribute("command")->value();
                         tmUnit.commandLen = StrToHex(qcmd,&tmUnit.commandId[0]);
-                        cmd.turnonComm.push_back(tmUnit);
+                        vCmd.push_back(tmUnit);
                         xml_ack_len_property=xml_ack_len_property->next_sibling("turnon_command");
                     }
+
+                   // if(vCmd.size()>0)
+                        cmd.mapCommand[MSG_TRANSMITTER_TURNON_OPR] = vCmd;
                 }
                 xml_property = xml_device->first_node("turnoff_command_define");
                 if(xml_property)
                 {
                     xml_node<>* xml_ack_len_property = xml_property->first_node("turnoff_command");
+                     vector<CommandUnit> vCmd;
                     while(xml_ack_len_property)
                     {
                         int nid = strtol(xml_ack_len_property->first_attribute("id")->value(),NULL,10);
@@ -302,14 +311,18 @@ bool LocalConfig::load_local_config(const char* sFileName)
                             tmUnit.ackLen = nackLen;
                         std::string qcmd = xml_ack_len_property->first_attribute("command")->value();
                         tmUnit.commandLen = StrToHex(qcmd,&tmUnit.commandId[0]);
-                        cmd.turnoffComm.push_back(tmUnit);
+                        vCmd.push_back(tmUnit);
                         xml_ack_len_property=xml_ack_len_property->next_sibling("turnoff_command");
                     }
+
+                    //if(vCmd.size()>0)
+                        cmd.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR] = vCmd;
                 }
                 xml_property = xml_device->first_node("up_command_define");
                 if(xml_property)
                 {
                     xml_node<>* xml_ack_len_property = xml_property->first_node("up_command");
+                      vector<CommandUnit> vCmd;
                     while(xml_ack_len_property)
                     {
                         int nid = strtol(xml_ack_len_property->first_attribute("id")->value(),NULL,10);
@@ -319,14 +332,18 @@ bool LocalConfig::load_local_config(const char* sFileName)
                             tmUnit.ackLen = nackLen;
                         std::string qcmd = xml_ack_len_property->first_attribute("command")->value();
                         tmUnit.commandLen = StrToHex(qcmd,&tmUnit.commandId[0]);
-                        cmd.uppowerComm.push_back(tmUnit);
+                         vCmd.push_back(tmUnit);
                         xml_ack_len_property=xml_ack_len_property->next_sibling("up_command");
                     }
+
+                   // if(vCmd.size()>0)
+                        cmd.mapCommand[MSG_TRANSMITTER_RISE_POWER_OPR] = vCmd;
                 }
                 xml_property = xml_device->first_node("dw_command_define");
                 if(xml_property)
                 {
                     xml_node<>* xml_ack_len_property = xml_property->first_node("dw_command");
+                      vector<CommandUnit> vCmd;
                     while(xml_ack_len_property)
                     {
                         int nid = strtol(xml_ack_len_property->first_attribute("id")->value(),NULL,10);
@@ -336,14 +353,17 @@ bool LocalConfig::load_local_config(const char* sFileName)
                             tmUnit.ackLen = nackLen;
                         std::string qcmd = xml_ack_len_property->first_attribute("command")->value();
                         tmUnit.commandLen = StrToHex(qcmd,&tmUnit.commandId[0]);
-                        cmd.lowpowerComm.push_back(tmUnit);
+                         vCmd.push_back(tmUnit);
                         xml_ack_len_property=xml_ack_len_property->next_sibling("dw_command");
                     }
+                   // if(vCmd.size()>0)
+                        cmd.mapCommand[MSG_TRANSMITTER_REDUCE_POWER_OPR] = vCmd;
                 }
                 xml_property = xml_device->first_node("reset_command_define");
                 if(xml_property)
                 {
                     xml_node<>* xml_ack_len_property = xml_property->first_node("reset_command");
+                     vector<CommandUnit> vCmd;
                     while(xml_ack_len_property)
                     {
                         int nid = strtol(xml_ack_len_property->first_attribute("id")->value(),NULL,10);
@@ -353,9 +373,12 @@ bool LocalConfig::load_local_config(const char* sFileName)
                             tmUnit.ackLen = nackLen;
                         std::string qcmd = xml_ack_len_property->first_attribute("command")->value();
                         tmUnit.commandLen = StrToHex(qcmd,&tmUnit.commandId[0]);
-                        cmd.lowpowerComm.push_back(tmUnit);
+                        vCmd.push_back(tmUnit);
                         xml_ack_len_property=xml_ack_len_property->next_sibling("reset_command");
                     }
+
+                    //if(vCmd.size()>0)
+                        cmd.mapCommand[MSG_DEV_RESET_OPR] = vCmd;
                 }
 
                 devices_cmd_[devId] = cmd;
@@ -459,148 +482,11 @@ void LocalConfig::device_cmd( string sDevId,CommandAttribute& cmd )
     map<string,CommandAttribute>::iterator iter = devices_cmd_.find(sDevId);
     if(iter!=devices_cmd_.end())
     {
-
-        if((*iter).second.queryComm.size()>0)
-        {
-            //cmd.queryComm.clear();
-            for(int i=0;i<(*iter).second.queryComm.size();i++)
-            {
-                //cmd.queryComm.push_back((*iter).second.queryComm[i]);
-                if(i>=cmd.queryComm.size())
-                {
-                    cmd.queryComm.push_back((*iter).second.queryComm[i]);
-                    continue;
-                }
-                cmd.queryComm[i].ackLen = (*iter).second.queryComm[i].ackLen;
-                if((*iter).second.queryComm[i].commandLen>0)
-                {
-                    memcpy(cmd.queryComm[i].commandId,(*iter).second.queryComm[i].commandId,(*iter).second.queryComm[i].commandLen);
-                    cmd.queryComm[i].commandLen=(*iter).second.queryComm[i].commandLen;
-                }
+        map<int,vector<CommandUnit> >::iterator type_iter =  iter->second.mapCommand.begin();
+        for(;type_iter!= iter->second.mapCommand.end();++type_iter){
+            if(type_iter->second.size()>0){//该类型有配置则覆盖原有配置
+                cmd.mapCommand[type_iter->first] = type_iter->second;
             }
         }
-        if((*iter).second.turnonComm.size()>0)
-        {
-            for(int i=0;i<(*iter).second.turnonComm.size();i++)
-            {
-                if(i>=cmd.turnonComm.size())
-                {
-                    cmd.turnonComm.push_back((*iter).second.turnonComm[i]);
-                    continue;
-                }
-                cmd.turnonComm[i].ackLen = (*iter).second.turnonComm[i].ackLen;
-                if((*iter).second.turnonComm[i].commandLen>0)
-                {
-                    memcpy(cmd.turnonComm[i].commandId,(*iter).second.turnonComm[i].commandId,(*iter).second.turnonComm[i].commandLen);
-                    cmd.turnonComm[i].commandLen=(*iter).second.turnonComm[i].commandLen;
-                }
-            }
-        }
-        if((*iter).second.turnoffComm.size()>0)
-        {
-            for(int i=0;i<(*iter).second.turnoffComm.size();i++)
-            {
-                if(i>=cmd.turnoffComm.size())
-                {
-                    cmd.turnoffComm.push_back((*iter).second.turnoffComm[i]);
-                    continue;
-                }
-                cmd.turnoffComm[i].ackLen = (*iter).second.turnoffComm[i].ackLen;
-                if((*iter).second.turnoffComm[i].commandLen>0)
-                {
-                    memcpy(cmd.turnoffComm[i].commandId,(*iter).second.turnoffComm[i].commandId,(*iter).second.turnoffComm[i].commandLen);
-                    cmd.turnoffComm[i].commandLen=(*iter).second.turnoffComm[i].commandLen;
-                }
-            }
-        }
-        /**/
-        if((*iter).second.uppowerComm.size()>0)
-        {
-            for(int i=0;i<(*iter).second.uppowerComm.size();i++)
-            {
-                if(i>=cmd.uppowerComm.size())
-                {
-                    cmd.uppowerComm.push_back((*iter).second.uppowerComm[i]);
-                    continue;
-                }
-                cmd.uppowerComm[i].ackLen = (*iter).second.uppowerComm[i].ackLen;
-                if((*iter).second.uppowerComm[i].commandLen>0)
-                {
-                    memcpy(cmd.uppowerComm[i].commandId,(*iter).second.uppowerComm[i].commandId,(*iter).second.uppowerComm[i].commandLen);
-                    cmd.uppowerComm[i].commandLen=(*iter).second.uppowerComm[i].commandLen;
-                }
-            }
-        }
-        if((*iter).second.lowpowerComm.size()>0)
-        {
-
-            for(int i=0;i<(*iter).second.lowpowerComm.size();i++)
-            {
-                if(i>=cmd.lowpowerComm.size())
-                {
-                    cmd.lowpowerComm.push_back((*iter).second.lowpowerComm[i]);
-                    continue;
-                }
-                cmd.lowpowerComm[i].ackLen = (*iter).second.lowpowerComm[i].ackLen;
-                if((*iter).second.lowpowerComm[i].commandLen>0)
-                {
-                    memcpy(cmd.lowpowerComm[i].commandId,(*iter).second.lowpowerComm[i].commandId,(*iter).second.lowpowerComm[i].commandLen);
-                    cmd.lowpowerComm[i].commandLen=(*iter).second.lowpowerComm[i].commandLen;
-                }
-            }
-        }
-        if((*iter).second.resetComm.size()>0)
-        {
-            for(int i=0;i<(*iter).second.resetComm.size();i++)
-            {
-                if(i>=cmd.resetComm.size())
-                {
-                    cmd.resetComm.push_back((*iter).second.resetComm[i]);
-                    continue;
-                }
-                cmd.resetComm[i].ackLen = (*iter).second.resetComm[i].ackLen;
-                if((*iter).second.resetComm[i].commandLen>0)
-                {
-                    memcpy(cmd.resetComm[i].commandId,(*iter).second.resetComm[i].commandId,(*iter).second.resetComm[i].commandLen);
-                    cmd.resetComm[i].commandLen=(*iter).second.resetComm[i].commandLen;
-                }
-            }
-        }
-
-        if((*iter).second.switchComm.size()>0)
-        {
-            for(int i=0;i<(*iter).second.switchComm.size();i++)
-            {
-                if(i>=cmd.switchComm.size())
-                {
-                    cmd.switchComm.push_back((*iter).second.switchComm[i]);
-                    continue;
-                }
-                cmd.switchComm[i].ackLen = (*iter).second.switchComm[i].ackLen;
-                if((*iter).second.switchComm[i].commandLen>0)
-                {
-                    memcpy(cmd.switchComm[i].commandId,(*iter).second.switchComm[i].commandId,(*iter).second.switchComm[i].commandLen);
-                    cmd.switchComm[i].commandLen=(*iter).second.switchComm[i].commandLen;
-                }
-            }
-        }
-        if((*iter).second.switch2Comm.size()>0)
-        {
-            for(int i=0;i<(*iter).second.switch2Comm.size();i++)
-            {
-                if(i>=cmd.switch2Comm.size())
-                {
-                    cmd.switch2Comm.push_back((*iter).second.switch2Comm[i]);
-                    continue;
-                }
-                cmd.switch2Comm[i].ackLen = (*iter).second.switch2Comm[i].ackLen;
-                if((*iter).second.switch2Comm[i].commandLen>0)
-                {
-                    memcpy(cmd.switch2Comm[i].commandId,(*iter).second.switch2Comm[i].commandId,(*iter).second.switch2Comm[i].commandLen);
-                    cmd.switch2Comm[i].commandLen=(*iter).second.switch2Comm[i].commandLen;
-                }
-            }
-        }
-
     }
 }

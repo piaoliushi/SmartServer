@@ -6,7 +6,7 @@
 
 namespace hx_net
 {
-    MsgHandleAgentImpl::MsgHandleAgentImpl(net_session *pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
+    MsgHandleAgentImpl::MsgHandleAgentImpl(session_ptr pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
 		:m_pSessionPtr(pSession)
 		,m_pbaseMsg(0)
 		,m_io_service(io_service)
@@ -18,12 +18,12 @@ namespace hx_net
 	{
 	}
 
-    bool MsgHandleAgentImpl::Init()
+    bool MsgHandleAgentImpl::Init(pDevicePropertyExPtr devProperty)
 	{
         switch(m_devInfo.iDevType)
 		{
         case DEVICE_TRANSMITTER:{
-                m_pbaseMsg = new Tsmt_message(m_pSessionPtr,m_io_service,m_devInfo);
+                m_pbaseMsg = new Tsmt_message(m_pSessionPtr,m_io_service,m_devInfo,devProperty);
              }
             break;
         case DEVICE_TEMP:
@@ -39,8 +39,11 @@ namespace hx_net
 			break;
         case DEVICE_ELEC:{
                 m_pbaseMsg = new Electric_message(m_pSessionPtr,m_io_service,m_devInfo);
-			}
-			break;
+            } break;
+
+        case DEVICE_ANTENNA:{
+
+        } break;
 		default:
 			return false;
 		}
@@ -180,11 +183,26 @@ namespace hx_net
         return m_pbaseMsg->cur_dev_state();
     }
 
-    void MsgHandleAgentImpl::exec_task_now(int icmdType,int nResult)
+    void MsgHandleAgentImpl::exec_task_now(int icmdType,string sUser)
     {
         if(m_pbaseMsg==NULL)
             return ;
-        return m_pbaseMsg->exec_task_now(icmdType,nResult);
+        return m_pbaseMsg->exec_task_now(icmdType,sUser);
+    }
+
+    void MsgHandleAgentImpl::start_task_timeout_timer()
+    {
+        if(m_pbaseMsg==NULL)
+            return ;
+        return m_pbaseMsg->start_task_timeout_timer();
+    }
+
+    //获得运行状态
+    int MsgHandleAgentImpl::get_run_state()
+    {
+        if(m_pbaseMsg==NULL)
+            return dev_unknown;
+        return m_pbaseMsg->get_run_state();
     }
 }
 

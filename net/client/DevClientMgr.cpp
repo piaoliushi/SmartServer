@@ -152,5 +152,12 @@ namespace hx_net
 			return _devclientptr->is_direct_connect_device(sStationId,sDevNumber);
 		return false;
 	}
+
+    e_ErrorCode DevClientMgr::start_exec_task(string sDevId,string sUser,int cmdType)
+    {
+        if(_devclientptr)
+            return _devclientptr->start_exec_task(sDevId,sUser,cmdType);
+        return EC_OBJECT_NULL;
+    }
 }
 

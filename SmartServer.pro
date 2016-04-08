@@ -54,7 +54,9 @@ SOURCES += main.cpp\
     net/net_session.cpp \
     net/client/http_request_session.cpp \
     net/client/urdl.cpp \
-    net/client/dev_message/Tsmt_message.cpp
+    net/client/dev_message/Tsmt_message.cpp \
+    net/client/dev_message/transmmiter/Transmmiter.cpp \
+    net/client/dev_message/transmmiter/CDtransmmiter.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -112,7 +114,9 @@ HEADERS  += \
     database/DataBaseOperation.h \
     net/net_session.h \
     net/client/http_request_session.h \
-    net/client/dev_message/Tsmt_message.h
+    net/client/dev_message/Tsmt_message.h \
+    net/client/dev_message/transmmiter/Transmmiter.h \
+    net/client/dev_message/transmmiter/CDtransmmiter.h
 
 FORMS    += mainwindow.ui
 

@@ -3,7 +3,7 @@
 #include "./104/iec104.h"
 namespace hx_net
 {
-    Electric_message::Electric_message(net_session *pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
+    Electric_message::Electric_message(session_ptr  pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
 		:m_pSession(pSession)
         ,d_devInfo(devInfo)
 		,d_test_send_timer_(io_service)

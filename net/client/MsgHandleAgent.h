@@ -4,6 +4,7 @@
 #include "../share_ptr_object_define.h"
 #include "include.h"
 #include "DataTypeDefine.h"
+#include "device_session.h"
 using namespace std;
 
 namespace hx_net
@@ -13,10 +14,10 @@ namespace hx_net
 	class MsgHandleAgent
 	{
 	public:
-        MsgHandleAgent(net_session *conPtr,boost::asio::io_service& io_service,DeviceInfo &devInfo);
+        MsgHandleAgent(session_ptr conPtr,boost::asio::io_service& io_service,DeviceInfo &devInfo);
 		~MsgHandleAgent(void);
 	public:
-        bool Init();
+        bool Init(pDevicePropertyExPtr devProperty);
         bool Finit();
 		int start();
 		int stop();
@@ -37,7 +38,10 @@ namespace hx_net
 		void getRegisterCommand(CommandUnit &cmdUnit);
 
         int   cur_dev_state();
-        void exec_task_now(int icmdType,int nResult);
+        void exec_task_now(int icmdType,string sUser);
+        void start_task_timeout_timer();
+        //获得运行状态
+        int get_run_state();
 	private:
 		MsgHandleAgentImpl *m_msgImpl;
 	};

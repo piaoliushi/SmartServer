@@ -74,6 +74,8 @@ namespace hx_net
 		void commit_check_working_result(checkWorkingNotifyMsgPtr pcheckWorkResult);
 		//是否是通过上级平台直连下级平台设备
 		bool is_direct_connect_device(string sStationId,string sDevNumber);
+
+        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType);
 	private:
 		svc_state svc_state_;
 		boost::shared_ptr<DevClientMgr> m_pDevMgrPtr;//设备(被动连接)管理对象

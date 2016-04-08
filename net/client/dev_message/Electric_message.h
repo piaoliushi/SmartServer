@@ -8,7 +8,7 @@ namespace hx_net
 class Electric_message:public base_message
 {
 public:
-    Electric_message(net_session *pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo);
+    Electric_message(session_ptr pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo);
     ~Electric_message(void);
 public:
     void SetProtocol(int mainprotocol,int subprotocol);
@@ -35,7 +35,7 @@ protected:
 private:
     int              m_Subprotocol;//设备子协议号
     int                          m_mainprotocol;//主协议编号
-    net_session *m_pSession;//关联连接对象
+    session_ptr  m_pSession;//关联连接对象
     int      m_DevAddr;//设备地址
     bool  m_Register;
     boost::asio::deadline_timer     d_test_send_timer_;//连接定时器

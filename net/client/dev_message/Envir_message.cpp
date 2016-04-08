@@ -3,7 +3,7 @@
 namespace hx_net
 {
 
-    Envir_message::Envir_message(net_session *pSession,DeviceInfo &devInfo)
+    Envir_message::Envir_message(session_ptr pSession,DeviceInfo &devInfo)
 		:m_pSession(pSession)
         ,d_devInfo(devInfo)
 	{

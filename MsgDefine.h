@@ -32,6 +32,7 @@ typedef struct _tagDevUploadHead
 //message type define
 enum e_MsgType
 {
+    MSG_DEVICE_QUERY = 0,//查询
 	MSG_LOGIN_REQ     = 1, // 登录
 	MSG_LOGIN_ACK	  = 2,
 	MSG_HEARTBEAT_REQ = 3, // 心跳
@@ -94,6 +95,7 @@ enum e_MsgType
 	MSG_DUTY_LOG_ACK      = 52,//值班日志响应
 	MSG_CHECK_WORKING_REQ = 53,//查岗请求
 	MSG_CHECK_WORKING_ACK = 54,//查岗回复
+    MSG_DEV_RESET_OPR = 55,//复位指令
 
 };
 

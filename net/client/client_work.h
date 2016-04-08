@@ -73,14 +73,12 @@ public:
 		case MSG_TRANSMITTER_TURNON_OPR://发射机开启(默认高功率开机)
 		case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR://中功率开机
 		case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR://低功率开机
-			break;
 		case MSG_TRANSMITTER_TURNOFF_OPR://发射机关闭
 			{
-// 				DeviceCommandMsg commandmsg_;
-// 				commandmsg_.ParseFromArray(task->body(),task->bodySize());
-// 				string sUsr = QString::fromUtf8(commandmsg_.soperuser().c_str()).toLocal8Bit();
-// 				e_ErrorCode nReult = GetInst(SvcMgr).turn_off_transmitter(commandmsg_.sstationid(),
-// 											commandmsg_.sdevid(),sUsr);
+                DeviceCommandMsg commandmsg_;
+                commandmsg_.ParseFromArray(task->body(),task->bodySize());
+                string sUsr = commandmsg_.soperuser();
+                e_ErrorCode nReult = GetInst(SvcMgr).start_exec_task(commandmsg_.sdevid(),sUsr,MsgPtr->type);
 			}
 			break;
 		case MSG_ANTENNA_HTOB_OPR:

@@ -2,7 +2,7 @@
 #include "MsgHandleAgentImpl.h"
 namespace hx_net
 {
-    MsgHandleAgent::MsgHandleAgent(net_session *conPtr,boost::asio::io_service& io_service,DeviceInfo &devInfo)
+    MsgHandleAgent::MsgHandleAgent(session_ptr conPtr,boost::asio::io_service& io_service,DeviceInfo &devInfo)
         :m_msgImpl( new MsgHandleAgentImpl(conPtr,io_service,devInfo))
 	{
 	}
@@ -17,11 +17,11 @@ namespace hx_net
 		}
 	}
 
-    bool MsgHandleAgent::Init()
+    bool MsgHandleAgent::Init(pDevicePropertyExPtr devProperty)
 	{
 		if(m_msgImpl==NULL)
 			return false;
-        return m_msgImpl->Init();
+        return m_msgImpl->Init(devProperty);
 	}
 
 	bool MsgHandleAgent::Finit()
@@ -156,11 +156,28 @@ namespace hx_net
         return m_msgImpl->cur_dev_state();
     }
 
-    void MsgHandleAgent::exec_task_now(int icmdType,int nResult)
+    void MsgHandleAgent::exec_task_now(int icmdType,string sUser)
     {
         if(m_msgImpl==NULL)
             return ;
-        return m_msgImpl->exec_task_now(icmdType,nResult);
+        return m_msgImpl->exec_task_now(icmdType,sUser);
     }
+
+    void MsgHandleAgent::start_task_timeout_timer()
+    {
+        if(m_msgImpl==NULL)
+            return ;
+        return m_msgImpl->start_task_timeout_timer();
+    }
+
+    //获得运行状态
+    int MsgHandleAgent::get_run_state()
+    {
+        if(m_msgImpl==NULL)
+            return dev_unknown;
+        return m_msgImpl->get_run_state();
+    }
+
+
 
 }

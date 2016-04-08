@@ -31,6 +31,8 @@ namespace hx_net
 
 		//通用命令执行
 		e_ErrorCode excute_command(int cmdType,devCommdMsgPtr lpParam);
+        //下发控制指令
+        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType);
 		//向上提交查岗结果
 		void commit_check_working_result(checkWorkingNotifyMsgPtr pcheckWorkResult);
 

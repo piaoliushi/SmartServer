@@ -209,4 +209,11 @@ namespace hx_net
 			return m_pDevMgrPtr->is_direct_connect_device(sStationId,sDevNumber);
 		return false;
 	}
+
+    e_ErrorCode SvcMgr:: start_exec_task(string sDevId,string sUser,int cmdType)
+    {
+        if(m_pDevMgrPtr)
+            return m_pDevMgrPtr->start_exec_task(sDevId,sUser,cmdType);
+        return EC_OBJECT_NULL;
+    }
 }

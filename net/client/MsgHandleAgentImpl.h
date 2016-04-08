@@ -8,10 +8,10 @@ namespace hx_net
 	class MsgHandleAgentImpl
 	{
 	public:
-        MsgHandleAgentImpl(net_session *pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo);
+        MsgHandleAgentImpl(session_ptr pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo);
 		~MsgHandleAgentImpl(void);
 	public:
-        bool Init();
+        bool Init(pDevicePropertyExPtr devProperty);
 		bool Finit();
 		int start();
 		int stop();
@@ -31,10 +31,13 @@ namespace hx_net
 		bool isRegister();
 		void getRegisterCommand(CommandUnit &cmdUnit);
         int  cur_dev_state();
-        void exec_task_now(int icmdType,int nResult);
+        void exec_task_now(int icmdType,string sUser);
+        void start_task_timeout_timer();
+        //获得运行状态
+        int  get_run_state();
 	public:
 		base_message *m_pbaseMsg;
-        net_session      *m_pSessionPtr;
+        session_ptr m_pSessionPtr;
 		boost::asio::io_service    &m_io_service;
         DeviceInfo     &m_devInfo;
 	};

@@ -39,8 +39,8 @@ enum DEVType
 #define    NET_MOD_TCP   0 //TCP
 #define    NET_MOD_UDP   1 //UDP
 
-#define    RUN_TIME_DAY        0 //运行图-天
-#define    RUN_TIME_WEEK      1 //运行图-星期
+#define    RUN_TIME_DAY          0 //运行图-天
+#define    RUN_TIME_WEEK       1 //运行图-星期
 #define    RUN_TIME_MONTH    2 //运行图-月
 
 

@@ -70,6 +70,19 @@ vector<AntennaInformation>& StationConfig::get_antenna()
 	return mapAntennaInfo;
 }
 
+//获得关联设备信息
+DeviceInfo *StationConfig::get_devinfo_by_id(string sDevId)
+{
+      vector<ModleInfo>::iterator iter = mapModleInfo.begin();
+      for(;iter!=mapModleInfo.end();++iter){
+          map<string,DeviceInfo>::iterator dev_iter = (*iter).mapDevInfo.find(sDevId);
+          if(dev_iter!=(*iter).mapDevInfo.end())
+              return &(dev_iter->second);
+
+      }
+    return NULL;
+}
+
 AntennaInformation* StationConfig::get_antenna_ptr_by_id(string sAntennaNumber)
 {
 	vector<AntennaInformation>::iterator iter=mapAntennaInfo.begin();
@@ -234,11 +247,13 @@ AssociateInfo* StationConfig::get_antenna_associate_info_by_backup(string sBacku
 //查找other设备对应的串口服务器id
 string StationConfig::get_modle_id_by_devid(string sStationId,string sDevId)
 {
-/*	for(int i=0;i<mapModleInfo.size();++i)
-	{
-		if(mapModleInfo[i].mapDevInfo.find(sDevId)!=mapModleInfo[i].mapDevInfo.end())
-			return mapModleInfo[i].sModleNumber;
-    }*/
+    vector<ModleInfo>::iterator iter = mapModleInfo.begin();
+    for(;iter!=mapModleInfo.end();++iter){
+        map<string,DeviceInfo>::iterator dev_iter = (*iter).mapDevInfo.find(sDevId);
+        if(dev_iter!=(*iter).mapDevInfo.end())
+            return (*iter).sModleNumber;
+
+    }
     return "";
 }
 

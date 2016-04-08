@@ -231,6 +231,25 @@ bool DevClient::dev_base_info(string sStationId,DevBaseInfo& devInfo,string sDev
     return bRtValue;
 }
 
+e_ErrorCode DevClient::start_exec_task(string sDevId,string sUser,int cmdType)
+{
+    boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
+    e_ErrorCode opr_rlt = EC_DEVICE_NOT_FOUND;
+    std::map<DevKey,session_ptr>::iterator iter = device_pool_.find(DevKey(GetInst(LocalConfig).local_station_id(),sDevId));
+    if(iter!=device_pool_.end())//直连设备
+        (*iter).second->start_exec_task(sDevId,sUser,opr_rlt,cmdType);
+    else
+    {
+        string sMoxaId = GetInst(StationConfig).get_modle_id_by_devid(GetInst(LocalConfig).local_station_id(),sDevId);
+        if(!sMoxaId.empty())
+        {
+            std::map<DevKey,session_ptr>::iterator iter = device_pool_.find(DevKey(GetInst(LocalConfig).local_station_id(),sMoxaId));
+            if(iter!=device_pool_.end())//一带多设备
+                (*iter).second->start_exec_task(sDevId,sUser,opr_rlt,cmdType);
+        }
+    }
+    return opr_rlt;
+}
 //通用命令执行
 e_ErrorCode DevClient::excute_command(int cmdType,devCommdMsgPtr lpParam)
 {
@@ -333,18 +352,4 @@ bool DevClient::is_direct_connect_device(string sStationId,string sDevNumber)
     return false;
 }
 
-//-------------------------http----------------------------------------client--------------------------------//
-
-//上报http消息到上级平台(数据)
-void send_http_data_messge_to_platform(string sDevid,devDataNfyMsgPtr &dataPtr);
-//上报http消息到上级平台(执行结果)
-void send_http_excute_result_messge_to_platform(string sDevid,devCommdRsltPtr &commdRsltPtr);
-//上报http消息到上级平台(告警)
-void send_http_alarm_messge_to_platform(string sDevid,devAlarmNfyMsgPtr &alarmPtr);
-//上报http消息到上级平台(连接状态)
-void send_http_data_messge_to_platform(string sDevid,devNetNfyMsgPtr &netPtr);
-//http连接发送handler
-void http_open_handler(const boost::system::error_code& ec);
-//http发送
-void send_http_message(string &sMessage);
 }

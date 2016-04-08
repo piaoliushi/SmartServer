@@ -7,7 +7,7 @@ namespace hx_net
 class Envir_message:public base_message
 {
 public:
-    Envir_message(net_session *pSession,DeviceInfo &devInfo);
+    Envir_message(session_ptr pSession,DeviceInfo &devInfo);
     ~Envir_message(void);
 public:
     void SetProtocol(int mainprotocol,int subprotocol);
@@ -20,7 +20,7 @@ protected:
 private:
     int              m_Subprotocol;//设备子协议号
     int              m_mainprotocol;//主协议编号
-    net_session *m_pSession;//关联连接对象
+    session_ptr m_pSession;//关联连接对象
     DeviceInfo           &d_devInfo;//设备信息
 };
 }

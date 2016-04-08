@@ -56,6 +56,7 @@ namespace hx_net
 		//通用命令执行
 		e_ErrorCode excute_command(int cmdType,devCommdMsgPtr lpParam);
 
+        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType);
 		//获取转换模块在线数
 		int get_modle_online_count();
 

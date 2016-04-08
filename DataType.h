@@ -50,6 +50,7 @@ enum dev_run_state
 enum dev_opr_state
 {
 	dev_no_opr=-1,
+    dev_opr_excuting,
 	dev_opr_turn_on, //正在开机
 	dev_opr_turn_off,//正在关机
 };
