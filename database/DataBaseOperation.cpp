@@ -104,10 +104,9 @@ bool DataBaseOperation::GetDevInfo( string strDevnum,DeviceInfo& device )
             devquery.prepare(strSql);
             if(devquery.exec())
     {
-            if(devquery.next())//待修改
-    {
+            if(devquery.next())  {
             device.sDevNum = devquery.value(0).toString().toStdString();
-         //   QString sAsos = devquery.value(1).toString();
+            //   QString sAsos = devquery.value(1).toString();
             device.sDevName = devquery.value(2).toString().toStdString();
             device.iDevType = devquery.value(3).toInt();
             device.bAst = devquery.value(4).toBool();
@@ -171,7 +170,7 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
                 }
             }
 
-            if(net1query.size()>0)
+            if(net1query.size()>0 && info.mapDevInfo.size()>0)
                 v_Linkinfo.push_back(info);
         }
     }
@@ -1411,6 +1410,53 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
     }
     QSqlDatabase::database().commit();
     resValue = 0;
+    return true;
+}
+
+bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
+{
+    if(!IsOpen())
+    {
+        std::cout<<"数据库未打开"<<std::endl;
+        return false;
+    }
+    QSqlQuery userquery;
+    QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber from Users where Name='%1'").arg(QString::fromStdString(sName));
+    if(!userquery.exec(strSql))
+    {
+        return false;
+    }
+    if(userquery.next())
+    {
+        user.sName = sName;
+        user.sNumber = userquery.value(0).toString().toStdString();
+        user.sPassword = userquery.value(1).toString().toStdString();
+        user.nControlLevel = userquery.value(2).toInt();
+        user.sHeadship = userquery.value(3).toString().toStdString();
+        user.sJobNumber = userquery.value(4).toString().toStdString();
+    }
+    return true;
+}
+
+bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice )
+{
+    if(!IsOpen())
+    {
+        std::cout<<"数据库未打开"<<std::endl;
+        return false;
+    }
+    QSqlQuery query;
+    QString strSql=QString("select a.objectnumber from user_role_object a,users b where b.number='%1' and a.rolenumber=b.rolenumber").arg(QString::fromStdString(sUserId));
+    if(!query.exec(strSql))
+    {
+        return false;
+    }
+    while(query.next())
+    {
+        string sdevnum;
+        sdevnum = query.value(0).toString().toStdString();
+        vDevice.push_back(sdevnum);
+    }
     return true;
 }
 

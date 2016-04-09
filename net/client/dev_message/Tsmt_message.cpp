@@ -4,6 +4,7 @@
 #include "./net/SvcMgr.h"
 #include "./transmmiter/Transmmiter.h"
 #include "./transmmiter/CDtransmmiter.h"
+#include "./transmmiter/GmeTransmmit.h"
 namespace hx_net
 {
 
@@ -19,6 +20,7 @@ namespace hx_net
         ,d_antenna_Agent_(false)
         ,d_cur_task_(-1)
         ,m_ptransmmit(NULL)
+        ,dev_run_state_(dev_unknown)
     {
         CreateObject();
 
@@ -94,7 +96,7 @@ namespace hx_net
         if(dev_run_state_ != curState)
         {
             dev_run_state_=curState;
-            //GetInst(SvcMgr).get_notify()->OnRunState(this->TransmitterInfo.sNumber,dev_run_state_);
+            GetInst(SvcMgr).get_notify()->OnDevStatus(d_devInfo.sDevNum,dev_run_state_+1);
             //广播设备状态到在线客户端
             m_pSession->send_work_state_message(GetInst(LocalConfig).local_station_id(),d_devInfo.sDevNum
                                     ,d_devInfo.sDevName,TRANSMITTER,(dev_run_state)dev_run_state_);
@@ -192,6 +194,7 @@ namespace hx_net
         switch(d_devInfo.nDevProtocol)
         {
         case BEIJ_GME:
+            m_ptransmmit = new GmeTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case BEIJING_BEIGUANG:
             break;

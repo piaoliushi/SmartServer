@@ -53,6 +53,9 @@ public:
     bool AddItemMonitorRecord(string strDevnum,time_t savetime,DevMonitorDataPtr pdata);
     bool SetAlarmLimit(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);//0上，1下
     bool SetAlarmTime(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);
+
+    bool GetUserInfo( const string sName,UserInformation &user );
+    bool GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice );
 private:
 
     bool GetDevMonitorSch(string strDevnum,map<int,vector<Monitoring_Scheduler> >& mapMonitorSch);

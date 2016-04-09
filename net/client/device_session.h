@@ -26,6 +26,9 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
             TaskQueue<msgPointer>& taskwork,ModleInfo & modinfo,http_request_session_ptr &httpPtr);
 		~device_session();
 		Dev_Type dev_type(){return DEV_OTHER;}
+        //初始化设备配置
+        void init_session_config();
+        //设备基本信息
 		void dev_base_info(DevBaseInfo& devInfo,string iId="local");
 		//该连接是否包含此设备id
 		bool is_contain_dev(string sDevId);
@@ -163,6 +166,7 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 
         boost::mutex                    opr_state_mutex_;
         map<string,dev_opr_state>                   dev_opr_state_;//设备控制命令发送状态
+        boost::asio::io_service&          io_service_;
         //map<string,string>				   cur_opr_user_;//当前命令发起用户
         //map<string,int>                    cur_task_type_;//当前任务类型
         //map<string,time_t>               cur_task_start_time_;//当前任务提交开始时间

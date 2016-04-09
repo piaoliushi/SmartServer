@@ -12,6 +12,13 @@ int HexChar( char src )
         return 0x10;
 }
 
+int Dec2Hex(int input) //10进制转换成相同数字的进制
+    {
+        int hi = (input / 10);
+        int low = input % 10;
+        return hi * 16 + low;
+    }
+
 int StrToHex( string str,unsigned char* Data )
 {
     int t,t1;

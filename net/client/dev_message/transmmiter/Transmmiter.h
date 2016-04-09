@@ -5,6 +5,8 @@
 #include "../../../../DataType.h"
 #include "../../../message.h"
 #include "../../../../StructDef.h"
+#include"../../../../utility.h"
+
 namespace hx_net
 {
 	class Transmmiter

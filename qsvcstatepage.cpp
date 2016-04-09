@@ -91,7 +91,6 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
 
     connect(&m_Notify,SIGNAL(S_OnConnected(QString,int)),this,SLOT(OnDevConnect(QString,int)));
 
-    StartSvc();
 }
 
 QSvcStatePage::~QSvcStatePage()
@@ -138,7 +137,7 @@ void QSvcStatePage::StartSvc()
     else
     {
         GetInst(hx_net::SvcMgr).Stop();
-       // GetInst(DataBaseOperation).CloseDb();//清理数据库
+        GetInst(DataBaseOperation).CloseDb();//清理数据库
         m_IsRunning=false;
         d_pSvcStateValueLabel->setText(tr("已停止"));
         emit updateDevList(false);

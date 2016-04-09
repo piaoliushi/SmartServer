@@ -63,11 +63,11 @@ void DevClient::connect_all()
     vector<ModleInfo>::iterator modle_iter = vModle.begin();
     for(;modle_iter != vModle.end();modle_iter++)
     {
-        session_ptr new_session(new device_session(io_service_pool_.get_io_service(),taskwork_,(*modle_iter),http_request_session_ptr_));
-        if(device_pool_.find(DevKey(sLocalStationId,(*modle_iter).sModleNumber))==device_pool_.end())
+       if(device_pool_.find(DevKey(sLocalStationId,(*modle_iter).sModleNumber))==device_pool_.end())
         {
+            session_ptr new_session(new device_session(io_service_pool_.get_io_service(),taskwork_,(*modle_iter),http_request_session_ptr_));
             device_pool_[DevKey(sLocalStationId,(*modle_iter).sModleNumber)]=new_session;
-
+            new_session->init_session_config();
             if((*modle_iter).iCommunicationMode==CON_MOD_NET) {
                 if((*modle_iter).netMode.inet_type == NET_MOD_TCP){
                     new_session->connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);

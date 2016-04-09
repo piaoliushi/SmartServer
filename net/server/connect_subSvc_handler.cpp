@@ -153,7 +153,7 @@ namespace hx_net
 				string sDevId = (*iter_net).sdevid();
 				cout<<sStationId<<"->"<<sDevId<<endl;
 				DevNetStatus_e_NetStatus sState = (*iter_net).enetstatus();
-				GetInst(SvcMgr).get_notify()->OnConnected(sDevId,sState);
+                //GetInst(SvcMgr).get_notify()->OnConnected(sDevId,sState);
 				devNetNfyMsgPtr dev_netstate_ptr(new DevNetStatusNotify);
 				dev_netstate_ptr->add_cdevcurnetstatus()->CopyFrom((*iter_net));
 				GetInst(SvcMgr).send_dev_net_state_to_client(sStationId,sDevId,dev_netstate_ptr);
@@ -170,7 +170,7 @@ namespace hx_net
 				string sDevId = (*iter_work).sdevid();
 				cout<<sStationId<<"->"<<sDevId<<endl;
 				DevWorkStatus_e_WorkStatus sState = (*iter_work).eworkstatus();
-				GetInst(SvcMgr).get_notify()->OnRunState(sDevId,sState);
+                //GetInst(SvcMgr).get_notify()->OnRunState(sDevId,sState);
 
 				devWorkNfyMsgPtr dev_workstate_ptr(new DevWorkStatusNotify);
 				dev_workstate_ptr->add_cdevcurworkstatus()->CopyFrom((*iter_work));
@@ -322,7 +322,7 @@ namespace hx_net
 			 string sStationId = (*iter_net).sstationid();
 			 string sDevId = (*iter_net).sdevid();
 			 DevNetStatus_e_NetStatus sState = (*iter_net).enetstatus();
-			 GetInst(SvcMgr).get_notify()->OnConnected(sDevId,sState);
+             //GetInst(SvcMgr).get_notify()->OnConnected(sDevId,sState);
 			 GetInst(SvcMgr).send_dev_net_state_to_client(sStationId,sDevId,dev_netstate_ptr);
 			 if(check_and_update_net_state((*iter_net))==true)
 				 return;
@@ -360,7 +360,7 @@ namespace hx_net
 			string sStationId = (*iter_work).sstationid();
 			string sDevId = (*iter_work).sdevid();
 			DevWorkStatus_e_WorkStatus sState = (*iter_work).eworkstatus();
-			GetInst(SvcMgr).get_notify()->OnRunState(sDevId,sState);
+            //GetInst(SvcMgr).get_notify()->OnRunState(sDevId,sState);
 			GetInst(SvcMgr).send_dev_work_state_to_client(sStationId,sDevId,dev_workstate_ptr);
 			if(check_and_update_work_state((*iter_work))==true)
 				return;

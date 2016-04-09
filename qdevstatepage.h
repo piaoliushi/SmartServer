@@ -17,8 +17,7 @@ public:
 	void LoadDevToList();
 	void clearDevList();
 public slots:
-		void OnDevConnect(QString sDevId,int nResult);
-		void OnRunState(QString sDevId,int nResult);
+        void OnDevStatus(QString sDevId,int nResult);
 private:
 	QNotifyHandler &m_Notify;
 	QTableWidget *pDevList;//QTreeWidget

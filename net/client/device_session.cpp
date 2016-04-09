@@ -31,13 +31,25 @@ device_session::device_session(boost::asio::io_service& io_service,
     ,stop_flag_(false)
     ,task_count_(0)
     ,http_ptr_(httpPtr)
+    ,io_service_(io_service)
+{
+
+}
+
+device_session::~device_session()
+{
+
+}
+
+//初始化设备配置
+void device_session::init_session_config()
 {
     //获得网络协议转换器相关配置
     moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos.sModleNumber);
     map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
     for(;iter!=modleInfos.mapDevInfo.end();++iter)
     {
-        HMsgHandlePtr pars_agent = HMsgHandlePtr(new MsgHandleAgent(shared_from_this(),io_service,iter->second));
+        HMsgHandlePtr pars_agent = HMsgHandlePtr(new MsgHandleAgent(shared_from_this(),io_service_,iter->second));
         boost::shared_ptr<CommandAttribute> tmpCommand(new CommandAttribute);
 
         pDevicePropertyExPtr dev_config_ptr = GetInst(LocalConfig).device_property_ex((*iter).first);
@@ -65,12 +77,6 @@ device_session::device_session(boost::asio::io_service& io_service,
 
     netAlarm.nAlarmId = -1;//默认值
 }
-
-device_session::~device_session()
-{
-
-}
-
 
 void device_session::dev_base_info(DevBaseInfo& devInfo,string iId)
 {
@@ -133,7 +139,11 @@ void device_session::set_con_state(con_state curState)
                 send_net_state_message(GetInst(LocalConfig).local_station_id(),(*iter).first
                                         ,(*iter).second.sDevName,(e_DevType)((*iter).second.iDevType)
                                         ,othdev_con_state_);
-                //GetInst(SvcMgr).get_notify()->OnConnected((*iter).first,othdev_con_state_);
+                if(othdev_con_state_== con_connected)
+                    GetInst(SvcMgr).get_notify()->OnDevStatus((*iter).first,0);
+                else
+                    GetInst(SvcMgr).get_notify()->OnDevStatus((*iter).first,-1);
+
                 //通知http服务器
                 if(iter->second.iDevType == DEVICE_TRANSMITTER){
                     int nMod = (curState==con_connected)?1:0;
@@ -955,7 +965,8 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
                 else   {
                     cur_msg_q_id_=0;
                     DevMonitorDataPtr curData_ptr(new Data);
-                    if(receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,0))
+                    nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,0);
+                    if(nResult == 0)
                     {
 
                         if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()

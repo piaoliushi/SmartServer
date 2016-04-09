@@ -256,4 +256,23 @@ typedef struct
 }Data,pData;
 typedef boost::shared_ptr<Data> DevMonitorDataPtr;
 
+
+//用户信息
+typedef struct
+{
+    string sStationNumber;
+    string sNumber;
+    string sName;
+    string sPassword;
+    string sGender;
+    string sHeadship;
+    string sJobNumber;
+    string sTelephone;
+    string sEducation;
+    string sEmail;
+    short  nControlLevel;
+    string sNote;
+} UserInformation;
+
+
 #endif

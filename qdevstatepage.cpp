@@ -24,7 +24,7 @@ QDevStatePage::QDevStatePage(QNotifyHandler &Notify,QWidget *parent)
 
 	 pHMainLyt->addLayout(pHlyt);
 	 pDevList = new QTableWidget(this);
-	 pDevList->setColumnCount(6);
+     pDevList->setColumnCount(3);
 
 	 QStringList header; 
      header<<tr("设备名称")<<tr("IP:PORT")<<tr("当前状态");
@@ -36,8 +36,7 @@ QDevStatePage::QDevStatePage(QNotifyHandler &Notify,QWidget *parent)
 
 	 setLayout(pHMainLyt);
 	 pDevList->horizontalHeader()->setStretchLastSection(true);
-	 connect(&m_Notify,SIGNAL(S_OnConnected(QString,int)),this,SLOT(OnDevConnect(QString,int)));
-	 connect(&m_Notify,SIGNAL(S_OnRunState(QString,int)),this,SLOT(OnRunState(QString,int)));
+     connect(&m_Notify,SIGNAL(S_OnDevStatus(QString,int)),this,SLOT(OnDevStatus(QString,int)));
 }
 
 QDevStatePage::~QDevStatePage()
@@ -65,9 +64,17 @@ void QDevStatePage::LoadDevToList()
 		{	
 			int nrow = pDevList->rowCount();
 			pDevList->insertRow(nrow);
-            pDevList->setItem(nrow,0,new QTableWidgetItem(QIcon(tr(":/device_state.png")),(*iter).second.sDevName.c_str()));//QString(tr("转换模块"))
-            QString sEndpoint = QString(tr("%1:%2[%3]")).arg((*Modleiter).netMode.strIp.c_str())\
+            QIcon sIcon;
+            if(iter->second.iDevType == DEVICE_TRANSMITTER)
+                sIcon.addFile(QString::fromUtf8(":/new/images/transmitter.png"));
+            else if(iter->second.iDevType > DEVICE_TRANSMITTER && iter->second.iDevType <DEVICE_SWITCH)
+                 sIcon.addFile(QString::fromUtf8(":/new/images/envir.png"));
+            else
+                   sIcon.addFile(QString::fromUtf8(":/new/images/link.png"));
+            pDevList->setItem(nrow,0,new QTableWidgetItem(sIcon,(*iter).second.sDevName.c_str()));
+            QString sEndpoint = QString(tr("%1:%2[%3]")).arg((*Modleiter).netMode.strIp.c_str()) \
                 .arg((*Modleiter).netMode.ilocal_port).arg((*iter).second.iAddressCode);
+            //pDevList->setItem(nrow,1,new QTableWidgetItem((*iter).second.sDevNum.c_str()));
             pDevList->setItem(nrow,1,new QTableWidgetItem(sEndpoint));
             pDevList->setItem(nrow,2,new QTableWidgetItem(tr("未知")));
 
@@ -81,35 +88,38 @@ void QDevStatePage::LoadDevToList()
 	pDevList->resizeColumnsToContents();
 }
 
-void QDevStatePage::OnDevConnect(QString sDevId,int nResult)
+void QDevStatePage::OnDevStatus(QString sDevId,int nResult)
 {
 	if(pDevList->rowCount()<=0)
 		return;
 	if(m_mapListItems.find(sDevId)==m_mapListItems.end())
 		return;
-	switch ((con_state)nResult)
+    switch (nResult)
 	{
-	case con_connected:
-		pDevList->item(m_mapListItems[sDevId],4)->setText(tr("已连接"));
-		pDevList->item(m_mapListItems[sDevId],4)->setTextColor(QColor(0,0,255));
+    case -1://连接中断
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("中断"));
+        pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(150,150,150));
 		break;
-	case con_disconnected:
-		pDevList->item(m_mapListItems[sDevId],4)->setText(tr("已断开"));
-		pDevList->item(m_mapListItems[sDevId],4)->setTextColor(QColor(0,0,0));
+    case 0://连接正常
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("已断开"));
+        pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,0,255));
 		break;
-	case con_connecting:
-		pDevList->item(m_mapListItems[sDevId],4)->setText(tr("正在重连..."));
-		pDevList->item(m_mapListItems[sDevId],4)->setTextColor(QColor(255,0,0));
+    case 1://已开机
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("已开机"));
+        pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,255,0));
 		break;
+    case 2://已关机
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("已关机"));
+        pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(255,255,0));
+        break;
+    case 3://天线->主机
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("天线->主机"));
+        pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,255,0));
+        break;
+    case 4://天线->备机
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("天线->备机"));
+        pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,255,0));
+        break;
 	}
-
-    int nConSize =   GetInst(hx_net::SvcMgr).get_modle_online_count();
-	if(nConSize<0)
-		nConSize=0;
-	pDevConSize->setText(QString(tr("已连接：%1")).arg(nConSize));
 	
-}
-
-void QDevStatePage::OnRunState(QString sDevId,int nResult)
-{
 }

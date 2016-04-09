@@ -25,9 +25,9 @@ enum dev_alarm_state
 
 enum con_state 
 { 
-	con_connected= 0,       //已连接
-	con_disconnected ,      //已断开
-	con_connecting,         //正在连接...
+    con_connected= 0,       //已连接
+    con_disconnected ,      //已断开
+    con_connecting,         //正在连接...
 };
 
 enum usr_state
@@ -39,7 +39,7 @@ enum usr_state
 
 enum dev_run_state
 {
-	dev_running   =0,//已开机
+    dev_running   =0,//已开机
 	dev_shutted_down,//已关机(备机)
 	antenna_host,    //天线位置(主机)
 	antenna_backup,  //天线位置(备机)
@@ -106,22 +106,7 @@ typedef struct
 	string sNote;           //备注
 } StationInformation;
 
-//用户信息
-typedef struct 
-{
-	string sStationNumber;
-	string sNumber;
-	string sName;
-	string sPassword;
-	string sGender;
-	string sHeadship;
-	string sJobNumber;
-	string sTelephone;
-	string sEducation;
-	string sEmail;
-	short  nControlLevel;
-	string sNote;
-} UserInformation;
+
 
 
 //发射机协议

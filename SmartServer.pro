@@ -56,7 +56,8 @@ SOURCES += main.cpp\
     net/client/urdl.cpp \
     net/client/dev_message/Tsmt_message.cpp \
     net/client/dev_message/transmmiter/Transmmiter.cpp \
-    net/client/dev_message/transmmiter/CDtransmmiter.cpp
+    net/client/dev_message/transmmiter/CDtransmmiter.cpp \
+    net/client/dev_message/transmmiter/GmeTransmmit.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -116,7 +117,8 @@ HEADERS  += \
     net/client/http_request_session.h \
     net/client/dev_message/Tsmt_message.h \
     net/client/dev_message/transmmiter/Transmmiter.h \
-    net/client/dev_message/transmmiter/CDtransmmiter.h
+    net/client/dev_message/transmmiter/CDtransmmiter.h \
+    net/client/dev_message/transmmiter/GmeTransmmit.h
 
 FORMS    += mainwindow.ui
 
