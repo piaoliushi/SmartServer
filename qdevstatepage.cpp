@@ -25,9 +25,9 @@ QDevStatePage::QDevStatePage(QNotifyHandler &Notify,QWidget *parent)
 	 pHMainLyt->addLayout(pHlyt);
 	 pDevList = new QTableWidget(this);
      pDevList->setColumnCount(3);
-
+     pDevList->setFocusPolicy(Qt::NoFocus);
 	 QStringList header; 
-     header<<tr("设备名称")<<tr("IP:PORT")<<tr("当前状态");
+     header<<tr("设备名称")<<tr("IP地址")<<tr("当前状态");
 	 pDevList->setHorizontalHeaderLabels(header); 
 	 pDevList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	 pDevList->setSelectionBehavior ( QAbstractItemView::SelectRows); //设置选择行为，以行为单位
@@ -72,9 +72,9 @@ void QDevStatePage::LoadDevToList()
             else
                    sIcon.addFile(QString::fromUtf8(":/new/images/link.png"));
             pDevList->setItem(nrow,0,new QTableWidgetItem(sIcon,(*iter).second.sDevName.c_str()));
-            QString sEndpoint = QString(tr("%1:%2[%3]")).arg((*Modleiter).netMode.strIp.c_str()) \
-                .arg((*Modleiter).netMode.ilocal_port).arg((*iter).second.iAddressCode);
-            //pDevList->setItem(nrow,1,new QTableWidgetItem((*iter).second.sDevNum.c_str()));
+            QString sEndpoint = QString(tr("%1:%2")).arg((*Modleiter).netMode.strIp.c_str()).arg((*Modleiter).netMode.ilocal_port);
+             //   .arg((*iter).second.iAddressCode);
+            //pDevList->setItem(nrow,1,new QTableWidgetItem((*iter).second.sDevNum.c_str()));:%2
             pDevList->setItem(nrow,1,new QTableWidgetItem(sEndpoint));
             pDevList->setItem(nrow,2,new QTableWidgetItem(tr("未知")));
 
@@ -101,7 +101,7 @@ void QDevStatePage::OnDevStatus(QString sDevId,int nResult)
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(150,150,150));
 		break;
     case 0://连接正常
-        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("已断开"));
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("已连接"));
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,0,255));
 		break;
     case 1://已开机

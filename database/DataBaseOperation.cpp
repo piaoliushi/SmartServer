@@ -116,7 +116,7 @@ bool DataBaseOperation::GetDevInfo( string strDevnum,DeviceInfo& device )
             device.iAddressCode = devquery.value(8).toInt();
             device.nDevProtocol = devquery.value(9).toInt();
             device.nSubProtocol = devquery.value(10).toInt();
-            QString sprotoclnum = devquery.value(2).toString();
+            QString sprotoclnum = devquery.value(11).toString();
             GetDevMonItem(strDevnum,sprotoclnum,device.map_MonitorItem);
             GetDevMonitorSch(strDevnum,device.vMonitorSch);
             GetCmd(strDevnum,device.vCommSch);

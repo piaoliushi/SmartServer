@@ -22,35 +22,37 @@ namespace hx_net
 		, _workerptr(new server_work((*_taskqueueptr.get())))//创建一个用户任务
         , _serverptr(new LocalServer(port, (*_taskqueueptr.get())))//创建一个服务
     {
-        //_httpclientptr = hx_http_client_ptr(new hx_http_client);
-        _web_handler = new web_handler;
-        http::async_server<web_handler>::options options(*_web_handler);
-        options.address("192.168.1.197")
-                .port("8080")
-                .io_service(boost::make_shared<boost::asio::io_service>())
-                .thread_pool(boost::make_shared<boost::network::utils::thread_pool>(2))
-                .reuse_address(true);
-        _httpserverptr = new hx_http_server(options);//hx_http_server_ptr(
 
         _listenthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunNetListen, this)));
         _workthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunTasks, this)));
-        _httpthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunHttpServer,this)));
 
+        if(GetInst(LocalConfig).http_svc_use()==true){
+            _web_handler = new web_handler;
+            http::async_server<web_handler>::options options(*_web_handler);
+            options.address(GetInst(LocalConfig).http_svc_ip())
+                    .port(GetInst(LocalConfig).http_svc_port())
+                    .io_service(boost::make_shared<boost::asio::io_service>())
+                    .thread_pool(boost::make_shared<boost::network::utils::thread_pool>(2))
+                    .reuse_address(true);
+            _httpserverptr = new hx_http_server(options);
+            _httpthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunHttpServer,this)));
 
+        }
 
     }
 
 	ServerMgr::~ServerMgr() 
 	{
-        if(_httpserverptr)
+        if(_httpserverptr){
             _httpserverptr->stop();
+            _httpthreadptr->join();
+        }
 		_workerptr->stop();
-		//_serverptr->stop();
 		_taskqueueptr->ExitNotifyAll();
 		_listenthreadptr->join();
 		_workthreadptr->join();
 
-        _httpthreadptr->join();
+
 	}
 
 	void ServerMgr::RunNetListen()
@@ -123,33 +125,10 @@ namespace hx_net
 			return _serverptr->send_command_execute_result(sStationid,sDevid,nMsgType,commdRsltPtr);
 	}
 
-	//获得子台站设备状态信息
-	loginAckMsgPtr  ServerMgr::get_child_station_dev_status()
-	{
-		if(_serverptr)
-			return _serverptr->get_child_station_dev_status();
-		return loginAckMsgPtr();
-	}
 	//停止服务
 	void ServerMgr::stop_server()
 	{
 		if(_serverptr)
 			_serverptr->stop();
 	}
-
-	//上级查岗
-	void ServerMgr::check_station_working(checkWorkingReqMsgPtr pcheckWork)
-	{
-		if(_serverptr)
-			_serverptr->check_station_working(pcheckWork);
-	}
-
-    //发送http通知
-    void ServerMgr::send_http_message()
-    {
-        //if(_httpclientptr)
-        //{
-
-        //}
-    }
 }

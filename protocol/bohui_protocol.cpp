@@ -182,14 +182,15 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
 
             map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
             for(;cell_iter!=mapMonitorItem.end();++cell_iter){
-                if(cell_iter->second.bUpload == false)
-                    continue;
+               // if(cell_iter->second.bUpload == false)
+               //    continue;
                 xml_node<> *xml_Quality_Index = xml_reportMsg.allocate_node(node_element,"QualityIndex ");
-                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str()));
-                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleType",boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str()));
-               xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleID",boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str()));
+                //string sType = boost::lexical_cast<std::string>(cell_iter->second.iTargetId);
+                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
+                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
+               xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleID",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
                 float curValue = curData->mValues[cell_iter->first].fValue;
-                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",boost::lexical_cast<std::string>(curValue).c_str()));
+                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(curValue).c_str())));
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
                 xml_Quality->append_node(xml_Quality_Index);
 
@@ -243,9 +244,9 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                  if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
                      continue;
                  xml_node<> *xml_Quality_Index = xml_reportMsg.allocate_node(node_element,mapTypeToStr[cell_iter->second.iTargetId].second.c_str());
-                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str()));
+                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
                  float curValue = curData->mValues[cell_iter->first].fValue;
-                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",boost::lexical_cast<std::string>(curValue).c_str()));
+                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(curValue).c_str())));
                  xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
                  xml_Quality->append_node(xml_Quality_Index);
              }

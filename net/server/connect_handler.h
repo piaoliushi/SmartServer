@@ -24,7 +24,7 @@ namespace hx_net
 
 		void set_state(usr_state s);
 
-		bool sendMessage(e_MsgType _type,googleMsgPtr gMsgPtr);//google::protobuf::Message *
+        bool sendMessage(e_MsgType _type,googleMsgPtr gMsgPtr);
 
 		void start_hb_timer();
 
@@ -37,16 +37,6 @@ namespace hx_net
 		void login_user_ack(string sUser,string sPassword,msgPointer &pMsg);
 
 		void logout_user_ack(string sUser,string sPassword,msgPointer &pMsg);
-
-		void  handover_ack(string soldUser,string sNewUser,string sNewPassword,msgPointer &pMsg);
-
-		void  user_sign_in_out_ack(int bIn,string sUser,string sPassword);
-
-		void  user_duty_log(string sUserId,const string &sContent,int nType);
-
-		void  check_station_working(checkWorkingReqMsgPtr pcheckWork);
-
-		void  check_station_result_notify(checkWorkingNotifyMsgPtr pcheckWorkResult);
 
 		void handle_timeout(const boost::system::error_code& e);
 

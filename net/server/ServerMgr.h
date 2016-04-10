@@ -7,9 +7,6 @@
 #include "local_server.h"
 
 class server_work;
-//struct _web_handler;
-//class web_handler;
-//class hx_http_server;//hx_http_server_ptr
 namespace hx_net
 {
 	
@@ -51,9 +48,6 @@ namespace hx_net
 
 		//上级查岗
 		void check_station_working(checkWorkingReqMsgPtr pcheckWork);
-
-        //发送http通知
-        void send_http_message();
 
 	private:
 		boost::shared_ptr<boost::thread> _listenthreadptr;//网络监听线程

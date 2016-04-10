@@ -102,7 +102,7 @@ namespace hx_net
 		loginAckMsgPtr sloginAck(new LoginAck);
 		srv_.user_login(shared_from_this(),sUser,sPassword,*sloginAck);
 		const google::protobuf::RepeatedPtrField<DevNetStatus> vNetState = sloginAck->cdevcurnetstatus();
-		//cout<<vNetState.size()<<endl;
+
 		sendMessage(MSG_LOGIN_ACK,sloginAck);
 	}
 
@@ -111,49 +111,6 @@ namespace hx_net
 		logoutAckMsgPtr slogOutAck(new LogoutAck);
 		srv_.user_logout(shared_from_this(),sUser,sPassword,*slogOutAck);
 		sendMessage(MSG_LOGOUT_ACK,slogOutAck);
-	}
-
-	//交接班(ack消息共用，类型区分)
-	void connect_handler::handover_ack(string soldUser,string sNewUser,string sNewPassword,msgPointer &pMsg)
-	{
-		loginAckMsgPtr sloginAck(new LoginAck);
-		HandOverReq rhandover;
-		rhandover.ParseFromArray(pMsg->body(),pMsg->bodySize());
-        string sContents = rhandover.scontents();//QString::fromUtf8(rhandover.scontents().c_str()).toLocal8Bit();
-		srv_.user_handover(shared_from_this(),soldUser,sNewUser,sNewPassword,sContents,*sloginAck);
-		sendMessage(MSG_HANDOVER_ACK,sloginAck);
-	}
-
-	//签到,签退(ack)
-	void connect_handler::user_sign_in_out_ack(int bIn,string sUser,string sPassword)
-	{
-		signInOutAckMsgPtr signinAck(new SignInOutAck);
-		srv_.user_signin_out(shared_from_this(),sUser,sPassword,signinAck,bIn);
-		sendMessage(MSG_SIGN_IN_OUT_ACK,signinAck);
-	}
-	//值班日志
-	void  connect_handler::user_duty_log(string sUserId,const string &sContent,int nType)
-	{
-		dutyLogAckMsgPtr dutyAck(new DutyLogAck);
-		std::string sstationid = GetInst(LocalConfig).local_station_id();
-        //if(!GetInst(DbManager).AddDutyLog(sstationid,sUserId,sContent,nType))
-        //	dutyAck->set_eresult(EC_FAILED);
-        //else
-        //	dutyAck->set_eresult(EC_OK);
-		sendMessage(MSG_DUTY_LOG_ACK,dutyAck);
-	}
-	//查岗响应
-	void connect_handler::check_station_working(checkWorkingReqMsgPtr pcheckWork)
-	{
-		checkWorkingAckMsgPtr checkAck(new CheckStationWorkingAck);
-		//checkAck->set_sstationnumber(pcheckWork->ss);
-		srv_.check_working(shared_from_this(),pcheckWork,checkAck);
-		sendMessage(MSG_CHECK_WORKING_ACK,checkAck);
-	}
-	//查岗确认通知
-	void  connect_handler::check_station_result_notify(checkWorkingNotifyMsgPtr pcheckWorkResult)
-	{
-		srv_.check_working_result_notify(shared_from_this(),pcheckWorkResult);
 	}
 
 	//开始接收消息头

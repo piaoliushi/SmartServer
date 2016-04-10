@@ -20,12 +20,10 @@ SOURCES += main.cpp\
     net/io_service_pool.cpp \
     net/server/server_work.cpp \
     net/server/ServerMgr.cpp \
-    net/server/connect_subSvc_handler.cpp \
     net/server/connect_handler.cpp \
     net/server/http/RequestHandlerFactory.cpp \
     net/server/http/RequestHandler.cpp \
     net/server/http/CommonPrecomp.cpp \
-    net/client/SvcClient.cpp \
     net/client/MsgHandleAgentImpl.cpp \
     net/client/MsgHandleAgent.cpp \
     net/client/device_session.cpp \
@@ -33,7 +31,6 @@ SOURCES += main.cpp\
     net/client/DevClientMgr.cpp \
     net/client/DevClient.cpp \
     net/client/client_work.cpp \
-    net/client/client_session.cpp \
     net/client/dev_message/Envir_message.cpp \
     net/client/dev_message/Electric_message.cpp \
     net/client/dev_message/base_message.cpp \
@@ -71,20 +68,16 @@ HEADERS  += \
     net/config.h \
     net/server/server_work.h \
     net/server/ServerMgr.h \
-    net/server/connect_subSvc_handler.h \
     net/server/connect_handler.h \
     net/server/http/RequestHandlerFactory.h \
     net/server/http/RequestHandler.h \
     net/server/http/CommonPrecomp.h \
-    net/client/SvcClient.h \
     net/client/MsgHandleAgentImpl.h \
     net/client/MsgHandleAgent.h \
     net/client/device_session.h \
     net/client/device_message.h \
     net/client/DevClientMgr.h \
     net/client/DevClient.h \
-    net/client/client_work.h \
-    net/client/client_session.h \
     net/client/dev_message/Envir_message.h \
     net/client/dev_message/Electric_message.h \
     net/client/dev_message/base_message.h \

@@ -205,6 +205,19 @@ typedef struct
     map<int,vector<AssDevChan> >       map_AssDevChan;//设备关联设置
 }DeviceInfo,*pDeviceInfo;
 
+
+typedef struct
+{
+    string sStationNumber;//台站编号
+    string sDevNum;       //设备编号
+    string sDevName;      //设备名称
+    int    nDevType;        //设备类型
+    int    nConnectType;  //连接类型
+    int    nCommType;     //通信方式
+    map<int,DeviceMonitorItem> mapMonitorItem;//对应的监控项信息
+}DevBaseInfo;
+
+
 typedef struct
 {
     string    sModleNumber;
@@ -237,6 +250,7 @@ typedef struct
     int           nModuleId;//模块id
     int           nModuleType;//模块type
     int           nLimitId;//跃限类型,跃上限...
+    string      sReason;//告警描述
 }CurItemAlarmInfo;
 
 typedef struct DATA_INFO_TAG

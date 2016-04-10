@@ -16,6 +16,8 @@ public:
 	string local_station_id()const{return local_station_id_;}
 	string local_dev_server_number()const{return local_dev_server_id_;}
 	string local_station_name()const{return local_station_name_;}
+    string src_code(){return src_code_;}
+    string dst_code(){return dst_code_;}
 	string database_ip()const{return db_ip_;}
 	string database_user()const{return db_usr_;}
 	string database_password()const{return db_psw_;}
@@ -35,30 +37,21 @@ public:
 	int    sms_baud_rate(){return sms_baud_rate_;}
 	string sms_center_number(){return sms_center_number_;}
 
-	bool   upload_use(){return upload_use_;}
-	string relay_svc_ip(){return relay_svc_ip_;}
-	unsigned short relay_svc_port(){return relay_svc_port_;}
+    bool   report_use(){return report_use_;}
+    string report_svc_url(){return report_svc_url_;}
 
-	bool   accept_svc_use(){return accept_upload_use_;}
-	unsigned short accept_svc_port(){return accept_svc_port_;}
-	int    relay_data_save_interval(){return relay_data_save_invertal_;}
+    bool   http_svc_use(){return http_upload_use_;}
+    string http_svc_ip(){return http_svc_ip_;}
+    string http_svc_port(){return http_svc_port_;}
 	
-	//设备主动上传服务配置
-	bool   accept_dev_upload_svc_use(){return accept_dev_upload_use_;}
-	unsigned short accept_dev_upload_port(){return accept_dev_upload_svc_port_;}
-	double    dev_upload_data_save_interval(){return dev_upload_data_save_invertal_;}
-
-	//告警上传配置
-	bool   alarm_upload_use(){return alarm_upload_use_;}
-	string alarm_svc_ip(){return alarm_center_svc_ip_;}
-	unsigned short alarm_svc_port(){return alarm_center_svc_port_;}
-
 	bool writeSmsParToXml(const char* sFileName,bool bUse,string comId,int baudRate,string smsCenterNumber);
 	
     void device_cmd(string sDevId,CommandAttribute& cmd);//读取配置的命令
 
 private:
     string src_code_;//本平台唯一id
+    string dst_code_;//目标平台唯一id
+
 	string local_station_id_;   //本平台id
 	string local_dev_server_id_;//本监测服务id
 	string local_station_name_; //平台名称
@@ -75,23 +68,12 @@ private:
 	int    sms_baud_rate_;//波特率
 	string sms_center_number_;//短信中心号码
 
-	bool   upload_use_;//是否上传数据
-	string relay_svc_ip_;//级联服务ip
-	unsigned short relay_svc_port_;//级联服务port
+    bool   report_use_;//是否上传数据
+    string report_svc_url_;//上报目标url
 
-	bool   accept_upload_use_;//是否接收上传
-	unsigned short accept_svc_port_;//接收上传服务端口
-	int    relay_data_save_invertal_;//上传数据保存间隔
-
-	bool   accept_dev_upload_use_;//是否接收设备数据上传
-	unsigned short accept_dev_upload_svc_port_;//接收设备上传服务端口
-	double    dev_upload_data_save_invertal_;//设备数据上传保存间隔
-
-	bool   auto_switch_anttena_use_;//是否自动切换天线
-
-	bool   alarm_upload_use_;//是否上传到告警服务中心
-	string alarm_center_svc_ip_;//告警中心服务器ip
-	unsigned short alarm_center_svc_port_;//告警中心服务器端口
+    bool   http_upload_use_;//是否接收http请求
+    string http_svc_port_;//接收上传服务端口
+     string http_svc_ip_;//上报目标url
 
     map<string,pDevicePropertyExPtr> device_property_Ex_;
 	map<string,pMoxaPropertyExPtr> moxas_property_Ex_;

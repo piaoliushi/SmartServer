@@ -45,7 +45,7 @@ namespace hx_net
         virtual void            set_child_run_state(string sId,dev_run_state s){}
 		virtual dev_run_state   get_child_run_state(string sId){return dev_unknown;}
         virtual void  get_alarm_state(map<int,std::pair<int,tm> >& cellAlarm){}
-        virtual void  get_alarm_state(string sDevId,map<int,std::pair<int,tm> >& cellAlarm){}
+        virtual void  get_alarm_state(string sDevId,map<int,map<int,CurItemAlarmInfo> >& cellAlarm){}
         virtual void  clear_dev_alarm(string sDevId){}
         virtual void  clear_dev_state(string sDevId){}
 
@@ -95,8 +95,8 @@ namespace hx_net
 			                                 dev_run_state runState);
 		//打包发送设备报警状态消息
         virtual void send_alarm_state_message(string sStationid,string sDevid,string sDevName,
-                                              int nCellId,string sCellName,int devType,int alarmState,
-                                              string sStartTime,int alarmCount);
+                                              int nCellId,int devType,int  alarmState,
+                                              string sStartTime,int alarmCount,string sReason);
 		//打包发送命令执行结果
         virtual void send_command_execute_result_message(string sStationid,string sDevid,int devType,string sDevName,
 						                                 string sUsrName,e_MsgType nMsgType,e_ErrorCode eResult);

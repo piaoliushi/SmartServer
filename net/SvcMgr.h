@@ -50,10 +50,10 @@ namespace hx_net
 		//获得设备运行状态
 		dev_run_state get_dev_run_state(string sStationId,string sDevid);
 		//获得设备运行状态
-        void get_dev_alarm_state(string sStationId,string sDevid,map<int,std::pair<int,tm> >& cellAlarm);
+        void get_dev_alarm_state(string sStationId,string sDevid,map<int,map<int,CurItemAlarmInfo> >& cellAlarm);
 		
 		//发送设备数据通知
-		void send_monitor_data_to_client(string sStationid,string sDevid,devDataNfyMsgPtr &dataPtrToClient,devDataNfyMsgPtr &dataPtrToSvr);
+        void send_monitor_data_to_client(string sStationid,string sDevid,devDataNfyMsgPtr &dataPtrToClient);
 		//发送设备网络连接状态信息到客户端
 		void send_dev_net_state_to_client(string sStationid,string sDevid,devNetNfyMsgPtr &netPtr);
 		//发送设备运行状态信息到客户端
@@ -62,26 +62,18 @@ namespace hx_net
 		void send_dev_alarm_state_to_client(string sStationid,string sDevid,devAlarmNfyMsgPtr &alarmPtr);
 		//发送控制执行结果通知
 		void send_command_execute_result(string sStationid,string sDevid,e_MsgType nMsgType,devCommdRsltPtr &commdRsltPtr);
-										 
-		//void BroadcastMessage(e_MsgType _type,googleMsgPtr gMsgPtr);//google::protobuf::Message *
+
 		//获得子台站设备状态信息
 		loginAckMsgPtr  get_child_station_dev_status();
 		//执行通用指令
 		e_ErrorCode excute_command(int cmdType,devCommdMsgPtr lpParam);
-		//上级查岗
-		void check_station_working(checkWorkingReqMsgPtr pcheckWork);
-		//向上提交查岗结果
-		void commit_check_working_result(checkWorkingNotifyMsgPtr pcheckWorkResult);
-		//是否是通过上级平台直连下级平台设备
-		bool is_direct_connect_device(string sStationId,string sDevNumber);
 
         e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType);
 	private:
 		svc_state svc_state_;
 		boost::shared_ptr<DevClientMgr> m_pDevMgrPtr;//设备(被动连接)管理对象
 		boost::shared_ptr<ServerMgr> m_pClientMgrPtr;//客户端服务、上传服务、上传设备管理对象
-		
-		//pRecordAgentPtr m_pRecordAgentPtr;//录制服务代理对象
+
 		QNotifyHandler* notify_handler_ptr_;
 	};
 }

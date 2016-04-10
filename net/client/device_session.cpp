@@ -11,9 +11,8 @@ using namespace db;
 namespace hx_net
 {
 device_session::device_session(boost::asio::io_service& io_service,
-                               TaskQueue<msgPointer>& taskwork,ModleInfo & modinfo,http_request_session_ptr &httpPtr)
+                               ModleInfo & modinfo,http_request_session_ptr &httpPtr)
     :net_session(io_service)
-    ,taskwork_(taskwork)
     #ifdef USE_CLIENT_STRAND
     , strand_(io_service)
     #endif
@@ -80,16 +79,12 @@ void device_session::init_session_config()
 
 void device_session::dev_base_info(DevBaseInfo& devInfo,string iId)
 {
-
-    if(modleInfos.mapDevInfo.find(iId)!=modleInfos.mapDevInfo.end())
-    {
-        // devInfo.mapMonitorItem = modleInfos.mapDevInfo[iId].map_MonitorItem;
-        // devInfo.nDevType = modleInfos.mapDevInfo[iId].iDevType;
-        //devInfo.sDevName = modleInfos.mapDevInfo[iId].sDevName;
-        //devInfo.sDevNum = modleInfos.mapDevInfo[iId].sDevNum;
-        //devInfo.sDevNum = modleInfos.mapDevInfo[iId].sStationNumber;
-        //devInfo.nCommType = modleInfos.mapDevInfo[iId].nCommType;//主被动连接
-        //devInfo.nConnectType =modleInfos.mapDevInfo[iId].nConnectType;//连接方式0：tcp
+    map<string,DeviceInfo>::iterator find_iter = modleInfos.mapDevInfo.find(iId);
+    if(find_iter !=modleInfos.mapDevInfo.end()){
+        devInfo.sDevNum = find_iter->second.sDevNum;
+        devInfo.mapMonitorItem = find_iter->second.map_MonitorItem;
+        devInfo.nDevType = find_iter->second.iDevType;
+        devInfo.sDevName = find_iter->second.sDevName;
     }
 }
 
@@ -137,14 +132,14 @@ void device_session::set_con_state(con_state curState)
             {
                 //广播设备状态到在线客户端
                 send_net_state_message(GetInst(LocalConfig).local_station_id(),(*iter).first
-                                        ,(*iter).second.sDevName,(e_DevType)((*iter).second.iDevType)
+                                        ,(*iter).second.sDevName,(*iter).second.iDevType
                                         ,othdev_con_state_);
                 if(othdev_con_state_== con_connected)
                     GetInst(SvcMgr).get_notify()->OnDevStatus((*iter).first,0);
                 else
                     GetInst(SvcMgr).get_notify()->OnDevStatus((*iter).first,-1);
 
-                //通知http服务器
+                //通知http服务器(设备网络异常)
                 if(iter->second.iDevType == DEVICE_TRANSMITTER){
                     int nMod = (curState==con_connected)?1:0;
                     if(netAlarm.nAlarmId==-1 && nMod==0){
@@ -157,19 +152,17 @@ void device_session::set_con_state(con_state curState)
                         if(nMod==1)
                             netAlarm.nAlarmId=-1;
                     }
-
                 }
             }
-
         }
 }
 
 //获得发射机报警状态
-void device_session::get_alarm_state(string sDevId,map<int,std::pair<int,tm> >& cellAlarm)
+void device_session::get_alarm_state(string sDevId,map<int,map<int,CurItemAlarmInfo> >& cellAlarm)
 {
     boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
-    //if(mapItemAlarmStartTime.find(sDevId)!=mapItemAlarmStartTime.end())
-    //	cellAlarm = mapItemAlarmStartTime[sDevId];
+    if(mapItemAlarm.find(sDevId)!=mapItemAlarm.end())
+        cellAlarm = mapItemAlarm[sDevId];
 }
 
 
@@ -294,9 +287,6 @@ void device_session::connect_time_event(const boost::system::error_code& error)
             boost::system::error_code err= boost::system::error_code();
             handle_connected(err);
         }
-
-
-        //std::cout<<"reconnect request..."<<std::endl;
         start_timeout_timer();//启动超时定时器
     }
 }
@@ -355,6 +345,13 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
         else{
+
+            if(modleInfos.mapDevInfo.size()<=1)
+            {
+                close_all();
+                start_connect_timer(moxa_config_ptr->connect_timer_interval);
+                return;
+            }
             query_timeout_count_ = 0;
             cur_msg_q_id_ = 0;
             //发送清零数据给客户端,该设备可能连接异常
@@ -467,9 +464,6 @@ void device_session::close_all()
     wait_task_end();
     cur_msg_q_id_         =0;//当前命令id
     query_timeout_count_=0;//命令发送超时次数清零
-
-    clear_all_alarm();
-
 }
 
 //启动任务定时器
@@ -553,7 +547,7 @@ void device_session::notify_client(string sDevId,string devName,string user,int 
 
 
     send_command_execute_result_message(GetInst(LocalConfig).local_station_id(),sDevId,
-                                        TRANSMITTER,devName,"timer",(e_MsgType)cmdType,(e_ErrorCode)eResult);
+                                        DEVICE_TRANSMITTER,devName,"timer",(e_MsgType)cmdType,(e_ErrorCode)eResult);
     //通知http服务器
     int CommandType= -1;(user=="timer")?MSG_TRANSMITTER_TURNON_ACK:MSG_TRANSMITTER_TURNOFF_ACK;
     switch (cmdType) {
@@ -723,7 +717,7 @@ void device_session::clear_dev_alarm(string sDevId)
         for(;iter!=mapItemAlarm[sDevId].end();++iter) {
             //写入恢复记录,通知客户端
             //.......
-
+            record_alarm_and_notify(sDevId,0, 0,1,modleInfos.mapDevInfo[sDevId].map_MonitorItem[iter->first],typeIter->second);
         }
         iter->second.clear();
     }
@@ -1016,19 +1010,21 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
     tm *local_time = localtime(&curAlarm.startTime);
     strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
 
-    string sAlarm_reason = str(boost::format("%1%%2,当前值:%3%%4%,门限值:%5%%6%")
-                               %ItemInfo.sItemName%CONST_STR_ALARM_CONTENT[curAlarm.nLimitId]%fValue%ItemInfo.sUnit%fLimitValue%ItemInfo.sUnit);
+
     //存储告警到数据库
     if(!bMod){//0:告警产生
+
+        curAlarm. sReason = str(boost::format("%1%%2,当前值:%3%%4%,门限值:%5%%6%")
+        %ItemInfo.sItemName%CONST_STR_ALARM_CONTENT[curAlarm.nLimitId]%fValue%ItemInfo.sUnit%fLimitValue%ItemInfo.sUnit);
+
         bool bRslt = GetInst(DataBaseOperation).AddItemAlarmRecord(devId,curAlarm.startTime,ItemInfo.iItemIndex,curAlarm.nLimitId,curAlarm.nType,
-                                                                   fValue,sAlarm_reason,curAlarm.nAlarmId);
+                                                                   fValue,curAlarm. sReason,curAlarm.nAlarmId);
         if(bRslt==true){
             //提交监控量告警到上级平台
-            http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos.mapDevInfo[devId].iDevType,bMod,curAlarm,sAlarm_reason);
+            http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
-                                     ,sAlarm_reason//暂用reason替代item名称
-                                     ,modleInfos.mapDevInfo[devId].iDevType,curAlarm.nType,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size());
+                                     ,modleInfos.mapDevInfo[devId].iDevType,curAlarm.nType,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm. sReason);
             // 联动.....
         }
     }else{//1:告警恢复
@@ -1036,11 +1032,10 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
         bool bRslt = GetInst(DataBaseOperation).AddItemEndAlarmRecord(curTime,curAlarm.nAlarmId);
         if(bRslt==true){
             //提交监控量告警到上级平台
-            http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos.mapDevInfo[devId].iDevType,bMod,curAlarm,sAlarm_reason);
+            http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
-                                     ,sAlarm_reason//暂用reason替代item名称
-                                     ,modleInfos.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size());
+                                     ,modleInfos.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm. sReason);
             // 联动.....
         }
     }
@@ -1097,7 +1092,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                 //tmp_alarm_info.nAlarmId = 1000;//需修改
                 tmp_alarm_info.startTime = time(0);//记录时间
                 tmp_alarm_info.nType = ItemInfo.vItemAlarm[nIndex].iAlarmid;//告警类型
-                tmp_alarm_info.nLimitId = iLimittype;
+                tmp_alarm_info.nLimitId = iLimittype;//限值类型
                 map<int,CurItemAlarmInfo>  tmTypeAlarm;
                 tmTypeAlarm[iLimittype] = tmp_alarm_info;
                 mapItemAlarm[devId][ItemInfo.iItemIndex] = tmTypeAlarm;

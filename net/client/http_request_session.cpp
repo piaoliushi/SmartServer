@@ -56,8 +56,9 @@ http_request_session::http_request_session(boost::asio::io_service& io_service)
      string sReportMsg;
      Bohui_Protocol  bh_ptcl;
      bh_ptcl.createReportDataMsg(-1,sDevid,nDevType,curData,mapMonitorItem,sReportMsg);
+     std::cout<<sReportMsg.c_str()<<endl;
      if(sReportMsg.empty()==false)
-         openUrl(GetInst(LocalConfig).relay_svc_ip(),sReportMsg);
+         openUrl(GetInst(LocalConfig).report_svc_url(),sReportMsg);
  }
 
  //上报http消息到上级平台(告警)
@@ -76,7 +77,7 @@ http_request_session::http_request_session(boost::asio::io_service& io_service)
      if(temType>=0){
         bh_ptcl.createReportAlarmDataMsg(-1,temType,sDevid,alarmInfo,nMod,reason,sReportMsg);
         if(sReportMsg.empty()==false)
-            openUrl(GetInst(LocalConfig).relay_svc_ip(),sReportMsg);
+            openUrl(GetInst(LocalConfig).report_svc_url(),sReportMsg);
      }
  }
 
@@ -87,7 +88,7 @@ http_request_session::http_request_session(boost::asio::io_service& io_service)
      Bohui_Protocol  bh_ptcl;
      bh_ptcl.createReportAlarmDataMsg(-1,BH_POTO_CommunicationReport,sDevid,alarmInfo,nMod,reason,sReportMsg);
      if(sReportMsg.empty()==false)
-         openUrl(GetInst(LocalConfig).relay_svc_ip(),sReportMsg);
+         openUrl(GetInst(LocalConfig).report_svc_url(),sReportMsg);
  }
 
  //上报http消息到上级平台(执行结果)
@@ -97,7 +98,7 @@ http_request_session::http_request_session(boost::asio::io_service& io_service)
      Bohui_Protocol  bh_ptcl;
      bh_ptcl.creatExcutResultReportMsg(-1,BH_POTO_CmdStatusReport,sDevid,sTime,ndevState,desc,sReportMsg);
      if(sReportMsg.empty()==false)
-         openUrl(GetInst(LocalConfig).relay_svc_ip(),sReportMsg);
+         openUrl(GetInst(LocalConfig).report_svc_url(),sReportMsg);
  }
 
 }

@@ -13,24 +13,13 @@ LocalConfig::LocalConfig(void)
     ,db_usr_("sa")
     ,db_psw_("1234")
     ,db_driver_("SQL Native Client")
-    ,local_dev_server_id_("")
     ,sms_use_(false)
-    ,sms_com_("")
     ,sms_baud_rate_(9600)
     ,sms_center_number_("13888888888")
     ,local_port_(5000)
-    ,relay_svc_ip_("")
-    ,relay_svc_port_(5001)
-    ,upload_use_(false)
-    ,accept_svc_port_(5001)
-    ,accept_upload_use_(false)
-    ,relay_data_save_invertal_(30)
-    ,accept_dev_upload_use_(false)
-    ,accept_dev_upload_svc_port_(5002)
-    ,dev_upload_data_save_invertal_(15)
-    ,alarm_upload_use_(false)
-    ,alarm_center_svc_ip_("")
-    ,alarm_center_svc_port_(5003)
+    ,report_svc_url_("")
+    ,report_use_(false)
+    ,http_upload_use_(false)
 {
     //load_local_config("config.xml");
 }
@@ -52,8 +41,9 @@ bool LocalConfig::load_local_config(const char* sFileName)
         {
             local_station_id_ = xml_station->first_attribute("id")->value();
             local_station_name_ = xml_station->first_attribute("name")->value();
-            //QString ssname  = QString::fromUtf8(local_station_name_.c_str());
             local_dev_server_id_ = xml_station->first_attribute("dev_server_id")->value();
+            src_code_ = xml_station->first_attribute("src_code")->value();
+            dst_code_ = xml_station->first_attribute("dst_code")->value();
         }
         else
             return false;
@@ -100,57 +90,31 @@ bool LocalConfig::load_local_config(const char* sFileName)
             return false;
 
         //检查是否有数据上传服务配置
-        xml_node<>* xml_relay_svc_root = root->first_node("upload_svc_config" );
-        if(xml_server!=NULL)
+        xml_node<>* xml_upload_svc_root = root->first_node("upload_svc_config" );
+        if(xml_upload_svc_root!=NULL)
         {
             //级联链接配置
-            xml_node<>* xml_relay_svc = xml_relay_svc_root->first_node("relay_svc");
-            if(xml_relay_svc!=NULL)
+            xml_node<>* xml_report_svc = xml_upload_svc_root->first_node("report_svc");
+            if(xml_report_svc!=NULL)
             {
-                long nUse =  strtol(xml_relay_svc->first_attribute("use")->value(),NULL,10);
+                long nUse =  strtol(xml_report_svc->first_attribute("use")->value(),NULL,10);
                 if(nUse>0)
-                    upload_use_=true;
+                    report_use_=true;
                 else
-                    upload_use_=false;
-                relay_svc_ip_ = xml_relay_svc->first_attribute("ip")->value();
-                relay_svc_port_ = strtol(xml_relay_svc->first_attribute("port")->value(),NULL,10);
+                    report_use_=false;
+                report_svc_url_ = xml_report_svc->first_attribute("url")->value();
             }
-            //级联上传服务配置
-            xml_node<>* xml_accept_svc = xml_relay_svc_root->first_node("upload_svc");
-            if(xml_accept_svc!=0)
+            //本地http服务配置
+            xml_node<>* xml_http_svc = xml_upload_svc_root->first_node("http_svc");
+            if(xml_http_svc!=0)
             {
-                long nUse =  strtol(xml_accept_svc->first_attribute("use")->value(),NULL,10);
+                long nUse =  strtol(xml_http_svc->first_attribute("use")->value(),NULL,10);
                 if(nUse>0)
-                    accept_upload_use_=true;
+                    http_upload_use_=true;
                 else
-                    accept_upload_use_=false;
-                accept_svc_port_ = strtol(xml_accept_svc->first_attribute("port")->value(),NULL,10);
-                relay_data_save_invertal_ =  strtol(xml_accept_svc->first_attribute("data_save_interval")->value(),NULL,10);
-            }
-            //设备上传服务配置
-            xml_node<>* xml_dev_upload_svc = xml_relay_svc_root->first_node("dev_upload_svc");
-            if(xml_dev_upload_svc!=0)
-            {
-                long nUse =  strtol(xml_dev_upload_svc->first_attribute("use")->value(),NULL,10);
-                if(nUse>0)
-                    accept_dev_upload_use_=true;
-                else
-                    accept_dev_upload_use_=false;
-                accept_dev_upload_svc_port_ = strtol(xml_dev_upload_svc->first_attribute("port")->value(),NULL,10);
-                dev_upload_data_save_invertal_ =  strtod(xml_dev_upload_svc->first_attribute("data_save_interval")->value(),NULL);
-            }
-
-            //告警上传服务器配置
-            xml_node<>* xml_alarm_svc = xml_relay_svc_root->first_node("alarm_svc");
-            if(xml_alarm_svc!=NULL)
-            {
-                long nUse =  strtol(xml_alarm_svc->first_attribute("use")->value(),NULL,10);
-                if(nUse>0)
-                    upload_use_=true;
-                else
-                    upload_use_=false;
-                alarm_center_svc_ip_ = xml_alarm_svc->first_attribute("ip")->value();
-                alarm_center_svc_port_ = strtol(xml_alarm_svc->first_attribute("port")->value(),NULL,10);
+                    http_upload_use_=false;
+                http_svc_ip_ = xml_http_svc->first_attribute("ip")->value();
+                http_svc_port_ = xml_http_svc->first_attribute("port")->value();
             }
         }
         //串口服务器配置

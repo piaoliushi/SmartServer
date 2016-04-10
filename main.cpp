@@ -5,12 +5,15 @@
 #include <QStyleFactory>
 #include <QWSServer>
 #include <QtPlugin>
+#include <QMessageBox>
+#include "LocalConfig.h"
+#include "./net/config.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QWSServer::setCursorVisible(false);
-    Q_IMPORT_PLUGIN(qsqlpsql)
+    //QWSServer::setCursorVisible(false);
+    //Q_IMPORT_PLUGIN(qsqlpsql)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
@@ -42,8 +45,12 @@ int main(int argc, char *argv[])
     QFont font  = a.font();
     font.setPointSize(16);
     a.setFont(font);
-
-
+    QString AppDir = QCoreApplication::applicationDirPath();
+    AppDir.append("/ServerLocalConfig.xml");
+    if(!GetInst(LocalConfig).load_local_config(AppDir.toLatin1().constData())){
+        QMessageBox::information(NULL,QObject::tr("错误"),QObject::tr("加载本地配置文件失败！"));
+        return -1;
+    }
     MainWindow w;
     w.showMaximized();
     return a.exec();

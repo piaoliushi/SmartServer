@@ -280,11 +280,6 @@ namespace hx_net
 	{
 
 	}
-	//上级查岗
-	void  client_session::check_station_working(checkWorkingReqMsgPtr pcheckWork)
-	{
-		GetInst(SvcMgr).check_station_working(pcheckWork);
-	}
 	//获取连接状态
 	con_state client_session::get_con_state()
 	{

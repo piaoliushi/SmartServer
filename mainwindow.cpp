@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->tbDeviceState,SIGNAL(clicked()),this,SLOT(ShowDevStatePage()));
     connect(ui->tbOnlineUser,SIGNAL(clicked()),this,SLOT(ShowClientStatePage()));
     connect(ui->tbSystem,SIGNAL(clicked()),this,SLOT(ShowSystemInfoPage()));
-    connect(d_pSvcStatePage,SIGNAL(updateDevList(bool)),this,SLOT(OnUpdateDevList(bool)),Qt::DirectConnection);
+    connect(d_pSvcStatePage,SIGNAL(updateDevList(bool)),this,SLOT(OnUpdateDevList(bool)));
 
     ui->tbServer->setChecked(true);
     ShowSvcStatePage();

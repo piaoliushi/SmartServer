@@ -178,14 +178,6 @@ namespace hx_net
 		dev_cur_data_ptr->set_sstationid(sStationid);
 		dev_cur_data_ptr->set_sdevid(sDevid);
 
-        devDataNfyMsgPtr dev_cur_data_tosvr_ptr;
-        if(GetInst(LocalConfig).upload_use()==true){
-			dev_cur_data_tosvr_ptr = devDataNfyMsgPtr(new DevDataNotify);
-			dev_cur_data_tosvr_ptr->set_edevtype(devType);
-			dev_cur_data_tosvr_ptr->set_sstationid(sStationid);
-			dev_cur_data_tosvr_ptr->set_sdevid(sDevid);
-		}
-
         map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
         for(;cell_iter!=mapMonitorItem.end();++cell_iter){
 			int cellId = (*cell_iter).first;			
@@ -198,16 +190,9 @@ namespace hx_net
             cell->set_scellname((*cell_iter).second.sItemName.c_str());
             string  sValue = str(boost::format("%.2f")%curData->mValues[cellId].fValue);
 			cell->set_scellvalue(sValue);
-            if(dev_cur_data_tosvr_ptr!=0){
-                if((*cell_iter).second.bUpload==true){
-					DevDataNotify_eCellMsg *upcell = dev_cur_data_tosvr_ptr->add_ccelldata();
-                    upcell->CopyFrom(*cell);
-				}
-			}
-		}
+          }
 
-		GetInst(SvcMgr).send_monitor_data_to_client(sStationid,sDevid,dev_cur_data_ptr,dev_cur_data_tosvr_ptr);
-
+        GetInst(SvcMgr).send_monitor_data_to_client(sStationid,sDevid,dev_cur_data_ptr);
 
 	}
 
@@ -240,8 +225,8 @@ namespace hx_net
 	}
 	
     void net_session::send_alarm_state_message(string sStationid,string sDevid,string sDevName,
-                                           int nCellId,string sCellName,int devType,int  alarmState,
-                                           string sStartTime,int alarmCount)
+                                           int nCellId,int devType,int  alarmState,
+                                           string sStartTime,int alarmCount,string sReason)
 	{
 		devAlarmNfyMsgPtr dev_alarm_nfy_ptr(new DevAlarmStatusNotify);
 		DevAlarmStatus *dev_n_s = dev_alarm_nfy_ptr->add_cdevcuralarmstatus();
@@ -252,9 +237,9 @@ namespace hx_net
 		DevAlarmStatus_eCellAlarmMsg *dev_cell_alarm = dev_n_s->add_ccellalarm();
 		std::string scellid = str(boost::format("%1%")%nCellId);
 		dev_cell_alarm->set_scellid(scellid);
-        dev_cell_alarm->set_scellname(sCellName.c_str());
 		dev_cell_alarm->set_sstarttime(sStartTime);
 		dev_cell_alarm->set_ccellstatus((e_AlarmStatus)alarmState);
+        dev_cell_alarm->set_sdesp(sReason);
 
 		GetInst(SvcMgr).send_dev_alarm_state_to_client(sStationid,sDevid,dev_alarm_nfy_ptr);
 	}
@@ -266,7 +251,7 @@ namespace hx_net
 		ackMsgPtr->set_sstationid(sStationid);
 		ackMsgPtr->set_sdevid(sDevid);
         ackMsgPtr->set_sdevname(sDevName.c_str());
-        ackMsgPtr->set_edevtype((e_DevType)devType);
+        ackMsgPtr->set_edevtype(devType);
 		ackMsgPtr->set_eerrorid(eResult);
         ackMsgPtr->set_soperuser(sUsrName.c_str());
 

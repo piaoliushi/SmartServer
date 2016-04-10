@@ -39,6 +39,8 @@ private:
 	QLineEdit *d_stationName;
 	QLineEdit *d_databaseIp;
 	QLineEdit *d_databaseUser;
+    QLineEdit *d_deviceId;
+    QLineEdit *d_platformId;
 	QComboBox *d_comPort;
 	QComboBox *d_baudRate;
 	QLineEdit *d_smsCenterNumber;

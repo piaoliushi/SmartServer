@@ -255,7 +255,7 @@ typedef struct
 }DevParamerInfo;
 
 //所有设备通用
-typedef struct
+/*typedef struct
 {
 	string sStationNumber;//台站编号
 	string sDevNum;       //设备编号
@@ -264,7 +264,7 @@ typedef struct
 	int    nConnectType;  //连接类型
 	int    nCommType;//通信方式
 	map<int,DevParamerMonitorItem> mapMonitorItem;//对应的监控项信息
-}DevBaseInfo;
+}DevBaseInfo;*/
 
 /*typedef struct
 {

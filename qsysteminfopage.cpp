@@ -2,6 +2,7 @@
 #include <QHeaderView>
 #include <QPushButton>
 #include <QBoxLayout>
+#include <QGridLayout>
 #include <QLabel>
 #include <vector>
 #include <string>
@@ -29,25 +30,40 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     QVBoxLayout *pHMainLyt = new QVBoxLayout();
 
     pHMainLyt->addLayout(createTitleLayout(tr("台站属性")));
-    QHBoxLayout *pHlyt = new QHBoxLayout();
-    pHlyt->setContentsMargins(10,0,0,10);
+    //QHBoxLayout *pHlyt = new QHBoxLayout();
+    QGridLayout *pGridLayout = new QGridLayout();
+    pGridLayout->setContentsMargins(10,0,0,10);
     QLabel *staticLabel = new QLabel(tr("台站编号："));
-    pHlyt->addWidget(staticLabel);
+    pGridLayout->addWidget(staticLabel,0,0,1,1);
+
     d_stationNumber = new QLineEdit(this);
-    pHlyt->addWidget(d_stationNumber);
+
+    pGridLayout->addWidget(d_stationNumber,0,1,1,1);
     staticLabel = new QLabel(tr("台站名称："));
-    pHlyt->addWidget(staticLabel);
+
+    pGridLayout->addWidget(staticLabel,0,2,1,1);
     d_stationName = new QLineEdit(this);
-    pHlyt->addWidget(d_stationName);
-    pHMainLyt->addLayout(pHlyt);
+
+    pGridLayout->addWidget(d_stationName,0,3,1,1);
+
+    staticLabel = new QLabel(tr("设备标识："));
+    pGridLayout->addWidget(staticLabel,1,0,1,1);
+    d_deviceId = new QLineEdit(this);
+    pGridLayout->addWidget(d_deviceId,1,1,1,1);
+
+    staticLabel = new QLabel(tr("平台标识："));
+    pGridLayout->addWidget(staticLabel,1,2,1,1);
+    d_platformId = new QLineEdit(this);
+    pGridLayout->addWidget(d_platformId,1,3,1,1);
+    pHMainLyt->addLayout(pGridLayout);
 
     pHMainLyt->addLayout(createTitleLayout(tr("本机网络")));
-    pHlyt = new QHBoxLayout();
+    QHBoxLayout * pHlyt = new QHBoxLayout();
     pHlyt->setContentsMargins(10,0,0,10);
     staticLabel = new QLabel(tr("网卡1："));
     pHlyt->addWidget(staticLabel);
     QLabel *ethIp0 = new QLabel(this);
-      ethIp0->setStyleSheet("color:#5fff53");
+    ethIp0->setStyleSheet("color:#5fff53");
     pHlyt->addWidget(ethIp0);
     QNetworkInterface   interface0 = QNetworkInterface::interfaceFromName("eth0");
     QList<QNetworkAddressEntry>  netlist0 = interface0.addressEntries();
@@ -55,9 +71,9 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
         ethIp0->setText(netlist0.at(0).ip().toString());
     staticLabel = new QLabel(tr("网卡2："));
     pHlyt->addWidget(staticLabel);
-   QLabel *ethIp1 = new QLabel(this);
-   ethIp1->setStyleSheet("color:#5fff53");
-   //ethlp1->s();
+    QLabel *ethIp1 = new QLabel(this);
+    ethIp1->setStyleSheet("color:#5fff53");
+    //ethlp1->s();
     pHlyt->addWidget(ethIp1);
     QNetworkInterface   interface1 = QNetworkInterface::interfaceFromName("eth1");
     QList<QNetworkAddressEntry>  netlist1 = interface1.addressEntries();
@@ -78,7 +94,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
 
     setLayout(pHMainLyt);
 
-    //loadConfigData();
+    loadConfigData();
 
     //unLockEdit(false);
 
@@ -118,27 +134,26 @@ void QSystemInfoPage::loadConfigData()
     string stationId = GetInst(LocalConfig).local_station_id();
     string stationName = GetInst(LocalConfig).local_station_name();
     string svcNumber = GetInst(LocalConfig).local_dev_server_number();
-    string databaseIp = GetInst(LocalConfig).database_ip();
-    string databaseUser = GetInst(LocalConfig).database_user();
+    string sSrcCode = GetInst(LocalConfig).src_code();
+    string sDstCode = GetInst(LocalConfig).dst_code();
     int svcPort = GetInst(LocalConfig).local_port();
 
-    d_svcNumber->setText(QString::fromUtf8(svcNumber.c_str()));
-    d_svcPort->setText(QString::number(svcPort));
-    d_stationNumber->setText(QString::fromUtf8(stationId.c_str()));
-    d_stationName->setText(QString::fromUtf8(stationName.c_str()));
-    d_databaseIp->setText(QString::fromUtf8(databaseIp.c_str()));
-    d_databaseUser->setText(QString::fromUtf8(databaseUser.c_str()));
+    //d_svcNumber->setText(svcNumber.c_str());
+    d_stationNumber->setText(stationId.c_str());
+    d_stationName->setText(stationName.c_str());
+    d_deviceId->setText(sSrcCode.c_str());
+    d_platformId->setText(sDstCode.c_str());
 
 
-    bool bsms_use = GetInst(LocalConfig).sms_use();
-    string comId = GetInst(LocalConfig).sms_com();
-    int    baudRate = GetInst(LocalConfig).sms_baud_rate();
-    string centerNumber = GetInst(LocalConfig).sms_center_number();
+    //bool bsms_use = GetInst(LocalConfig).sms_use();
+    //string comId = GetInst(LocalConfig).sms_com();
+    //int    baudRate = GetInst(LocalConfig).sms_baud_rate();
+    //string centerNumber = GetInst(LocalConfig).sms_center_number();
 
-    d_smsEnable->setChecked(bsms_use);
-    d_comPort->setCurrentIndex(d_comPort->findText(QString::fromUtf8(comId.c_str())));
-    d_baudRate->setCurrentIndex(d_baudRate->findText(QString::number(baudRate)));
-    d_smsCenterNumber->setText(QString::fromUtf8(centerNumber.c_str()));
+    //d_smsEnable->setChecked(bsms_use);
+    //d_comPort->setCurrentIndex(d_comPort->findText(QString::fromUtf8(comId.c_str())));
+    //d_baudRate->setCurrentIndex(d_baudRate->findText(QString::number(baudRate)));
+   // d_smsCenterNumber->setText(QString::fromUtf8(centerNumber.c_str()));
 
     /*map<string,pDevicePropertyExPtr> &vTransmitter = GetInst(LocalConfig).transmitter_property_ex();
     map<string,pDevicePropertyExPtr>::iterator transmitter_iter = vTransmitter.begin();
@@ -147,7 +162,7 @@ void QSystemInfoPage::loadConfigData()
         d_Transmitters->addItem((*transmitter_iter).first.c_str());
     }*/
 
-    d_pAutoRun->setChecked(isAutoStart());
+    //d_pAutoRun->setChecked(isAutoStart());
 }
 
 void QSystemInfoPage::transmitterChanged(const QString sTrsmitNumber)

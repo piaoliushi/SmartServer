@@ -23,7 +23,7 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 	{
 	public:
 		device_session(boost::asio::io_service& io_service, 
-            TaskQueue<msgPointer>& taskwork,ModleInfo & modinfo,http_request_session_ptr &httpPtr);
+            ModleInfo & modinfo,http_request_session_ptr &httpPtr);
 		~device_session();
 		Dev_Type dev_type(){return DEV_OTHER;}
         //初始化设备配置
@@ -49,7 +49,7 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 		//获得设备运行状态（默认连接正常则运行正常）
         dev_run_state   get_run_state(string sDevId);
 		//获得报警状态
-        void get_alarm_state(string sDevId,map<int,std::pair<int,tm> >& cellAlarm);
+        void get_alarm_state(string sDevId,map<int,map<int,CurItemAlarmInfo> >& cellAlarm);
 		//执行通用指令
 		bool excute_command(int cmdType,devCommdMsgPtr lpParam,e_ErrorCode &opResult);
 		//清除所有报警标志
@@ -140,7 +140,6 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         size_t                          query_timeout_count_;//查询命令执行超时次数
 		size_t                          cur_msg_q_id_;//当前发送的消息序号
 
-		TaskQueue<msgPointer>&          taskwork_;//任务队列应用(应修改为发射机特定任务)
 		boost::recursive_mutex          data_deal_mutex;
 		boost::recursive_mutex          alarm_state_mutex;
         //devid<itemid<iLimittype,info> > >

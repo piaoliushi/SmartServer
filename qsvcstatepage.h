@@ -22,7 +22,6 @@ public:
 public slots:
 		void StartSvc();
         void timeUpdate();
-		void OnDevConnect(QString sDevId,int nResult);
 private:
 	QNotifyHandler &m_Notify;
 	bool m_IsRunning;

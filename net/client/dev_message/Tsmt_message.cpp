@@ -99,7 +99,7 @@ namespace hx_net
             GetInst(SvcMgr).get_notify()->OnDevStatus(d_devInfo.sDevNum,dev_run_state_+1);
             //广播设备状态到在线客户端
             m_pSession->send_work_state_message(GetInst(LocalConfig).local_station_id(),d_devInfo.sDevNum
-                                    ,d_devInfo.sDevName,TRANSMITTER,(dev_run_state)dev_run_state_);
+                                    ,d_devInfo.sDevName,DEVICE_TRANSMITTER,(dev_run_state)dev_run_state_);
         }
     }
 

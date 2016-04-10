@@ -161,31 +161,6 @@ inline bool e_CellType_Parse(
   return ::google::protobuf::internal::ParseNamedEnum<e_CellType>(
     e_CellType_descriptor(), name, value);
 }
-enum e_DevType {
-  TRANSMITTER = 0,
-  ANTENNA = 1,
-  ELCPOWER = 2,
-  ENVIR = 3,
-  SECURITY = 4,
-  AUDIO = 5,
-  PROGRAM = 6,
-  VIDEO = 7
-};
-bool e_DevType_IsValid(int value);
-const e_DevType e_DevType_MIN = TRANSMITTER;
-const e_DevType e_DevType_MAX = VIDEO;
-const int e_DevType_ARRAYSIZE = e_DevType_MAX + 1;
-
-const ::google::protobuf::EnumDescriptor* e_DevType_descriptor();
-inline const ::std::string& e_DevType_Name(e_DevType value) {
-  return ::google::protobuf::internal::NameOfEnum(
-    e_DevType_descriptor(), value);
-}
-inline bool e_DevType_Parse(
-    const ::std::string& name, e_DevType* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<e_DevType>(
-    e_DevType_descriptor(), name, value);
-}
 enum e_AlarmStatus {
   UPPER = 0,
   UPUPER = 1,
@@ -3146,12 +3121,12 @@ class TurnOnDevMsg : public ::google::protobuf::Message {
   inline ::std::string* release_sdevid();
   inline void set_allocated_sdevid(::std::string* sdevid);
 
-  // optional .e_DevType eDevType = 3;
+  // optional int32 eDevType = 3;
   inline bool has_edevtype() const;
   inline void clear_edevtype();
   static const int kEDevTypeFieldNumber = 3;
-  inline ::e_DevType edevtype() const;
-  inline void set_edevtype(::e_DevType value);
+  inline ::google::protobuf::int32 edevtype() const;
+  inline void set_edevtype(::google::protobuf::int32 value);
 
   // optional string sOperUser = 4;
   inline bool has_soperuser() const;
@@ -3183,7 +3158,7 @@ class TurnOnDevMsg : public ::google::protobuf::Message {
   ::std::string* sstationid_;
   ::std::string* sdevid_;
   ::std::string* soperuser_;
-  int edevtype_;
+  ::google::protobuf::int32 edevtype_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
   friend void protobuf_ShutdownFile_protocol_2eproto();
@@ -3270,12 +3245,12 @@ class TurnOffDevMsg : public ::google::protobuf::Message {
   inline ::std::string* release_sdevid();
   inline void set_allocated_sdevid(::std::string* sdevid);
 
-  // optional .e_DevType eDevType = 3;
+  // optional int32 eDevType = 3;
   inline bool has_edevtype() const;
   inline void clear_edevtype();
   static const int kEDevTypeFieldNumber = 3;
-  inline ::e_DevType edevtype() const;
-  inline void set_edevtype(::e_DevType value);
+  inline ::google::protobuf::int32 edevtype() const;
+  inline void set_edevtype(::google::protobuf::int32 value);
 
   // optional string sOperUser = 4;
   inline bool has_soperuser() const;
@@ -3307,7 +3282,7 @@ class TurnOffDevMsg : public ::google::protobuf::Message {
   ::std::string* sstationid_;
   ::std::string* sdevid_;
   ::std::string* soperuser_;
-  int edevtype_;
+  ::google::protobuf::int32 edevtype_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
   friend void protobuf_ShutdownFile_protocol_2eproto();
@@ -3505,12 +3480,12 @@ class DeviceCommandMsg : public ::google::protobuf::Message {
   inline ::std::string* release_sdevname();
   inline void set_allocated_sdevname(::std::string* sdevname);
 
-  // optional .e_DevType eDevType = 4;
+  // optional int32 eDevType = 4;
   inline bool has_edevtype() const;
   inline void clear_edevtype();
   static const int kEDevTypeFieldNumber = 4;
-  inline ::e_DevType edevtype() const;
-  inline void set_edevtype(::e_DevType value);
+  inline ::google::protobuf::int32 edevtype() const;
+  inline void set_edevtype(::google::protobuf::int32 value);
 
   // optional string sOperUser = 5;
   inline bool has_soperuser() const;
@@ -3558,7 +3533,7 @@ class DeviceCommandMsg : public ::google::protobuf::Message {
   ::std::string* sdevname_;
   ::std::string* soperuser_;
   ::google::protobuf::RepeatedPtrField< ::CommandParam > cparams_;
-  int edevtype_;
+  ::google::protobuf::int32 edevtype_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
   friend void protobuf_ShutdownFile_protocol_2eproto();
@@ -3645,12 +3620,12 @@ class DeviceCommandResultNotify : public ::google::protobuf::Message {
   inline ::std::string* release_sdevid();
   inline void set_allocated_sdevid(::std::string* sdevid);
 
-  // optional .e_DevType eDevType = 3;
+  // optional int32 eDevType = 3;
   inline bool has_edevtype() const;
   inline void clear_edevtype();
   static const int kEDevTypeFieldNumber = 3;
-  inline ::e_DevType edevtype() const;
-  inline void set_edevtype(::e_DevType value);
+  inline ::google::protobuf::int32 edevtype() const;
+  inline void set_edevtype(::google::protobuf::int32 value);
 
   // optional string sDevName = 4;
   inline bool has_sdevname() const;
@@ -3717,7 +3692,7 @@ class DeviceCommandResultNotify : public ::google::protobuf::Message {
   ::std::string* sstationid_;
   ::std::string* sdevid_;
   ::std::string* sdevname_;
-  int edevtype_;
+  ::google::protobuf::int32 edevtype_;
   int eerrorid_;
   ::std::string* soperuser_;
   ::google::protobuf::RepeatedPtrField< ::CommandParam > cparams_;
@@ -8790,7 +8765,7 @@ inline void TurnOnDevMsg::set_allocated_sdevid(::std::string* sdevid) {
   // @@protoc_insertion_point(field_set_allocated:TurnOnDevMsg.sDevId)
 }
 
-// optional .e_DevType eDevType = 3;
+// optional int32 eDevType = 3;
 inline bool TurnOnDevMsg::has_edevtype() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -8804,12 +8779,11 @@ inline void TurnOnDevMsg::clear_edevtype() {
   edevtype_ = 0;
   clear_has_edevtype();
 }
-inline ::e_DevType TurnOnDevMsg::edevtype() const {
+inline ::google::protobuf::int32 TurnOnDevMsg::edevtype() const {
   // @@protoc_insertion_point(field_get:TurnOnDevMsg.eDevType)
-  return static_cast< ::e_DevType >(edevtype_);
+  return edevtype_;
 }
-inline void TurnOnDevMsg::set_edevtype(::e_DevType value) {
-  assert(::e_DevType_IsValid(value));
+inline void TurnOnDevMsg::set_edevtype(::google::protobuf::int32 value) {
   set_has_edevtype();
   edevtype_ = value;
   // @@protoc_insertion_point(field_set:TurnOnDevMsg.eDevType)
@@ -9047,7 +9021,7 @@ inline void TurnOffDevMsg::set_allocated_sdevid(::std::string* sdevid) {
   // @@protoc_insertion_point(field_set_allocated:TurnOffDevMsg.sDevId)
 }
 
-// optional .e_DevType eDevType = 3;
+// optional int32 eDevType = 3;
 inline bool TurnOffDevMsg::has_edevtype() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -9061,12 +9035,11 @@ inline void TurnOffDevMsg::clear_edevtype() {
   edevtype_ = 0;
   clear_has_edevtype();
 }
-inline ::e_DevType TurnOffDevMsg::edevtype() const {
+inline ::google::protobuf::int32 TurnOffDevMsg::edevtype() const {
   // @@protoc_insertion_point(field_get:TurnOffDevMsg.eDevType)
-  return static_cast< ::e_DevType >(edevtype_);
+  return edevtype_;
 }
-inline void TurnOffDevMsg::set_edevtype(::e_DevType value) {
-  assert(::e_DevType_IsValid(value));
+inline void TurnOffDevMsg::set_edevtype(::google::protobuf::int32 value) {
   set_has_edevtype();
   edevtype_ = value;
   // @@protoc_insertion_point(field_set:TurnOffDevMsg.eDevType)
@@ -9536,7 +9509,7 @@ inline void DeviceCommandMsg::set_allocated_sdevname(::std::string* sdevname) {
   // @@protoc_insertion_point(field_set_allocated:DeviceCommandMsg.sDevName)
 }
 
-// optional .e_DevType eDevType = 4;
+// optional int32 eDevType = 4;
 inline bool DeviceCommandMsg::has_edevtype() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -9550,12 +9523,11 @@ inline void DeviceCommandMsg::clear_edevtype() {
   edevtype_ = 0;
   clear_has_edevtype();
 }
-inline ::e_DevType DeviceCommandMsg::edevtype() const {
+inline ::google::protobuf::int32 DeviceCommandMsg::edevtype() const {
   // @@protoc_insertion_point(field_get:DeviceCommandMsg.eDevType)
-  return static_cast< ::e_DevType >(edevtype_);
+  return edevtype_;
 }
-inline void DeviceCommandMsg::set_edevtype(::e_DevType value) {
-  assert(::e_DevType_IsValid(value));
+inline void DeviceCommandMsg::set_edevtype(::google::protobuf::int32 value) {
   set_has_edevtype();
   edevtype_ = value;
   // @@protoc_insertion_point(field_set:DeviceCommandMsg.eDevType)
@@ -9823,7 +9795,7 @@ inline void DeviceCommandResultNotify::set_allocated_sdevid(::std::string* sdevi
   // @@protoc_insertion_point(field_set_allocated:DeviceCommandResultNotify.sDevId)
 }
 
-// optional .e_DevType eDevType = 3;
+// optional int32 eDevType = 3;
 inline bool DeviceCommandResultNotify::has_edevtype() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -9837,12 +9809,11 @@ inline void DeviceCommandResultNotify::clear_edevtype() {
   edevtype_ = 0;
   clear_has_edevtype();
 }
-inline ::e_DevType DeviceCommandResultNotify::edevtype() const {
+inline ::google::protobuf::int32 DeviceCommandResultNotify::edevtype() const {
   // @@protoc_insertion_point(field_get:DeviceCommandResultNotify.eDevType)
-  return static_cast< ::e_DevType >(edevtype_);
+  return edevtype_;
 }
-inline void DeviceCommandResultNotify::set_edevtype(::e_DevType value) {
-  assert(::e_DevType_IsValid(value));
+inline void DeviceCommandResultNotify::set_edevtype(::google::protobuf::int32 value) {
   set_has_edevtype();
   edevtype_ = value;
   // @@protoc_insertion_point(field_set:DeviceCommandResultNotify.eDevType)
@@ -10081,11 +10052,6 @@ template <> struct is_proto_enum< ::e_CellType> : ::google::protobuf::internal::
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::e_CellType>() {
   return ::e_CellType_descriptor();
-}
-template <> struct is_proto_enum< ::e_DevType> : ::google::protobuf::internal::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::e_DevType>() {
-  return ::e_DevType_descriptor();
 }
 template <> struct is_proto_enum< ::e_AlarmStatus> : ::google::protobuf::internal::true_type {};
 template <>
