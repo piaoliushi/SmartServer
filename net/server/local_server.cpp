@@ -183,8 +183,8 @@ namespace hx_net
                                     map<int,CurItemAlarmInfo>::iterator iter_a = iter->second.begin();
                                     for(;iter_a!=iter->second.begin();++iter_a){
                                         DevAlarmStatus_eCellAlarmMsg *pCellAlarm = dev_alarm_s->add_ccellalarm();
-                                        std::string scellid = str(boost::format("%1%")%iter->first);
-                                        pCellAlarm->set_scellid(scellid);
+                                        //std::string scellid = str(boost::format("%1%")%iter->first);
+                                        pCellAlarm->set_scellid(iter->first);
                                         pCellAlarm->set_sdesp(iter_a->second.sReason);
                                         char str_time[64];
                                         tm *local_time = localtime(&iter_a->second.startTime);

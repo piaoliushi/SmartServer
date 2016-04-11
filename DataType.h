@@ -285,7 +285,7 @@ struct DevicePropertyEx
 {
         DevicePropertyEx()
 		:query_timeout_count(6)//默认查询超时次数为3次(在查询间隔内发送两次查询指令无数据返回则断开当前网络连接)
-		,query_interval(1600)//2默认查询间隔2000耗秒
+        ,query_interval(5000)//2默认查询间隔2000耗秒
 		,connect_timer_interval(3)//默认连接间隔3秒
 		,connect_timeout_duration(10)//默认连接超时时长10秒
 		,run_detect_max_count(2)//默认检测功率3次高于0值功率设定值则认为开机

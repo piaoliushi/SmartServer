@@ -58,6 +58,7 @@ protected:
 public:
     static  map<int,pair<string,string> >   mapTypeToStr;
     static  string  SrcCode;
+    static  string  DstCode;
 
 };
 

@@ -70,9 +70,9 @@ http_request_session::http_request_session(boost::asio::io_service& io_service)
      int temType = -1;
      if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE)
          temType = BH_POTO_EnvAlarmReport;//动环设备
-     else if(temType>=DEVICE_GS_RECIVE)
+     else if(nDevType>=DEVICE_GS_RECIVE)
          temType = BH_POTO_LinkDevAlarmReport;//链路设备
-     else if(temType==DEVICE_TRANSMITTER)
+     else if(nDevType==DEVICE_TRANSMITTER)
          temType = BH_POTO_QualityAlarmReport;//发射机设备
      if(temType>=0){
         bh_ptcl.createReportAlarmDataMsg(-1,temType,sDevid,alarmInfo,nMod,reason,sReportMsg);

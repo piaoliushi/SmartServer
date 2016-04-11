@@ -186,8 +186,8 @@ namespace hx_net
 				continue;
 			DevDataNotify_eCellMsg *cell = dev_cur_data_ptr->add_ccelldata();
             cell->set_ecelltype((e_CellType)(*cell_iter).second.iItemType);
-            cell->set_scellid(boost::lexical_cast<string>((*cell_iter).second.iItemIndex));
-            cell->set_scellname((*cell_iter).second.sItemName.c_str());
+            cell->set_scellid((*cell_iter).second.iItemIndex);
+            cell->set_scellname((*cell_iter).second.sItemName);
             string  sValue = str(boost::format("%.2f")%curData->mValues[cellId].fValue);
 			cell->set_scellvalue(sValue);
           }
@@ -205,7 +205,7 @@ namespace hx_net
 		dev_n_s->set_edevtype(devType);
 		dev_n_s->set_sstationid(sStationid);
 		dev_n_s->set_sdevid(sDevid);
-		dev_n_s->set_sdevname(QString::fromLocal8Bit(sDevName.c_str()).toUtf8().data());
+        dev_n_s->set_sdevname(sDevName);
 		dev_n_s->set_enetstatus((DevNetStatus_e_NetStatus)netState);
 
 		GetInst(SvcMgr).send_dev_net_state_to_client(sStationid,sDevid,dev_net_nfy_ptr);
@@ -213,12 +213,12 @@ namespace hx_net
 
     void net_session::send_work_state_message( string sStationid,string sDevid,string sDevName,int devType, dev_run_state runState )
 	{
-		devWorkNfyMsgPtr dev_run_nfy_ptr(new DevWorkStatusNotify);// dev_run_nfy;
+        devWorkNfyMsgPtr dev_run_nfy_ptr(new DevWorkStatusNotify);
 		DevWorkStatus *dev_n_s = dev_run_nfy_ptr->add_cdevcurworkstatus();
 		dev_n_s->set_edevtype(devType);
 		dev_n_s->set_sstationid(sStationid);
 		dev_n_s->set_sdevid(sDevid);
-		dev_n_s->set_sdevname(QString::fromLocal8Bit(sDevName.c_str()).toUtf8().data());
+        dev_n_s->set_sdevname(sDevName);
 		dev_n_s->set_eworkstatus((DevWorkStatus_e_WorkStatus)runState);
 
 		GetInst(SvcMgr).send_dev_work_state_to_client(sStationid,sDevid,dev_run_nfy_ptr);
@@ -232,11 +232,12 @@ namespace hx_net
 		DevAlarmStatus *dev_n_s = dev_alarm_nfy_ptr->add_cdevcuralarmstatus();
 		dev_n_s->set_edevtype(devType);
 		dev_n_s->set_sdevid(sDevid);
-        dev_n_s->set_sdevname(sDevName.c_str());
+        dev_n_s->set_sdevname(sDevName);
 		dev_n_s->set_nalarmcount(alarmCount);
+        dev_n_s->set_nalarmmod(MOD_CELL);//该标志指示时量值告警还是其他告警（整机）
 		DevAlarmStatus_eCellAlarmMsg *dev_cell_alarm = dev_n_s->add_ccellalarm();
-		std::string scellid = str(boost::format("%1%")%nCellId);
-		dev_cell_alarm->set_scellid(scellid);
+        //std::string scellid = str(boost::format("%1%")%nCellId);
+        dev_cell_alarm->set_scellid(nCellId);
 		dev_cell_alarm->set_sstarttime(sStartTime);
 		dev_cell_alarm->set_ccellstatus((e_AlarmStatus)alarmState);
         dev_cell_alarm->set_sdesp(sReason);
@@ -250,10 +251,10 @@ namespace hx_net
 		devCommdRsltPtr ackMsgPtr(new DeviceCommandResultNotify);
 		ackMsgPtr->set_sstationid(sStationid);
 		ackMsgPtr->set_sdevid(sDevid);
-        ackMsgPtr->set_sdevname(sDevName.c_str());
+        ackMsgPtr->set_sdevname(sDevName);
         ackMsgPtr->set_edevtype(devType);
 		ackMsgPtr->set_eerrorid(eResult);
-        ackMsgPtr->set_soperuser(sUsrName.c_str());
+        ackMsgPtr->set_soperuser(sUsrName);
 
 		GetInst(SvcMgr).send_command_execute_result(sStationid,sDevid,nMsgType,ackMsgPtr);
 	}

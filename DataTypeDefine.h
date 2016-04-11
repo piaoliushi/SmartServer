@@ -39,9 +39,9 @@ enum DEVType
 #define    NET_MOD_TCP   0 //TCP
 #define    NET_MOD_UDP   1 //UDP
 
-#define    RUN_TIME_DAY          0 //运行图-天
-#define    RUN_TIME_WEEK       1 //运行图-星期
-#define    RUN_TIME_MONTH    2 //运行图-月
+#define    RUN_TIME_DAY          2 //运行图-天
+#define    RUN_TIME_WEEK       0 //运行图-星期
+#define    RUN_TIME_MONTH    1 //运行图-月
 
 
 enum _tag_CommandType{
@@ -141,7 +141,7 @@ typedef struct
     int iResumetime;   //恢复延迟(秒)
     int iAlarmtype;       //0:监控量,1:设备
     string strLinkageRoleNumber;//联动角色
-    bool  bIsAlarm;
+    //bool  bIsAlarm;
     vector<LinkAction> vLinkAction;//联动动作
 }Alarm_config;
 
@@ -251,6 +251,7 @@ typedef struct
     int           nModuleType;//模块type
     int           nLimitId;//跃限类型,跃上限...
     string      sReason;//告警描述
+    bool        bNotifyed;//已通知标志
 }CurItemAlarmInfo;
 
 typedef struct DATA_INFO_TAG

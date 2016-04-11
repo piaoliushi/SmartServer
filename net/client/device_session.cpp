@@ -695,8 +695,8 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos.mapDevInfo[sDevId].iDevType
                               ,curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
-    http_ptr_->send_http_data_messge_to_platform(sDevId,modleInfos.mapDevInfo[sDevId].iDevType,
-                                                 curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
+   // http_ptr_->send_http_data_messge_to_platform(sDevId,modleInfos.mapDevInfo[sDevId].iDevType,
+    //                                             curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
     //检测当前报警状态
     check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
     //如果在监测时间段则保存当前记录
@@ -1014,7 +1014,7 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
     //存储告警到数据库
     if(!bMod){//0:告警产生
 
-        curAlarm. sReason = str(boost::format("%1%%2,当前值:%3%%4%,门限值:%5%%6%")
+        curAlarm. sReason = str(boost::format("%1%%2%,当前值:%3%%4%,门限值:%5%%6%")
         %ItemInfo.sItemName%CONST_STR_ALARM_CONTENT[curAlarm.nLimitId]%fValue%ItemInfo.sUnit%fLimitValue%ItemInfo.sUnit);
 
         bool bRslt = GetInst(DataBaseOperation).AddItemAlarmRecord(devId,curAlarm.startTime,ItemInfo.iItemIndex,curAlarm.nLimitId,curAlarm.nType,
@@ -1024,7 +1024,7 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
             http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
-                                     ,modleInfos.mapDevInfo[devId].iDevType,curAlarm.nType,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm. sReason);
+                                     ,modleInfos.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
             // 联动.....
         }
     }else{//1:告警恢复
@@ -1047,8 +1047,8 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
     //遍历监控量告警配置
     for(int nIndex=0;nIndex<ItemInfo.vItemAlarm.size();++nIndex)
     {
-        if(ItemInfo.vItemAlarm[nIndex].bIsAlarm==false)
-            continue;
+      //  if(ItemInfo.vItemAlarm[nIndex].bIsAlarm==false)
+     //       continue;
         CurItemAlarmInfo  tmp_alarm_info;
         int iLimittype = ItemInfo.vItemAlarm[nIndex].iLimittype;
         bool  bIsAlarm=false;
@@ -1058,7 +1058,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                 if(fValue > ItemInfo.vItemAlarm[nIndex].fLimitvalue)
                     bIsAlarm=true;
             }else{//下限,下下限告警
-                if(fValue > ItemInfo.vItemAlarm[nIndex].fLimitvalue)
+                if(fValue < ItemInfo.vItemAlarm[nIndex].fLimitvalue)
                     bIsAlarm=true;
             }
         }else{//状态量
@@ -1073,26 +1073,36 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                 //判断该告警类型是否在告警
                 map<int,CurItemAlarmInfo>::iterator alarm_type_findIter = mapItemAlarm[devId][ItemInfo.iItemIndex].find(iLimittype);
                 if(alarm_type_findIter != mapItemAlarm[devId][ItemInfo.iItemIndex].end()){
+                    //判断该告警是否已经通知
+                    if(alarm_type_findIter->second.bNotifyed == true)
+                        return;
                     //计算持续时间,判断进行告警
                     time_t curTime = time(0);
                     double  dtime_during = difftime( curTime, alarm_type_findIter->second.startTime );
                     if(dtime_during>=ItemInfo.vItemAlarm[nIndex].iDelaytime){
                         //存储告警,通知告警,联动告警
                         record_alarm_and_notify(devId,fValue, ItemInfo.vItemAlarm[nIndex].fLimitvalue,0,ItemInfo,alarm_type_findIter->second);
+                        alarm_type_findIter->second.bNotifyed = true;
                     }
                 }else{ //没有找到,增加该告警类型
-                    //tmp_alarm_info.nAlarmId = 1000;//需修改
                     tmp_alarm_info.startTime = time(0);//记录时间
                     tmp_alarm_info.nType = ItemInfo.vItemAlarm[nIndex].iAlarmid;//告警类型
                     tmp_alarm_info.nLimitId = iLimittype;
+                    tmp_alarm_info.nModuleId = ItemInfo.iModDevId;
+                    tmp_alarm_info.nModuleType = ItemInfo.iModTypeId;
+                    tmp_alarm_info.nTargetId = ItemInfo.iTargetId;
+                    tmp_alarm_info.bNotifyed = false;
                     mapItemAlarm[devId][ItemInfo.iItemIndex][iLimittype] = tmp_alarm_info;
                 }
             }else {
                 //没有找到增加该告警监控项
-                //tmp_alarm_info.nAlarmId = 1000;//需修改
                 tmp_alarm_info.startTime = time(0);//记录时间
                 tmp_alarm_info.nType = ItemInfo.vItemAlarm[nIndex].iAlarmid;//告警类型
                 tmp_alarm_info.nLimitId = iLimittype;//限值类型
+                tmp_alarm_info.nModuleId = ItemInfo.iModDevId;
+                tmp_alarm_info.nModuleType = ItemInfo.iModTypeId;
+                tmp_alarm_info.nTargetId = ItemInfo.iTargetId;
+                 tmp_alarm_info.bNotifyed = false;
                 map<int,CurItemAlarmInfo>  tmTypeAlarm;
                 tmTypeAlarm[iLimittype] = tmp_alarm_info;
                 mapItemAlarm[devId][ItemInfo.iItemIndex] = tmTypeAlarm;
@@ -1110,7 +1120,6 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
 
                         //存储告警恢复,通知客户端,移除该告警
                         record_alarm_and_notify(devId,fValue, ItemInfo.vItemAlarm[nIndex].fLimitvalue,1,ItemInfo,findTypeIter->second);
-
                         findIter->second.erase(findTypeIter);//移除该告警类型告警
                         if( findIter->second.size()<=0)
                             mapItemAlarm[devId].erase(findIter);//如果监控项告警为空,则移除该监控量告警

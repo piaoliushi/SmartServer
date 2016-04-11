@@ -8,11 +8,14 @@
 #include<time.h>
 using namespace std;
 using namespace db;
-string  Bohui_Protocol::SrcCode = GetInst(LocalConfig).local_station_id();
+string  Bohui_Protocol::SrcCode = "";//GetInst(LocalConfig).src_code();
+string  Bohui_Protocol::DstCode = "";//GetInst(LocalConfig).dst_code();
 map<int,pair<string,string> > Bohui_Protocol::mapTypeToStr= map<int,pair<string,string> >();
 
 Bohui_Protocol::Bohui_Protocol()
 {
+     Bohui_Protocol::SrcCode = GetInst(LocalConfig).src_code();
+     Bohui_Protocol::DstCode = GetInst(LocalConfig).dst_code();
 }
 
 //分析http请求数据(包括发射机,动环,链路告警门限,运行图,告警开关设置)
@@ -189,8 +192,8 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleID",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
-                float curValue = curData->mValues[cell_iter->first].fValue;
-                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(curValue).c_str())));
+                string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
+                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(sValue.c_str())));
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
                 xml_Quality->append_node(xml_Quality_Index);
 
@@ -328,9 +331,9 @@ xml_node<>*  Bohui_Protocol::_createResponseXmlHeader(xml_document<>  &xmlMsg,in
                                    %ltime->tm_mday%ltime->tm_hour%ltime->tm_min%ltime->tm_sec);
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("DateTime",xmlMsg.allocate_string(createTM.c_str())));
 
-        nodeHeader->append_attribute(xmlMsg.allocate_attribute("SrcCode","110000N01"));
-        nodeHeader->append_attribute(xmlMsg.allocate_attribute("DstCode","110000X01"));
-        nodeHeader->append_attribute(xmlMsg.allocate_attribute("SrcURL","http://192.168.1.140/Server"));
+        nodeHeader->append_attribute(xmlMsg.allocate_attribute("SrcCode",Bohui_Protocol::SrcCode.c_str()));
+        nodeHeader->append_attribute(xmlMsg.allocate_attribute("DstCode",Bohui_Protocol::DstCode.c_str()));
+        //nodeHeader->append_attribute(xmlMsg.allocate_attribute("SrcURL",xmlMsg.allocate_string(sDstUrl.c_str())));
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("ReplyID",xmlMsg.allocate_string(boost::lexical_cast<std::string>(nReplyId).c_str())));
         xmlMsg.append_node(nodeHeader);
         return nodeHeader;

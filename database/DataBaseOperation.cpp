@@ -326,8 +326,8 @@ bool DataBaseOperation::GetDevMonItem( string strDevnum,QString qsPrtocolNum,map
     /*QString strSql=QString("select MonitoringIndex,MonitoringName,Ratio,ItemType,ItemValueType,AlarmEnable,IsUpload,UnitString from Monitoring_Device_Item \
                            where DeviceNumber='%1'").arg(QString::fromStdString(strDevnum));*/
 
-    QString strSql=QString("select a.MonitoringIndex,a.MonitoringName,a.Ratio,a.ItemType,a.ItemValueType,a.AlarmEnable,a.IsUpload,a.UnitString,b.alarmtype,b.type,b.moduletype,b.moduleid \
-                           from Monitoring_Device_Item a,base_device_item b\
+    QString strSql=QString("select a.MonitoringIndex,a.MonitoringName,a.Ratio,a.ItemType,a.ItemValueType,a.AlarmEnable,a.IsUpload,c.name,b.alarmtype,b.type,b.moduletype,b.moduleid \
+                           from Monitoring_Device_Item a left join data_dictionary c on c.code=a.unitstring and c.type='CompanyType',base_device_item b\
                            where a.DeviceNumber='%1' and b.monitoringindex=a.monitoringindex and b.protocolnumber='%2'").arg(QString::fromStdString(strDevnum)).arg(qsPrtocolNum);
             itemschquery.prepare(strSql);
             if(itemschquery.exec())
@@ -882,7 +882,7 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
         return false;
     }
     QSqlQuery inquery;
-    QString strSql=QString("insert into device_alarm_record(devicenumber,monitoringindex,alarmstarttime,alarmendtime,limittype,alarmvalue,alarmtypeid,alarmreason) values(:devicenumber,:monitoringindex,\
+    QString strSql=QString("insert into device_alarm_record(devicenumber,monitoringindex,alarmstarttime,limittype,alarmvalue,alarmtypeid,alarmreason) values(:devicenumber,:monitoringindex,\
                            :alarmstarttime,:limittype,:alarmvalue,:alarmtypeid,:alarmreason)");
             inquery.prepare(strSql);
     inquery.bindValue(":devicenumber",QString::fromStdString(strDevnum));
@@ -1216,7 +1216,7 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
 //设置发射机运行图
 bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
 {
-    if(!IsOpen())
+    /*if(!IsOpen())
     {
         std::cout<<"数据库未打开"<<std::endl;
         resValue = 3;
@@ -1410,7 +1410,263 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
     }
     QSqlDatabase::database().commit();
     resValue = 0;
-    return true;
+    return true;*/
+    if(!IsOpen())
+       {
+           std::cout<<"数据库未打开"<<std::endl;
+           resValue = 3;
+           return false;
+       }
+       rapidxml::xml_node<>* tranNode = root_node->first_node("TranInfo");
+       if(tranNode==NULL)
+       {
+           resValue = 11;
+           return false;
+       }
+       QSqlDatabase::database().transaction();
+       for(;tranNode!=NULL;tranNode=tranNode->next_sibling())
+       {
+           rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("TransmitterID");
+           if(attr==NULL)
+           {
+               resValue = 11;
+               return false;
+           }
+           QString qsTransNum = attr->value();
+
+           QSqlQuery qsDel;
+           QString strSql=QString("delete from monitoring_scheduler where objectnumber=:objectnumber");
+           qsDel.prepare(strSql);
+           qsDel.bindValue(":objectnumber",qsTransNum);
+           if(!qsDel.exec())
+           {
+               QSqlDatabase::database().rollback();
+               resValue = 3;
+               return false;
+           }
+
+           strSql = QString("delete from command_scheduler where objectnumber=:objectnumber and (commandtype=15 or commandtype=19)");
+           qsDel.prepare(strSql);
+           qsDel.bindValue(":objectnumber",qsTransNum);
+           if(!qsDel.exec())
+           {
+               QSqlDatabase::database().rollback();
+               resValue = 3;
+               return false;
+           }
+           rapidxml::xml_node<>* setnode = tranNode->first_node();
+           if(setnode==NULL)
+           {
+               QSqlDatabase::database().rollback();
+               resValue = 11;
+               return false;
+           }
+
+           QSqlQuery insertQuery;//0:星期 1:月 2:天
+           strSql = QString("insert into monitoring_scheduler(objectnumber,weekday,enable,starttime,endtime,datetype,month,day,alarmendtime) \
+                            values(:objectnumber,:weekday,:enable,:starttime,:endtime,:datetype,:month,:day,:alarmendtime)");
+                            insertQuery.prepare(strSql);
+           insertQuery.bindValue(":objectnumber",qsTransNum);
+           QString strCmd = QString("insert into monitoring_scheduler(objectnumber,paramnumber,enable,weekday,starttime,commandtype,hasparam,datetype,month,day,commandendtime) \
+                                    values(:objectnumber,'',1,:weekday,:enable,:starttime,:commandtype,0,:datetype,:month,:day,:commandendtime)");
+           QSqlQuery insertCmdopenQuery;
+           insertCmdopenQuery.prepare(strSql);
+           insertCmdopenQuery.bindValue(":objectnumber",qsTransNum);
+           insertCmdopenQuery.bindValue(":commandtype",15);
+           QSqlQuery insertCmdcloseQuery;
+           insertCmdcloseQuery.prepare(strSql);
+           insertCmdcloseQuery.bindValue(":objectnumber",qsTransNum);
+           insertCmdcloseQuery.bindValue(":commandtype",19);
+           while(setnode)
+           {
+               QString name=setnode->name();
+               if(name!="MonthTime" && name!="WeeklyTime" && name!="DayTime" )
+               {
+                   QSqlDatabase::database().rollback();
+                   resValue = 11;
+                   return false;
+               }
+               int shutype=0;
+               if(name=="MonthTime")
+               {
+                   shutype = 1;
+               }
+               else if(name=="DayTime")
+               {
+                   shutype = 2;
+               }
+               insertQuery.bindValue(":datetype",shutype);
+               insertCmdopenQuery.bindValue(":datetype",shutype);
+               insertCmdcloseQuery.bindValue(":datetype",shutype);
+
+               rapidxml::xml_attribute<char> * attrType = setnode->first_attribute("Type");
+               if(attrType==NULL)
+               {
+                   QSqlDatabase::database().rollback();
+                   resValue = 11;
+                   return false;
+               }
+               insertQuery.bindValue(":enable",atoi(attrType->value()));
+               QDateTime qdt;
+               qdt.setDate(QDate(1970,1,1));
+               rapidxml::xml_attribute<char> * attrStarttime = setnode->first_attribute("StartTime");
+               if(attrStarttime==NULL)
+               {
+                   attrStarttime = setnode->first_attribute("StartDateTime");
+                   if(attrStarttime==NULL){
+                       QSqlDatabase::database().rollback();
+                       resValue = 11;
+                       return false;
+                   }else
+                       qdt=QDateTime::fromString(attrStarttime->value(),"yyyy-MM-dd hh:mm:ss");
+               }else
+                   qdt=QDateTime::fromString(attrStarttime->value(),"hh:mm:ss");
+
+
+               if(qdt.isValid()==false){
+                   QSqlDatabase::database().rollback();
+                   resValue = 11;
+                   return false;
+               }
+               insertQuery.bindValue(":starttime",qdt);
+               if(atoi(attrType->value())==0)
+               {
+                   insertCmdcloseQuery.bindValue(":starttime",qdt.addSecs(20));
+               }
+               else
+               {
+                   insertCmdopenQuery.bindValue(":starttime",qdt.addSecs(-20));
+               }
+               rapidxml::xml_attribute<char> * attrEndtime = setnode->first_attribute("EndTime");
+               if(attrEndtime==NULL)
+               {
+                   attrEndtime = setnode->first_attribute("EndDateTime");
+                   if(attrEndtime==NULL){
+                       QSqlDatabase::database().rollback();
+                       resValue = 11;
+                       return false;
+                   }else
+                       qdt=QDateTime::fromString(attrEndtime->value(),"yyyy-MM-dd hh:mm:ss");
+               }else
+                   qdt=QDateTime::fromString(attrEndtime->value(),"hh:mm:ss");
+
+               if(qdt.isValid()==false){
+                   QSqlDatabase::database().rollback();
+                   resValue = 11;
+                   return false;
+               }
+               insertQuery.bindValue(":endtime",qdt);
+               if(atoi(attrType->value())==1)
+               {
+                   insertCmdcloseQuery.bindValue(":starttime",qdt.addSecs(20));
+               }
+               else
+               {
+                   insertCmdopenQuery.bindValue(":starttime",qdt.addSecs(-20));
+               }
+
+
+               int iweek = 0;
+               int iMon = -1;
+               int iday = 0;
+               QDateTime qAlarmendDt;// = QDateTime::currentDateTime();
+               switch(shutype)
+               {
+               case 1:
+               {
+                   rapidxml::xml_attribute<char> * attrMotn = setnode->first_attribute("Month");
+                   if(attrMotn==NULL)
+                   {
+                       QSqlDatabase::database().rollback();
+                       resValue = 11;
+                       return false;
+                   }
+                   iMon = atoi(attrMotn->value());
+                   rapidxml::xml_attribute<char> * attrDay = setnode->first_attribute("Day");
+                   if(attrDay==NULL)
+                   {
+                       QSqlDatabase::database().rollback();
+                       resValue = 11;
+                       return false;
+                   }
+                   iday=atoi(attrDay->value());
+
+                   rapidxml::xml_attribute<char> * attrend = setnode->first_attribute("AlarmEndTime");
+                   if(attrend==NULL)
+                   {
+                       //QSqlDatabase::database().rollback();
+                       //resValue = 11;
+                       break;//return false;
+                   }
+                   qAlarmendDt = QDateTime::fromString(attrend->value(),"yyyy-MM-dd hh:mm:ss");
+               }
+                   break;
+               case 0:
+               {
+                   rapidxml::xml_attribute<char> * attrWeek = setnode->first_attribute("DayofWeek");
+                   if(attrWeek==NULL)
+                   {
+                       QSqlDatabase::database().rollback();
+                       resValue = 11;
+                       return false;
+                   }
+                   iweek = atoi(attrWeek->value());
+                   rapidxml::xml_attribute<char> * attrend = setnode->first_attribute("AlarmEndTime");
+                   if(attrend==NULL)
+                   {
+                       //QSqlDatabase::database().rollback();
+                       //resValue = 11;
+                       break;
+                   }
+                   qAlarmendDt = QDateTime::fromString(attrend->value(),"yyyy-MM-dd hh:mm:ss");
+               }
+                   break;
+               case 2:
+               {
+
+               }
+                   break;
+               }
+               insertQuery.bindValue(":weekday",iweek);
+               insertQuery.bindValue(":month",iMon);
+               insertQuery.bindValue(":day",iday);
+               insertQuery.bindValue(":alarmendtime",qAlarmendDt);
+
+               insertCmdcloseQuery.bindValue(":weekday",iweek);
+               insertCmdcloseQuery.bindValue(":month",iMon);
+               insertCmdcloseQuery.bindValue(":day",iday);
+               insertCmdcloseQuery.bindValue(":commandendtime",qAlarmendDt);
+
+               insertCmdopenQuery.bindValue(":weekday",iweek);
+               insertCmdopenQuery.bindValue(":month",iMon);
+               insertCmdopenQuery.bindValue(":day",iday);
+               insertCmdopenQuery.bindValue(":commandendtime",qAlarmendDt);
+
+               if(!insertQuery.exec())
+               {
+                   QSqlDatabase::database().rollback();
+                   resValue = 11;
+                   return false;
+               }
+               if(!insertCmdopenQuery.exec())
+               {
+                   QSqlDatabase::database().rollback();
+                   resValue = 11;
+                   return false;
+               }
+               if(!insertCmdcloseQuery.exec())
+               {
+                   QSqlDatabase::database().rollback();
+                   resValue = 11;
+                   return false;
+               }
+               setnode = setnode->next_sibling();
+           }
+           vecDevid.push_back(qsTransNum.toStdString());
+       }
+       QSqlDatabase::database().commit();
+       resValue = 0;
+       return true;
 }
 
 bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )

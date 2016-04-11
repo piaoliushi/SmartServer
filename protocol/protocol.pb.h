@@ -163,8 +163,8 @@ inline bool e_CellType_Parse(
 }
 enum e_AlarmStatus {
   UPPER = 0,
-  UPUPER = 1,
-  LOWER = 2,
+  LOWER = 1,
+  UPUPER = 2,
   LOWLOWER = 3,
   STATE = 4,
   DEVICE = 5,
@@ -184,6 +184,25 @@ inline bool e_AlarmStatus_Parse(
     const ::std::string& name, e_AlarmStatus* value) {
   return ::google::protobuf::internal::ParseNamedEnum<e_AlarmStatus>(
     e_AlarmStatus_descriptor(), name, value);
+}
+enum e_AlarmMod {
+  MOD_CELL = 0,
+  MOD_OTHER = 1
+};
+bool e_AlarmMod_IsValid(int value);
+const e_AlarmMod e_AlarmMod_MIN = MOD_CELL;
+const e_AlarmMod e_AlarmMod_MAX = MOD_OTHER;
+const int e_AlarmMod_ARRAYSIZE = e_AlarmMod_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* e_AlarmMod_descriptor();
+inline const ::std::string& e_AlarmMod_Name(e_AlarmMod value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    e_AlarmMod_descriptor(), value);
+}
+inline bool e_AlarmMod_Parse(
+    const ::std::string& name, e_AlarmMod* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<e_AlarmMod>(
+    e_AlarmMod_descriptor(), name, value);
 }
 // ===================================================================
 
@@ -240,17 +259,12 @@ class DevDataNotify_eCellMsg : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required string sCellId = 1;
+  // required int32 sCellId = 1;
   inline bool has_scellid() const;
   inline void clear_scellid();
   static const int kSCellIdFieldNumber = 1;
-  inline const ::std::string& scellid() const;
-  inline void set_scellid(const ::std::string& value);
-  inline void set_scellid(const char* value);
-  inline void set_scellid(const char* value, size_t size);
-  inline ::std::string* mutable_scellid();
-  inline ::std::string* release_scellid();
-  inline void set_allocated_scellid(::std::string* scellid);
+  inline ::google::protobuf::int32 scellid() const;
+  inline void set_scellid(::google::protobuf::int32 value);
 
   // required .e_CellType eCellType = 2;
   inline bool has_ecelltype() const;
@@ -312,11 +326,11 @@ class DevDataNotify_eCellMsg : public ::google::protobuf::Message {
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* scellid_;
+  ::google::protobuf::int32 scellid_;
+  int ecelltype_;
   ::std::string* scellname_;
   ::std::string* scellvalue_;
   ::std::string* baudiovalue_;
-  int ecelltype_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
   friend void protobuf_ShutdownFile_protocol_2eproto();
@@ -1003,17 +1017,12 @@ class DevAlarmStatus_eCellAlarmMsg : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required string sCellId = 1;
+  // required int32 sCellId = 1;
   inline bool has_scellid() const;
   inline void clear_scellid();
   static const int kSCellIdFieldNumber = 1;
-  inline const ::std::string& scellid() const;
-  inline void set_scellid(const ::std::string& value);
-  inline void set_scellid(const char* value);
-  inline void set_scellid(const char* value, size_t size);
-  inline ::std::string* mutable_scellid();
-  inline ::std::string* release_scellid();
-  inline void set_allocated_scellid(::std::string* scellid);
+  inline ::google::protobuf::int32 scellid() const;
+  inline void set_scellid(::google::protobuf::int32 value);
 
   // optional string sCellName = 2;
   inline bool has_scellname() const;
@@ -1075,11 +1084,11 @@ class DevAlarmStatus_eCellAlarmMsg : public ::google::protobuf::Message {
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* scellid_;
   ::std::string* scellname_;
+  ::google::protobuf::int32 scellid_;
+  int ccellstatus_;
   ::std::string* sstarttime_;
   ::std::string* sdesp_;
-  int ccellstatus_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
   friend void protobuf_ShutdownFile_protocol_2eproto();
@@ -1194,10 +1203,17 @@ class DevAlarmStatus : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 nalarmcount() const;
   inline void set_nalarmcount(::google::protobuf::int32 value);
 
-  // repeated .DevAlarmStatus.eCellAlarmMsg cCellAlarm = 6;
+  // optional int32 nAlarmMod = 6;
+  inline bool has_nalarmmod() const;
+  inline void clear_nalarmmod();
+  static const int kNAlarmModFieldNumber = 6;
+  inline ::google::protobuf::int32 nalarmmod() const;
+  inline void set_nalarmmod(::google::protobuf::int32 value);
+
+  // repeated .DevAlarmStatus.eCellAlarmMsg cCellAlarm = 7;
   inline int ccellalarm_size() const;
   inline void clear_ccellalarm();
-  static const int kCCellAlarmFieldNumber = 6;
+  static const int kCCellAlarmFieldNumber = 7;
   inline const ::DevAlarmStatus_eCellAlarmMsg& ccellalarm(int index) const;
   inline ::DevAlarmStatus_eCellAlarmMsg* mutable_ccellalarm(int index);
   inline ::DevAlarmStatus_eCellAlarmMsg* add_ccellalarm();
@@ -1218,6 +1234,8 @@ class DevAlarmStatus : public ::google::protobuf::Message {
   inline void clear_has_edevtype();
   inline void set_has_nalarmcount();
   inline void clear_has_nalarmcount();
+  inline void set_has_nalarmmod();
+  inline void clear_has_nalarmmod();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1229,6 +1247,7 @@ class DevAlarmStatus : public ::google::protobuf::Message {
   ::google::protobuf::int32 edevtype_;
   ::google::protobuf::int32 nalarmcount_;
   ::google::protobuf::RepeatedPtrField< ::DevAlarmStatus_eCellAlarmMsg > ccellalarm_;
+  ::google::protobuf::int32 nalarmmod_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
   friend void protobuf_ShutdownFile_protocol_2eproto();
@@ -3710,7 +3729,7 @@ class DeviceCommandResultNotify : public ::google::protobuf::Message {
 
 // DevDataNotify_eCellMsg
 
-// required string sCellId = 1;
+// required int32 sCellId = 1;
 inline bool DevDataNotify_eCellMsg::has_scellid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -3721,69 +3740,17 @@ inline void DevDataNotify_eCellMsg::clear_has_scellid() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void DevDataNotify_eCellMsg::clear_scellid() {
-  if (scellid_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    scellid_->clear();
-  }
+  scellid_ = 0;
   clear_has_scellid();
 }
-inline const ::std::string& DevDataNotify_eCellMsg::scellid() const {
+inline ::google::protobuf::int32 DevDataNotify_eCellMsg::scellid() const {
   // @@protoc_insertion_point(field_get:DevDataNotify.eCellMsg.sCellId)
-  return *scellid_;
-}
-inline void DevDataNotify_eCellMsg::set_scellid(const ::std::string& value) {
-  set_has_scellid();
-  if (scellid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    scellid_ = new ::std::string;
-  }
-  scellid_->assign(value);
-  // @@protoc_insertion_point(field_set:DevDataNotify.eCellMsg.sCellId)
-}
-inline void DevDataNotify_eCellMsg::set_scellid(const char* value) {
-  set_has_scellid();
-  if (scellid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    scellid_ = new ::std::string;
-  }
-  scellid_->assign(value);
-  // @@protoc_insertion_point(field_set_char:DevDataNotify.eCellMsg.sCellId)
-}
-inline void DevDataNotify_eCellMsg::set_scellid(const char* value, size_t size) {
-  set_has_scellid();
-  if (scellid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    scellid_ = new ::std::string;
-  }
-  scellid_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:DevDataNotify.eCellMsg.sCellId)
-}
-inline ::std::string* DevDataNotify_eCellMsg::mutable_scellid() {
-  set_has_scellid();
-  if (scellid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    scellid_ = new ::std::string;
-  }
-  // @@protoc_insertion_point(field_mutable:DevDataNotify.eCellMsg.sCellId)
   return scellid_;
 }
-inline ::std::string* DevDataNotify_eCellMsg::release_scellid() {
-  clear_has_scellid();
-  if (scellid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = scellid_;
-    scellid_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
-}
-inline void DevDataNotify_eCellMsg::set_allocated_scellid(::std::string* scellid) {
-  if (scellid_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete scellid_;
-  }
-  if (scellid) {
-    set_has_scellid();
-    scellid_ = scellid;
-  } else {
-    clear_has_scellid();
-    scellid_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:DevDataNotify.eCellMsg.sCellId)
+inline void DevDataNotify_eCellMsg::set_scellid(::google::protobuf::int32 value) {
+  set_has_scellid();
+  scellid_ = value;
+  // @@protoc_insertion_point(field_set:DevDataNotify.eCellMsg.sCellId)
 }
 
 // required .e_CellType eCellType = 2;
@@ -4959,7 +4926,7 @@ DevWorkStatusNotify::mutable_cdevcurworkstatus() {
 
 // DevAlarmStatus_eCellAlarmMsg
 
-// required string sCellId = 1;
+// required int32 sCellId = 1;
 inline bool DevAlarmStatus_eCellAlarmMsg::has_scellid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -4970,69 +4937,17 @@ inline void DevAlarmStatus_eCellAlarmMsg::clear_has_scellid() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void DevAlarmStatus_eCellAlarmMsg::clear_scellid() {
-  if (scellid_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    scellid_->clear();
-  }
+  scellid_ = 0;
   clear_has_scellid();
 }
-inline const ::std::string& DevAlarmStatus_eCellAlarmMsg::scellid() const {
+inline ::google::protobuf::int32 DevAlarmStatus_eCellAlarmMsg::scellid() const {
   // @@protoc_insertion_point(field_get:DevAlarmStatus.eCellAlarmMsg.sCellId)
-  return *scellid_;
-}
-inline void DevAlarmStatus_eCellAlarmMsg::set_scellid(const ::std::string& value) {
-  set_has_scellid();
-  if (scellid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    scellid_ = new ::std::string;
-  }
-  scellid_->assign(value);
-  // @@protoc_insertion_point(field_set:DevAlarmStatus.eCellAlarmMsg.sCellId)
-}
-inline void DevAlarmStatus_eCellAlarmMsg::set_scellid(const char* value) {
-  set_has_scellid();
-  if (scellid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    scellid_ = new ::std::string;
-  }
-  scellid_->assign(value);
-  // @@protoc_insertion_point(field_set_char:DevAlarmStatus.eCellAlarmMsg.sCellId)
-}
-inline void DevAlarmStatus_eCellAlarmMsg::set_scellid(const char* value, size_t size) {
-  set_has_scellid();
-  if (scellid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    scellid_ = new ::std::string;
-  }
-  scellid_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:DevAlarmStatus.eCellAlarmMsg.sCellId)
-}
-inline ::std::string* DevAlarmStatus_eCellAlarmMsg::mutable_scellid() {
-  set_has_scellid();
-  if (scellid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    scellid_ = new ::std::string;
-  }
-  // @@protoc_insertion_point(field_mutable:DevAlarmStatus.eCellAlarmMsg.sCellId)
   return scellid_;
 }
-inline ::std::string* DevAlarmStatus_eCellAlarmMsg::release_scellid() {
-  clear_has_scellid();
-  if (scellid_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = scellid_;
-    scellid_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
-}
-inline void DevAlarmStatus_eCellAlarmMsg::set_allocated_scellid(::std::string* scellid) {
-  if (scellid_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete scellid_;
-  }
-  if (scellid) {
-    set_has_scellid();
-    scellid_ = scellid;
-  } else {
-    clear_has_scellid();
-    scellid_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:DevAlarmStatus.eCellAlarmMsg.sCellId)
+inline void DevAlarmStatus_eCellAlarmMsg::set_scellid(::google::protobuf::int32 value) {
+  set_has_scellid();
+  scellid_ = value;
+  // @@protoc_insertion_point(field_set:DevAlarmStatus.eCellAlarmMsg.sCellId)
 }
 
 // optional string sCellName = 2;
@@ -5568,7 +5483,31 @@ inline void DevAlarmStatus::set_nalarmcount(::google::protobuf::int32 value) {
   // @@protoc_insertion_point(field_set:DevAlarmStatus.nAlarmCount)
 }
 
-// repeated .DevAlarmStatus.eCellAlarmMsg cCellAlarm = 6;
+// optional int32 nAlarmMod = 6;
+inline bool DevAlarmStatus::has_nalarmmod() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void DevAlarmStatus::set_has_nalarmmod() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void DevAlarmStatus::clear_has_nalarmmod() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void DevAlarmStatus::clear_nalarmmod() {
+  nalarmmod_ = 0;
+  clear_has_nalarmmod();
+}
+inline ::google::protobuf::int32 DevAlarmStatus::nalarmmod() const {
+  // @@protoc_insertion_point(field_get:DevAlarmStatus.nAlarmMod)
+  return nalarmmod_;
+}
+inline void DevAlarmStatus::set_nalarmmod(::google::protobuf::int32 value) {
+  set_has_nalarmmod();
+  nalarmmod_ = value;
+  // @@protoc_insertion_point(field_set:DevAlarmStatus.nAlarmMod)
+}
+
+// repeated .DevAlarmStatus.eCellAlarmMsg cCellAlarm = 7;
 inline int DevAlarmStatus::ccellalarm_size() const {
   return ccellalarm_.size();
 }
@@ -10057,6 +9996,11 @@ template <> struct is_proto_enum< ::e_AlarmStatus> : ::google::protobuf::interna
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::e_AlarmStatus>() {
   return ::e_AlarmStatus_descriptor();
+}
+template <> struct is_proto_enum< ::e_AlarmMod> : ::google::protobuf::internal::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::e_AlarmMod>() {
+  return ::e_AlarmMod_descriptor();
 }
 
 }  // namespace google
