@@ -505,7 +505,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                 //按星期控制
                 if((*cmd_iter).iDateType == RUN_TIME_WEEK){
                     if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0) continue;//超过运行图终止时间且终止时间不为0,则跳过
-                    if((pCurTime->tm_wday+1)== (*cmd_iter).iWeek){
+                    if((pCurTime->tm_wday)== (*cmd_iter).iWeek){
                         tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
                         unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
                         if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
@@ -650,11 +650,12 @@ bool device_session::is_monitor_time(string sDevId)
     if(week_iter!=modleInfos.mapDevInfo[sDevId].vMonitorSch.end()){
         vector<Monitoring_Scheduler>::iterator iter = week_iter->second.begin();
         for(;iter!=week_iter->second.end();++iter){
-            if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0) continue;//超过运行图终止时间且终止时间不为0,则跳过
-            if((pCurTime->tm_wday+1)== (*iter).iMonitorWeek){
+            if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0)
+                continue;//超过运行图终止时间且终止时间不为0,则跳过
+            if((pCurTime->tm_wday)== (*iter).iMonitorWeek){
                 tm *pSetTimeS = localtime(&((*iter).tStartTime));
-                tm *pSetTimeE = localtime(&((*iter).tEndTime));
                 unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
+                tm *pSetTimeE = localtime(&((*iter).tEndTime));
                 unsigned long set_tm_e = pSetTimeE->tm_hour*3600+pSetTimeE->tm_min*60+pSetTimeE->tm_sec;
                 if(cur_tm>=set_tm_s && cur_tm<set_tm_e){
                     return (*iter).bMonitorFlag;
@@ -671,8 +672,8 @@ bool device_session::is_monitor_time(string sDevId)
             if((pCurTime->tm_mon+1)== (*iter).iMonitorMonth ||  (*iter).iMonitorMonth==0){ //如果是当前月或者是all则比较
                 if((pCurTime->tm_mday)== (*iter).iMonitorDay){
                     tm *pSetTimeS = localtime(&((*iter).tStartTime));
-                    tm *pSetTimeE = localtime(&((*iter).tEndTime));
                     unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
+                     tm *pSetTimeE = localtime(&((*iter).tEndTime));
                     unsigned long set_tm_e = pSetTimeE->tm_hour*3600+pSetTimeE->tm_min*60+pSetTimeE->tm_sec;
                     if(cur_tm>=set_tm_s && cur_tm<set_tm_e){
                         return (*iter).bMonitorFlag;
@@ -714,7 +715,7 @@ void device_session::clear_dev_alarm(string sDevId)
     map<int,map<int,CurItemAlarmInfo> >::iterator iter = mapItemAlarm[sDevId].begin();
     for(;iter!=mapItemAlarm[sDevId].end();++iter) {
         map<int,CurItemAlarmInfo>::iterator typeIter = iter->second.begin();
-        for(;iter!=mapItemAlarm[sDevId].end();++iter) {
+        for(;typeIter!=iter->second.end();++typeIter) {
             //写入恢复记录,通知客户端
             //.......
             record_alarm_and_notify(sDevId,0, 0,1,modleInfos.mapDevInfo[sDevId].map_MonitorItem[iter->first],typeIter->second);

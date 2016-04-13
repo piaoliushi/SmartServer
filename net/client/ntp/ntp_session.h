@@ -19,10 +19,6 @@ typedef boost::weak_ptr<ntp_session>    ntp_session_weak_ptr;
         ~ntp_session();
 		//udp连接
 		void udp_connect(std::string hostname,unsigned short port);
-		//断开连接
-		void disconnect();
-		//发送消息
-		bool sendRawMessage(unsigned char * data_,int nDatalen);
 	protected:
 		void start_read_head(int msgLen);//开始接收头
 		void start_read_body(int msgLen);//开始接收体

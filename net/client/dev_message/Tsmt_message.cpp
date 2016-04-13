@@ -10,7 +10,8 @@ namespace hx_net
 
     Tsmt_message::Tsmt_message(session_ptr pSession,boost::asio::io_service& io_service,
                                DeviceInfo &devInfo,pDevicePropertyExPtr devProperty)
-        :d_devInfo(devInfo)
+        :base_message()
+        ,d_devInfo(devInfo)
         ,task_timeout_timer_(io_service)
         ,d_devProperty(devProperty)
         ,d_relate_tsmt_ptr_(NULL)

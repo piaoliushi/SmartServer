@@ -59,7 +59,7 @@ void QClientStatePage::OnClientOffline(QString sAddr)
 {
 	for(int irow=0;irow<pClientList->rowCount();++irow)
 	{
-		QTableWidgetItem *p = pClientList->item(irow,3);
+        QTableWidgetItem *p = pClientList->item(irow,1);
 		QString sContent = p->text();
 		if(sContent==sAddr)
 		{
@@ -76,12 +76,12 @@ void QClientStatePage::OnClientLogin(QString sAddr,QString sName,QString sID)
 {
 	for(int irow=0;irow<pClientList->rowCount();++irow)
 	{
-		QTableWidgetItem *p = pClientList->item(irow,3);
+        QTableWidgetItem *p = pClientList->item(irow,1);
 		QString sContent = p->text();
 		if(sContent==sAddr)
 		{
 			pClientList->setItem(irow,0,new QTableWidgetItem(sName));
-			pClientList->setItem(irow,1,new QTableWidgetItem(sID));
+            //pClientList->setItem(irow,1,new QTableWidgetItem(sID));
 			return;
 		}
 	}
@@ -90,12 +90,12 @@ void QClientStatePage::OnClientLogout(QString sAddr)
 {
 	for(int irow=0;irow<pClientList->rowCount();++irow)
 	{
-		QTableWidgetItem *p = pClientList->item(irow,3);
+        QTableWidgetItem *p = pClientList->item(irow,1);
 		QString sContent = p->text();
 		if(sContent==sAddr)
 		{
 			pClientList->setItem(irow,0,new QTableWidgetItem(QString(tr("****"))));
-			pClientList->setItem(irow,1,new QTableWidgetItem(QString(tr("****"))));
+            //pClientList->setItem(irow,1,new QTableWidgetItem(QString(tr("****"))));
 			return;
 		}
 	}

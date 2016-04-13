@@ -22,6 +22,7 @@ public:
     void getRegisterCommand(CommandUnit &cmdUnit);
     void start_test_send_timer(unsigned long nSeconds=50);
     void stop_test_send_timer();
+	void GetAllCmd(CommandAttribute &cmdAll);
 protected:
     void test104data();
     int parse_104_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
@@ -32,6 +33,7 @@ protected:
     void iecsock_sframe_send();
     void iecsock_iframe_send();
     void test_time_event(const boost::system::error_code& error);
+	int decode_Eda9033A(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
 private:
     int              m_Subprotocol;//设备子协议号
     int                          m_mainprotocol;//主协议编号
@@ -47,5 +49,8 @@ private:
     unsigned short     d_num_s;//发送序列号
 
     DeviceInfo           &d_devInfo;//设备信息
+
+	int m_Uo,m_Io;
+	float m_Ubb,m_Ibb;
 };
 }

@@ -1,10 +1,12 @@
 #include "Electric_message.h"
 #include "./104/iec104_types.h"
 #include "./104/iec104.h"
+#include"../../../utility.h"
 namespace hx_net
 {
     Electric_message::Electric_message(session_ptr  pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
-		:m_pSession(pSession)
+        :base_message()
+        ,m_pSession(pSession)
         ,d_devInfo(devInfo)
 		,d_test_send_timer_(io_service)
 		,d_interrogation_send_timer_(io_service)
@@ -13,7 +15,19 @@ namespace hx_net
 		,d_testfr(1)
 		,d_num_s(0)
 		,d_num_r(0)
+		,m_Uo(250)
+		,m_Io(5)
+		,m_Ubb(1.0)
+		,m_Ibb(10.0)
 	{
+        if(d_devInfo.map_DevProperty.find("VRANG")!=d_devInfo.map_DevProperty.end())
+			m_Uo = atoi(d_devInfo.map_DevProperty[""].property_value.c_str());
+        if(d_devInfo.map_DevProperty.find("ARANG")!=d_devInfo.map_DevProperty.end())
+			m_Io = atoi(d_devInfo.map_DevProperty[""].property_value.c_str());
+        if(d_devInfo.map_DevProperty.find("VRATIO")!=d_devInfo.map_DevProperty.end())
+			m_Ubb = atof(d_devInfo.map_DevProperty[""].property_value.c_str());
+        if(d_devInfo.map_DevProperty.find("ARATIO")!=d_devInfo.map_DevProperty.end())
+			m_Ibb = atof(d_devInfo.map_DevProperty[""].property_value.c_str());
 	}
 
 	Electric_message::~Electric_message(void)
@@ -51,9 +65,9 @@ namespace hx_net
 
     int Electric_message::check_msg_header(unsigned char *data,int nDataLen)
     {
-        switch(m_mainprotocol){
+        switch(d_devInfo.nDevProtocol){
         case EDA9033:{
-            switch (m_Subprotocol)
+            switch (d_devInfo.nSubProtocol)
             {
             case ZXJY_BACK:
             {
@@ -65,11 +79,25 @@ namespace hx_net
                 }else
                     return -1;
             }
+			case Eda9033_A:
+				{
+					if(nDataLen<2)
+						return -1;
+					if(data[0] == 0x4C && data[1] == 0x57)
+						return 0;
+					else
+					{
+						unsigned char cDes[2]={0};
+						cDes[0]=0x4C;
+						cDes[1]=0x57;
+						return kmp(data,nDataLen,cDes,2);
+					}
+				}
             }
         }
             break;
         case ELECTRIC:{
-            switch (m_Subprotocol)
+            switch (d_devInfo.nSubProtocol)
             {
             case ELECTRIC_104: {
                 if(data[0]==START) {
@@ -90,11 +118,16 @@ namespace hx_net
 
 	int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
 	{
-        switch(m_mainprotocol){
+        switch(d_devInfo.nDevProtocol){
         case EDA9033:
+			switch (d_devInfo.nSubProtocol)
+			{
+			case Eda9033_A:
+				return decode_Eda9033A(data,data_ptr,nDataLen);
+			}
             break;
         case ELECTRIC:{
-               switch (m_Subprotocol)
+               switch (d_devInfo.nSubProtocol)
                 {
                  case ELECTRIC_104:
                          return parse_104_data(data,data_ptr,nDataLen);
@@ -107,20 +140,22 @@ namespace hx_net
 
 	bool Electric_message::IsStandardCommand()
 	{
-        switch(m_mainprotocol){
+        switch(d_devInfo.nDevProtocol){
         case EDA9033:{
-            switch (m_Subprotocol)
+            switch (d_devInfo.nSubProtocol)
             {
             case Eda9003_F:
                 return false;
             case ZXJY_BACK:
                 return true;
+			case Eda9033_A:
+				return false;
             }
             return false;
         }
             break;
         case ELECTRIC:{
-            switch (m_Subprotocol)
+            switch (d_devInfo.nSubProtocol)
             {
             case ELECTRIC_104:
             case ELECTRIC_101:
@@ -134,11 +169,11 @@ namespace hx_net
 	
 	void Electric_message::getRegisterCommand(CommandUnit &cmdUnit)
 	{
-        switch(m_mainprotocol){
+        switch(d_devInfo.nDevProtocol){
         case EDA9033:
             break;
         case ELECTRIC:{
-            switch (m_Subprotocol)
+            switch (d_devInfo.nSubProtocol)
             {
             case ELECTRIC_104:
                 break;
@@ -383,5 +418,120 @@ namespace hx_net
 		}
 
 		d_num_s = (d_num_s + 1) % 32767;
+	}
+
+	void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
+	{
+		switch(d_devInfo.nDevProtocol){
+		case EDA9033:
+			{
+				switch(d_devInfo.nSubProtocol)
+				{
+				case Eda9033_A:
+					{
+						CommandUnit tmUnit;
+						tmUnit.ackLen = 45;
+						tmUnit.commandLen = 7;
+						tmUnit.commandId[0] = 0x4C;
+						tmUnit.commandId[1] = 0x57;
+						tmUnit.commandId[2] = d_devInfo.iAddressCode;
+						tmUnit.commandId[3] = 0x30;
+						tmUnit.commandId[4] = 0x0E;
+						tmUnit.commandId[5] = tmUnit.commandId[2]+tmUnit.commandId[3]+tmUnit.commandId[4];
+						tmUnit.commandId[6] = 0x0D;
+                        cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+					}
+					break;
+				}
+			}
+			break;
+		case ELECTRIC:{
+			switch (d_devInfo.nSubProtocol)
+			{
+			case ELECTRIC_104:
+				break;
+			case ELECTRIC_101:
+				return;
+			}
+					  }
+					  break;
+		}
+	}
+
+	int Electric_message::decode_Eda9033A( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen )
+	{
+		int indexpos =0;
+		DataInfo dainfo;
+		//A相电压、电流
+		dainfo.bType = false;
+		dainfo.fValue = (float)((data[5]<<8)|data[6])/10000*m_Uo*m_Ubb;
+		data_ptr->mValues[indexpos++] = dainfo;
+		dainfo.fValue = (float)((data[7]<<8)|data[8])/10000*m_Io*m_Ibb;
+		data_ptr->mValues[indexpos++] = dainfo;
+		//B相电压、电流
+		dainfo.fValue = (float)((data[9]<<8)|data[10])/10000*m_Uo*m_Ubb;
+		data_ptr->mValues[indexpos++] = dainfo;
+		dainfo.fValue = (float)((data[11]<<8)|data[12])/10000*m_Io*m_Ibb;
+		data_ptr->mValues[indexpos++] = dainfo;
+		//C相电压、电流
+		dainfo.fValue = (float)((data[13]<<8)|data[14])/10000*m_Uo*m_Ubb;
+		data_ptr->mValues[indexpos++] = dainfo;
+		dainfo.fValue = (float)((data[15]<<8)|data[16])/10000*m_Io*m_Ibb;
+		data_ptr->mValues[indexpos++] = dainfo;
+		//总有功功率值 
+		dainfo.fValue = (float)(((data[17]&0x7F)<<8)|data[18])/10000*3*m_Uo*m_Ubb*m_Io*m_Ibb;
+		data_ptr->mValues[indexpos++] = dainfo;
+		//总无功功率值
+		dainfo.fValue = (float)(((data[19]&0x7F)<<8)|data[20])/10000*3*m_Uo*m_Ubb*m_Io*m_Ibb;
+		data_ptr->mValues[indexpos++] = dainfo;
+		//总功率因数值
+		dainfo.fValue = (float)(((data[21]&0x7F)<<8)|data[22])/10000;
+		data_ptr->mValues[indexpos++] = dainfo;
+		//A相有功功率值
+		dainfo.fValue = (float)(((data[23]&0x7F)<<8)|data[24])/10000*m_Uo*m_Ubb*m_Io*m_Ibb;
+		data_ptr->mValues[indexpos++] = dainfo;
+		//B相有功功率值
+		dainfo.fValue = (float)(((data[25]&0x7F)<<8)|data[26])/10000*m_Uo*m_Ubb*m_Io*m_Ibb;
+		data_ptr->mValues[indexpos++] = dainfo;
+		//C相有功功率值
+		dainfo.fValue = (float)(((data[27]&0x7F)<<8)|data[28])/10000*m_Uo*m_Ubb*m_Io*m_Ibb;//29 30
+		data_ptr->mValues[indexpos++] = dainfo;
+		//有功总电能
+	
+		dainfo.fValue = (float)(((data[31]&0x7F)<<24)|(data[32]<<16)|(data[33]<<8)|(data[34]))
+			*m_Uo*m_Ubb*m_Io*m_Ibb/3000/3600;
+		data_ptr->mValues[indexpos++] = dainfo;
+		
+		//正向有功总电能
+
+		dainfo.fValue = (float)((data[35]<<24)|(data[36]<<16)|(data[37]<<8)|(data[38]))
+			*m_Uo*m_Ubb*m_Io*m_Ibb/3000/3600;
+		data_ptr->mValues[indexpos++] = dainfo;
+		//反向有功总电能
+
+		dainfo.fValue = (float)((data[39]<<24)|(data[40]<<16)|(data[41]<<8)|(data[42]))
+			*m_Uo*m_Ubb*m_Io*m_Ibb/3000/3600;
+		data_ptr->mValues[indexpos++] = dainfo;
+
+		dainfo.bType = true;
+		if(data_ptr->mValues[1].fValue>1 || data_ptr->mValues[3].fValue>1 
+			|| data_ptr->mValues[5].fValue>1)
+		{
+			dainfo.fValue = 1.0;
+		}
+		else
+			dainfo.fValue = 0.0;
+		data_ptr->mValues[indexpos++] = dainfo;
+		dainfo.bType = false;
+		//AB相电压
+        dainfo.fValue = (float)sqrt(data_ptr->mValues[0].fValue*data_ptr->mValues[0].fValue+data_ptr->mValues[2].fValue*data_ptr->mValues[2].fValue+data_ptr->mValues[0].fValue*data_ptr->mValues[2].fValue);
+		data_ptr->mValues[indexpos++] = dainfo;
+		//BC
+		dainfo.fValue = (float)sqrt(data_ptr->mValues[4].fValue*data_ptr->mValues[4].fValue+data_ptr->mValues[2].fValue*data_ptr->mValues[2].fValue+data_ptr->mValues[4].fValue*data_ptr->mValues[2].fValue);
+		data_ptr->mValues[indexpos++] = dainfo;
+		//CA
+		dainfo.fValue = (float)sqrt(data_ptr->mValues[0].fValue*data_ptr->mValues[0].fValue+data_ptr->mValues[4].fValue*data_ptr->mValues[4].fValue+data_ptr->mValues[0].fValue*data_ptr->mValues[4].fValue);
+		data_ptr->mValues[indexpos++] = dainfo;
+		return RE_SUCCESS;
 	}
 }

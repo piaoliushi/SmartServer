@@ -1467,14 +1467,14 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
                             values(:objectnumber,:weekday,:enable,:starttime,:endtime,:datetype,:month,:day,:alarmendtime)");
                             insertQuery.prepare(strSql);
            insertQuery.bindValue(":objectnumber",qsTransNum);
-           QString strCmd = QString("insert into monitoring_scheduler(objectnumber,paramnumber,enable,weekday,starttime,commandtype,hasparam,datetype,month,day,commandendtime) \
-                                    values(:objectnumber,'',1,:weekday,:enable,:starttime,:commandtype,0,:datetype,:month,:day,:commandendtime)");
+           QString strCmd = QString("insert into command_scheduler(objectnumber,paramnumber,enable,weekday,starttime,commandtype,hasparam,datetype,month,day,commandendtime) \
+                                    values(:objectnumber,'',1,:weekday,:starttime,:commandtype,0,:datetype,:month,:day,:commandendtime)");
            QSqlQuery insertCmdopenQuery;
-           insertCmdopenQuery.prepare(strSql);
+           insertCmdopenQuery.prepare(strCmd);
            insertCmdopenQuery.bindValue(":objectnumber",qsTransNum);
            insertCmdopenQuery.bindValue(":commandtype",15);
            QSqlQuery insertCmdcloseQuery;
-           insertCmdcloseQuery.prepare(strSql);
+           insertCmdcloseQuery.prepare(strCmd);
            insertCmdcloseQuery.bindValue(":objectnumber",qsTransNum);
            insertCmdcloseQuery.bindValue(":commandtype",19);
            while(setnode)
@@ -1642,6 +1642,7 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
                insertCmdopenQuery.bindValue(":day",iday);
                insertCmdopenQuery.bindValue(":commandendtime",qAlarmendDt);
 
+             //   switch(shutype)
                if(!insertQuery.exec())
                {
                    QSqlDatabase::database().rollback();

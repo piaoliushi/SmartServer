@@ -11,7 +11,7 @@ namespace hx_net
 	{
 
 	}
-    void Transmmiter::kmp_init( const unsigned char *pattern, int pattern_size,int *pi )
+    /*void Transmmiter::kmp_init( const unsigned char *pattern, int pattern_size,int *pi )
     {
         if(pi==NULL)
             return;
@@ -98,5 +98,5 @@ namespace hx_net
             }
         }
         return  nAccum;
-    }
+    }*/
 }

@@ -9,4 +9,8 @@ using namespace std;
 int HexChar( char src );
 int StrToHex( string str,unsigned char* Data );
 int Dec2Hex(int input);
+void kmp_init( const unsigned char *pattern, int pattern_size,int *pi );
+int kmp( const unsigned char *matcher, int mlen, const unsigned char *pattern, int plen );
+unsigned short CRC16_A001( unsigned char * ptr, int len );
+unsigned short CRC16_CCITT( unsigned char * ptr, int len );
 #endif // UTILITY_H
