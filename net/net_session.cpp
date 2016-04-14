@@ -270,11 +270,11 @@ namespace hx_net
 			if(smsInfo[i].iAlarmLevel==nAlarmLevel)
 			{
 				//如果告警级别需要发送短信，且短信使能打开
-				if((nAlarmLevel==SMS || nAlarmLevel==SMSANDTEL)&&
-					GetInst(LocalConfig).sms_use())
-				{
-					string sCenterId = GetInst(LocalConfig).sms_center_number();
-				}
+                //if((nAlarmLevel==SMS || nAlarmLevel==SMSANDTEL)&&
+                //	GetInst(LocalConfig).sms_use())
+                //{
+                //	string sCenterId = GetInst(LocalConfig).sms_center_number();
+                //}
                 //发送短信2016-3-22
                 //GetInst(DbManager).WriteCallTask(smsInfo[i].sPhoneNumber,sContent,nAlarmLevel);
 			}

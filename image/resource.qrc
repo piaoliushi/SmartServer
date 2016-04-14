@@ -12,5 +12,6 @@
         <file alias="users.png">users.png</file>
         <file alias="envir.png">envir.png</file>
         <file alias="transmitter.png">transmitter.png</file>
+        <file>clock.png</file>
     </qresource>
 </RCC>

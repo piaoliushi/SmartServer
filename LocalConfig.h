@@ -25,6 +25,7 @@ public:
 	unsigned short local_port()const{return local_port_;}
 	int            heartbeat_interval()const{return hb_interval_;}
 	int            heartbeat_timeout()const{return hb_timeout_;}
+    void ntp_config(bool &use,int &nMod,int &nValue,string &sAdjustTime);
 
     map<string,pDevicePropertyExPtr>& device_property_ex();
     pDevicePropertyExPtr  device_property_ex(string sTransmitterId);
@@ -32,10 +33,10 @@ public:
 	bool writeLocalParToXml(const char* sFileName,string stationId,string stationName,string svcId,
 		                    unsigned short svcPort,string dbIp,string dbUser);
 
-	bool sms_use(){return sms_use_;}
-	string sms_com(){return sms_com_;}
-	int    sms_baud_rate(){return sms_baud_rate_;}
-	string sms_center_number(){return sms_center_number_;}
+    //bool sms_use(){return sms_use_;}
+    //string sms_com(){return sms_com_;}
+    //int    sms_baud_rate(){return sms_baud_rate_;}
+    //string sms_center_number(){return sms_center_number_;}
 
     bool   report_use(){return report_use_;}
     string report_svc_url(){return report_svc_url_;}
@@ -43,6 +44,7 @@ public:
     bool   http_svc_use(){return http_upload_use_;}
     string http_svc_ip(){return http_svc_ip_;}
     string http_svc_port(){return http_svc_port_;}
+    string ntp_svc_ip(){return ntp_svc_ip_;}
 	
 	bool writeSmsParToXml(const char* sFileName,bool bUse,string comId,int baudRate,string smsCenterNumber);
 	
@@ -63,17 +65,25 @@ private:
 	int    hb_interval_;//心跳间隔
 	int    hb_timeout_; //心跳超时时间
 
-	bool   sms_use_;//是否开启短信报警
-	string sms_com_;//串口名称
-	int    sms_baud_rate_;//波特率
-	string sms_center_number_;//短信中心号码
+    //bool   sms_use_;//是否开启短信报警
+    //string sms_com_;//串口名称
+    //int    sms_baud_rate_;//波特率
+    //string sms_center_number_;//短信中心号码
 
     bool   report_use_;//是否上传数据
     string report_svc_url_;//上报目标url
 
+    string ntp_svc_ip_;//ntp服务器
+    bool ntp_upload_use_;
+    int ntp_mod_;//0:天1:星期2:月
+    int ntp_mod_value_;//星期1-7,月1-12,天1-31
+    //int ntp_month_;//
+    string  ntp_time_;//校时时间
+   // int ntp_day_;//
+
     bool   http_upload_use_;//是否接收http请求
     string http_svc_port_;//接收上传服务端口
-     string http_svc_ip_;//上报目标url
+    string http_svc_ip_;//上报目标url
 
     map<string,pDevicePropertyExPtr> device_property_Ex_;
 	map<string,pMoxaPropertyExPtr> moxas_property_Ex_;

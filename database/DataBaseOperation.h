@@ -2,9 +2,11 @@
 #define DATABASEOPERATION_H
 #include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QDateTime>
 #include "DataTypeDefine.h"
 #include <iostream>
 #include "../rapidxml/rapidxml.hpp"
+#include "../qnotifyhandler.h"
 #include <boost/thread.hpp>
 using namespace rapidxml;
 namespace db {
@@ -15,6 +17,7 @@ public:
     ~DataBaseOperation();
 
 public:
+    void set_notify(QNotifyHandler* pNotify){d_cur_Notify = pNotify;}
     bool OpenDb(const std::string& serveraddress,
         const std::string& database,
         const std::string& uid,
@@ -26,6 +29,7 @@ public:
     bool CloseDb();
     bool IsOpen();
     bool ReOpen();
+    bool check_database();
 
 public:
     //获得所有设备信息
@@ -57,7 +61,7 @@ public:
     bool GetUserInfo( const string sName,UserInformation &user );
     bool GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice );
 private:
-
+    void StartReOpen();//启动重连线程
     bool GetDevMonitorSch(string strDevnum,map<int,vector<Monitoring_Scheduler> >& mapMonitorSch);
     bool GetCmdParam(string strCmdnum,CmdParam& param);
     bool GetCmd(string strDevnum,vector<Command_Scheduler>& vcmdsch);
@@ -73,8 +77,14 @@ private:
     bool GetAssDevChan( QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev );
 private:
     QSqlDatabase   q_db;
-    QString dsn;
-    boost::mutex   db_connect_mutex_;
+    QString d_serveraddress;
+    QString d_database;
+    QString d_uid;
+    QString d_pwd;
+    boost::recursive_mutex   db_connect_mutex_;
+    boost::shared_ptr<boost::thread> reconnect_thread_;//网络监听线程
+    QDateTime d_db_check_time;
+    QNotifyHandler  *d_cur_Notify;
 };
 }
 

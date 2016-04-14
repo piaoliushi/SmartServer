@@ -13,13 +13,17 @@ LocalConfig::LocalConfig(void)
     ,db_usr_("sa")
     ,db_psw_("1234")
     ,db_driver_("SQL Native Client")
-    ,sms_use_(false)
-    ,sms_baud_rate_(9600)
-    ,sms_center_number_("13888888888")
+   // ,sms_use_(false)
+    //,sms_baud_rate_(9600)
+    //,sms_center_number_("13888888888")
     ,local_port_(5000)
     ,report_svc_url_("")
     ,report_use_(false)
     ,http_upload_use_(false)
+    ,ntp_upload_use_(false)
+    ,ntp_mod_(1)
+    ,ntp_mod_value_(2)
+    ,ntp_time_("1900-1-1 00:00:00")
 {
     //load_local_config("config.xml");
 }
@@ -48,7 +52,7 @@ bool LocalConfig::load_local_config(const char* sFileName)
         else
             return false;
 
-        xml_node<>* xml_sms = root->first_node("sms" );
+       /* xml_node<>* xml_sms = root->first_node("sms" );
         if(xml_sms!=NULL)
         {
             long nUse =  strtol(xml_sms->first_attribute("use")->value(),NULL,10);
@@ -61,7 +65,7 @@ bool LocalConfig::load_local_config(const char* sFileName)
             sms_center_number_ = xml_sms->first_attribute("sms_center_number")->value();
         }
         else
-            return false;
+            return false;*/
 
         xml_node<>* xml_database = root->first_node("database");
         if(xml_database!=NULL)
@@ -115,6 +119,19 @@ bool LocalConfig::load_local_config(const char* sFileName)
                     http_upload_use_=false;
                 http_svc_ip_ = xml_http_svc->first_attribute("ip")->value();
                 http_svc_port_ = xml_http_svc->first_attribute("port")->value();
+            }
+            //ntp服务配置
+            xml_node<>* xml_ntp_svc = xml_upload_svc_root->first_node("ntp_svc");
+            if(xml_ntp_svc!=0){
+                long nUse =  strtol(xml_ntp_svc->first_attribute("use")->value(),NULL,10);
+                if(nUse>0)
+                    ntp_upload_use_=true;
+                else
+                    ntp_upload_use_=false;
+                ntp_svc_ip_ = xml_ntp_svc->first_attribute("ip")->value();
+                ntp_mod_ = strtol(xml_ntp_svc->first_attribute("mod")->value(),NULL,10);
+                ntp_mod_value_ = strtol(xml_ntp_svc->first_attribute("mod_value")->value(),NULL,10);
+                ntp_time_ = xml_ntp_svc->first_attribute("time")->value();
             }
         }
         //串口服务器配置
@@ -356,6 +373,15 @@ bool LocalConfig::load_local_config(const char* sFileName)
 
     return false;
 }
+
+void LocalConfig::ntp_config(bool &use,int &nMod,int &nValue,string &sAdjustTime)
+{
+    use = ntp_upload_use_;
+    nMod = ntp_mod_;
+    nValue = ntp_mod_value_;
+    sAdjustTime = ntp_time_;
+}
+
 map<string,pDevicePropertyExPtr>& LocalConfig::device_property_ex()
 {
     return device_property_Ex_;

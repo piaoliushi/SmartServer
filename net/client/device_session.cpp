@@ -570,12 +570,12 @@ void device_session::notify_client(string sDevId,string devName,string user,int 
 
 void device_session::set_opr_state(string sdevId,dev_opr_state curState)
 {
-    boost::mutex::scoped_lock lock(opr_state_mutex_);
+    boost::recursive_mutex::scoped_lock lock(opr_state_mutex_);
     dev_opr_state_[sdevId] = curState;
 }
 
 dev_opr_state  device_session::get_opr_state(string sdevId){
-    boost::mutex::scoped_lock lock(opr_state_mutex_);
+    boost::recursive_mutex::scoped_lock lock(opr_state_mutex_);
     return dev_opr_state_[sdevId];
 }
 
@@ -1163,7 +1163,7 @@ void device_session::sendSmsToUsers(int nLevel,string &sContent)
     {
         if(smsInfo[i].iAlarmLevel==nLevel)
         {
-            string sCenterId = GetInst(LocalConfig).sms_center_number();
+            //string sCenterId = GetInst(LocalConfig).sms_center_number();
             //扩平台需要，暂时删去
             //GetInst(CSmsTraffic).SendSMSContent(sCenterId,smsInfo[i].sPhoneNumber,sContent);
         }

@@ -22,6 +22,7 @@ public:
 public slots:
 		void StartSvc();
         void timeUpdate();
+        void OnDatabase(bool bOk);
 private:
 	QNotifyHandler &m_Notify;
 	bool m_IsRunning;
@@ -30,6 +31,9 @@ private:
     QLabel   *d_pSvcStateValueLabel;
     QLabel   *d_pHttpServerStateValueLabel;
     QLabel   *d_pDatabaseStateValueLabel;
+
+    QLabel    *d_pAdjustTimeModLabel;
+    QLabel    *d_pABaseTimeLabel;
 
     QLabel   *d_plbDateTime;
 };

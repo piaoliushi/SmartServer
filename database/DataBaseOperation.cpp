@@ -13,26 +13,41 @@ namespace db {
 
 DataBaseOperation::DataBaseOperation()
 {
-    dsn="";
+    reconnect_thread_.reset();
+    d_db_check_time = QDateTime::currentDateTime();
 }
 
 DataBaseOperation::~DataBaseOperation()
 {
-
+    if(reconnect_thread_!=NULL)
+    {
+        if(reconnect_thread_->joinable())
+        {
+            reconnect_thread_->interrupt();
+            reconnect_thread_->join();
+        }
+    }
 }
 
 bool DataBaseOperation::OpenDb( const std::string& serveraddress, const std::string& database, const std::string& uid, const std::string& pwd, int timeout, std::string link_driver,std::string driverName/*="SQL Native Client"*/ )
 {
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     q_db = QSqlDatabase::addDatabase("QPSQL");
     q_db.setHostName(QString::fromStdString(serveraddress));//设置主机名
     q_db.setDatabaseName(QString::fromStdString(database));//设置数据库名
     q_db.setUserName(QString::fromStdString(uid));//设置用户名
     q_db.setPassword(QString::fromStdString(pwd));//设置用户密码
 
+    d_serveraddress = QString::fromStdString(serveraddress);
+    d_database = QString::fromStdString(database);
+    d_uid = QString::fromStdString(uid);
+    d_pwd=QString::fromStdString(pwd);
     if(!q_db.open())
     {
+        StartReOpen();
         return false;
     }
+    StartReOpen();
     return true;
 }
 
@@ -40,6 +55,7 @@ bool DataBaseOperation::CloseDb()
 {
     if(q_db.isOpen())
     {
+        boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
         q_db.close();
     }
     return true;
@@ -47,23 +63,67 @@ bool DataBaseOperation::CloseDb()
 
 bool DataBaseOperation::IsOpen()
 {
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     return q_db.isOpen();
+}
+
+bool DataBaseOperation::check_database()
+{
+    if(d_db_check_time.secsTo(QDateTime::currentDateTime())>5){
+        QSqlQuery query ;
+        QString sNow("select now()");
+        query.prepare(sNow);
+         if(!query.exec()){
+             d_db_check_time = QDateTime::currentDateTime();
+             return false;
+         }
+         d_db_check_time = QDateTime::currentDateTime();
+    }
+    return true;
+}
+
+
+void DataBaseOperation::StartReOpen()
+{
+     if(reconnect_thread_==NULL)
+    {
+        reconnect_thread_.reset(new boost::thread(boost::bind(&DataBaseOperation::ReOpen,this)));
+    }
+    else
+    {//reconnect_thread_->timed_join(boost::posix_time::microseconds(0))
+       /* if(reconnect_thread_->joinable())
+        {
+            reconnect_thread_->interrupt();
+            reconnect_thread_->join();
+            reconnect_thread_.reset(new boost::thread(boost::bind(&DataBaseOperation::ReOpen,this)));
+        }*/
+    }
 }
 
 bool DataBaseOperation::ReOpen()
 {
-    if(q_db.isOpen())
+    if(check_database()==false)
     {
+        boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
         q_db.close();
+         d_cur_Notify->OnDatabase(false);
+    }else {
+         boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+         ReOpen();
     }
-    if(dsn.isEmpty())
-    {
-        return false;
-    }
-    q_db.setDatabaseName(dsn);
+
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    q_db.setHostName(d_serveraddress);//设置主机名
+    q_db.setDatabaseName(d_database);//设置数据库名
+    q_db.setUserName(d_uid);//设置用户名
+    q_db.setPassword(d_pwd);//设置用户密码
     if(!q_db.open())
     {
-        return false;
+      boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
+      return ReOpen();
+    }else {
+        d_cur_Notify->OnDatabase(true);
+        ReOpen();
     }
     return true;
 }
@@ -76,6 +136,7 @@ bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicr
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery query;
     QString strSql=QString("select code,name,remark from data_dictionary where type='IndexType' union select alarmswitch,alarmswitchname,remark from alarm_switch");
     query.prepare(strSql);
@@ -98,6 +159,8 @@ bool DataBaseOperation::GetDevInfo( string strDevnum,DeviceInfo& device )
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery devquery;
     QString strSql=QString("select a.DeviceNumber,a.AssociateNumber,a.DeviceName,a.DeviceType,a.IsAssociate,a.IsMultiChannel,a.ChannelSize,a.IsUse,a.AddressCode,b.MainCategoryNumber,b.SubCategoryNumber,a.ProtocolNumber\
                            from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and b.ProtocolNumber=a.ProtocolNumber").arg(QString::fromStdString(strDevnum));
@@ -140,6 +203,7 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery netquery;
     QString strSql=QString("select NetType,IpAddress,LocalPort,PeerPort,ConnectType,CommTypeNumber from Net_Communication_Mode");
     netquery.prepare(strSql);
@@ -218,6 +282,7 @@ bool DataBaseOperation::GetDevMonitorSch( string strDevnum,map<int,vector<Monito
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery schquery;
     QString strSql=QString("select id,ObjectNumber,WeekDay,Enable,StartTime,EndTime,datetype,month,day, \
                            alarmendtime from Monitoring_Scheduler where ObjectNumber='%1'").arg(QString::fromStdString(strDevnum));
@@ -255,6 +320,7 @@ bool DataBaseOperation::GetCmdParam( string strCmdnum,CmdParam& param )
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery cmdparquery;
     QString strSql=QString("select Param0,HasParam1,Param1 from Param_Define where ParamNumber='%1'").arg(QString::fromStdString(strCmdnum));
     cmdparquery.prepare(strSql);
@@ -282,6 +348,7 @@ bool DataBaseOperation::GetCmd( string strDevnum,vector<Command_Scheduler>& vcmd
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery cmdschquery;
     QString strSql=QString("select id,CommandType,WeekDay,StartTime,HasParam,ParamNumber,month,day,commandendtime,datetype from Command_Scheduler where ObjectNumber='%1' and Enable=1").arg(QString::fromStdString(strDevnum));
     cmdschquery.prepare(strSql);
@@ -322,6 +389,7 @@ bool DataBaseOperation::GetDevMonItem( string strDevnum,QString qsPrtocolNum,map
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery itemschquery;
     /*QString strSql=QString("select MonitoringIndex,MonitoringName,Ratio,ItemType,ItemValueType,AlarmEnable,IsUpload,UnitString from Monitoring_Device_Item \
                            where DeviceNumber='%1'").arg(QString::fromStdString(strDevnum));*/
@@ -366,6 +434,7 @@ bool DataBaseOperation::GetDevProperty( string strDevnum,map<string,DevProperty>
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery itemschquery;
     QString strSql=QString("select a.BasePropertyNumber,a.PropertyValueType,a.PropertyValue,b.PropertyName from Device_Property_Role_Bind a,Base_Property b \
                            where a.DeviceNumber='%1' and b.BasePropertyNumber=a.BasePropertyNumber").arg(QString::fromStdString(strDevnum));
@@ -397,6 +466,7 @@ bool DataBaseOperation::GetNetProperty( string strConTypeNumber,NetCommunication
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery netquery;
     QString strSql=QString("select NetType,IpAddress,LocalPort,PeerPort,ConnectType from Net_Communication_Mode \
                            where CommTypeNumber='%1'").arg(QString::fromStdString(strConTypeNumber));
@@ -431,6 +501,7 @@ bool DataBaseOperation::GetComProperty( string strConTypeNumber,ComCommunication
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery comquery;
     QString strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity from Com_Communication_Mode \
                            where CommTypeNumber='%1'").arg(QString::fromStdString(strConTypeNumber));
@@ -466,6 +537,7 @@ bool DataBaseOperation::GetLinkActionParam( string strParamnum,map<int,ActionPar
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery actpquery;
     QString strSql=QString("select a.parameterindex,b.ParameterContent,b.ActionParameterType from Action_Parameter_Bind_Content a,Action_Parameter_Content b \
                            where a.ParameterNumber='%1' and b.ActionParameterContentNumber=a.ActionParameterContentNumber order by a.parameterindex"
@@ -495,6 +567,7 @@ bool DataBaseOperation::GetLinkAction( string strLinkRolenum,vector<LinkAction>&
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery actquery;
     QString strSql=QString("select b.ActionNumber,b.ActionName,b.ActionType,b.IsParam,b.ParameterNumber from Linkage_Role_Bind_Action a,Action b \
                            where a.LinkageRoleNumber='%1' and b.ActionNumber=a.ActionNumber").arg(QString::fromStdString(strLinkRolenum));
@@ -569,7 +642,7 @@ bool DataBaseOperation::GetAssDevChan( QString strDevNum,map<int,vector<AssDevCh
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
-
+boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery itemschquery;
     QString strSql=QString("select objectnumberb,channelnumberb,channelnumbera from associate_object  where objectnumbera='%1'").arg(strDevNum);
     itemschquery.prepare(strSql);
@@ -614,6 +687,7 @@ bool DataBaseOperation::GetAlarmConfig( string strDevnum,map<int,Alarm_config>& 
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery alarmconfigquery;
     QString strSql=QString("select a.MonitoringIndex,a.LimitValue,a.AlarmLevel,a.JumpLimitType,a.LinkageEnable,a.LinkageRoleNumber,a.delaytime,a.LinkageRoleNumber,a.alarmconfigtype \
                            from Alarm_Item_config a,device_alarm_switch b where a.DeviceNumber='%1' and b.alarmenable>0 and a.alarmconfigtype<>0 and b.devicenumber=a.DeviceNumber and \
@@ -652,6 +726,7 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery alarmconfigquery;
     QString strSql=QString("select a.LimitValue,a.AlarmLevel,a.JumpLimitType,a.LinkageEnable,a.LinkageRoleNumber,a.delaytime,a.LinkageRoleNumber,a.alarmconfigtype \
                            from Alarm_Item_config a ,device_alarm_switch b where a.DeviceNumber='%1' and monitoringindex=%2 and a.alarmconfigtype=0 and b.alarmenable>0 \
@@ -659,30 +734,26 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
             alarmconfigquery.prepare(strSql);
             if(alarmconfigquery.exec())
     {
-            while(alarmconfigquery.next())
-    {
+            while(alarmconfigquery.next()) {
             Alarm_config acfig;
             acfig.fLimitvalue = alarmconfigquery.value(0).toDouble();
             acfig.iAlarmlevel = alarmconfigquery.value(1).toInt();
             acfig.iLimittype = alarmconfigquery.value(2).toInt();
             acfig.iLinkageEnable = alarmconfigquery.value(3).toInt();
             if(acfig.iLinkageEnable>0)
-    {
-            GetLinkAction(alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
-}
+                GetLinkAction(alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
             acfig.iDelaytime = alarmconfigquery.value(5).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
             acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
             acfig.iAlarmid = iIndex;
             vAlarmconfig.push_back(acfig);
-}
-}
-            else
-    {
+            }
+        } else {
             std::cout<<alarmconfigquery.lastError().text().toStdString()<<std::endl;
             return false;
-}
-            return true;
+       }
+
+     return true;
 }
 
 /*bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<Alarm_config>& vAlarmconfig )
@@ -731,6 +802,7 @@ bool DataBaseOperation::SetEnableMonitor( string strDevnum,int iItemIndex,bool b
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery qquery;
     QString strSql=QString("update alarm_item_config set alarmenable=%1 where DeviceNumber='%2' and MonitoringIndex=%3").arg(bEnabled).arg(QString::fromStdString(strDevnum)).arg(iItemIndex);
     qquery.prepare(strSql);
@@ -749,6 +821,7 @@ bool DataBaseOperation::UpdateMonitorItem( string strDevnum,DeviceMonitorItem di
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery qquery;
     QString strSql=QString("update Monitoring_Device_Item set MonitoringName=:MonitoringName,Ratio=:Ratio,ItemType=:ItemType,ItemValueType=:ItemValueType,\
                            AlarmEnable=:AlarmEnable,IsUpload=:IsUpload,UnitString:UnitString where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
@@ -778,18 +851,13 @@ bool DataBaseOperation::UpdateMonitorItems( string strDevnum,vector<DeviceMonito
         return false;
     }
 
-    /*	for(;iter!=v_ditem.end();++iter)
-    {
-        UpdateMonitorItem(strDevnum,(*iter));
-    }*/
-
-
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery qquery;
     QString strSql=QString("update Monitoring_Device_Item set MonitoringName=:MonitoringName,Ratio=:Ratio,ItemType=:ItemType,ItemValueType=:ItemValueType,\
                            AlarmEnable=:AlarmEnable,IsUpload=:IsUpload,UnitString:UnitString where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
             qquery.prepare(strSql);
 
-            vector<DeviceMonitorItem>::iterator iter = v_ditem.begin();
+    vector<DeviceMonitorItem>::iterator iter = v_ditem.begin();
     QSqlDatabase::database().transaction();
     for(;iter!=v_ditem.end();++iter)
     {
@@ -821,11 +889,12 @@ bool DataBaseOperation::UpdateItemAlarmConfig( string strDevnum,int iIndex,Alarm
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery qquery;
     QString strSql=QString("update action_parameter_content set LimitValue=:LimitValue,AlarmLevel=:AlarmLevel,JumpLimitType=:JumpLimitType,LinkageEnable=:LinkageEnable,\
                            LinkageRoleNumber=:LinkageRoleNumber where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
-            qquery.prepare(strSql);
-            qquery.bindValue(":LimitValue",alarm_config.fLimitvalue);
+    qquery.prepare(strSql);
+    qquery.bindValue(":LimitValue",alarm_config.fLimitvalue);
     qquery.bindValue(":AlarmLevel",alarm_config.iAlarmlevel);
     qquery.bindValue(":JumpLimitType",alarm_config.iLimittype);
     qquery.bindValue(":LinkageEnable",alarm_config.iLinkageEnable);
@@ -847,6 +916,7 @@ bool DataBaseOperation::UpdateItemAlarmConfigs( string strDevnum,map<int,Alarm_c
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery qquery;
     QString strSql=QString("update Monitoring_Device_Item set LimitValue=:LimitValue,AlarmLevel=:AlarmLevel,JumpLimitType=:JumpLimitType,LinkageEnable=:LinkageEnable,\
                            LinkageRoleNumber=:LinkageRoleNumber where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
@@ -881,6 +951,7 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery inquery;
     QString strSql=QString("insert into device_alarm_record(devicenumber,monitoringindex,alarmstarttime,limittype,alarmvalue,alarmtypeid,alarmreason) values(:devicenumber,:monitoringindex,\
                            :alarmstarttime,:limittype,:alarmvalue,:alarmtypeid,:alarmreason)");
@@ -896,7 +967,7 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
     inquery.bindValue(":alarmvalue",dValue);
     inquery.bindValue(":alarmtypeid",nalarmTypeId);
     inquery.bindValue(":alarmreason",QString::fromStdString(sreason));
-    boost::mutex::scoped_lock lock(db_connect_mutex_);
+    //boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     if(!inquery.exec())
     {
         std::cout<<inquery.lastError().text().toStdString()<<std::endl;
@@ -921,6 +992,7 @@ bool DataBaseOperation::AddItemEndAlarmRecord( time_t endTime,unsigned long long
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery inquery;
     QString strSql=QString("update device_alarm_record set alarmendtime=:alarmendtime where id=:id ");//:alarmendtime,
     inquery.prepare(strSql);
@@ -946,6 +1018,7 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery inquery;
     QString strSql=QString("insert into device_monitoring_record(devicenumber,monitoringindex,monitoringtime,monitoringvalue) values(:devicenumber,:monitoringindex,\
                            :monitoringtime,:monitoringvalue)");
@@ -982,6 +1055,7 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
         resValue = 3;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     rapidxml::xml_node<>* tranNode = root_node->first_node("TranInfo");
     if(tranNode==NULL)
     {
@@ -1003,7 +1077,6 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
             }
         }
         QString qsTransNum = attr->value();
-        boost::mutex::scoped_lock lock(db_connect_mutex_);
         QSqlDatabase::database().transaction();
         QString strDel = QString("delete from device_alarm_switch where devicenumber='%1'").arg(qsTransNum);
         QSqlQuery qsDel;
@@ -1067,6 +1140,7 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
         resValue = 3;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     rapidxml::xml_node<>* tranNode = root_node->first_node("TranInfo");
     if(tranNode==NULL)
     {
@@ -1089,7 +1163,6 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
             }
         }
         QString qsTransNum = attr->value();
-        boost::mutex::scoped_lock lock(db_connect_mutex_);
         QSqlDatabase::database().transaction();
         QSqlQuery qsDel;
         QString strSql=QString("delete from alarm_item_config where devicenumber=:devicenumber");
@@ -1417,6 +1490,7 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
            resValue = 3;
            return false;
        }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
        rapidxml::xml_node<>* tranNode = root_node->first_node("TranInfo");
        if(tranNode==NULL)
        {
@@ -1677,6 +1751,7 @@ bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery userquery;
     QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber from Users where Name='%1'").arg(QString::fromStdString(sName));
     if(!userquery.exec(strSql))
@@ -1702,6 +1777,7 @@ bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<st
         std::cout<<"数据库未打开"<<std::endl;
         return false;
     }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery query;
     QString strSql=QString("select a.objectnumber from user_role_object a,users b where b.number='%1' and a.rolenumber=b.rolenumber").arg(QString::fromStdString(sUserId));
     if(!query.exec(strSql))

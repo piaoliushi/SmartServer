@@ -23,6 +23,12 @@ void QNotifyHandler::OnClientOnline(string sIp,short port)
 	emit S_OnClientOnline(sEndpoint);
 }
 
+//数据库状态
+void QNotifyHandler::OnDatabase(bool bOk)
+{
+    emit S_OnDatabase(bOk);
+}
+
 void QNotifyHandler::OnClientOffline(string sIp,short port)
 {
     QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);

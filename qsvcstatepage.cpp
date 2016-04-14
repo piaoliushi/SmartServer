@@ -68,6 +68,41 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     d_pDatabaseStateValueLabel->setStyleSheet(tr("font: 18pt; color:red;"));
     pGridLayout->addWidget(d_pDatabaseStateValueLabel,2,1,1,1);
 
+    bool bUse;
+    int nMod,nValue;
+    string sTime;
+    GetInst(LocalConfig).ntp_config(bUse,nMod,nValue,sTime);
+
+    QLabel *pAdjustTime = new QLabel(QObject::tr("自动校时:"));
+    pAdjustTime->setFixedSize(80,30);
+    pGridLayout->addWidget(pAdjustTime,3,0,1,1);
+    d_pABaseTimeLabel = new QLabel(QObject::tr("00:00:00"));
+    d_pABaseTimeLabel->setStyleSheet(tr("font: 18pt; color:rgb(117,250,0);"));
+    d_pABaseTimeLabel->setFixedHeight(60);
+    pGridLayout->addWidget(d_pABaseTimeLabel,3,1,1,1);
+     d_pAdjustTimeModLabel = new QLabel(QObject::tr("每星期"));
+     pGridLayout->addWidget(d_pAdjustTimeModLabel,3,2,1,1);
+
+     d_pABaseTimeLabel->setText(sTime.c_str());
+     if(bUse==false){
+          d_pABaseTimeLabel->setStyleSheet(tr("font: 10pt; color:gray;"));
+          d_pAdjustTimeModLabel->setStyleSheet(tr("font: 10pt; color:gray;"));
+     }else
+     {
+         if(nMod==0)
+             d_pAdjustTimeModLabel->setText("每天");
+         else if(nMod==2)
+              d_pAdjustTimeModLabel->setText("每月");
+
+     }
+
+
+
+
+
+    pGridLayout->addWidget(d_pDatabaseStateValueLabel,2,1,1,1);
+
+
 
     pHLyt->addLayout(pGridLayout);
     QSpacerItem *pRightSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Maximum);
@@ -81,7 +116,7 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     connect(pTime,SIGNAL(timeout()),this,SLOT(timeUpdate()));
     pTime->start(1000);
 
-    //connect(&m_Notify,SIGNAL(S_OnConnected(QString,int)),this,SLOT(OnDevConnect(QString,int)));
+    connect(&m_Notify,SIGNAL(S_OnDatabase(bool)),this,SLOT(OnDatabase(bool)));
 
 }
 
@@ -98,7 +133,7 @@ void QSvcStatePage::StartSvc()
 {
     if(m_IsRunning==false)
     {
-
+        GetInst(DataBaseOperation).set_notify(&m_Notify);
         if(GetInst(DataBaseOperation).OpenDb(GetInst(LocalConfig).database_ip(),
                                              "postgres",
                                              GetInst(LocalConfig).database_user(),
@@ -133,10 +168,26 @@ void QSvcStatePage::StartSvc()
 
 }
 
+void QSvcStatePage::OnDatabase(bool bOk)
+{
+    if(bOk){
+        d_pDatabaseStateValueLabel->setStyleSheet("color:rgb(117,250,0)");
+        d_pDatabaseStateValueLabel->setText(tr("连接正常"));
+    }else
+    {
+        d_pDatabaseStateValueLabel->setStyleSheet("color:red");
+        d_pDatabaseStateValueLabel->setText(tr("已断开"));
+    }
+}
+
 void QSvcStatePage::timeUpdate()
 {
     QDateTime current_date_time = QDateTime::currentDateTime();
     QLocale lo = QLocale::Chinese;
     QString current_date = lo.toString(current_date_time,"yyyy-MM-dd hh:mm:ss dddd");
     d_plbDateTime->setText(current_date);
+
+    //if(IsStart())
+        //GetInst(DataBaseOperation).check_database();
+
 }

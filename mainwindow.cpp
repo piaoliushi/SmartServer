@@ -39,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ShowSvcStatePage();
 
     d_pSvcStatePage->StartSvc();
+
+
 }
 
 MainWindow::~MainWindow()
