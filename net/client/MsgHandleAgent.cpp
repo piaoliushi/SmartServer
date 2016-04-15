@@ -178,6 +178,12 @@ namespace hx_net
         return m_msgImpl->get_run_state();
     }
 
+     void MsgHandleAgent::reset_run_state()
+     {
+         if(m_msgImpl==NULL)
+             return;
+         return m_msgImpl->reset_run_state();
+     }
 
 
 }

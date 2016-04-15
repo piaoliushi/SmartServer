@@ -136,8 +136,10 @@ void device_session::set_con_state(con_state curState)
                                         ,othdev_con_state_);
                 if(othdev_con_state_== con_connected)
                     GetInst(SvcMgr).get_notify()->OnDevStatus((*iter).first,0);
-                else
+                else {
+                    dev_agent_and_com[(*iter).first].second->reset_run_state();
                     GetInst(SvcMgr).get_notify()->OnDevStatus((*iter).first,-1);
+                }
 
                 //通知http服务器(设备网络异常)
                 if(iter->second.iDevType == DEVICE_TRANSMITTER){
@@ -604,14 +606,14 @@ bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opR
 }
 
 //判断是否保存当前记录
-void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtr)
+void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtr,const map<int,DeviceMonitorItem> &mapMonitorItem)
 {
     time_t tmCurTime;
     time(&tmCurTime);
     double ninterval = difftime(tmCurTime,tmLastSaveTime[sDevId]);
     if(ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
         return ;
-    if(GetInst(DataBaseOperation).AddItemMonitorRecord(sDevId,tmCurTime,curDataPtr))
+    if(GetInst(DataBaseOperation).AddItemMonitorRecord(sDevId,tmCurTime,curDataPtr,mapMonitorItem))
         tmLastSaveTime[sDevId] = tmCurTime;
 
 }
@@ -702,7 +704,7 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
     //如果在监测时间段则保存当前记录
     if(bIsMonitorTime)
-        save_monitor_record(sDevId,curDataPtr);
+        save_monitor_record(sDevId,curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
     //任务数递减
     task_count_decrease();
     return;

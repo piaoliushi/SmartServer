@@ -31,6 +31,7 @@ public:
     int get_run_state();
     //设置运行状态
     void set_run_state(int curState);
+    void reset_run_state();
 
 
 protected:

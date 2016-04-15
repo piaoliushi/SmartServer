@@ -43,8 +43,8 @@ http_request_session::http_request_session(boost::asio::io_service& io_service)
 
    }else {
        http_stream_.close();
-     std::cerr << "Unable to open URL: ";
-     std::cerr << ec.message() << std::endl;
+     //std::cerr << "Unable to open URL: ";
+     //std::cerr << ec.message() << std::endl;
    }
 
  }

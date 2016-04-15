@@ -23,6 +23,7 @@ public slots:
 		void StartSvc();
         void timeUpdate();
         void OnDatabase(bool bOk);
+        void onMunualAdjustTime();
 private:
 	QNotifyHandler &m_Notify;
 	bool m_IsRunning;

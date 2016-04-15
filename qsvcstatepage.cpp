@@ -1,5 +1,6 @@
 #include "qsvcstatepage.h"
 #include <QGridLayout>
+#include <QProcess>
 #include <QDebug>
 #include<QMessageBox>
 #include <QDateTime>
@@ -29,6 +30,12 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     d_plbDateTime->setFixedSize(245,20);
     d_plbDateTime->setStyleSheet(tr("font: 18pt; color:#45c9d5;"));
     pTopLyt->addSpacerItem(pLeftTopSpace);
+    QPushButton *pAdjustTimeBt = new QPushButton(this);
+    pAdjustTimeBt->setFocusPolicy(Qt::NoFocus);
+    pAdjustTimeBt->setIcon(QIcon(":/new/images/clock.png"));
+    pAdjustTimeBt->setFlat(true);
+    connect(pAdjustTimeBt,SIGNAL(clicked()),this,SLOT(onMunualAdjustTime()));
+     pTopLyt->addWidget(pAdjustTimeBt);
     pTopLyt->addWidget(d_plbDateTime);
 
     pVMainLyt->addLayout(pTopLyt);
@@ -118,6 +125,7 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
 
     connect(&m_Notify,SIGNAL(S_OnDatabase(bool)),this,SLOT(OnDatabase(bool)));
 
+
 }
 
 QSvcStatePage::~QSvcStatePage()
@@ -187,7 +195,13 @@ void QSvcStatePage::timeUpdate()
     QString current_date = lo.toString(current_date_time,"yyyy-MM-dd hh:mm:ss dddd");
     d_plbDateTime->setText(current_date);
 
-    //if(IsStart())
-        //GetInst(DataBaseOperation).check_database();
+    if(IsStart())
+        GetInst(DataBaseOperation).check_database();
 
 }
+
+ void QSvcStatePage::onMunualAdjustTime()
+ {
+    QString sexecute = QString(tr("./ntpclient -s -t -i 1 -h %1 &")).arg(GetInst(LocalConfig).ntp_svc_ip().c_str());
+    QProcess::execute(sexecute);
+ }

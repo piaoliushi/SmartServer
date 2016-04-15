@@ -81,7 +81,7 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 		//判断监测量是否报警
 		void check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,bool bMonitor);
 
-		void save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtr);
+        void save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtrconst,const map<int,DeviceMonitorItem> &mapMonitorItem);
 
 		bool is_need_save_data(string sDevId);
 

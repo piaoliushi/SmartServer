@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <string>
+#include <boost/thread/recursive_mutex.hpp>
 using namespace std;
 
 
@@ -32,6 +33,8 @@ signals:
 	void S_OnClientLogin(QString sAddr,QString sName,QString sID);
 	void S_OnClientLogout(QString sAddr);
     void S_OnDatabase(bool bOk);
+private:
+    boost::recursive_mutex   mutex_;
 };
 
 #endif // QNOTIFYHANDLER_H

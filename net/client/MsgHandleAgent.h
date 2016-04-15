@@ -42,6 +42,8 @@ namespace hx_net
         void start_task_timeout_timer();
         //获得运行状态
         int get_run_state();
+        //设置运行状态
+        void reset_run_state();
 	private:
 		MsgHandleAgentImpl *m_msgImpl;
 	};

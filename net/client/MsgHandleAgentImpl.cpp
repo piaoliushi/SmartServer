@@ -204,5 +204,12 @@ namespace hx_net
             return dev_unknown;
         return m_pbaseMsg->get_run_state();
     }
+
+    void MsgHandleAgentImpl::reset_run_state()
+    {
+        if(m_pbaseMsg==NULL)
+            return;
+        return m_pbaseMsg->reset_run_state();
+    }
 }
 

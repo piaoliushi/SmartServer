@@ -22,6 +22,8 @@ namespace hx_net
         ,d_cur_task_(-1)
         ,m_ptransmmit(NULL)
         ,dev_run_state_(dev_unknown)
+        ,d_shutdown_count_(0)
+        ,d_run_count_(0)
     {
         CreateObject();
 
@@ -119,6 +121,11 @@ namespace hx_net
      {
          return (get_run_state()==dev_detecting)?true:false;
      }
+
+       void Tsmt_message::reset_run_state()
+       {
+           set_run_state(dev_unknown);
+       }
 
     //检测发射机运行状态
     void Tsmt_message::detect_run_state(DevMonitorDataPtr curDataPtr)
@@ -299,7 +306,7 @@ namespace hx_net
             case MSG_TRANSMITTER_TURNOFF_OPR:{
                 if(is_shut_down())
                     bCmdExcComplet = true;
-            } break;
+                } break;
             }
 
             if(bCmdExcComplet == true){

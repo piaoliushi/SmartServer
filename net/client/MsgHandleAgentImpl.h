@@ -35,6 +35,7 @@ namespace hx_net
         void start_task_timeout_timer();
         //获得运行状态
         int  get_run_state();
+         void reset_run_state();
 	public:
 		base_message *m_pbaseMsg;
         session_ptr m_pSessionPtr;

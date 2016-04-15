@@ -54,7 +54,7 @@ public:
     bool AddItemEndAlarmRecord(time_t endTime,unsigned long long irecordid);
 
     //添加历史记录
-    bool AddItemMonitorRecord(string strDevnum,time_t savetime,DevMonitorDataPtr pdata);
+    bool AddItemMonitorRecord(string strDevnum,time_t savetime,DevMonitorDataPtr pdata,const map<int,DeviceMonitorItem> &mapMonitorItem);
     bool SetAlarmLimit(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);//0上，1下
     bool SetAlarmTime(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);
 
@@ -76,7 +76,7 @@ private:
     bool GetDevInfo(string strDevnum,DeviceInfo& device);
     bool GetAssDevChan( QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev );
 private:
-    QSqlDatabase   q_db;
+    //QSqlDatabase   q_db;
     QString d_serveraddress;
     QString d_database;
     QString d_uid;

@@ -79,24 +79,10 @@ con_state DevClient::get_dev_net_state(string sStationId,string sDevid)
     {
         if(iter->first.stationId == sStationId)
         {
-            if(iter->second->dev_type()==DEV_OTHER )
-            {
-                if(iter->second->is_contain_dev(sDevid))
-                    return iter->second->get_con_state();
-            }
-            else if(iter->second->dev_type()==DEV_TRANSMITTER_AGENT)//发射机代理设备
-            {
-                if(iter->second->is_contain_dev(sDevid))
-                    return iter->second->get_child_con_state(sDevid);
-            }
-            else if(iter->first.devId == sDevid)
-            {
+            if(iter->second->is_contain_dev(sDevid))
                 return iter->second->get_con_state();
-            }
         }
-
     }
-
     return con_disconnected;
 }
 //获得设备运行状态
@@ -108,22 +94,9 @@ dev_run_state DevClient::get_dev_run_state(string sStationId,string sDevid)
     {
         if(iter->first.stationId == sStationId)
         {
-            if(iter->second->dev_type()==DEV_OTHER )
-            {
-                if(iter->second->is_contain_dev(sDevid))
-                    return iter->second->get_run_state();
-            }
-            else if(iter->second->dev_type()==DEV_TRANSMITTER_AGENT)//发射机代理设备
-            {
-                if(iter->second->is_contain_dev(sDevid))
-                    return iter->second->get_child_run_state(sDevid);
-            }
-            else if(iter->first.devId == sDevid)
-            {
-                return iter->second->get_run_state();
-            }
-        }
-
+            if(iter->second->is_contain_dev(sDevid))
+                return iter->second->get_run_state(sDevid);
+         }
     }
 
     return dev_unknown;
@@ -154,6 +127,7 @@ bool DevClient::dev_base_info(string sStationId,DevBaseInfo& devInfo,string sDev
             if(iter->second->is_contain_dev(sDevid)){
                 iter->second->dev_base_info(devInfo,sDevid);
                 bRtValue = true;
+                return bRtValue;
             }
         }
     }
@@ -168,6 +142,7 @@ e_ErrorCode DevClient::start_exec_task(string sDevId,string sUser,int cmdType)
     for(;iter!=device_pool_.end();++iter){
             if(iter->second->is_contain_dev(sDevId)){
                 iter->second->start_exec_task(sDevId,sUser,opr_rlt,cmdType);
+                return opr_rlt;
             }
     }
     return opr_rlt;
@@ -181,6 +156,7 @@ e_ErrorCode DevClient::excute_command(int cmdType,devCommdMsgPtr lpParam)
     for(;iter!=device_pool_.end();++iter){
             if(iter->second->is_contain_dev(lpParam->sdevid())){
                 iter->second->excute_command(cmdType,lpParam,opr_rlt);
+                return opr_rlt;
             }
     }
     return opr_rlt;
