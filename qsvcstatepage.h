@@ -24,6 +24,8 @@ public slots:
         void timeUpdate();
         void OnDatabase(bool bOk);
         void onMunualAdjustTime();
+protected:
+        void checkAutoAdjustTime();
 private:
 	QNotifyHandler &m_Notify;
 	bool m_IsRunning;
@@ -37,6 +39,11 @@ private:
     QLabel    *d_pABaseTimeLabel;
 
     QLabel   *d_plbDateTime;
+
+    bool     d_bUseNtp;
+    int       d_nModNtp;
+    int       d_nValueNtp;
+    string   d_sTimeNtp;
 };
 
 #endif // QSVCSTATEPAGE_H

@@ -162,6 +162,35 @@ e_ErrorCode DevClient::excute_command(int cmdType,devCommdMsgPtr lpParam)
     return opr_rlt;
 }
 
+//更新运行图
+e_ErrorCode DevClient::update_monitor_time(string &sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+                                           vector<Command_Scheduler> &cmmdScheduler)
+{
+    e_ErrorCode opr_rlt = EC_DEVICE_NOT_FOUND;
+    boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
+    std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
+    for(;iter!=device_pool_.end();++iter){
+        if(iter->second->is_contain_dev(sDevId)){
+            iter->second->update_monitor_time(sDevId,monitorScheduler,cmmdScheduler);
+            return opr_rlt;
+        }
+    }
+    return opr_rlt;
+}
+//更新告警配置
+e_ErrorCode DevClient::update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo)
+{
+    e_ErrorCode opr_rlt = EC_DEVICE_NOT_FOUND;
+    boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
+    std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
+    for(;iter!=device_pool_.end();++iter){
+        if(iter->second->is_contain_dev(sDevId)){
+            iter->second->update_dev_alarm_config(sDevId,devInfo);
+            return opr_rlt;
+        }
+    }
+   return EC_OBJECT_NULL;
+}
 int DevClient::get_modle_online_count()
 {
     boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);

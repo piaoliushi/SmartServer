@@ -69,6 +69,12 @@ namespace hx_net
 		e_ErrorCode excute_command(int cmdType,devCommdMsgPtr lpParam);
 
         e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType);
+
+        //更新运行图
+       e_ErrorCode update_monitor_time(string &sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+                                 vector<Command_Scheduler> &cmmdScheduler);
+       //更新告警配置
+      e_ErrorCode update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo);
 	private:
 		svc_state svc_state_;
 		boost::shared_ptr<DevClientMgr> m_pDevMgrPtr;//设备(被动连接)管理对象

@@ -60,6 +60,11 @@ public:
 
     bool GetUserInfo( const string sName,UserInformation &user );
     bool GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice );
+
+
+    bool GetUpdateDevTimeScheduleInfo( string strDevnum,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+                                                  vector<Command_Scheduler> &cmmdScheduler  );
+    bool GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& device );
 private:
     void StartReOpen();//启动重连线程
     bool GetDevMonitorSch(string strDevnum,map<int,vector<Monitoring_Scheduler> >& mapMonitorSch);

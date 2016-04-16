@@ -94,5 +94,20 @@ namespace hx_net
             return _devclientptr->start_exec_task(sDevId,sUser,cmdType);
         return EC_OBJECT_NULL;
     }
+    //更新运行图
+   e_ErrorCode DevClientMgr::update_monitor_time(string &sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+                             vector<Command_Scheduler> &cmmdScheduler)
+   {
+       if(_devclientptr)
+           return _devclientptr->update_monitor_time(sDevId,monitorScheduler,cmmdScheduler);
+       return EC_OBJECT_NULL;
+   }
+   //更新告警配置
+  e_ErrorCode DevClientMgr::update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo)
+  {
+      if(_devclientptr)
+          return _devclientptr->update_dev_alarm_config(sDevId,devInfo);
+      return EC_OBJECT_NULL;
+  }
 }
 

@@ -56,12 +56,19 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 		void clear_all_alarm();
 		//清除单设备报警
 		void clear_dev_alarm(string sDevId);
+        //清理设备未设置的告警项
+        void clear_dev_item_alarm(string sDevId,int nitemId);
 		//发送消息
 		bool sendRawMessage(unsigned char * data_,int nDatalen);
         //启动定时控制
         void start_task_schedules_timer();
         //发送命令到设备
         void send_cmd_to_dev(string sDevId,int cmdType,int childId);
+        //更新运行图
+        void update_monitor_time(string &devId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+                                 vector<Command_Scheduler> &cmmdScheduler);
+        //更新告警配置
+        void  update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo);
 	protected:
 		void start_read_head(int msgLen);//开始接收头
 		void start_read_body(int msgLen);//开始接收体
@@ -165,10 +172,11 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 
         boost::recursive_mutex                    opr_state_mutex_;
         map<string,dev_opr_state>                   dev_opr_state_;//设备控制命令发送状态
-        boost::asio::io_service&          io_service_;
-        //map<string,string>				   cur_opr_user_;//当前命令发起用户
-        //map<string,int>                    cur_task_type_;//当前任务类型
-        //map<string,time_t>               cur_task_start_time_;//当前任务提交开始时间
+        boost::asio::io_service&                   io_service_;
+
+        boost::recursive_mutex                    update_time_schedule_mutex_;//更新运行图锁
+        boost::recursive_mutex                    update_cmd_schedule_mutex_;//更新运行图锁
+        boost::recursive_mutex                    update_alarm_config_mutex_;//更新告警配置锁
 	};
 }
 #endif

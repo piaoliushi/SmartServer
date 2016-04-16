@@ -27,8 +27,8 @@ namespace hx_net
          if(msgLen>0)
             move_w_ptr(msgLen);
 		int nResult = agentPtr->check_msg_header(r_ptr(),valid_msg_len());
-		if(nResult>0)
-			data_.resize(msgLen+nResult+1);//重新扩充消息长度
+        if(nResult>0 && space()<nResult)
+            data_.resize(data_.size()+nResult-space()+1);//重新扩充消息长度
 		return nResult;
 	}
 

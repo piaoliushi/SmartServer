@@ -31,7 +31,7 @@ namespace hx_net
 		virtual bool isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr){return true;}
 		virtual bool ItemValueIsAlarm(DevMonitorDataPtr curDataPtr,int monitorItemId,dev_alarm_state &curState){return false;}
         //HDevAgentPtr Agent(){return dev_agent_;}
-		unsigned long CRC16_A001( unsigned char * ptr, int len );
+        //unsigned long CRC16_A001( unsigned char * ptr, int len );
 
         virtual int cur_dev_state(){return -1;}
         virtual void exec_task_now(int icmdType,string sUser){}

@@ -165,4 +165,20 @@ namespace hx_net
             return m_pDevMgrPtr->start_exec_task(sDevId,sUser,cmdType);
         return EC_OBJECT_NULL;
     }
+
+    //更新运行图
+   e_ErrorCode SvcMgr::update_monitor_time(string &sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+                             vector<Command_Scheduler> &cmmdScheduler)
+   {
+       if(m_pDevMgrPtr)
+           return m_pDevMgrPtr->update_monitor_time(sDevId,monitorScheduler,cmmdScheduler);
+       return EC_OBJECT_NULL;
+   }
+   //更新告警配置
+  e_ErrorCode SvcMgr::update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo)
+  {
+      if(m_pDevMgrPtr)
+          return m_pDevMgrPtr->update_dev_alarm_config(sDevId,devInfo);
+      return EC_OBJECT_NULL;
+  }
 }

@@ -48,6 +48,7 @@ void device_session::init_session_config()
     map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
     for(;iter!=modleInfos.mapDevInfo.end();++iter)
     {
+        dev_opr_state_[iter->first] = dev_no_opr;
         HMsgHandlePtr pars_agent = HMsgHandlePtr(new MsgHandleAgent(shared_from_this(),io_service_,iter->second));
         boost::shared_ptr<CommandAttribute> tmpCommand(new CommandAttribute);
 
@@ -490,6 +491,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
         map<string,DeviceInfo>::iterator witer = modleInfos.mapDevInfo.begin();
         for(;witer!=modleInfos.mapDevInfo.end();++witer)
         {
+            boost::recursive_mutex::scoped_lock lock(update_cmd_schedule_mutex_);//增加锁防止读写竞争
             vector<Command_Scheduler>::iterator cmd_iter = witer->second.vCommSch.begin();
             for(;cmd_iter!=witer->second.vCommSch.end();++cmd_iter)
             {
@@ -547,9 +549,8 @@ void device_session::notify_client(string sDevId,string devName,string user,int 
     static  char str_time[64];
     strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
 
-
     send_command_execute_result_message(GetInst(LocalConfig).local_station_id(),sDevId,
-                                        DEVICE_TRANSMITTER,devName,"timer",(e_MsgType)cmdType,(e_ErrorCode)eResult);
+                                        DEVICE_TRANSMITTER,devName,user,(e_MsgType)cmdType,(e_ErrorCode)eResult);
     //通知http服务器
     int CommandType= -1;(user=="timer")?MSG_TRANSMITTER_TURNON_ACK:MSG_TRANSMITTER_TURNOFF_ACK;
     switch (cmdType) {
@@ -635,13 +636,16 @@ bool device_session::is_need_save_data(string sDevId)
 bool device_session::is_monitor_time(string sDevId)
 {
     time_t curTime = time(0);
-    tm *pCurTime = localtime(&curTime);
-    unsigned long cur_tm = pCurTime->tm_hour*3600+pCurTime->tm_min*60+pCurTime->tm_sec;
+    tm *pnowTime = localtime(&curTime);
+    unsigned long cur_tm = pnowTime->tm_hour*3600+pnowTime->tm_min*60+pnowTime->tm_sec;
+
+    boost::recursive_mutex::scoped_lock lock(update_time_schedule_mutex_);
     //运行图----天
     map<int,vector<Monitoring_Scheduler> >::iterator day_iter = modleInfos.mapDevInfo[sDevId].vMonitorSch.find(RUN_TIME_DAY);
     if(day_iter!=modleInfos.mapDevInfo[sDevId].vMonitorSch.end()){
         vector<Monitoring_Scheduler>::iterator iter = day_iter->second.begin();
         for(;iter!=day_iter->second.end();++iter){
+            tm *pCurTime = localtime(&curTime);
             if(curTime>=(*iter).tStartTime && curTime<(*iter).tEndTime){
                 return (*iter).bMonitorFlag;
             }
@@ -652,6 +656,7 @@ bool device_session::is_monitor_time(string sDevId)
     if(week_iter!=modleInfos.mapDevInfo[sDevId].vMonitorSch.end()){
         vector<Monitoring_Scheduler>::iterator iter = week_iter->second.begin();
         for(;iter!=week_iter->second.end();++iter){
+            tm *pCurTime = localtime(&curTime);
             if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0)
                 continue;//超过运行图终止时间且终止时间不为0,则跳过
             if((pCurTime->tm_wday)== (*iter).iMonitorWeek){
@@ -670,7 +675,19 @@ bool device_session::is_monitor_time(string sDevId)
     if(month_iter!=modleInfos.mapDevInfo[sDevId].vMonitorSch.end()){
         vector<Monitoring_Scheduler>::iterator iter = month_iter->second.begin();
         for(;iter!=month_iter->second.end();++iter){
-            if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0) continue;//超过运行图终止时间且终止时间不为0,则跳过
+
+            //tm *ltime = localtime(&((*iter).tStartTime));
+            //std::string sTM = str(boost::format("%1%-%2%-%3% %4%:%5%:%6%")%(ltime->tm_year+1900)%(ltime->tm_mon+1)
+            //                           %ltime->tm_mday%ltime->tm_hour%ltime->tm_min%ltime->tm_sec);
+            //ltime = localtime(&((*iter).tEndTime));
+            //std::string eTM = str(boost::format("%1%-%2%-%3% %4%:%5%:%6%")%(ltime->tm_year+1900)%(ltime->tm_mon+1)
+              //                         %ltime->tm_mday%ltime->tm_hour%ltime->tm_min%ltime->tm_sec);
+             tm *pCurTime = localtime(&curTime);
+             //cout<<"按月:"<<(*iter).iMonitorMonth<<"当前月"<<pCurTime->tm_mon<<"开始时间："<<sTM<<"结束时间："<<eTM<<endl;
+
+            if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0)
+                  continue;//超过运行图终止时间且终止时间不为0,则跳过
+
             if((pCurTime->tm_mon+1)== (*iter).iMonitorMonth ||  (*iter).iMonitorMonth==0){ //如果是当前月或者是all则比较
                 if((pCurTime->tm_mday)== (*iter).iMonitorDay){
                     tm *pSetTimeS = localtime(&((*iter).tStartTime));
@@ -713,7 +730,6 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 void device_session::clear_dev_alarm(string sDevId)
 {
     boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
-
     map<int,map<int,CurItemAlarmInfo> >::iterator iter = mapItemAlarm[sDevId].begin();
     for(;iter!=mapItemAlarm[sDevId].end();++iter) {
         map<int,CurItemAlarmInfo>::iterator typeIter = iter->second.begin();
@@ -1046,7 +1062,7 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
 //分析告警---2016-4-1--完成
 void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorItem &ItemInfo)
 {
-    boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
+    boost::recursive_mutex::scoped_lock lock(update_alarm_config_mutex_);
     //遍历监控量告警配置
     for(int nIndex=0;nIndex<ItemInfo.vItemAlarm.size();++nIndex)
     {
@@ -1070,6 +1086,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
         }
 
         if(bIsAlarm == true){
+              boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
             //判断该监控项是否在告警
             map<int,map<int,CurItemAlarmInfo> >::iterator findIter = mapItemAlarm[devId].find(ItemInfo.iItemIndex);
             if(findIter != mapItemAlarm[devId].end()){
@@ -1088,6 +1105,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                         alarm_type_findIter->second.bNotifyed = true;
                     }
                 }else{ //没有找到,增加该告警类型
+
                     tmp_alarm_info.startTime = time(0);//记录时间
                     tmp_alarm_info.nType = ItemInfo.vItemAlarm[nIndex].iAlarmid;//告警类型
                     tmp_alarm_info.nLimitId = iLimittype;
@@ -1095,6 +1113,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                     tmp_alarm_info.nModuleType = ItemInfo.iModTypeId;
                     tmp_alarm_info.nTargetId = ItemInfo.iTargetId;
                     tmp_alarm_info.bNotifyed = false;
+                    boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
                     mapItemAlarm[devId][ItemInfo.iItemIndex][iLimittype] = tmp_alarm_info;
                 }
             }else {
@@ -1108,10 +1127,12 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                  tmp_alarm_info.bNotifyed = false;
                 map<int,CurItemAlarmInfo>  tmTypeAlarm;
                 tmTypeAlarm[iLimittype] = tmp_alarm_info;
+                boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
                 mapItemAlarm[devId][ItemInfo.iItemIndex] = tmTypeAlarm;
             }
         }else {
             //当前没有告警,判断是否存在此告警,确定是否需要恢复,移除该告警
+            boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
             map<int,map<int,CurItemAlarmInfo> >::iterator findIter = mapItemAlarm[devId].find(ItemInfo.iItemIndex);
             //查找是否有该监控项
             if(findIter != mapItemAlarm[devId].end()){
@@ -1120,7 +1141,6 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                     time_t curTime = time(0);
                     double  dtime_during = difftime( curTime, findTypeIter->second.startTime );
                     if(dtime_during>=ItemInfo.vItemAlarm[nIndex].iResumetime){
-
                         //存储告警恢复,通知客户端,移除该告警
                         record_alarm_and_notify(devId,fValue, ItemInfo.vItemAlarm[nIndex].fLimitvalue,1,ItemInfo,findTypeIter->second);
                         findIter->second.erase(findTypeIter);//移除该告警类型告警
@@ -1136,7 +1156,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
 //清除所有报警状态
 void device_session::clear_all_alarm()
 {
-    boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
+    //boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
     //mapItemAlarmStartTime.clear();//报警项开始时间清除
     //mapItemAlarmRecord.clear();   //报警记录清除
 }
@@ -1242,4 +1262,56 @@ bool device_session::excute_command(int cmdType,devCommdMsgPtr lpParam,e_ErrorCo
 
     return true;
 }
+
+//更新运行图
+void device_session::update_monitor_time(string &devId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+                                         vector<Command_Scheduler> &cmmdScheduler)
+{
+    {
+         boost::recursive_mutex::scoped_lock lock(update_time_schedule_mutex_);
+         modleInfos.mapDevInfo[devId].vMonitorSch = monitorScheduler;
+    }
+
+    {
+         boost::recursive_mutex::scoped_lock lock(update_cmd_schedule_mutex_);
+         modleInfos.mapDevInfo[devId].vCommSch = cmmdScheduler;
+    }
+}
+
+//更新告警配置
+void  device_session::update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo)
+{
+    {
+        //更新整机
+      boost::recursive_mutex::scoped_lock alarm_lock(update_alarm_config_mutex_);
+      modleInfos.mapDevInfo[sDevId].map_AlarmConfig = devInfo.map_AlarmConfig;
+    }
+    {
+        //更新监控项告警
+        map<int,DeviceMonitorItem>::iterator iterItem = modleInfos.mapDevInfo[sDevId].map_MonitorItem.begin();
+        for(;iterItem!=modleInfos.mapDevInfo[sDevId].map_MonitorItem.end();++iterItem){
+            boost::recursive_mutex::scoped_lock alarm_lock(update_alarm_config_mutex_);
+            iterItem->second.vItemAlarm = devInfo.map_MonitorItem[iterItem->first].vItemAlarm;
+            if(iterItem->second.vItemAlarm.size() ==0)
+                clear_dev_item_alarm(sDevId,iterItem->first);
+            //.....清理之前已产生的告警
+        }
+    }
+}
+//清理设备未设置的告警项
+void device_session::clear_dev_item_alarm(string sDevId,int nitemId)
+{
+    boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
+    map<int,map<int,CurItemAlarmInfo> >::iterator iter = mapItemAlarm[sDevId].find(nitemId);
+    if(iter==mapItemAlarm[sDevId].end())
+        return ;
+    map<int,CurItemAlarmInfo>::iterator typeIter = iter->second.begin();
+    for(;typeIter!=iter->second.end();++typeIter) {
+        //写入恢复记录,通知客户端
+        //.......
+        record_alarm_and_notify(sDevId,0, 0,1,modleInfos.mapDevInfo[sDevId].map_MonitorItem[iter->first],typeIter->second);
+    }
+    iter->second.clear();
+}
+
 }

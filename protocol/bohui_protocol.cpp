@@ -2,6 +2,7 @@
 #include "./net/config.h"
 #include "LocalConfig.h"
 #include "StationConfig.h"
+#include "../net/SvcMgr.h"
 #include "bohui_const_define.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
@@ -487,6 +488,13 @@ void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
     if (GetInst(DataBaseOperation).SetAlarmTime(rootNode,nValue,vecDeviceNumber)==true)//nDevType,
     {
         // 通知设备服务......
+        for(int nDev=0;nDev<vecDeviceNumber.size();++nDev){
+            map<int,vector<Monitoring_Scheduler> > monitorScheduler;
+            vector<Command_Scheduler> cmmdScheduler;
+            if(GetInst(DataBaseOperation).GetUpdateDevTimeScheduleInfo(vecDeviceNumber[nDev],monitorScheduler,cmmdScheduler)){
+                GetInst(hx_net::SvcMgr).update_monitor_time(vecDeviceNumber[nDev],monitorScheduler,cmmdScheduler);
+            }
+        }
     }
 }
 
@@ -497,6 +505,12 @@ void Bohui_Protocol::_setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValu
     if (GetInst(DataBaseOperation).SetAlarmLimit(rootNode,nValue,vecDeviceNumber)==true)//nDevType,
     {
         // 通知设备服务......
+        for(int nDev=0;nDev<vecDeviceNumber.size();++nDev){
+            DeviceInfo devInfo;
+            if(GetInst(DataBaseOperation).GetUpdateDevAlarmInfo(vecDeviceNumber[nDev],devInfo)){
+                GetInst(hx_net::SvcMgr).update_dev_alarm_config(vecDeviceNumber[nDev],devInfo);
+            }
+        }
     }
 }
 
@@ -504,10 +518,22 @@ void Bohui_Protocol::_setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValu
 void Bohui_Protocol::_setAlarmSwitchSetParam(int nDevType,xml_node<> *rootNode,int &nValue)
 {
     vector<string> vecDeviceNumber;//保存影响的设备ID集合
+    cout<<"写入数据库－－－－start"<<endl;
     if (GetInst(DataBaseOperation).SetEnableAlarm(rootNode,nValue,vecDeviceNumber)==true)//nDevType,
     {
+        cout<<"写入数据库－－－－success"<<endl;
         // 通知设备服务......
-    }
+        for(int nDev=0;nDev<vecDeviceNumber.size();++nDev){
+            DeviceInfo devInfo;
+            cout<<"读取数据库－－－－start"<<endl;
+            if(GetInst(DataBaseOperation).GetUpdateDevAlarmInfo(vecDeviceNumber[nDev],devInfo)){
+                 cout<<"读取数据库－－－－success"<<endl;
+                GetInst(hx_net::SvcMgr).update_dev_alarm_config(vecDeviceNumber[nDev],devInfo);
+            }else
+                cout<<"读取数据库－－－－error"<<endl;
+        }
+    }else
+         cout<<"写入数据库－－－－error"<<endl;
 }
 //手动控制(发射机)
 void Bohui_Protocol::_controlDeviceCommand(int nDevType,xml_node<> *rootNode,int &nValue)
@@ -529,6 +555,9 @@ void Bohui_Protocol::_controlDeviceCommand(int nDevType,xml_node<> *rootNode,int
         sDevId = attr_devId->value();
         nSwitch = strtol(attr_switch->value(),NULL,10);
         //--------------发送控制指令------------------------------------//
-        //......................
+        if(nSwitch == 0)//关机
+            GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNON_OPR);
+        else if(nSwitch == 1)//开机
+            GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNON_OPR);
     }
 }

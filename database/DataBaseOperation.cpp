@@ -76,7 +76,7 @@ bool DataBaseOperation::IsOpen()
 bool DataBaseOperation::check_database()
 {
     if(d_db_check_time.secsTo(QDateTime::currentDateTime())>5){
-        QSqlQuery query ;
+        QSqlQuery query;
         QString sNow("select now()");
         query.prepare(sNow);
          if(!query.exec()){
@@ -401,9 +401,6 @@ bool DataBaseOperation::GetDevMonItem( string strDevnum,QString qsPrtocolNum,map
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery itemschquery;
-    /*QString strSql=QString("select MonitoringIndex,MonitoringName,Ratio,ItemType,ItemValueType,AlarmEnable,IsUpload,UnitString from Monitoring_Device_Item \
-                           where DeviceNumber='%1'").arg(QString::fromStdString(strDevnum));*/
-
     QString strSql=QString("select a.MonitoringIndex,a.MonitoringName,a.Ratio,a.ItemType,a.ItemValueType,a.AlarmEnable,a.IsUpload,c.name,b.alarmtype,b.type,b.moduletype,b.moduleid \
                            from Monitoring_Device_Item a left join data_dictionary c on c.code=a.unitstring and c.type='CompanyType',base_device_item b\
                            where a.DeviceNumber='%1' and b.monitoringindex=a.monitoringindex and b.protocolnumber='%2'").arg(QString::fromStdString(strDevnum)).arg(qsPrtocolNum);
@@ -1061,8 +1058,7 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
     for(;tranNode!=NULL;tranNode=tranNode->next_sibling())
     {
         rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("TransmitterID");
-        if(attr==NULL)
-        {
+        if(attr==NULL){
             attr = tranNode->first_attribute("ID");
             if(attr==NULL){
                 resValue = 11;
@@ -1074,14 +1070,12 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
         QString strDel = QString("delete from device_alarm_switch where devicenumber='%1'").arg(qsTransNum);
         QSqlQuery qsDel;
 
-        if(!qsDel.exec(strDel))
-        {
+        if(!qsDel.exec(strDel)) {
             cout<<qsDel.lastError().text().toStdString()<<"SetEnableAlarm---qsDel---error!"<<endl;
             QSqlDatabase::database().rollback();
             resValue = 3;
             return false;
         }
-
 
         rapidxml::xml_node<>* alswNode = tranNode->first_node("AlarmSwitch");
         QSqlQuery qsInsert;
@@ -1582,7 +1576,7 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
                }
                insertQuery.bindValue(":enable",atoi(attrType->value()));
                QDateTime qdt;
-               qdt.setDate(QDate(1970,1,1));
+
                rapidxml::xml_attribute<char> * attrStarttime = setnode->first_attribute("StartTime");
                if(attrStarttime==NULL)
                {
@@ -1593,8 +1587,10 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
                        return false;
                    }else
                        qdt=QDateTime::fromString(attrStarttime->value(),"yyyy-MM-dd hh:mm:ss");
-               }else
+               }else{
                    qdt=QDateTime::fromString(attrStarttime->value(),"hh:mm:ss");
+                   qdt.setDate(QDate(1970,2,1));
+               }
 
 
                if(qdt.isValid()==false){
@@ -1621,9 +1617,10 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
                        return false;
                    }else
                        qdt=QDateTime::fromString(attrEndtime->value(),"yyyy-MM-dd hh:mm:ss");
-               }else
+               }else{
                    qdt=QDateTime::fromString(attrEndtime->value(),"hh:mm:ss");
-
+                   qdt.setDate(QDate(1970,2,1));
+               }
                if(qdt.isValid()==false){
                    QSqlDatabase::database().rollback();
                    resValue = 11;
@@ -1747,6 +1744,53 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
        return true;
 }
 
+
+bool DataBaseOperation::GetUpdateDevTimeScheduleInfo( string strDevnum,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+                                              vector<Command_Scheduler> &cmmdScheduler  )
+{
+    if(!IsOpen())
+    {
+        std::cout<<"数据库未打开"<<std::endl;
+        return false;
+    }
+    GetDevMonitorSch(strDevnum,monitorScheduler);
+    GetCmd(strDevnum,cmmdScheduler);
+
+    return true;
+}
+
+bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& device )
+{
+    if(!IsOpen())
+    {
+        std::cout<<"数据库未打开"<<std::endl;
+        return false;
+    }
+
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    QSqlQuery devquery;
+    QString strSql=QString("select a.DeviceNumber,a.ProtocolNumber\
+                           from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and b.ProtocolNumber=a.ProtocolNumber").arg(QString::fromStdString(strDevnum));
+            devquery.prepare(strSql);
+       if(devquery.exec())   {
+            if(devquery.next())  {
+            device.sDevNum = devquery.value(0).toString().toStdString();
+            QString sprotoclnum = devquery.value(1).toString();
+            if(GetDevMonItem(strDevnum,sprotoclnum,device.map_MonitorItem)==false)
+                    return false;
+            if(GetAlarmConfig(strDevnum,device.map_AlarmConfig)==false)
+                return false;
+            }
+        }else {
+            std::cout<<devquery.lastError().text().toStdString()<<"GetUpdateDevAlarmInfo---query---error!"<<std::endl;
+            return false;
+        }
+       return true;
+}
+
+
+
+//获取用户信息
 bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
 {
     if(!IsOpen())

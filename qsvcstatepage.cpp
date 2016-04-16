@@ -20,6 +20,9 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     ,m_Notify(Notify)
     ,m_IsRunning(false)
     ,d_pOnlineDevValueLabel(NULL)
+    ,d_bUseNtp(false)
+    ,d_nModNtp(1)
+    ,d_nValueNtp(2)
 {
     QHBoxLayout *pTopLyt =new QHBoxLayout();
     QHBoxLayout *pHLyt = new QHBoxLayout();
@@ -75,10 +78,8 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     d_pDatabaseStateValueLabel->setStyleSheet(tr("font: 18pt; color:red;"));
     pGridLayout->addWidget(d_pDatabaseStateValueLabel,2,1,1,1);
 
-    bool bUse;
-    int nMod,nValue;
-    string sTime;
-    GetInst(LocalConfig).ntp_config(bUse,nMod,nValue,sTime);
+
+    GetInst(LocalConfig).ntp_config(d_bUseNtp,d_nModNtp,d_nValueNtp,d_sTimeNtp);
 
     QLabel *pAdjustTime = new QLabel(QObject::tr("自动校时:"));
     pAdjustTime->setFixedSize(80,30);
@@ -90,15 +91,15 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
      d_pAdjustTimeModLabel = new QLabel(QObject::tr("每星期"));
      pGridLayout->addWidget(d_pAdjustTimeModLabel,3,2,1,1);
 
-     d_pABaseTimeLabel->setText(sTime.c_str());
-     if(bUse==false){
+     d_pABaseTimeLabel->setText(d_sTimeNtp.c_str());
+     if(d_bUseNtp==false){
           d_pABaseTimeLabel->setStyleSheet(tr("font: 10pt; color:gray;"));
           d_pAdjustTimeModLabel->setStyleSheet(tr("font: 10pt; color:gray;"));
      }else
      {
-         if(nMod==0)
+         if(d_nModNtp==0)
              d_pAdjustTimeModLabel->setText("每天");
-         else if(nMod==2)
+         else if(d_nModNtp==2)
               d_pAdjustTimeModLabel->setText("每月");
 
      }
@@ -197,6 +198,8 @@ void QSvcStatePage::timeUpdate()
 
     if(IsStart())
         GetInst(DataBaseOperation).check_database();
+    if(d_bUseNtp)
+        checkAutoAdjustTime();
 
 }
 
@@ -204,4 +207,25 @@ void QSvcStatePage::timeUpdate()
  {
     QString sexecute = QString(tr("./ntpclient -s -t -i 1 -h %1 &")).arg(GetInst(LocalConfig).ntp_svc_ip().c_str());
     QProcess::execute(sexecute);
+ }
+
+ void QSvcStatePage::checkAutoAdjustTime()
+ {
+     QDateTime curTm = QDateTime::currentDateTime();
+     QDateTime configTm = QDateTime::fromString(d_sTimeNtp.c_str(),"hh:mm:ss");
+     if(configTm.isValid()==false)
+           return;
+     //cout<<"date:"<<curTm.date().day()<<"week:"<<curTm.date().dayOfWeek()<<endl;
+     //cout<<"curTime:"<<curTm.time().toString("hh:mm:ss").toStdString()<<"configTime:"<<configTm.time().toString("hh:mm:ss").toStdString()<<endl;
+     if(  curTm.time().secsTo(configTm.time()) == 0){
+         if(d_nModNtp==0){//按天
+             onMunualAdjustTime();
+         }else if(d_nModNtp==1){//按星期
+             if(curTm.date().dayOfWeek() == d_nValueNtp)
+                 onMunualAdjustTime();
+         }else if(d_nModNtp==2){//按月
+             if(curTm.date().day()==d_nValueNtp)
+                  onMunualAdjustTime();
+         }
+     }
  }

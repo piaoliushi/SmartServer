@@ -10,7 +10,7 @@ namespace hx_net
 	base_message::~base_message(void)
 	{
 	}
-	unsigned long base_message::CRC16_A001( unsigned char * ptr, int len )
+    /*unsigned long base_message::CRC16_A001( unsigned char * ptr, int len )
 	{
 		unsigned constnum=0xA001;
 		unsigned short nAccum=0xFFFF;
@@ -28,7 +28,7 @@ namespace hx_net
 			}     
 		}
 		return  nAccum;
-	}
+    }*/
 
 	void base_message::Char2Hex(unsigned char ch, char* szHex)
 	{
@@ -44,7 +44,7 @@ namespace hx_net
 		}
 		szHex[2] = 0;
 	}
-	void base_message::CharStr2HexStr(unsigned char const* pucCharStr, string &pszHexStr, int iSize)
+    void base_message::CharStr2HexStr(unsigned char const* pucCharStr, string &pszHexStr, int iSize)
 	{
 		
 		int i;
@@ -57,6 +57,6 @@ namespace hx_net
 			//string xx;
 			pszHexStr.append(szHex);
 			pszHexStr.append(" ");
-		}
+        }
 	}
 }

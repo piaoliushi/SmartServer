@@ -23,7 +23,7 @@ LocalConfig::LocalConfig(void)
     ,ntp_upload_use_(false)
     ,ntp_mod_(1)
     ,ntp_mod_value_(2)
-    ,ntp_time_("1900-1-1 00:00:00")
+    ,ntp_time_("1900-1-1 15:01:01")
 {
     //load_local_config("config.xml");
 }
