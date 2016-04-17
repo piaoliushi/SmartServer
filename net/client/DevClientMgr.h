@@ -40,10 +40,10 @@ namespace hx_net
 		//获得设备基本信息
 		bool dev_base_info(string sStationId,DevBaseInfo& devInfo,string sdevId="local");
         //更新运行图
-       e_ErrorCode update_monitor_time(string &sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+       e_ErrorCode update_monitor_time(string sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                                  vector<Command_Scheduler> &cmmdScheduler);
        //更新告警配置
-      e_ErrorCode update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo);
+      e_ErrorCode update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
 	private:
 		boost::shared_ptr<boost::thread> _listenthreadptr;//网络监听线程
         //boost::shared_ptr<boost::thread> _workthreadptr;//工作线程

@@ -130,10 +130,10 @@ namespace hx_net
 
         virtual void init_session_config(){}
         //更新运行图
-       virtual void update_monitor_time(string &devId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+       virtual void update_monitor_time(string devId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                                  vector<Command_Scheduler> &cmmdScheduler){}
         //更新告警配置
-       virtual void update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo){}
+       virtual void update_dev_alarm_config(string sDevId,DeviceInfo &devInfo){}
 	public:
 		virtual void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);
 		virtual void handle_read_body(const boost::system::error_code& error, size_t bytes_transferred);

@@ -26,6 +26,7 @@ bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody)
     int nPriority=0;
     try
     {
+         cout<<strMsg<<endl;
         xml_document<>   xml_doc;
         xml_doc.parse<0>(const_cast<char*>(strMsg.c_str()));
         xml_node<> *rootNode = xml_doc.first_node("Msg");
@@ -65,6 +66,7 @@ bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody)
     }
     catch(...)
     {
+        //cout<<strMsg<<endl;
         //xml载入异常，replyID=-100(暂定，待修改),vlaue=10(xml解析错误),
          createResponseMsg(nMsgId,10,CONST_STR_BOHUI_TYPE[BH_POTO_XmlParseError],responseBody);
     }
@@ -484,51 +486,275 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
 //设置告警运行图
 void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
 {
-    vector<string> vecDeviceNumber;//保存影响的设备ID集合
-    if (GetInst(DataBaseOperation).SetAlarmTime(rootNode,nValue,vecDeviceNumber)==true)//nDevType,
+    nValue = 11;
+    map<string,vector<Monitoring_Scheduler> > mapSrcMontSch;
+    if(_parse_alarm_run_time(rootNode,nValue,mapSrcMontSch)==false)
+        return;
+    if (GetInst(DataBaseOperation).SetAlarmTime(mapSrcMontSch)==true)//nDevType,
     {
+        nValue=0;
         // 通知设备服务......
-        for(int nDev=0;nDev<vecDeviceNumber.size();++nDev){
+        map<string,vector<Monitoring_Scheduler> >::iterator iter = mapSrcMontSch.begin();
+        for(;iter!=mapSrcMontSch.end();++iter){
             map<int,vector<Monitoring_Scheduler> > monitorScheduler;
             vector<Command_Scheduler> cmmdScheduler;
-            if(GetInst(DataBaseOperation).GetUpdateDevTimeScheduleInfo(vecDeviceNumber[nDev],monitorScheduler,cmmdScheduler)){
-                GetInst(hx_net::SvcMgr).update_monitor_time(vecDeviceNumber[nDev],monitorScheduler,cmmdScheduler);
+
+            if(GetInst(DataBaseOperation).GetUpdateDevTimeScheduleInfo(iter->first,monitorScheduler,cmmdScheduler)){
+                GetInst(hx_net::SvcMgr).update_monitor_time(iter->first,monitorScheduler,cmmdScheduler);
             }
         }
     }
+}
+
+bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<string,vector<Monitoring_Scheduler> > &mapMonSch)
+{
+    nValue = 11;
+    rapidxml::xml_node<>* tranNode = root_node->first_node("TranInfo");
+    if(tranNode==NULL)
+        return false;
+
+    for(;tranNode!=NULL;tranNode=tranNode->next_sibling()){
+        vector<Monitoring_Scheduler> vecSch;
+        rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("TransmitterID");
+        if(attr==NULL)
+            return false;
+        string qsTransNum = attr->value();
+        rapidxml::xml_node<>* setnode = tranNode->first_node();
+        if(setnode==NULL)
+            return false;
+        while(setnode){
+            Monitoring_Scheduler tmSch;
+            string name=setnode->name();
+            if(name!="MonthTime" && name!="WeeklyTime" && name!="DayTime" )
+                return false;
+            int shutype=0;//按星期
+            if(name=="MonthTime")
+                shutype = 1;//按月
+            else if(name=="DayTime")
+                shutype = 2;//按天
+            tmSch.iMonitorType = shutype;
+            rapidxml::xml_attribute<char> * attrType = setnode->first_attribute("Type");
+            if(attrType==NULL)
+                return false;
+            tmSch.bMonitorFlag = atoi(attrType->value());//监测标志0:停播
+            //开始时间
+            QDateTime qdt;
+            rapidxml::xml_attribute<char> * attrStarttime = setnode->first_attribute("StartTime");
+            if(attrStarttime==NULL){
+                attrStarttime = setnode->first_attribute("StartDateTime");
+                if(attrStarttime==NULL)
+                    return false;
+                else
+                    qdt=QDateTime::fromString(attrStarttime->value(),"yyyy-MM-dd hh:mm:ss");
+            }else{
+                qdt=QDateTime::fromString(attrStarttime->value(),"hh:mm:ss");
+                qdt.setDate(QDate(1970,2,1));
+            }
+            if(qdt.isValid())
+                tmSch.tStartTime = qdt.toTime_t();
+            else
+                return false;
+            //结束时间
+            rapidxml::xml_attribute<char> * attrEndtime = setnode->first_attribute("EndTime");
+            if(attrEndtime==NULL){
+                attrEndtime = setnode->first_attribute("EndDateTime");
+                if(attrEndtime==NULL)
+                    return false;
+                else
+                    qdt=QDateTime::fromString(attrStarttime->value(),"yyyy-MM-dd hh:mm:ss");
+            }else{
+                qdt=QDateTime::fromString(attrStarttime->value(),"hh:mm:ss");
+                qdt.setDate(QDate(1970,2,1));
+            }
+            if(qdt.isValid())
+                tmSch.tEndTime = qdt.toTime_t();
+            else
+                return false;
+             rapidxml::xml_attribute<char> * attrMotn = setnode->first_attribute("Month");
+             if(attrMotn!=NULL)
+                    tmSch.iMonitorMonth = atoi(attrMotn->value());
+             rapidxml::xml_attribute<char> * attrDay = setnode->first_attribute("Day");
+             if(attrDay!=NULL)
+                    tmSch.iMonitorDay = atoi(attrDay->value());
+             rapidxml::xml_attribute<char> * attrWeek = setnode->first_attribute("DayofWeek");
+             if(attrWeek==NULL)
+                    tmSch.iMonitorWeek = atoi(attrWeek->value());
+             rapidxml::xml_attribute<char> * attrend = setnode->first_attribute("AlarmEndTime");
+             if(attrend!=NULL){
+                    qdt=QDateTime::fromString(attrend->value(),"yyyy-MM-dd hh:mm:ss");
+                    if(qdt.isValid())
+                        tmSch.tAlarmEndTime = qdt.toTime_t();
+                    else
+                        return false;
+               }
+             vecSch.push_back(tmSch);
+             setnode = setnode->next_sibling();
+
+        }
+        mapMonSch[qsTransNum] = vecSch;
+    }
+    nValue = 0;
+    return true;
 }
 
 //设置告警门限
 void Bohui_Protocol::_setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValue)
 {
-    vector<string> vecDeviceNumber;//保存影响的设备ID集合
-    if (GetInst(DataBaseOperation).SetAlarmLimit(rootNode,nValue,vecDeviceNumber)==true)//nDevType,
+    nValue = 11;
+    map<string,vector<Alarm_config> > mapAlarmSet;
+    if(_parse_alarm_param_set(rootNode,nValue,mapAlarmSet)==false)
+        return;
+    if (GetInst(DataBaseOperation).SetAlarmLimit(mapAlarmSet,nValue)==true)//nDevType,
     {
+        nValue=0;
         // 通知设备服务......
-        for(int nDev=0;nDev<vecDeviceNumber.size();++nDev){
+        map<string,vector<Alarm_config> >::iterator iter = mapAlarmSet.begin();
+        for(;iter!=mapAlarmSet.end();++iter){
             DeviceInfo devInfo;
-            if(GetInst(DataBaseOperation).GetUpdateDevAlarmInfo(vecDeviceNumber[nDev],devInfo)){
-                GetInst(hx_net::SvcMgr).update_dev_alarm_config(vecDeviceNumber[nDev],devInfo);
+            if(GetInst(DataBaseOperation).GetUpdateDevAlarmInfo(iter->first,devInfo)){
+                GetInst(hx_net::SvcMgr).update_dev_alarm_config(iter->first,devInfo);
             }
         }
     }
 }
+bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,map<string,vector<Alarm_config> > &mapAlarmSet)
+{
+    nValue = 11;
+    rapidxml::xml_node<>* tranNode = root_node->first_node("TranInfo");
+    if(tranNode==NULL){
+        tranNode = root_node->first_node("Dev");
+        if(tranNode==NULL)
+            return false;
+    }
 
+    for(;tranNode!=NULL;tranNode=tranNode->next_sibling())
+    {
+        vector<Alarm_config> vAlarmConf;
+        rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("TransmitterID");
+        if(attr==NULL){
+            attr = tranNode->first_attribute("ID");
+            if(attr==NULL)
+                return false;
+         }
+        string qsTransNum = attr->value();
+        rapidxml::xml_node<>* alswNode = tranNode->first_node("AlarmParam");
+        if(alswNode == NULL)
+            return false;
+        for(;alswNode!=NULL;alswNode=alswNode->next_sibling()) {
+            Alarm_config  curConf;
+            rapidxml::xml_attribute<>* atType = alswNode->first_attribute("Type");
+            if(atType!=NULL)   {
+                int itype = atoi(atType->value());
+                curConf.iAlarmid = itype;
+                rapidxml::xml_attribute<>* atDuration=NULL;
+                if(itype==512)
+                {
+                    atDuration = alswNode->first_attribute("EarlyDuration");
+                    if(atDuration==NULL)
+                        return false;
+                    curConf.iDelaytime = atoi(atDuration->value());
+                    atDuration = alswNode->first_attribute("DelayedDuration");
+                    if(atDuration==NULL)
+                        return false;
+                     curConf.iResumetime = atoi(atDuration->value());
+                } else {
+                    atDuration = alswNode->first_attribute("Duration");
+                    if(atDuration==NULL)
+                        return false;
+                    curConf.iDelaytime = atoi(atDuration->value());
+                    atDuration = alswNode->first_attribute("ResumeDuration");
+                    if(atDuration==NULL)
+                        return false;
+                    curConf.iResumetime = atoi(atDuration->value());
+                }
+
+                    rapidxml::xml_attribute<>* atTP = alswNode->first_attribute("DownThreshold");
+                    if(atTP!=NULL){
+                        curConf.iLimittype = 1;
+                        if(itype==(511) || itype==(512))
+                             curConf.iLimittype = 4;
+                        curConf.fLimitvalue = atof(atTP->value());
+                        vAlarmConf.push_back(curConf);
+                    }
+                    atTP = alswNode->first_attribute("UpThreshold");
+                    if(atTP!=NULL){
+                        curConf.iLimittype = 0;
+                        if(itype==(511) || itype==(512))
+                             curConf.iLimittype = 4;
+                        curConf.fLimitvalue = atof(atDuration->value());
+                        vAlarmConf.push_back(curConf);
+                    }
+               }
+            }
+        mapAlarmSet[qsTransNum] = vAlarmConf;
+    }
+     nValue = 0;
+    return true;
+}
 //告警开关设置
+bool Bohui_Protocol::_parse_alarm_switch_set(xml_node<> *root_node,int &nValue,map<string,vector<Alarm_Switch_Set> > &mapAlarmSwitchSet)
+{
+    nValue = 11;
+    rapidxml::xml_node<>* tranNode = root_node->first_node("TranInfo");
+    if(tranNode==NULL){
+        tranNode = root_node->first_node("Dev");
+        if(tranNode==NULL)
+            return false;
+    }
+
+    for(;tranNode!=NULL;tranNode=tranNode->next_sibling())
+    {
+        vector<Alarm_Switch_Set>  vAlarmSwich;
+        rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("TransmitterID");
+        if(attr==NULL){
+            attr = tranNode->first_attribute("ID");
+            if(attr==NULL)
+                return false;
+        }
+
+        string qsTransNum = attr->value();
+        rapidxml::xml_node<>* alswNode = tranNode->first_node("AlarmSwitch");
+        for(;alswNode!=NULL;alswNode=alswNode->next_sibling())
+        {
+            Alarm_Switch_Set tmpConf;
+            rapidxml::xml_attribute<>* atType = alswNode->first_attribute("Type");
+            if(atType!=NULL) {
+                tmpConf.iAlarmid = atoi(atType->value());
+                rapidxml::xml_attribute<>* atSwitch = alswNode->first_attribute("Switch");
+                if(atSwitch==NULL)
+                    return false;
+                tmpConf.iSwtich = atoi(atSwitch->value());
+                rapidxml::xml_attribute<>* atDesc = alswNode->first_attribute("Desc");
+                if(atDesc!=NULL)
+                    tmpConf.sDes = atDesc->value();
+                vAlarmSwich.push_back(tmpConf);
+            }
+        }
+        mapAlarmSwitchSet[qsTransNum] = vAlarmSwich;
+    }
+    nValue = 0;
+    return true;
+}
+
 void Bohui_Protocol::_setAlarmSwitchSetParam(int nDevType,xml_node<> *rootNode,int &nValue)
 {
-    vector<string> vecDeviceNumber;//保存影响的设备ID集合
+    nValue = 11;
+    map<string,vector<Alarm_Switch_Set> > mapAlarmSwtichSet;
+    if(_parse_alarm_switch_set(rootNode,nValue,mapAlarmSwtichSet)==false)
+        return;
     cout<<"写入数据库－－－－start"<<endl;
-    if (GetInst(DataBaseOperation).SetEnableAlarm(rootNode,nValue,vecDeviceNumber)==true)//nDevType,
+    if (GetInst(DataBaseOperation).SetEnableAlarm(mapAlarmSwtichSet,nValue)==true)//nDevType,
     {
+        nValue =0;
         cout<<"写入数据库－－－－success"<<endl;
         // 通知设备服务......
-        for(int nDev=0;nDev<vecDeviceNumber.size();++nDev){
+        map<string,vector<Alarm_Switch_Set> >::iterator iter = mapAlarmSwtichSet.begin();
+       for(;iter!=mapAlarmSwtichSet.end();++iter){
             DeviceInfo devInfo;
             cout<<"读取数据库－－－－start"<<endl;
-            if(GetInst(DataBaseOperation).GetUpdateDevAlarmInfo(vecDeviceNumber[nDev],devInfo)){
+            if(GetInst(DataBaseOperation).GetUpdateDevAlarmInfo(iter->first,devInfo)){
                  cout<<"读取数据库－－－－success"<<endl;
-                GetInst(hx_net::SvcMgr).update_dev_alarm_config(vecDeviceNumber[nDev],devInfo);
+                GetInst(hx_net::SvcMgr).update_dev_alarm_config(iter->first,devInfo);
             }else
                 cout<<"读取数据库－－－－error"<<endl;
         }

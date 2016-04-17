@@ -69,10 +69,10 @@ namespace hx_net
 		bool dev_base_info(string sStationId,DevBaseInfo& devInfo,string sDevid="local");
 
         //更新运行图
-        e_ErrorCode update_monitor_time(string &sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+        e_ErrorCode update_monitor_time(string sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                                                    vector<Command_Scheduler> &cmmdScheduler);
         //更新告警配置
-        e_ErrorCode update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo);
+        e_ErrorCode update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
 	private:
 		boost::recursive_mutex         device_pool_mutex_;
 		std::map<DevKey,session_ptr>   device_pool_;

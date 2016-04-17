@@ -147,6 +147,14 @@ typedef struct
 
 typedef struct
 {
+    int iAlarmid;//告警类型id
+    int iSwtich;
+    string sDes;
+}Alarm_Switch_Set;
+
+
+typedef struct
+{
     int iWeek;
     int iUse;
     time_t  tStartTime;

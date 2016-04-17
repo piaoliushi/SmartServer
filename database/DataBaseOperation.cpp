@@ -140,7 +140,7 @@ bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicr
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -164,7 +164,7 @@ bool DataBaseOperation::GetDevInfo( string strDevnum,DeviceInfo& device )
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
 
@@ -205,7 +205,7 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -289,7 +289,7 @@ bool DataBaseOperation::GetDevMonitorSch( string strDevnum,map<int,vector<Monito
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -327,7 +327,7 @@ bool DataBaseOperation::GetCmdParam( string strCmdnum,CmdParam& param )
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -355,7 +355,7 @@ bool DataBaseOperation::GetCmd( string strDevnum,vector<Command_Scheduler>& vcmd
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -396,7 +396,7 @@ bool DataBaseOperation::GetDevMonItem( string strDevnum,QString qsPrtocolNum,map
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -434,7 +434,7 @@ bool DataBaseOperation::GetDevProperty( string strDevnum,map<string,DevProperty>
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -462,7 +462,7 @@ bool DataBaseOperation::GetNetProperty( string strConTypeNumber,NetCommunication
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -491,7 +491,7 @@ bool DataBaseOperation::GetComProperty( string strConTypeNumber,ComCommunication
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -521,7 +521,7 @@ bool DataBaseOperation::GetLinkActionParam( string strParamnum,map<int,ActionPar
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -551,7 +551,7 @@ bool DataBaseOperation::GetLinkAction( string strLinkRolenum,vector<LinkAction>&
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -582,7 +582,7 @@ bool DataBaseOperation::GetLinkAction( string strLinkRolenum,vector<LinkAction>&
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     QSqlQuery alarmconfigquery;
@@ -623,7 +623,7 @@ bool DataBaseOperation::GetAssDevChan( QString strDevNum,map<int,vector<AssDevCh
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -668,7 +668,7 @@ bool DataBaseOperation::GetAlarmConfig( string strDevnum,map<int,Alarm_config>& 
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -707,7 +707,7 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -744,7 +744,7 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     QSqlQuery alarmconfigquery;
@@ -783,7 +783,7 @@ bool DataBaseOperation::SetEnableMonitor( string strDevnum,int iItemIndex,bool b
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -802,7 +802,7 @@ bool DataBaseOperation::UpdateMonitorItem( string strDevnum,DeviceMonitorItem di
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -831,7 +831,7 @@ bool DataBaseOperation::UpdateMonitorItems( string strDevnum,vector<DeviceMonito
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
 
@@ -871,7 +871,7 @@ bool DataBaseOperation::UpdateItemAlarmConfig( string strDevnum,int iIndex,Alarm
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -898,7 +898,7 @@ bool DataBaseOperation::UpdateItemAlarmConfigs( string strDevnum,map<int,Alarm_c
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -933,7 +933,7 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -977,7 +977,7 @@ bool DataBaseOperation::AddItemEndAlarmRecord( time_t endTime,unsigned long long
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -1003,7 +1003,7 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -1037,11 +1037,55 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
     return true;
 }
 //改完待测2016-03-30 16:53
+  bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &mapAlarmSwitchSet,int& resValue)
+  {
+      if(!IsOpen()) {
+          std::cout<<"the database is interrupt"<<std::endl;
+          resValue = 3;
+          return false;
+      }
+      boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+      map<string,vector<Alarm_Switch_Set> >::iterator iter = mapAlarmSwitchSet.begin();
+      for(;iter!=mapAlarmSwitchSet.end();++iter){
+
+          QString qsTransNum = QString::fromStdString(iter->first);
+          QSqlDatabase::database().transaction();
+          QString strDel = QString("delete from device_alarm_switch where devicenumber='%1'").arg(qsTransNum);
+          QSqlQuery qsDel;
+          if(!qsDel.exec(strDel)) {
+              cout<<qsDel.lastError().text().toStdString()<<"SetEnableAlarm---qsDel---error!"<<endl;
+              QSqlDatabase::database().rollback();
+              resValue = 3;
+              return false;
+          }
+          QSqlQuery qsInsert;
+          QString strSql = QString("insert into device_alarm_switch(devicenumber,alarmswitchtype,alarmenable,description) values(:devicenumber,:alarmswitchtype,:alarmenable,:description)");
+          qsInsert.prepare(strSql);
+          qsInsert.bindValue(":devicenumber",qsTransNum);
+
+          for(int i=0;i<iter->second.size();++i){
+                 qsInsert.bindValue(":alarmswitchtype",iter->second[i].iAlarmid);
+                  qsInsert.bindValue(":alarmenable",iter->second[i].iSwtich);
+                  if(iter->second[i].sDes.empty()==false)
+                     qsInsert.bindValue(":description",iter->second[i].sDes.empty());
+                  if(!qsInsert.exec()) {
+                      QSqlDatabase::database().rollback();
+                      resValue = 3;
+                      return false;
+                  }
+             }
+          }
+
+    QSqlDatabase::database().commit();
+
+    return true;
+  }
+
 bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         resValue = 3;
         return false;
     }
@@ -1120,11 +1164,67 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
     return true;
 }
 //改完待测2016-03-30 16:40
+bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlarmSet,int& resValue)
+{
+    if(!IsOpen()){
+        std::cout<<"the database is interrupt"<<std::endl;
+        resValue = 3;
+        return false;
+    }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    map<string,vector<Alarm_config> >::iterator iter=mapAlarmSet.begin();
+    for(;iter!=mapAlarmSet.end();++iter) {
+        QString qsTransNum = QString::fromStdString(iter->first);
+        QSqlDatabase::database().transaction();
+        QSqlQuery qsDel;
+        QString strSql=QString("delete from alarm_item_config where devicenumber=:devicenumber");
+        qsDel.prepare(strSql);
+        qsDel.bindValue(":devicenumber",qsTransNum);
+        if(!qsDel.exec()) {
+            cout<<qsDel.lastError().text().toStdString()<<"SetEnableAlarm---qsDel2---error!"<<endl;
+            QSqlDatabase::database().rollback();
+            resValue = 3;
+            return false;
+        }
+
+        QSqlQuery qsInsert;
+        strSql=QString("insert into alarm_item_config(devicenumber,monitoringindex,limitvalue,jumplimittype,delaytime,resumeduration,alarmconfigtype,alarmenable) \
+                       values(:devicenumber,:monitoringindex,:limitvalue,:jumplimittype,:delaytime,:resumeduration,:alarmconfigtype,1)");
+                       qsInsert.prepare(strSql);
+                qsInsert.bindValue(":devicenumber",qsTransNum);
+
+        for(int i=0;i<iter->second.size();++i){
+
+            int itype = iter->second[i].iAlarmid;
+
+            if(itype!=512 && itype!=511)
+                qsInsert.bindValue(":alarmconfigtype",0);
+            else
+                qsInsert.bindValue(":alarmconfigtype",1);
+            qsInsert.bindValue(":monitoringindex",itype);
+
+            qsInsert.bindValue(":delaytime", iter->second[i].iDelaytime);
+            qsInsert.bindValue(":resumeduration", iter->second[i].iResumetime);
+            qsInsert.bindValue(":jumplimittype",iter->second[i].iLimittype);
+            qsInsert.bindValue(":limitvalue",iter->second[i].fLimitvalue);
+            if(!qsInsert.exec())  {
+                cout<<qsInsert.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
+                QSqlDatabase::database().rollback();
+                resValue = 3;
+                return false;
+            }
+        }
+        QSqlDatabase::database().commit();
+    }
+    resValue = 0;
+    return true;
+}
+
 bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         resValue = 3;
         return false;
     }
@@ -1279,11 +1379,107 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
     return true;
 }
 //设置发射机运行图
+bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > &mapSch)
+{
+    if(!IsOpen()){
+        std::cout<<"the database is interrupt"<<std::endl;
+        return false;
+    }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    QSqlDatabase::database().transaction();
+    map<string,vector<Monitoring_Scheduler> >::iterator iter= mapSch.begin();
+    for(;iter!=mapSch.end();++iter){
+        QString sDevNum = QString::fromStdString(iter->first);
+        QSqlQuery qsDel;
+        QString strSql=QString("delete from monitoring_scheduler where objectnumber=:objectnumber");
+        qsDel.prepare(strSql);
+        qsDel.bindValue(":objectnumber",sDevNum);
+        if(!qsDel.exec()){
+            cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel---error!"<<endl;
+            QSqlDatabase::database().rollback();
+            return false;
+        }
+
+        QSqlQuery insertQuery;//0:星期 1:月 2:天
+        strSql = QString("insert into monitoring_scheduler(objectnumber,weekday,enable,starttime,endtime,datetype,month,day,alarmendtime) \
+                         values(:objectnumber,:weekday,:enable,:starttime,:endtime,:datetype,:month,:day,:alarmendtime)");
+        insertQuery.prepare(strSql);
+        insertQuery.bindValue(":objectnumber",sDevNum);
+        QString strCmd = QString("insert into command_scheduler(objectnumber,paramnumber,enable,weekday,starttime,commandtype,hasparam,datetype,month,day,commandendtime) \
+                                 values(:objectnumber,'',1,:weekday,:starttime,:commandtype,0,:datetype,:month,:day,:commandendtime)");
+                                 QSqlQuery insertCmdopenQuery;
+        insertCmdopenQuery.prepare(strCmd);
+        insertCmdopenQuery.bindValue(":objectnumber",sDevNum);
+        insertCmdopenQuery.bindValue(":commandtype",15);
+        QSqlQuery insertCmdcloseQuery;
+        insertCmdcloseQuery.prepare(strCmd);
+        insertCmdcloseQuery.bindValue(":objectnumber",sDevNum);
+        insertCmdcloseQuery.bindValue(":commandtype",19);
+        for(int i=0;i<iter->second.size();++i){
+            Command_Scheduler cmmdSch;
+            int shutype = iter->second[i].iMonitorType;
+            insertQuery.bindValue(":datetype",shutype);
+            insertCmdopenQuery.bindValue(":datetype",shutype);
+            insertCmdcloseQuery.bindValue(":datetype",shutype);
+            insertQuery.bindValue(":enable",iter->second[i].bMonitorFlag);
+            QDateTime qdt = QDateTime::fromTime_t(iter->second[i].tStartTime);
+            insertQuery.bindValue(":starttime",qdt);
+            if(iter->second[i].bMonitorFlag==false)
+                insertCmdcloseQuery.bindValue(":starttime",qdt.addSecs(20));//不监测关机时间退后20秒
+            else
+                insertCmdopenQuery.bindValue(":starttime",qdt.addSecs(-20));//监测开机时间退后20秒
+
+            qdt = QDateTime::fromTime_t(iter->second[i].tEndTime);
+            insertQuery.bindValue(":endtime",qdt);
+            if(iter->second[i].bMonitorFlag==true)
+                insertCmdcloseQuery.bindValue(":starttime",qdt.addSecs(20));//监测关机时间退后20秒
+            else
+                insertCmdopenQuery.bindValue(":starttime",qdt.addSecs(-20));//监测开机时间退后20秒
+
+            QDateTime qAlarmendDt = QDateTime::fromTime_t(iter->second[i].tAlarmEndTime);
+
+            insertQuery.bindValue(":weekday",iter->second[i].iMonitorWeek);
+            insertQuery.bindValue(":month",iter->second[i].iMonitorMonth);
+            insertQuery.bindValue(":day",iter->second[i].iMonitorDay);
+            insertQuery.bindValue(":alarmendtime",qAlarmendDt);
+
+            insertCmdcloseQuery.bindValue(":weekday",iter->second[i].iMonitorWeek);
+            insertCmdcloseQuery.bindValue(":month",iter->second[i].iMonitorMonth);
+            insertCmdcloseQuery.bindValue(":day",iter->second[i].iMonitorDay);
+            insertCmdcloseQuery.bindValue(":commandendtime",qAlarmendDt);
+
+            insertCmdopenQuery.bindValue(":weekday",iter->second[i].iMonitorWeek);
+            insertCmdopenQuery.bindValue(":month",iter->second[i].iMonitorMonth);
+            insertCmdopenQuery.bindValue(":day",iter->second[i].iMonitorDay);
+            insertCmdopenQuery.bindValue(":commandendtime",qAlarmendDt);
+
+            if(!insertQuery.exec())  {
+                cout<<insertQuery.lastError().text().toStdString()<<"SetAlarmTime---insertQuery---error!"<<endl;
+                QSqlDatabase::database().rollback();
+                return false;
+            }
+            if(!insertCmdopenQuery.exec()) {
+                cout<<insertCmdopenQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdopenQuery---error!"<<endl;
+                QSqlDatabase::database().rollback();
+                return false;
+            }
+            if(!insertCmdcloseQuery.exec()) {
+                cout<<insertCmdcloseQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdcloseQuery---error!"<<endl;
+                QSqlDatabase::database().rollback();
+                return false;
+            }
+        }
+
+    }
+    QSqlDatabase::database().commit();
+    return true;
+}
+
 bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
 {
     /*if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         resValue = 3;
         return false;
     }
@@ -1478,7 +1674,7 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
     return true;*/
     if(!IsOpen())
        {
-           std::cout<<"数据库未打开"<<std::endl;
+           std::cout<<"the database is interrupt"<<std::endl;
            resValue = 3;
            return false;
        }
@@ -1693,9 +1889,6 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
                }
                    break;
                case 2:
-               {
-
-               }
                    break;
                }
                insertQuery.bindValue(":weekday",iweek);
@@ -1750,7 +1943,7 @@ bool DataBaseOperation::GetUpdateDevTimeScheduleInfo( string strDevnum,map<int,v
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     GetDevMonitorSch(strDevnum,monitorScheduler);
@@ -1763,7 +1956,7 @@ bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& devi
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
 
@@ -1795,7 +1988,7 @@ bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -1822,7 +2015,7 @@ bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<st
 {
     if(!IsOpen())
     {
-        std::cout<<"数据库未打开"<<std::endl;
+        std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);

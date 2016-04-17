@@ -39,6 +39,8 @@ public:
     //打开关闭监控量报警
     bool SetEnableMonitor(string strDevnum,int iItemIndex,bool bEnabled=true);
     bool SetEnableAlarm(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);
+    bool SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &mapAlarmSwitchSet,int& resValue);
+
     //更新监控量配置
     bool UpdateMonitorItem(string strDevnum,DeviceMonitorItem ditem);
     //批量更新监控量配置
@@ -56,7 +58,10 @@ public:
     //添加历史记录
     bool AddItemMonitorRecord(string strDevnum,time_t savetime,DevMonitorDataPtr pdata,const map<int,DeviceMonitorItem> &mapMonitorItem);
     bool SetAlarmLimit(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);//0上，1下
+    bool SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlarmSet,int& resValue);
+
     bool SetAlarmTime(rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid);
+    bool SetAlarmTime(map<string,vector<Monitoring_Scheduler> > &mapSch);
 
     bool GetUserInfo( const string sName,UserInformation &user );
     bool GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice );

@@ -42,12 +42,15 @@ protected:
     void _execLinkDevQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue);
 
     //设置告警运行图
+    bool _parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<string,vector<Monitoring_Scheduler> > &mapMonSch);
     void _setAlarmTime(xml_node<> *rootNode,int &nValue);
 
     //设置告警门限
+    bool _parse_alarm_param_set(xml_node<> *root_node,int &nValue,map<string,vector<Alarm_config> > &mapAlarmSet);
     void _setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValue);
 
     //告警开关设置
+    bool _parse_alarm_switch_set(xml_node<> *root_node,int &nValue,map<string,vector<Alarm_Switch_Set> > &mapAlarmSwitchSet);
     void _setAlarmSwitchSetParam(int nDevType,xml_node<> *rootNode,int &nValue);
 
     //设备手动控制(发射机)

@@ -167,7 +167,7 @@ namespace hx_net
     }
 
     //更新运行图
-   e_ErrorCode SvcMgr::update_monitor_time(string &sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+   e_ErrorCode SvcMgr::update_monitor_time(string  sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                              vector<Command_Scheduler> &cmmdScheduler)
    {
        if(m_pDevMgrPtr)
@@ -175,7 +175,7 @@ namespace hx_net
        return EC_OBJECT_NULL;
    }
    //更新告警配置
-  e_ErrorCode SvcMgr::update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo)
+  e_ErrorCode SvcMgr::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo)
   {
       if(m_pDevMgrPtr)
           return m_pDevMgrPtr->update_dev_alarm_config(sDevId,devInfo);

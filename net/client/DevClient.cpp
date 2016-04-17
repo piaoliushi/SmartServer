@@ -163,7 +163,7 @@ e_ErrorCode DevClient::excute_command(int cmdType,devCommdMsgPtr lpParam)
 }
 
 //更新运行图
-e_ErrorCode DevClient::update_monitor_time(string &sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+e_ErrorCode DevClient::update_monitor_time(string sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                                            vector<Command_Scheduler> &cmmdScheduler)
 {
     e_ErrorCode opr_rlt = EC_DEVICE_NOT_FOUND;
@@ -178,7 +178,7 @@ e_ErrorCode DevClient::update_monitor_time(string &sDevId,map<int,vector<Monitor
     return opr_rlt;
 }
 //更新告警配置
-e_ErrorCode DevClient::update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo)
+e_ErrorCode DevClient::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo)
 {
     e_ErrorCode opr_rlt = EC_DEVICE_NOT_FOUND;
     boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);

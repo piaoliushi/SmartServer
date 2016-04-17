@@ -1264,7 +1264,7 @@ bool device_session::excute_command(int cmdType,devCommdMsgPtr lpParam,e_ErrorCo
 }
 
 //更新运行图
-void device_session::update_monitor_time(string &devId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+void device_session::update_monitor_time(string devId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                                          vector<Command_Scheduler> &cmmdScheduler)
 {
     {
@@ -1279,7 +1279,7 @@ void device_session::update_monitor_time(string &devId,map<int,vector<Monitoring
 }
 
 //更新告警配置
-void  device_session::update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo)
+void  device_session::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo)
 {
     {
         //更新整机

@@ -65,10 +65,10 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         //发送命令到设备
         void send_cmd_to_dev(string sDevId,int cmdType,int childId);
         //更新运行图
-        void update_monitor_time(string &devId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+        void update_monitor_time(string devId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                                  vector<Command_Scheduler> &cmmdScheduler);
         //更新告警配置
-        void  update_dev_alarm_config(string &sDevId,DeviceInfo &devInfo);
+        void  update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
 	protected:
 		void start_read_head(int msgLen);//开始接收头
 		void start_read_body(int msgLen);//开始接收体
