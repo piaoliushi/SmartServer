@@ -49,8 +49,16 @@ enum _tag_CommandType{
     DEV_TASK_TURNOFF = 1,
 };
 //运行图结构
-typedef struct
+typedef struct _tag_M_Sch
 {
+    _tag_M_Sch(){
+        iMonitorType=-1;
+        iMonitorWeek=-1;
+        iMonitorMonth=-1;
+        iMonitorDay=-1;
+
+    }
+
     int      iMonitorType;    //0=星期，1=月，2=天
     bool    bMonitorFlag;    //flase-不监测，true-监测
     int      iMonitorWeek;   //星期(1-7）

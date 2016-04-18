@@ -490,7 +490,7 @@ void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
     map<string,vector<Monitoring_Scheduler> > mapSrcMontSch;
     if(_parse_alarm_run_time(rootNode,nValue,mapSrcMontSch)==false)
         return;
-    if (GetInst(DataBaseOperation).SetAlarmTime(mapSrcMontSch)==true)//nDevType,
+    if (GetInst(DataBaseOperation).SetAlarmTime(mapSrcMontSch,nValue)==true)//nDevType,
     {
         nValue=0;
         // 通知设备服务......
@@ -561,9 +561,9 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
                 if(attrEndtime==NULL)
                     return false;
                 else
-                    qdt=QDateTime::fromString(attrStarttime->value(),"yyyy-MM-dd hh:mm:ss");
+                    qdt=QDateTime::fromString(attrEndtime->value(),"yyyy-MM-dd hh:mm:ss");
             }else{
-                qdt=QDateTime::fromString(attrStarttime->value(),"hh:mm:ss");
+                qdt=QDateTime::fromString(attrEndtime->value(),"hh:mm:ss");
                 qdt.setDate(QDate(1970,2,1));
             }
             if(qdt.isValid())
@@ -577,14 +577,14 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
              if(attrDay!=NULL)
                     tmSch.iMonitorDay = atoi(attrDay->value());
              rapidxml::xml_attribute<char> * attrWeek = setnode->first_attribute("DayofWeek");
-             if(attrWeek==NULL)
+             if(attrWeek!=NULL)
                     tmSch.iMonitorWeek = atoi(attrWeek->value());
              rapidxml::xml_attribute<char> * attrend = setnode->first_attribute("AlarmEndTime");
              if(attrend!=NULL){
                     qdt=QDateTime::fromString(attrend->value(),"yyyy-MM-dd hh:mm:ss");
                     if(qdt.isValid())
                         tmSch.tAlarmEndTime = qdt.toTime_t();
-                    else
+                    else if(shutype!=2)
                         return false;
                }
              vecSch.push_back(tmSch);

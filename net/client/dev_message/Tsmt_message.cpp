@@ -286,9 +286,6 @@ namespace hx_net
     //任务超时回调
     void Tsmt_message::schedules_task_time_out(const boost::system::error_code& error)
     {
-        if(!m_pSession->is_connected())
-            return;
-
         if(error!= boost::asio::error::operation_aborted)
         {
             time_t tmCurTime;

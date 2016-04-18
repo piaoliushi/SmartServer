@@ -1081,7 +1081,7 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
     return true;
   }
 
-bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
+/*bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
 {
     if(!IsOpen())
     {
@@ -1162,7 +1162,7 @@ bool DataBaseOperation::SetEnableAlarm( rapidxml::xml_node<char>* root_node,int&
 
     resValue = 0;
     return true;
-}
+}*/
 //改完待测2016-03-30 16:40
 bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlarmSet,int& resValue)
 {
@@ -1220,7 +1220,7 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
     return true;
 }
 
-bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
+/*bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
 {
     if(!IsOpen())
     {
@@ -1377,12 +1377,13 @@ bool DataBaseOperation::SetAlarmLimit( rapidxml::xml_node<char>* root_node,int& 
     }
     resValue = 0;
     return true;
-}
+}*/
 //设置发射机运行图
-bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > &mapSch)
+bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > &mapSch,int& resValue)
 {
     if(!IsOpen()){
         std::cout<<"the database is interrupt"<<std::endl;
+        resValue = 3;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -1397,8 +1398,20 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
         if(!qsDel.exec()){
             cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel---error!"<<endl;
             QSqlDatabase::database().rollback();
+            resValue = 3;
             return false;
         }
+
+        strSql = QString("delete from command_scheduler where objectnumber=:objectnumber and (commandtype=15 or commandtype=19)");
+        qsDel.prepare(strSql);
+        qsDel.bindValue(":objectnumber",sDevNum);
+        if(!qsDel.exec()) {
+            cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel2---error!"<<endl;
+            QSqlDatabase::database().rollback();
+            resValue = 3;
+            return false;
+        }
+
 
         QSqlQuery insertQuery;//0:星期 1:月 2:天
         strSql = QString("insert into monitoring_scheduler(objectnumber,weekday,enable,starttime,endtime,datetype,month,day,alarmendtime) \
@@ -1421,7 +1434,9 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
             insertQuery.bindValue(":datetype",shutype);
             insertCmdopenQuery.bindValue(":datetype",shutype);
             insertCmdcloseQuery.bindValue(":datetype",shutype);
-            insertQuery.bindValue(":enable",iter->second[i].bMonitorFlag);
+
+            int nEnable = (iter->second[i].bMonitorFlag==false)?0:1;
+            insertQuery.bindValue(":enable",nEnable);
             QDateTime qdt = QDateTime::fromTime_t(iter->second[i].tStartTime);
             insertQuery.bindValue(":starttime",qdt);
             if(iter->second[i].bMonitorFlag==false)
@@ -1456,16 +1471,19 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
             if(!insertQuery.exec())  {
                 cout<<insertQuery.lastError().text().toStdString()<<"SetAlarmTime---insertQuery---error!"<<endl;
                 QSqlDatabase::database().rollback();
+                resValue = 3;
                 return false;
             }
             if(!insertCmdopenQuery.exec()) {
                 cout<<insertCmdopenQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdopenQuery---error!"<<endl;
                 QSqlDatabase::database().rollback();
+                resValue = 3;
                 return false;
             }
             if(!insertCmdcloseQuery.exec()) {
                 cout<<insertCmdcloseQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdcloseQuery---error!"<<endl;
                 QSqlDatabase::database().rollback();
+                resValue = 3;
                 return false;
             }
         }
@@ -1475,203 +1493,8 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
     return true;
 }
 
-bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
+/*bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& resValue,vector<string>& vecDevid )
 {
-    /*if(!IsOpen())
-    {
-        std::cout<<"the database is interrupt"<<std::endl;
-        resValue = 3;
-        return false;
-    }
-    rapidxml::xml_node<>* tranNode = root_node->first_node("TranInfo");
-    if(tranNode==NULL)
-    {
-        resValue = 11;
-        return false;
-    }
-    QSqlDatabase::database().transaction();
-    for(;tranNode!=NULL;tranNode=tranNode->next_sibling())
-    {
-        rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("TransmitterID");
-        if(attr==NULL)
-        {
-            resValue = 11;
-            return false;
-        }
-        QString qsTransNum = attr->value();
-
-        QSqlQuery qsDel;
-        QString strSql=QString("delete from monitoring_scheduler where objectnumber=:objectnumber");
-        qsDel.prepare(strSql);
-        qsDel.bindValue(":objectnumber",qsTransNum);
-        if(!qsDel.exec())
-        {
-            QSqlDatabase::database().rollback();
-            resValue = 3;
-            return false;
-        }
-
-        rapidxml::xml_node<>* setnode = tranNode->first_node();
-        if(setnode==NULL)
-        {
-            QSqlDatabase::database().rollback();
-            resValue = 11;
-            return false;
-        }
-
-        QSqlQuery insertQuery;//0:星期 1:月 2:天
-        strSql = QString("insert into monitoring_scheduler(objectnumber,weekday,enable,starttime,endtime,datetype,month,day,alarmendtime) \
-                         values(:objectnumber,:weekday,:enable,:starttime,:endtime,:datetype,:month,:day,:alarmendtime)");
-                         insertQuery.prepare(strSql);
-                insertQuery.bindValue(":objectnumber",qsTransNum);
-        while(setnode)
-        {
-            QString name=setnode->name();
-            if(name!="MonthTime" && name!="WeeklyTime" && name!="DayTime" )
-            {
-                QSqlDatabase::database().rollback();
-                resValue = 11;
-                return false;
-            }
-            int shutype=0;
-            if(name=="MonthTime")
-            {
-                shutype = 1;
-            }
-            else if(name=="DayTime")
-            {
-                shutype = 2;
-            }
-            insertQuery.bindValue(":datetype",shutype);
-
-            QDateTime qdt;
-            qdt.setDate(QDate(1970,1,1));
-            rapidxml::xml_attribute<char> * attrStarttime = setnode->first_attribute("StartTime");
-            if(attrStarttime==NULL)
-            {
-                attrStarttime = setnode->first_attribute("StartDateTime");
-                if(attrStarttime==NULL){
-                    QSqlDatabase::database().rollback();
-                    resValue = 11;
-                    return false;
-                }else
-                    qdt=QDateTime::fromString(attrStarttime->value(),"yyyy-MM-dd hh:mm:ss");
-            }else
-                qdt=QDateTime::fromString(attrStarttime->value(),"hh:mm:ss");
-
-
-            if(qdt.isValid()==false){
-                QSqlDatabase::database().rollback();
-                resValue = 11;
-                return false;
-            }
-            insertQuery.bindValue(":starttime",qdt);
-            rapidxml::xml_attribute<char> * attrEndtime = setnode->first_attribute("EndTime");
-            if(attrEndtime==NULL)
-            {
-                attrEndtime = setnode->first_attribute("EndDateTime");
-                if(attrEndtime==NULL){
-                    QSqlDatabase::database().rollback();
-                    resValue = 11;
-                    return false;
-                }else
-                    qdt=QDateTime::fromString(attrEndtime->value(),"yyyy-MM-dd hh:mm:ss");
-            }else
-                qdt=QDateTime::fromString(attrEndtime->value(),"hh:mm:ss");
-
-            if(qdt.isValid()==false){
-                QSqlDatabase::database().rollback();
-                resValue = 11;
-                return false;
-            }
-
-            insertQuery.bindValue(":endtime",qdt);
-            rapidxml::xml_attribute<char> * attrType = setnode->first_attribute("Type");
-            if(attrType==NULL)
-            {
-                QSqlDatabase::database().rollback();
-                resValue = 11;
-                return false;
-            }
-            insertQuery.bindValue(":enable",atoi(attrType->value()));
-            int iweek = 0;
-            int iMon = -1;
-            int iday = 0;
-            QDateTime qAlarmendDt;// = QDateTime::currentDateTime();
-            switch(shutype)
-            {
-            case 1:
-            {
-                rapidxml::xml_attribute<char> * attrMotn = setnode->first_attribute("Month");
-                if(attrMotn==NULL)
-                {
-                    QSqlDatabase::database().rollback();
-                    resValue = 11;
-                    return false;
-                }
-                iMon = atoi(attrMotn->value());
-                rapidxml::xml_attribute<char> * attrDay = setnode->first_attribute("Day");
-                if(attrDay==NULL)
-                {
-                    QSqlDatabase::database().rollback();
-                    resValue = 11;
-                    return false;
-                }
-                iday=atoi(attrDay->value());
-
-                rapidxml::xml_attribute<char> * attrend = setnode->first_attribute("AlarmEndTime");
-                if(attrend==NULL)
-                {
-                    //QSqlDatabase::database().rollback();
-                    //resValue = 11;
-                    break;//return false;
-                }
-                qAlarmendDt = QDateTime::fromString(attrend->value(),"yyyy-MM-dd hh:mm:ss");
-            }
-                break;
-            case 0:
-            {
-                rapidxml::xml_attribute<char> * attrWeek = setnode->first_attribute("DayofWeek");
-                if(attrWeek==NULL)
-                {
-                    QSqlDatabase::database().rollback();
-                    resValue = 11;
-                    return false;
-                }
-                iweek = atoi(attrWeek->value());
-                rapidxml::xml_attribute<char> * attrend = setnode->first_attribute("AlarmEndTime");
-                if(attrend==NULL)
-                {
-                    //QSqlDatabase::database().rollback();
-                    //resValue = 11;
-                    break;
-                }
-                qAlarmendDt = QDateTime::fromString(attrend->value(),"yyyy-MM-dd hh:mm:ss");
-            }
-                break;
-            case 2:
-            {
-
-            }
-                break;
-            }
-            insertQuery.bindValue(":weekday",iweek);
-            insertQuery.bindValue(":month",iMon);
-            insertQuery.bindValue(":day",iday);
-            insertQuery.bindValue(":alarmendtime",qAlarmendDt);
-            if(!insertQuery.exec())
-            {
-                QSqlDatabase::database().rollback();
-                resValue = 11;
-                return false;
-            }
-            setnode = setnode->next_sibling();
-        }
-        vecDevid.push_back(qsTransNum.toStdString());
-    }
-    QSqlDatabase::database().commit();
-    resValue = 0;
-    return true;*/
     if(!IsOpen())
        {
            std::cout<<"the database is interrupt"<<std::endl;
@@ -1935,7 +1758,7 @@ bool DataBaseOperation::SetAlarmTime( rapidxml::xml_node<char>* root_node,int& r
        QSqlDatabase::database().commit();
        resValue = 0;
        return true;
-}
+}*/
 
 
 bool DataBaseOperation::GetUpdateDevTimeScheduleInfo( string strDevnum,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
@@ -1954,8 +1777,7 @@ bool DataBaseOperation::GetUpdateDevTimeScheduleInfo( string strDevnum,map<int,v
 
 bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& device )
 {
-    if(!IsOpen())
-    {
+    if(!IsOpen()) {
         std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }

@@ -395,6 +395,8 @@ void device_session::start_write(unsigned char* commStr,int commLen)
         return;
     if(is_tcp())
     {
+        if(get_con_state()!=con_connected)
+            return;
         boost::asio::async_write(
                     socket(),
                     boost::asio::buffer(commStr,commLen),
@@ -464,7 +466,7 @@ void device_session::close_all()
     close_i();   //关闭socket
     //等待任务结束，任务里面，必须放在运行状态检测之前
     //状态检测会
-    wait_task_end();
+    //wait_task_end();
     cur_msg_q_id_         =0;//当前命令id
     query_timeout_count_=0;//命令发送超时次数清零
 }
