@@ -559,11 +559,17 @@ void device_session::notify_client(string sDevId,string devName,string user,int 
     case MSG_TRANSMITTER_TURNON_OPR:
     case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:
     case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR: {
-        CommandType = (user=="timer")?CMD_AUTO_TURNON_SEND:CMD_MANUAL_TURNON_SEND;
+        if(eResult == EC_OPR_ON_GOING)
+            CommandType = (user=="timer")?CMD_AUTO_TURNON_SEND:CMD_MANUAL_TURNON_SEND;
+        else if(eResult == EC_OK)
+            CommandType = (user=="timer")?STATE_AUTO_TURNON:STATE_MANUAL_TURNON;
     } break;
-    case MSG_TRANSMITTER_TURNOFF_OPR:
-        CommandType = (user=="timer")?CMD_AUTO_TURNOFF_SEND:CMD_MANUAL_TURNOFF_SEND;
-        break;
+    case MSG_TRANSMITTER_TURNOFF_OPR:{
+          if(eResult == EC_OPR_ON_GOING)
+              CommandType = (user=="timer")?CMD_AUTO_TURNOFF_SEND:CMD_MANUAL_TURNOFF_SEND;
+          else if(eResult == EC_OK)
+              CommandType = (user=="timer")?STATE_AUTO_TURNOFF:STATE_MANUAL_TURNOFF;
+    }break;
     default:
         break;
     }

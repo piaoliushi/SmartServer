@@ -333,8 +333,18 @@ namespace hx_net
 			string curUsrId = (*iter).second.usr_number_;
 			tcp::endpoint remote_add = (*iter).second.endPoint_;
 			GetInst(SvcMgr).get_notify()->OnClientOffline(remote_add.address().to_string(),remote_add.port());
-
 			(*iter).first->close_i();
+            std::map<string,vector<session_ptr> >::iterator itersession = devToUser_.begin();
+            for(;itersession!=devToUser_.end();++itersession)
+            {
+                vector<session_ptr>::iterator itervect= (*itersession).second.begin();
+                for(;itervect!=(*itersession).second.end();++itervect){
+                    if((*itervect) == iter->first){
+                        (*itersession).second.erase(itervect);
+                        break;
+                    }
+                }
+            }
 			session_pool_.erase(iter);
 			return 0;
 		}

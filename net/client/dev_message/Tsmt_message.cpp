@@ -242,19 +242,16 @@ namespace hx_net
 
     void Tsmt_message::exec_task_now(int icmdType,string sUser)
     {
-        //连接失效,返回
-        if(!m_pSession->is_connected()){
-            //nResult = EC_NET_ERROR;
-            return;
-        }
 
+        d_cur_task_ = icmdType;
+        d_cur_user_ = sUser;//记录当前用户，定时，自动，人工
         excute_task_cmd();
 
-        d_cur_user_ = sUser;//记录当前用户，定时，自动，人工
         std::time(&d_OprStartTime);//循环执行计时开始
-        d_cur_task_ = icmdType;
+        tm *pCurTime = localtime(&d_OprStartTime);
+        m_pSession-> notify_client(d_devInfo.sDevNum,d_devInfo.sDevName,sUser,
+                                  d_cur_task_,pCurTime,EC_OPR_ON_GOING);
         start_task_timeout_timer();
-
     }
 
     //启动任务定时器
@@ -370,8 +367,10 @@ namespace hx_net
     {
         if(is_detecting())
             return;
-        if(m_pSession!=NULL)
+        if(m_pSession!=NULL){
             m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0);
+            cout<<"关机指令已发送..."<<endl;
+        }
         return;
     }
 }
