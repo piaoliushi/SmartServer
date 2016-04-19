@@ -20,7 +20,7 @@ public:
     bool IsStandardCommand();
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     int   cur_dev_state();
-    void exec_task_now(int icmdType,string sUser);
+    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode);
     //启动定时控制
     void start_task_timeout_timer();
     //设备运行状态
@@ -44,6 +44,7 @@ protected:
      void  excute_task_cmd();
      void  GetResultData(DevMonitorDataPtr data_ptr);
     void   CreateObject();
+    bool  cmd_excute_is_ok();
 private:
     int      m_Subprotocol;//设备子协议号
     int                 m_mainprotocol;//主协议编号

@@ -125,7 +125,7 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 		virtual void handle_write(const boost::system::error_code& error,size_t bytes_transferred);
        //开始执行任务
         bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType);
-        void notify_client(string sDevId,string devName,string user,int cmdType, tm *pCurTime,int eResult);
+        void notify_client(string sDevId,string devName,string user,int cmdType, tm *pCurTime,bool bNtfFlash,int eResult);
         void set_opr_state(string sdevId,dev_opr_state curState);
         dev_opr_state get_opr_state(string sdevId);
 	private:

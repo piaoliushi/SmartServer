@@ -505,7 +505,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                         bool bRslt =  start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
                         //通知客户端正在执行
                         if(bRslt==true)
-                            notify_client(witer->first,witer->second.sDevName,"timer",(*cmd_iter).iCommandType,pCurTime,eResult);
+                            notify_client(witer->first,witer->second.sDevName,"timer",(*cmd_iter).iCommandType,pCurTime,true,eResult);
                     }
                 }
                 //按星期控制
@@ -519,7 +519,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                             bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
                             //通知客户端正在执行
                             if(bRslt==true)
-                                notify_client(witer->first,witer->second.sDevName,"timer",(*cmd_iter).iCommandType,pCurTime,eResult);
+                                notify_client(witer->first,witer->second.sDevName,"timer",(*cmd_iter).iCommandType,pCurTime,true,eResult);
                         }
                     }
                 }
@@ -535,7 +535,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                             bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
                             //通知客户端正在执行
                             if(bRslt==true)
-                                notify_client(witer->first,witer->second.sDevName,"timer",(*cmd_iter).iCommandType,pCurTime,eResult);
+                                notify_client(witer->first,witer->second.sDevName,"timer",(*cmd_iter).iCommandType,pCurTime,true,eResult);
                         }
                     }
                 }
@@ -546,13 +546,16 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
     }
 }
 
-void device_session::notify_client(string sDevId,string devName,string user,int cmdType, tm *pCurTime,int eResult)//witer->second.sDevNum
+void device_session::notify_client(string sDevId,string devName,string user,int cmdType, tm *pCurTime,
+                                   bool bNtfFlash,int eResult)
 {
     static  char str_time[64];
     strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
 
-    send_command_execute_result_message(GetInst(LocalConfig).local_station_id(),sDevId,
-                                        DEVICE_TRANSMITTER,devName,user,(e_MsgType)cmdType,(e_ErrorCode)eResult);
+    if(bNtfFlash){
+        send_command_execute_result_message(GetInst(LocalConfig).local_station_id(),sDevId,
+                                            DEVICE_TRANSMITTER,devName,user,(e_MsgType)cmdType,(e_ErrorCode)eResult);
+    }
     //通知http服务器
     int CommandType= -1;(user=="timer")?MSG_TRANSMITTER_TURNON_ACK:MSG_TRANSMITTER_TURNOFF_ACK;
     switch (cmdType) {
@@ -607,9 +610,9 @@ bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opR
     //cur_opr_user_[sDevId] = sUser;//记录当前操作用户
     //cur_task_type_[sDevId] = cmdType;//记录当前任务类型
     //现在执行任务
-    dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser);
+    dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult);
 
-    opResult = EC_OPR_ON_GOING;//正在执行控制命令
+    //opResult = EC_OPR_ON_GOING;//正在执行控制命令
 
     return true;
 }

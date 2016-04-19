@@ -240,17 +240,22 @@ namespace hx_net
         }
     }
 
-    void Tsmt_message::exec_task_now(int icmdType,string sUser)
+    void Tsmt_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode)
     {
 
         d_cur_task_ = icmdType;
         d_cur_user_ = sUser;//记录当前用户，定时，自动，人工
-        excute_task_cmd();
+        if(cmd_excute_is_ok()){
+            eErrCode = EC_OK;
+            return;
+        }
 
+        excute_task_cmd();
         std::time(&d_OprStartTime);//循环执行计时开始
         tm *pCurTime = localtime(&d_OprStartTime);
+        eErrCode = EC_OPR_ON_GOING;
         m_pSession-> notify_client(d_devInfo.sDevNum,d_devInfo.sDevName,sUser,
-                                  d_cur_task_,pCurTime,EC_OPR_ON_GOING);
+                                  d_cur_task_,pCurTime,false,eErrCode);
         start_task_timeout_timer();
     }
 
@@ -279,6 +284,25 @@ namespace hx_net
             break;
         }
     }
+    bool  Tsmt_message::cmd_excute_is_ok()
+    {
+         bool  bCmdExcComplet = false;
+         e_ErrorCode bCmdExcRslt = EC_FAILED;
+         switch (d_cur_task_) {
+         case MSG_TRANSMITTER_TURNON_OPR:
+         case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:
+         case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR:{
+             if(is_running())
+                 bCmdExcComplet = true;
+         } break;
+         case MSG_TRANSMITTER_TURNOFF_OPR:{
+             if(is_shut_down())
+                 bCmdExcComplet = true;
+             } break;
+         }
+
+         return bCmdExcComplet;
+    }
 
     //任务超时回调
     void Tsmt_message::schedules_task_time_out(const boost::system::error_code& error)
@@ -289,24 +313,12 @@ namespace hx_net
             time(&tmCurTime);
             double ninterval = difftime(tmCurTime,d_OprStartTime);
              tm *pCurTime = localtime(&tmCurTime);
-            bool  bCmdExcComplet = false;
-            switch (d_cur_task_) {
-            case MSG_TRANSMITTER_TURNON_OPR:
-            case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:
-            case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR:{
-                if(is_running())
-                    bCmdExcComplet = true;
-            } break;
-            case MSG_TRANSMITTER_TURNOFF_OPR:{
-                if(is_shut_down())
-                    bCmdExcComplet = true;
-                } break;
-            }
 
-            if(bCmdExcComplet == true){
+
+             if(cmd_excute_is_ok()){
                 //通知到客户端...
                 m_pSession->notify_client(d_devInfo.sDevNum,d_devInfo.sDevName,d_cur_user_,
-                                          d_cur_task_,pCurTime,EC_OK);
+                                          d_cur_task_,pCurTime,true,EC_OK);
                 m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
                 d_cur_user_.clear();
                 d_cur_task_ = -1;
@@ -316,7 +328,7 @@ namespace hx_net
                 if(ninterval>=d_devProperty->cmd_excut_timeout_duration) {
                     //通知到客户端...
                     m_pSession->notify_client(d_devInfo.sDevNum,d_devInfo.sDevName,d_cur_user_,
-                                              d_cur_task_,pCurTime,EC_FAILED);
+                                              d_cur_task_,pCurTime,true,EC_FAILED);
                     m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
                     d_cur_user_.clear();
                     d_cur_task_ = -1;

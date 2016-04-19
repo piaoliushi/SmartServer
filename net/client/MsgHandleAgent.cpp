@@ -156,11 +156,11 @@ namespace hx_net
         return m_msgImpl->cur_dev_state();
     }
 
-    void MsgHandleAgent::exec_task_now(int icmdType,string sUser)
+    void MsgHandleAgent::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode)
     {
         if(m_msgImpl==NULL)
             return ;
-        return m_msgImpl->exec_task_now(icmdType,sUser);
+        return m_msgImpl->exec_task_now(icmdType,sUser,eErrCode);
     }
 
     void MsgHandleAgent::start_task_timeout_timer()
