@@ -69,7 +69,7 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     d_pHttpServerStateValueLabel->setStyleSheet(tr("font: 18pt; color:rgb(117,250,0);"));
     pGridLayout->addWidget(d_pHttpServerStateValueLabel,1,1,1,1);
 
-    QLabel *pDatabaseStateLabel = new QLabel(QObject::tr("数据库:"));
+    QLabel *pDatabaseStateLabel = new QLabel(QObject::tr("数 据 库:"));
     pDatabaseStateLabel->setFixedSize(80,30);
     pGridLayout->addWidget(pDatabaseStateLabel,2,0,1,1);
 
@@ -88,7 +88,7 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     d_pABaseTimeLabel->setStyleSheet(tr("font: 18pt; color:rgb(117,250,0);"));
     d_pABaseTimeLabel->setFixedHeight(60);
     pGridLayout->addWidget(d_pABaseTimeLabel,3,1,1,1);
-     d_pAdjustTimeModLabel = new QLabel(QObject::tr("每星期"));
+     d_pAdjustTimeModLabel = new QLabel(QObject::tr("每周"));
      pGridLayout->addWidget(d_pAdjustTimeModLabel,3,2,1,1);
 
      d_pABaseTimeLabel->setText(d_sTimeNtp.c_str());
@@ -148,7 +148,7 @@ void QSvcStatePage::StartSvc()
                                              GetInst(LocalConfig).database_user(),
                                              GetInst(LocalConfig).database_password()))
         {
-            d_pDatabaseStateValueLabel->setStyleSheet("color:rgb(117,250,0)");
+            d_pDatabaseStateValueLabel->setStyleSheet("font: 18pt;color:rgb(117,250,0)");
             d_pDatabaseStateValueLabel->setText(tr("连接正常"));
             GetInst(StationConfig).load_station_config();
             emit updateDevList(true);
@@ -180,11 +180,11 @@ void QSvcStatePage::StartSvc()
 void QSvcStatePage::OnDatabase(bool bOk)
 {
     if(bOk){
-        d_pDatabaseStateValueLabel->setStyleSheet("color:rgb(117,250,0)");
+        d_pDatabaseStateValueLabel->setStyleSheet("font: 18pt;color:rgb(117,250,0)");
         d_pDatabaseStateValueLabel->setText(tr("连接正常"));
     }else
     {
-        d_pDatabaseStateValueLabel->setStyleSheet("color:red");
+        d_pDatabaseStateValueLabel->setStyleSheet("font: 18pt;color:red");
         d_pDatabaseStateValueLabel->setText(tr("已断开"));
     }
 }
