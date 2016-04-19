@@ -150,12 +150,12 @@ void QSvcStatePage::StartSvc()
         {
             d_pDatabaseStateValueLabel->setStyleSheet("font: 18pt;color:rgb(117,250,0)");
             d_pDatabaseStateValueLabel->setText(tr("连接正常"));
-            GetInst(StationConfig).load_station_config();
-            emit updateDevList(true);
+            if(GetInst(StationConfig).load_station_config()==true){
+                emit updateDevList(true);
+            }
         }
         else  {
-           // d_pDatabaseStateValueLabel->setStyleSheet("color:red");
-           // d_pDatabaseStateValueLabel->setText(tr("已断开"));
+             GetInst(DataBaseOperation).CloseDb();
             return;
         }
 
@@ -164,15 +164,15 @@ void QSvcStatePage::StartSvc()
         m_IsRunning=true;
         d_pSvcStateValueLabel->setText(tr("正在运行"));
         d_pHttpServerStateValueLabel->setText("正在运行");
-        //emit updateMenu();
+
     }
     else
     {
-        GetInst(hx_net::SvcMgr).Stop();
-        GetInst(DataBaseOperation).CloseDb();//清理数据库
-        m_IsRunning=false;
-        d_pSvcStateValueLabel->setText(tr("已停止"));
-        emit updateDevList(false);
+        //GetInst(hx_net::SvcMgr).Stop();
+        //GetInst(DataBaseOperation).CloseDb();//清理数据库
+        //m_IsRunning=false;
+        //d_pSvcStateValueLabel->setText(tr("已停止"));
+        //emit updateDevList(false);
     }
 
 }
@@ -198,6 +198,8 @@ void QSvcStatePage::timeUpdate()
 
     if(IsStart())
         GetInst(DataBaseOperation).check_database();
+    else
+        StartSvc();
     if(d_bUseNtp)
         checkAutoAdjustTime();
 
@@ -205,8 +207,9 @@ void QSvcStatePage::timeUpdate()
 
  void QSvcStatePage::onMunualAdjustTime()
  {
-    QString sexecute = QString(tr("./ntpclient -s -t -i 1 -h %1 &")).arg(GetInst(LocalConfig).ntp_svc_ip().c_str());
-    QProcess::execute(sexecute);
+     GetInst(DataBaseOperation).CloseDb();
+     QString sexecute = QString(tr("./ntpclient -s -t -i 1 -h %1 &")).arg(GetInst(LocalConfig).ntp_svc_ip().c_str());
+     QProcess::execute(sexecute);
  }
 
  void QSvcStatePage::checkAutoAdjustTime()

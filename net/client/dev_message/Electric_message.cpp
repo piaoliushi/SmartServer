@@ -458,6 +458,16 @@ namespace hx_net
 		}
 	}
 
+     bool Electric_message::is_auto_run()
+     {
+         switch(d_devInfo.nDevProtocol){
+         case ELECTRIC:
+             return true;
+         }
+
+         return false;
+     }
+
 	int Electric_message::decode_Eda9033A( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen )
 	{
 		int indexpos =0;

@@ -188,8 +188,8 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
 
             map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
             for(;cell_iter!=mapMonitorItem.end();++cell_iter){
-               // if(cell_iter->second.bUpload == false)
-               //    continue;
+                if(cell_iter->second.bUpload == false)
+                   continue;
                 xml_node<> *xml_Quality_Index = xml_reportMsg.allocate_node(node_element,"QualityIndex ");
                 //string sType = boost::lexical_cast<std::string>(cell_iter->second.iTargetId);
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));

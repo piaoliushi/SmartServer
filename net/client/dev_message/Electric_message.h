@@ -16,7 +16,7 @@ public:
     int    decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
     bool IsStandardCommand();
     bool isRegister();
-    bool is_auto_run(){return true;}
+    bool is_auto_run();
     int start();
     int stop();
     void getRegisterCommand(CommandUnit &cmdUnit);

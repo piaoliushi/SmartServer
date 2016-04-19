@@ -44,7 +44,7 @@ bool DataBaseOperation::OpenDb( const std::string& serveraddress, const std::str
     d_pwd=QString::fromStdString(pwd);
     if(!q_db.open())
     {
-        StartReOpen();
+       //StartReOpen();
         return false;
     }
     //StartReOpen();
@@ -57,8 +57,8 @@ bool DataBaseOperation::CloseDb()
     QString dbName;
     {
         QSqlDatabase db = QSqlDatabase::database();
-        if(db.isOpen()==false && db.isValid()==false)
-            return true;
+       // if(db.isOpen()==false && db.isValid()==false)
+        //    return true;
         dbName = QSqlDatabase::database().connectionName();
         db.close();
     }
@@ -109,16 +109,9 @@ void DataBaseOperation::StartReOpen()
 
 bool DataBaseOperation::ReOpen()
 {
-   // if(check_database()==false)
-   // {
-        CloseDb();
-        d_cur_Notify->OnDatabase(false);
-  //  }else {
-    //     boost::this_thread::sleep(boost::posix_time::milliseconds(1000));
-   //      ReOpen();
-   // }
+     CloseDb();
+     d_cur_Notify->OnDatabase(false);
 
-    //boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlDatabase q_db = QSqlDatabase::addDatabase("QPSQL");
     q_db.setHostName(d_serveraddress);//设置主机名
     q_db.setDatabaseName(d_database);//设置数据库名

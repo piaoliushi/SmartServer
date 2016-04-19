@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tbServer->setChecked(true);
     ShowSvcStatePage();
 
-    d_pSvcStatePage->StartSvc();
+    //d_pSvcStatePage->StartSvc();
 
 
 }

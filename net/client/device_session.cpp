@@ -411,8 +411,6 @@ void device_session::start_write(unsigned char* commStr,int commLen)
             #endif
                     );
     }
-
-
     else
     {
         usocket().async_send_to(boost::asio::buffer(commStr,commLen),uendpoint_,
@@ -726,8 +724,8 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos.mapDevInfo[sDevId].iDevType
                               ,curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
-   // http_ptr_->send_http_data_messge_to_platform(sDevId,modleInfos.mapDevInfo[sDevId].iDevType,
-    //                                             curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
+    http_ptr_->send_http_data_messge_to_platform(sDevId,modleInfos.mapDevInfo[sDevId].iDevType,
+                                                 curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
     //检测当前报警状态
     check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
     //如果在监测时间段则保存当前记录
