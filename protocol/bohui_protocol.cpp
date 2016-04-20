@@ -251,8 +251,8 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                      continue;
                  xml_node<> *xml_Quality_Index = xml_reportMsg.allocate_node(node_element,mapTypeToStr[cell_iter->second.iTargetId].second.c_str());
                  xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
-                 float curValue = curData->mValues[cell_iter->first].fValue;
-                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(curValue).c_str())));
+                 string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
+                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(sValue.c_str())));
                  xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
                  xml_Quality->append_node(xml_Quality_Index);
              }
@@ -490,7 +490,7 @@ void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
     map<string,vector<Monitoring_Scheduler> > mapSrcMontSch;
     if(_parse_alarm_run_time(rootNode,nValue,mapSrcMontSch)==false)
         return;
-    if (GetInst(DataBaseOperation).SetAlarmTime(mapSrcMontSch,nValue)==true)//nDevType,
+    if (GetInst(DataBaseOperation).SetAlarmTime(mapSrcMontSch,nValue)==true)
     {
         nValue=0;
         // 通知设备服务......
@@ -782,7 +782,7 @@ void Bohui_Protocol::_controlDeviceCommand(int nDevType,xml_node<> *rootNode,int
         nSwitch = strtol(attr_switch->value(),NULL,10);
         //--------------发送控制指令------------------------------------//
         if(nSwitch == 0)//关机
-            GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNON_OPR);
+            GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNOFF_OPR);
         else if(nSwitch == 1)//开机
             GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNON_OPR);
     }

@@ -3,6 +3,7 @@
 //#include "./dev_message/Hx_message.h"
 #include "./dev_message/Tsmt_message.h"
 #include "./dev_message/Electric_message.h"
+#include "./dev_message/Timer_message.h"
 
 namespace hx_net
 {
@@ -29,10 +30,12 @@ namespace hx_net
         case DEVICE_TEMP:
         case DEVICE_SMOKE:
         case DEVICE_WATER:
-        case DEVICE_AIR:{
-                m_pbaseMsg = new Envir_message(m_pSessionPtr,m_devInfo);
-			}
+        case DEVICE_AIR:
+            m_pbaseMsg = new Envir_message(m_pSessionPtr,m_devInfo);
 			break;
+        case DEVICE_GPS:
+            m_pbaseMsg = new Timer_message(m_pSessionPtr,m_devInfo);
+            break;
         case HUIXIN:	{
                 //m_pbaseMsg = new Hx_message(m_pSessionPtr);
 			}

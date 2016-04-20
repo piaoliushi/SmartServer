@@ -54,11 +54,6 @@ struct HandlerKey
 		//收集本平台所有设备状态信息
 		void  get_local_station_dev_status(loginAckMsgPtr &statusMsgPtr);
 
-
-		//设置退出标志
-		void setExitServer();
-		bool isExitServer();
-
 	private:	
 		
 		TaskQueue<msgPointer>& taskwork_;//引用一个任务队列
@@ -69,11 +64,6 @@ struct HandlerKey
 		std::map<session_ptr,HandlerKey> session_pool_;//用户连接handler
 
         std::map<string,vector<session_ptr> > devToUser_;//通过Dev获得对应的连接
-
-		bool    is_stop_;//是否退出
-
-		boost::recursive_mutex exit_mutex_;
-		bool  exit_;
 		
 	};
 }

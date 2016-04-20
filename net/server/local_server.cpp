@@ -15,7 +15,6 @@ namespace hx_net
 		:io_service_pool_(io_service_pool_size)//设置io pool尺寸
 		,taskwork_(taskwork)//引用任务队列 
         ,acceptor_(io_service_pool_.get_io_service(),tcp::endpoint(tcp::v4(),port))
-		,exit_(false)
 	{
 		start_accept();
 	}
@@ -30,23 +29,8 @@ namespace hx_net
 		io_service_pool_.run();
 	}
 
-	//设置退出标志
-    void LocalServer::setExitServer()
-	{
-
-		boost::recursive_mutex::scoped_lock lock(exit_mutex_);
-		exit_ = true;
-	}
-
-    bool LocalServer::isExitServer()
-	{
-		boost::recursive_mutex::scoped_lock lock(exit_mutex_);
-		return exit_;
-	}
-
     void LocalServer::stop()
 	{
-		setExitServer();  
         remove_all();
 		acceptor_.close();
 		io_service_pool_.stop();
@@ -54,8 +38,6 @@ namespace hx_net
 
     void LocalServer::handle_accept(session_ptr new_session_ptr,const boost::system::error_code& error)
 	{
-		if(isExitServer())
-			return;
 		if(!error)
 		{
 			try

@@ -129,8 +129,6 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         void set_opr_state(string sdevId,dev_opr_state curState);
         dev_opr_state get_opr_state(string sdevId);
 	private:
-		boost::mutex					stop_mutex_;
-		bool								    stop_flag_;
 		tcp::resolver                      resolver_;	
 		udp::resolver                    uresolver_;
 

@@ -27,7 +27,6 @@ device_session::device_session(boost::asio::io_service& io_service,
     ,modleInfos(modinfo)
     ,cur_msg_q_id_(0)
     ,query_timeout_count_(0)
-    ,stop_flag_(false)
     ,task_count_(0)
     ,http_ptr_(httpPtr)
     ,io_service_(io_service)
@@ -46,6 +45,7 @@ void device_session::init_session_config()
     //获得网络协议转换器相关配置
     moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos.sModleNumber);
     map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
+    bool bIsTransmitter = false;
     for(;iter!=modleInfos.mapDevInfo.end();++iter)
     {
         dev_opr_state_[iter->first] = dev_no_opr;
@@ -72,10 +72,17 @@ void device_session::init_session_config()
         mapItemAlarm.insert(std::make_pair(iter->first,devAlarmItem));
         //定时数据保存时间初始化
         tmLastSaveTime.insert(std::make_pair(iter->first,time(0)));
+
+        if(iter->second.iDevType == DEVICE_TRANSMITTER)
+            bIsTransmitter=true;
     }
     cur_dev_id_ = dev_agent_and_com.begin()->first;
 
     netAlarm.nAlarmId = -1;//默认值
+
+    //启动发射机任务定时器
+    if(bIsTransmitter==true)
+        start_task_schedules_timer();
 }
 
 void device_session::dev_base_info(DevBaseInfo& devInfo,string iId)
@@ -174,8 +181,6 @@ void device_session::connect(std::string hostname,unsigned short port,bool bReco
     if(is_connected())
         return;
 
-    set_stop(false);
-
     boost::system::error_code ec;
     tcp::resolver::query query(hostname, boost::lexical_cast<std::string, unsigned short>(port));
     tcp::resolver::iterator iter = resolver_.resolve(query, ec);
@@ -225,8 +230,6 @@ void device_session::start_timeout_timer(unsigned long nSeconds)
 //连接超时回调
 void device_session::connect_timeout(const boost::system::error_code& error)
 {
-    if(is_stop())
-        return;
     //只有当前状态是正在连接才执行超时。。。
     if(!is_connecting())
         return;
@@ -235,17 +238,6 @@ void device_session::connect_timeout(const boost::system::error_code& error)
         start_connect_timer();//启动重连尝试
 }
 
-void device_session::set_stop(bool bStop)
-{
-    boost::mutex::scoped_lock lock(stop_mutex_);
-    stop_flag_=bStop;
-}
-
-bool device_session::is_stop()
-{
-    boost::mutex::scoped_lock lock(stop_mutex_);
-    return stop_flag_;
-}
 //是否已经建立连接
 bool device_session::is_connected(string sDevId)
 {
@@ -297,7 +289,6 @@ void device_session::connect_time_event(const boost::system::error_code& error)
 
 void device_session::disconnect()
 {
-    set_stop();
     close_all();
     clear_all_alarm();//当停止服务时，清除所有报警
 }
@@ -338,8 +329,6 @@ void device_session::start_query_timer(unsigned long nSeconds/* =3 */)
 
 void  device_session::query_send_time_event(const boost::system::error_code& error)
 {
-    if(!is_connected())
-        return;
     if(error!= boost::asio::error::operation_aborted)
     {
         if(query_timeout_count_<moxa_config_ptr->query_timeout_count)
@@ -480,8 +469,6 @@ void device_session::start_task_schedules_timer()
 //定时任务回调
 void device_session::schedules_task_time_out(const boost::system::error_code& error)
 {
-    if(!is_connected())
-        return;
     if(error!= boost::asio::error::operation_aborted)
     {
         time_t curTime = time(0);
@@ -754,10 +741,7 @@ void device_session::clear_dev_alarm(string sDevId)
 
 void device_session::handle_connected(const boost::system::error_code& error)
 {
-    if(is_stop())
-        return;
     timeout_timer_.cancel();//关闭重连超时定时器
-
     if(!error)
     {
         set_con_state(con_connected);
@@ -779,8 +763,6 @@ void device_session::handle_connected(const boost::system::error_code& error)
         map<string,time_t>::iterator iter = tmLastSaveTime.begin();
         for(;iter!=tmLastSaveTime.end();++iter)
             (*iter).second = curTm;
-        //启动任务定时器
-        start_task_schedules_timer();
         return;
     }
     else	{

@@ -56,17 +56,6 @@ typedef struct
     map<int,vector<CommandUnit> > mapCommand;//命令
 }CommandAttribute;
 
-
-//
-/*typedef struct DATA_TAG
-{
-	DataInfo datainfoBuf[400];
-	int Length;//数据个数
-	string sId;//设备Id
-
-}Data,*pData;*/
-
-
 typedef struct
 {
 	unsigned char uHeadFlag[4]; //固定的命令头 48 58 44 51/4F/43
@@ -74,13 +63,7 @@ typedef struct
 	int uiLength;  // 00 00 00 08 整个数据包的长度，包括该命令头部分.
 }AckHeader,*pAckHeader;
 
-/*typedef struct DZDATA_TAG
-{
-	AckHeader     cmd;
-	int Length;//数据个数
-	DataInfo datainfoBuf[220];
-}DzData,*pDzData;*/
-////协议类型
+//协议类型
 typedef enum PROTOCOL
 {
 	BEIJ_GME                      = 0, //吉兆系列
@@ -103,7 +86,9 @@ typedef enum PROTOCOL
 	HARRIS                           = 17, //哈里斯
 	DE_XIN                            = 18, //德芯
     ELECTRIC                         =19,  //电力规约
-    ANTENNA_CONTROL          = 20 //天线控制器
+    ANTENNA_CONTROL          = 20, //天线控制器
+    TSC_TMIEDEV                  = 21 //校时设备
+
 }Protocol,*pProtocol;
 
 typedef enum ANTENAPROTOCOL
@@ -261,6 +246,11 @@ typedef enum ElECTRICPROTOCOL
 	ELECTRIC_104     = 0, 
 	ELECTRIC_101     = 1, 
 }ElectricSubProtocol,*pElectricSubProtocol;
+
+typedef enum TIMEROTOCOL
+{
+    TFS_001 = 0
+}TimeSubProtocol;
 
 typedef enum RESOLVE_TAG  //resolve
 {
