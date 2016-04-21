@@ -55,7 +55,8 @@ SOURCES += main.cpp\
     net/client/dev_message/transmmiter/Transmmiter.cpp \
     net/client/dev_message/transmmiter/CDtransmmiter.cpp \
     net/client/dev_message/transmmiter/GmeTransmmit.cpp \
-    net/client/dev_message/Timer_message.cpp
+    net/client/dev_message/Timer_message.cpp \
+    net/client/dev_message/transmmiter/LngdTransmmit.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -113,7 +114,8 @@ HEADERS  += \
     net/client/dev_message/transmmiter/Transmmiter.h \
     net/client/dev_message/transmmiter/CDtransmmiter.h \
     net/client/dev_message/transmmiter/GmeTransmmit.h \
-    net/client/dev_message/Timer_message.h
+    net/client/dev_message/Timer_message.h \
+    net/client/dev_message/transmmiter/LngdTransmmit.h
 
 FORMS    += mainwindow.ui
 

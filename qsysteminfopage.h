@@ -56,6 +56,11 @@ private:
 	QLineEdit   *d_PowerLimit;
 	QCheckBox   *d_pAutoRun;
 
+    QLineEdit *d_RptUrl;
+    QCheckBox *d_RptEnable;
+    QLineEdit *d_NtpIp;
+    QCheckBox *d_NtpEnable;
+
 };
 
 #endif // QSYSTEMINFOPAGE_H

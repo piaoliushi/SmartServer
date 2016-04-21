@@ -21,8 +21,8 @@ void QNotifyHandler::OnDevStatus(string sDevId,int nResult)
 void QNotifyHandler::OnClientOnline(string sIp,short port)
 {
     boost::recursive_mutex::scoped_lock lock(mutex_);
-    QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);
-	emit S_OnClientOnline(sEndpoint);
+    //QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);sEndpoint
+    emit S_OnClientOnline(QString::fromStdString(sIp));
 }
 
 //数据库状态

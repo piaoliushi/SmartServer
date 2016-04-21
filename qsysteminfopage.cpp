@@ -33,31 +33,63 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     //QHBoxLayout *pHlyt = new QHBoxLayout();
     QGridLayout *pGridLayout = new QGridLayout();
     pGridLayout->setContentsMargins(10,0,0,10);
-    QLabel *staticLabel = new QLabel(tr("台站编号："));
+    QLabel *staticLabel = new QLabel(tr("台站编号:"),this);
     pGridLayout->addWidget(staticLabel,0,0,1,1);
 
     d_stationNumber = new QLineEdit(this);
+    d_stationNumber->setReadOnly(true);
 
     pGridLayout->addWidget(d_stationNumber,0,1,1,1);
-    staticLabel = new QLabel(tr("台站名称："));
+    staticLabel = new QLabel(tr("台站名称:"),this);
 
     pGridLayout->addWidget(staticLabel,0,2,1,1);
     d_stationName = new QLineEdit(this);
+    d_stationName->setReadOnly(true);
 
     pGridLayout->addWidget(d_stationName,0,3,1,1);
 
-    staticLabel = new QLabel(tr("设备标识："));
+    staticLabel = new QLabel(tr("设备标识:"),this);
     pGridLayout->addWidget(staticLabel,1,0,1,1);
     d_deviceId = new QLineEdit(this);
+    d_deviceId->setReadOnly(true);
     pGridLayout->addWidget(d_deviceId,1,1,1,1);
 
-    staticLabel = new QLabel(tr("平台标识："));
+    staticLabel = new QLabel(tr("平台标识:"),this);
     pGridLayout->addWidget(staticLabel,1,2,1,1);
+
     d_platformId = new QLineEdit(this);
+    d_platformId->setReadOnly(true);
     pGridLayout->addWidget(d_platformId,1,3,1,1);
     pHMainLyt->addLayout(pGridLayout);
 
-    pHMainLyt->addLayout(createTitleLayout(tr("本机网络")));
+    pHMainLyt->addLayout(createTitleLayout(tr("平台属性")));
+    QVBoxLayout *pPltVlyt = new QVBoxLayout();
+    pPltVlyt->setContentsMargins(10,0,0,10);
+     QHBoxLayout * pRptHlyt = new QHBoxLayout();
+
+     staticLabel = new QLabel(tr("上报服务:"),this);
+     pRptHlyt->addWidget(staticLabel);
+     d_RptUrl = new QLineEdit(this);
+     d_RptUrl->setReadOnly(true);
+     pRptHlyt->addWidget(d_RptUrl);
+    pPltVlyt->addLayout(pRptHlyt);
+
+    QHBoxLayout * pNptHlyt = new QHBoxLayout();
+     staticLabel = new QLabel(tr("校时服务:"),this);
+     pNptHlyt->addWidget(staticLabel);
+     d_NtpIp = new QLineEdit(this);
+     d_NtpIp->setReadOnly(true);
+     pNptHlyt->addWidget(d_NtpIp);
+     d_NtpEnable = new QCheckBox(tr("启用"),this);
+     d_NtpEnable->setFocusPolicy(Qt::NoFocus);
+     d_NtpEnable->setEnabled(false);
+     d_NtpEnable->setCheckable(true);
+     pNptHlyt->addWidget(d_NtpEnable);
+     pPltVlyt->addLayout(pNptHlyt);
+
+     pHMainLyt->addLayout(pPltVlyt);
+
+     pHMainLyt->addLayout(createTitleLayout(tr("本机网络")));
     QHBoxLayout * pHlyt = new QHBoxLayout();
     pHlyt->setContentsMargins(10,0,0,10);
     staticLabel = new QLabel(tr("网卡1："));
@@ -73,7 +105,6 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     pHlyt->addWidget(staticLabel);
     QLabel *ethIp1 = new QLabel(this);
     ethIp1->setStyleSheet("color:#5fff53");
-    //ethlp1->s();
     pHlyt->addWidget(ethIp1);
     QNetworkInterface   interface1 = QNetworkInterface::interfaceFromName("eth1");
     QList<QNetworkAddressEntry>  netlist1 = interface1.addressEntries();
@@ -85,19 +116,26 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     pHMainLyt->addLayout(pHlyt);
 
 
-
-
-
     QSpacerItem *pBottomSpace = new QSpacerItem(20, 20, QSizePolicy::Maximum, QSizePolicy::Expanding);
     pHMainLyt->addSpacerItem(pBottomSpace);
 
+    QHBoxLayout * pAboutHlyt = new QHBoxLayout();
+    pBottomSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding,QSizePolicy::Maximum );
+    pAboutHlyt->addSpacerItem(pBottomSpace);
+    QVBoxLayout *pAboutVlyt = new QVBoxLayout();
+    QLabel *lbAboult = new QLabel("版权所有 © 2006-2016 安徽汇鑫电子有限公司 保留所有权利",this);
+    lbAboult->setStyleSheet(tr("font: 9pt; color:#45c9d5;"));
+    pAboutVlyt->addWidget(lbAboult);
+    lbAboult = new QLabel("电话:0551-65319365,65314565",this);
+    lbAboult->setStyleSheet(tr("font: 9pt; color:#45c9d5;"));
+     pAboutVlyt->addWidget(lbAboult);
 
+    pAboutHlyt->addLayout(pAboutVlyt);
+
+    pHMainLyt->addLayout(pAboutHlyt);
     setLayout(pHMainLyt);
 
     loadConfigData();
-
-    //unLockEdit(false);
-
 
 }
 
@@ -136,33 +174,17 @@ void QSystemInfoPage::loadConfigData()
     string svcNumber = GetInst(LocalConfig).local_dev_server_number();
     string sSrcCode = GetInst(LocalConfig).src_code();
     string sDstCode = GetInst(LocalConfig).dst_code();
-    int svcPort = GetInst(LocalConfig).local_port();
+    string sRpturl = GetInst(LocalConfig).report_svc_url();
+    string sNtpIp = GetInst(LocalConfig).ntp_svc_ip();
 
-    //d_svcNumber->setText(svcNumber.c_str());
     d_stationNumber->setText(stationId.c_str());
     d_stationName->setText(stationName.c_str());
     d_deviceId->setText(sSrcCode.c_str());
     d_platformId->setText(sDstCode.c_str());
+    d_RptUrl->setText(sRpturl.c_str());
+    d_NtpIp->setText(sNtpIp.c_str());
+    d_NtpEnable->setChecked(GetInst(LocalConfig).ntp_svc_use());
 
-
-    //bool bsms_use = GetInst(LocalConfig).sms_use();
-    //string comId = GetInst(LocalConfig).sms_com();
-    //int    baudRate = GetInst(LocalConfig).sms_baud_rate();
-    //string centerNumber = GetInst(LocalConfig).sms_center_number();
-
-    //d_smsEnable->setChecked(bsms_use);
-    //d_comPort->setCurrentIndex(d_comPort->findText(QString::fromUtf8(comId.c_str())));
-    //d_baudRate->setCurrentIndex(d_baudRate->findText(QString::number(baudRate)));
-   // d_smsCenterNumber->setText(QString::fromUtf8(centerNumber.c_str()));
-
-    /*map<string,pDevicePropertyExPtr> &vTransmitter = GetInst(LocalConfig).transmitter_property_ex();
-    map<string,pDevicePropertyExPtr>::iterator transmitter_iter = vTransmitter.begin();
-    for(;transmitter_iter!=vTransmitter.end();++transmitter_iter)
-    {
-        d_Transmitters->addItem((*transmitter_iter).first.c_str());
-    }*/
-
-    //d_pAutoRun->setChecked(isAutoStart());
 }
 
 void QSystemInfoPage::transmitterChanged(const QString sTrsmitNumber)

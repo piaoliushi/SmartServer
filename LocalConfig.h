@@ -45,6 +45,7 @@ public:
     string http_svc_ip(){return http_svc_ip_;}
     string http_svc_port(){return http_svc_port_;}
     string ntp_svc_ip(){return ntp_svc_ip_;}
+    bool  ntp_svc_use(){return ntp_upload_use_;}
 	
 	bool writeSmsParToXml(const char* sFileName,bool bUse,string comId,int baudRate,string smsCenterNumber);
 	

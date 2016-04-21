@@ -224,7 +224,8 @@ typedef enum KANGTEPROTOCOL
 typedef enum LIAOPROTOCOL
 {
 	LNSZ_HS           = 0,//辽宁数字HSFM-3 3KW   
-	LNSZ_10_5Kw       = 1,//辽宁数字调频5/10Kw
+    LNSZ_10_5Kw    = 1,//辽宁数字调频5/10Kw
+    LNSZ_169         =2,//辽宁dtmb
 }LngdSubProtocol;
 typedef enum SHANGHAIPROTOCOL
 {
