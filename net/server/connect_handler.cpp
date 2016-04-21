@@ -33,7 +33,7 @@ namespace hx_net
 	//启动心跳定时器
 	void connect_handler::start_hb_timer()
 	{
-        h_b_timer_.expires_from_now(boost::posix_time::seconds(5));
+        h_b_timer_.expires_from_now(boost::posix_time::seconds(60));
 		h_b_timer_.async_wait(strand_.wrap(
 			boost::bind(&connect_handler::handle_timeout,this,
 			boost::asio::placeholders::error))); 
@@ -45,7 +45,7 @@ namespace hx_net
 		if (!e)
 		{
 			std::time_t now = time(0);
-            if (now - get_last_hb_time() >15)//超时
+            if (now - get_last_hb_time() >180)//超时
 			{
  				close_handler();
 				cout<<"heartbeat timeout!"<<endl;

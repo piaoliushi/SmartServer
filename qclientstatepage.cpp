@@ -49,7 +49,7 @@ void QClientStatePage::OnClientOnline(QString sAddr)
     pClientList->setItem(nrow,0,new QTableWidgetItem(QString(tr(" none"))));
 	QDateTime time=QDateTime::currentDateTime();
     pClientList->setItem(nrow,1,new QTableWidgetItem(sAddr));
-    pClientList->setItem(nrow,2,new QTableWidgetItem(time.toString("MM/dd hh:mm:ss")));
+    pClientList->setItem(nrow,2,new QTableWidgetItem(time.toString("yy/MM/dd hh:mm:ss")));
 
 	pClientList->resizeColumnsToContents();
 	pClientList->horizontalHeader()->setStretchLastSection(true);
