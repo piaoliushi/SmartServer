@@ -36,7 +36,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     QGridLayout *pGridLayout = new QGridLayout();
     pGridLayout->setContentsMargins(10,0,0,10);
     QLabel *staticLabel = new QLabel(tr("台站编号:"),this);
-    staticLabel->setFixedWidth(80);
+    staticLabel->setFixedWidth(70);
     pGridLayout->addWidget(staticLabel,0,0,1,1);
 
     d_stationNumber = new QLabel(this);
@@ -46,7 +46,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
 
     pGridLayout->addWidget(d_stationNumber,0,1,1,1);
     staticLabel = new QLabel(tr("台站名称:"),this);
-    staticLabel->setFixedWidth(80);
+    staticLabel->setFixedWidth(70);
 
     pGridLayout->addWidget(staticLabel,0,2,1,1);
     d_stationName = new QLabel(this);
@@ -56,14 +56,14 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     pGridLayout->addWidget(d_stationName,0,3,1,1);
 
     staticLabel = new QLabel(tr("设备标识:"),this);
-    staticLabel->setFixedWidth(80);
+    staticLabel->setFixedWidth(70);
     pGridLayout->addWidget(staticLabel,1,0,1,1);
     d_deviceId = new QLabel(this);
     d_deviceId->setStyleSheet("color:#5fff53");
     pGridLayout->addWidget(d_deviceId,1,1,1,1);
 
     staticLabel = new QLabel(tr("平台标识:"),this);
-    staticLabel->setFixedWidth(80);
+    staticLabel->setFixedWidth(70);
     pGridLayout->addWidget(staticLabel,1,2,1,1);
 
     d_platformId = new QLabel(this);
@@ -77,7 +77,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
      QHBoxLayout * pRptHlyt = new QHBoxLayout();
 
      staticLabel = new QLabel(tr("平台服务:"),this);
-     staticLabel->setFixedWidth(80);
+     staticLabel->setFixedWidth(70);
      pRptHlyt->addWidget(staticLabel);
      d_RptUrl = new QLabel(this);
      d_RptUrl->setStyleSheet("color:#5fff53");
@@ -86,13 +86,13 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
 
      QHBoxLayout * pNptHlyt = new QHBoxLayout();
      staticLabel = new QLabel(tr("校时服务:"),this);
-     staticLabel->setFixedWidth(80);
+     staticLabel->setFixedWidth(70);
      pNptHlyt->addWidget(staticLabel);
      d_NtpIp = new QLabel(this);
      d_NtpIp->setStyleSheet("color:#5fff53");
      pNptHlyt->addWidget(d_NtpIp);
      d_NtpEnable = new QCheckBox(this);
-     d_NtpEnable->setFixedWidth(10);
+     d_NtpEnable->setFixedWidth(15);
      d_NtpEnable->setFocusPolicy(Qt::NoFocus);
      d_NtpEnable->setEnabled(false);
      d_NtpEnable->setCheckable(true);
@@ -110,7 +110,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     QHBoxLayout * pHlyt = new QHBoxLayout();
     pHlyt->setContentsMargins(10,0,0,10);
     staticLabel = new QLabel(tr("网卡1:"));
-    staticLabel->setFixedWidth(80);
+    staticLabel->setFixedWidth(65);
     pHlyt->addWidget(staticLabel);
     QLabel *ethIp0 = new QLabel(this);
     ethIp0->setStyleSheet("color:#5fff53");
@@ -120,7 +120,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     if(!netlist0.isEmpty())
         ethIp0->setText(netlist0.at(0).ip().toString());
     staticLabel = new QLabel(tr("网卡2:"));
-    staticLabel->setFixedWidth(80);
+    staticLabel->setFixedWidth(65);
     pHlyt->addWidget(staticLabel);
     QLabel *ethIp1 = new QLabel(this);
     ethIp1->setStyleSheet("color:#5fff53");
