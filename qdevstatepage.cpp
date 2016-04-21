@@ -19,7 +19,7 @@ QDevStatePage::QDevStatePage(QNotifyHandler &Notify,QWidget *parent)
 	QVBoxLayout *pHMainLyt = new QVBoxLayout(this);
 	
 	QHBoxLayout *pHlyt = new QHBoxLayout();
-	  pDevSize = new QLabel(tr("设备数："));
+      pDevSize = new QLabel(tr("设备信息："));
       pHlyt->addWidget(pDevSize);
 
 	 pHMainLyt->addLayout(pHlyt);
@@ -82,8 +82,8 @@ void QDevStatePage::LoadDevToList()
 		}
     }
 
-	int nDevNum = pDevList->rowCount();
-	pDevSize->setText(QString(tr("设备数：%1")).arg(nDevNum));
+    //int nDevNum = pDevList->rowCount();
+    //pDevSize->setText(QString(tr("设备数：%1")).arg(nDevNum));
 
 	pDevList->resizeColumnsToContents();
 }

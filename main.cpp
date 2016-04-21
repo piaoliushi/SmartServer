@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     pal.setBrush(QPalette::Midlight,QColor(90,90,90));
     pal.setBrush(QPalette::Mid,QColor(60,60,60));
     pal.setBrush(QPalette::Dark,QColor(30,30,30));
-    pal.setBrush(QPalette::Highlight, QColor(40,40,70));
+    //pal.setBrush(QPalette::Highlight, QColor(40,40,70));
     pal.setBrush(QPalette::HighlightedText, Qt::white);
     pal.setBrush(QPalette::Link, QColor(85,170,255));
     pal.setBrush(QPalette::LinkVisited, QColor(170,100,240));

@@ -17,6 +17,7 @@
 #include<QMessageBox>
 #include <QNetworkInterface>
 #include <QNetworkAddressEntry>
+#include <QPalette>
 #include "./net/SvcMgr.h"
 #include "DataType.h"
 #include "StationConfig.h"
@@ -27,6 +28,7 @@ using namespace std;
 QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     : QWidget(parent)
 { 
+
     QVBoxLayout *pHMainLyt = new QVBoxLayout();
 
     pHMainLyt->addLayout(createTitleLayout(tr("台站属性")));
@@ -34,31 +36,38 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     QGridLayout *pGridLayout = new QGridLayout();
     pGridLayout->setContentsMargins(10,0,0,10);
     QLabel *staticLabel = new QLabel(tr("台站编号:"),this);
+    staticLabel->setFixedWidth(60);
     pGridLayout->addWidget(staticLabel,0,0,1,1);
 
-    d_stationNumber = new QLineEdit(this);
-    d_stationNumber->setReadOnly(true);
+    d_stationNumber = new QLabel(this);
+    d_stationNumber->setStyleSheet("color:#5fff53");
+    //d_stationNumber->setPalette(palette);
+    //d_stationNumber->setFrameShadow(QLabel::Sunken);
 
     pGridLayout->addWidget(d_stationNumber,0,1,1,1);
     staticLabel = new QLabel(tr("台站名称:"),this);
+    staticLabel->setFixedWidth(60);
 
     pGridLayout->addWidget(staticLabel,0,2,1,1);
-    d_stationName = new QLineEdit(this);
-    d_stationName->setReadOnly(true);
+    d_stationName = new QLabel(this);
+    d_stationName->setStyleSheet("color:#5fff53");
+
 
     pGridLayout->addWidget(d_stationName,0,3,1,1);
 
     staticLabel = new QLabel(tr("设备标识:"),this);
+    staticLabel->setFixedWidth(60);
     pGridLayout->addWidget(staticLabel,1,0,1,1);
-    d_deviceId = new QLineEdit(this);
-    d_deviceId->setReadOnly(true);
+    d_deviceId = new QLabel(this);
+    d_deviceId->setStyleSheet("color:#5fff53");
     pGridLayout->addWidget(d_deviceId,1,1,1,1);
 
     staticLabel = new QLabel(tr("平台标识:"),this);
+    staticLabel->setFixedWidth(60);
     pGridLayout->addWidget(staticLabel,1,2,1,1);
 
-    d_platformId = new QLineEdit(this);
-    d_platformId->setReadOnly(true);
+    d_platformId = new QLabel(this);
+    d_platformId->setStyleSheet("color:#5fff53");
     pGridLayout->addWidget(d_platformId,1,3,1,1);
     pHMainLyt->addLayout(pGridLayout);
 
@@ -68,23 +77,31 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
      QHBoxLayout * pRptHlyt = new QHBoxLayout();
 
      staticLabel = new QLabel(tr("上报服务:"),this);
+     staticLabel->setFixedWidth(60);
      pRptHlyt->addWidget(staticLabel);
-     d_RptUrl = new QLineEdit(this);
-     d_RptUrl->setReadOnly(true);
+     d_RptUrl = new QLabel(this);
+     d_RptUrl->setStyleSheet("color:#5fff53");
      pRptHlyt->addWidget(d_RptUrl);
-    pPltVlyt->addLayout(pRptHlyt);
+     pPltVlyt->addLayout(pRptHlyt);
 
-    QHBoxLayout * pNptHlyt = new QHBoxLayout();
+     QHBoxLayout * pNptHlyt = new QHBoxLayout();
      staticLabel = new QLabel(tr("校时服务:"),this);
+     staticLabel->setFixedWidth(60);
      pNptHlyt->addWidget(staticLabel);
-     d_NtpIp = new QLineEdit(this);
-     d_NtpIp->setReadOnly(true);
+     d_NtpIp = new QLabel(this);
+     d_NtpIp->setStyleSheet("color:#5fff53");
      pNptHlyt->addWidget(d_NtpIp);
-     d_NtpEnable = new QCheckBox(tr("启用"),this);
+     d_NtpEnable = new QCheckBox(this);
+     d_NtpEnable->setFixedWidth(10);
      d_NtpEnable->setFocusPolicy(Qt::NoFocus);
      d_NtpEnable->setEnabled(false);
      d_NtpEnable->setCheckable(true);
      pNptHlyt->addWidget(d_NtpEnable);
+     staticLabel = new QLabel(tr("启用"),this);
+     staticLabel->setFixedWidth(40);
+     pNptHlyt->addWidget(staticLabel);
+     QSpacerItem *pNtpSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding,QSizePolicy::Maximum );
+     pNptHlyt->addSpacerItem(pNtpSpace);
      pPltVlyt->addLayout(pNptHlyt);
 
      pHMainLyt->addLayout(pPltVlyt);
@@ -92,7 +109,8 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
      pHMainLyt->addLayout(createTitleLayout(tr("本机网络")));
     QHBoxLayout * pHlyt = new QHBoxLayout();
     pHlyt->setContentsMargins(10,0,0,10);
-    staticLabel = new QLabel(tr("网卡1："));
+    staticLabel = new QLabel(tr("网卡1:"));
+    staticLabel->setFixedWidth(60);
     pHlyt->addWidget(staticLabel);
     QLabel *ethIp0 = new QLabel(this);
     ethIp0->setStyleSheet("color:#5fff53");
@@ -101,7 +119,8 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     QList<QNetworkAddressEntry>  netlist0 = interface0.addressEntries();
     if(!netlist0.isEmpty())
         ethIp0->setText(netlist0.at(0).ip().toString());
-    staticLabel = new QLabel(tr("网卡2："));
+    staticLabel = new QLabel(tr("网卡2:"));
+    staticLabel->setFixedWidth(60);
     pHlyt->addWidget(staticLabel);
     QLabel *ethIp1 = new QLabel(this);
     ethIp1->setStyleSheet("color:#5fff53");
@@ -123,11 +142,11 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     pBottomSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding,QSizePolicy::Maximum );
     pAboutHlyt->addSpacerItem(pBottomSpace);
     QVBoxLayout *pAboutVlyt = new QVBoxLayout();
-    QLabel *lbAboult = new QLabel("版权所有 © 2006-2016 安徽汇鑫电子有限公司 保留所有权利",this);
+    QLabel *lbAboult = new QLabel("版权所有 © 2006-2016 安徽汇鑫电子有限公司",this);
     lbAboult->setStyleSheet(tr("font: 9pt; color:#45c9d5;"));
     pAboutVlyt->addWidget(lbAboult);
-    lbAboult = new QLabel("电话:0551-65319365,65314565",this);
-    lbAboult->setStyleSheet(tr("font: 9pt; color:#45c9d5;"));
+    lbAboult = new QLabel("电话:0551-65319365 , 65314565",this);
+    lbAboult->setStyleSheet(tr("font: 10pt; color:#45c9d5;"));
      pAboutVlyt->addWidget(lbAboult);
 
     pAboutHlyt->addLayout(pAboutVlyt);

@@ -11,9 +11,9 @@ QClientStatePage::QClientStatePage(QNotifyHandler &Notify,QWidget *parent)
 {
 	QVBoxLayout *pHMainLyt = new QVBoxLayout(this);
 	QHBoxLayout *pHlyt = new QHBoxLayout();
-	QLabel*pClientStatic = new QLabel(tr("在线用户数："));
+    QLabel*pClientStatic = new QLabel(tr("在线用户："));
 	pHlyt->addWidget(pClientStatic);
-	QLabel*pClientSize = new QLabel(tr("0"));
+    QLabel*pClientSize = new QLabel(tr(""));
 	pHlyt->addWidget(pClientSize);
 	
 	pHMainLyt->addLayout(pHlyt);
@@ -21,7 +21,7 @@ QClientStatePage::QClientStatePage(QNotifyHandler &Notify,QWidget *parent)
     pClientList->setColumnCount(3);
     pClientList->setFocusPolicy(Qt::NoFocus);
 	QStringList header; 
-    header<<tr("用户名称")<<tr("IP地址")<<tr("登陆时间");
+    header<<tr("用户名")<<tr("IP地址")<<tr("登陆时间");
 	pClientList->setHorizontalHeaderLabels(header); 
 	pClientList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	pClientList->setSelectionBehavior ( QAbstractItemView::SelectRows); //设置选择行为，以行为单位
@@ -49,7 +49,7 @@ void QClientStatePage::OnClientOnline(QString sAddr)
     pClientList->setItem(nrow,0,new QTableWidgetItem(QString(tr(" none"))));
 	QDateTime time=QDateTime::currentDateTime();
     pClientList->setItem(nrow,1,new QTableWidgetItem(sAddr));
-    pClientList->setItem(nrow,2,new QTableWidgetItem(time.toString("yyyy-MM-dd hh:mm:ss dddd")));
+    pClientList->setItem(nrow,2,new QTableWidgetItem(time.toString("MM/dd hh:mm:ss")));
 
 	pClientList->resizeColumnsToContents();
 	pClientList->horizontalHeader()->setStretchLastSection(true);

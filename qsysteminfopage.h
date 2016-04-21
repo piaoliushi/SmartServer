@@ -33,14 +33,14 @@ public slots:
 	bool isAutoStart();
    // int    get_gw_ip(char *eth, char *ipaddr);
 private:
-	QLineEdit *d_svcNumber;
-	QLineEdit *d_svcPort;
-	QLineEdit *d_stationNumber;
-	QLineEdit *d_stationName;
-	QLineEdit *d_databaseIp;
-	QLineEdit *d_databaseUser;
-    QLineEdit *d_deviceId;
-    QLineEdit *d_platformId;
+    QLabel *d_svcNumber;
+    QLabel *d_svcPort;
+    QLabel *d_stationNumber;
+    QLabel *d_stationName;
+    QLabel *d_databaseIp;
+    QLabel *d_databaseUser;
+    QLabel *d_deviceId;
+    QLabel *d_platformId;
 	QComboBox *d_comPort;
 	QComboBox *d_baudRate;
 	QLineEdit *d_smsCenterNumber;
@@ -56,9 +56,9 @@ private:
 	QLineEdit   *d_PowerLimit;
 	QCheckBox   *d_pAutoRun;
 
-    QLineEdit *d_RptUrl;
+    QLabel *d_RptUrl;
     QCheckBox *d_RptEnable;
-    QLineEdit *d_NtpIp;
+    QLabel *d_NtpIp;
     QCheckBox *d_NtpEnable;
 
 };
