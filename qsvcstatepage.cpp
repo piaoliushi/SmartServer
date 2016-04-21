@@ -85,16 +85,17 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     pAdjustTime->setFixedSize(80,30);
     pGridLayout->addWidget(pAdjustTime,3,0,1,1);
     d_pABaseTimeLabel = new QLabel(QObject::tr("00:00:00"));
-    d_pABaseTimeLabel->setStyleSheet(tr("font: 18pt; color:rgb(117,250,0);"));
+    d_pABaseTimeLabel->setStyleSheet(tr("font: 16pt; color:rgb(117,250,0);"));
     d_pABaseTimeLabel->setFixedHeight(60);
     pGridLayout->addWidget(d_pABaseTimeLabel,3,1,1,1);
      d_pAdjustTimeModLabel = new QLabel(QObject::tr("每周"));
+     d_pAdjustTimeModLabel->setStyleSheet(tr("font: 16pt; color:rgb(117,250,0);"));
      pGridLayout->addWidget(d_pAdjustTimeModLabel,3,2,1,1);
 
      d_pABaseTimeLabel->setText(d_sTimeNtp.c_str());
      if(d_bUseNtp==false){
-          d_pABaseTimeLabel->setStyleSheet(tr("font: 10pt; color:gray;"));
-          d_pAdjustTimeModLabel->setStyleSheet(tr("font: 10pt; color:gray;"));
+          d_pABaseTimeLabel->setStyleSheet(tr("font: 16pt; color:gray;"));
+          d_pAdjustTimeModLabel->setStyleSheet(tr("font: 16pt; color:gray;"));
      }else
      {
          if(d_nModNtp==0)

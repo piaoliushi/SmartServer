@@ -92,7 +92,11 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
      d_NtpIp->setStyleSheet("color:#5fff53");
      pNptHlyt->addWidget(d_NtpIp);
      d_NtpEnable = new QCheckBox(this);
-     d_NtpEnable->setFixedWidth(15);
+     d_NtpEnable->setStyleSheet("QCheckBox::indicator {width: 20px; height: 20px;}QCheckBox::indicator:checked \
+     {image: url(:/new/images/checked.png);} QCheckBox::indicator:unchecked \
+     {image: url(:/new/images/unchecked.png);}");
+
+     d_NtpEnable->setFixedWidth(22);
      d_NtpEnable->setFocusPolicy(Qt::NoFocus);
      d_NtpEnable->setEnabled(false);
      d_NtpEnable->setCheckable(true);

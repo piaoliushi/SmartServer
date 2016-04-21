@@ -13,5 +13,7 @@
         <file alias="envir.png">envir.png</file>
         <file alias="transmitter.png">transmitter.png</file>
         <file>clock.png</file>
+        <file alias="checked.png">checked.png</file>
+        <file alias="unchecked.png">unchecked.png</file>
     </qresource>
 </RCC>
