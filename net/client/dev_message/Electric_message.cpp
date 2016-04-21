@@ -17,8 +17,8 @@ namespace hx_net
 		,d_num_r(0)
 		,m_Uo(250)
 		,m_Io(5)
-		,m_Ubb(1.0)
-		,m_Ibb(10.0)
+        ,m_Ubb(1.0)//电压比
+        ,m_Ibb(20.0)//电流比
 	{
         if(d_devInfo.map_DevProperty.find("VRANG")!=d_devInfo.map_DevProperty.end())
 			m_Uo = atoi(d_devInfo.map_DevProperty[""].property_value.c_str());

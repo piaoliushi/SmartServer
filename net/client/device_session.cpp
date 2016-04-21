@@ -154,6 +154,7 @@ void device_session::set_con_state(con_state curState)
                     int nMod = (curState==con_connected)?1:0;
                     if(netAlarm.nAlarmId==-1 && nMod==0){
                         netAlarm.nAlarmId = time(0);
+                        netAlarm.startTime = netAlarm.nAlarmId;
                         netAlarm.nType = 2;//发射机断开
                     }
                     if(netAlarm.nAlarmId>0){
@@ -592,12 +593,9 @@ bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opR
         return false;//已经有任务正在执行
     }
 
-    //cur_opr_user_[sDevId] = sUser;//记录当前操作用户
-    //cur_task_type_[sDevId] = cmdType;//记录当前任务类型
     //现在执行任务
     dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult);
 
-    //opResult = EC_OPR_ON_GOING;//正在执行控制命令
 
     return true;
 }

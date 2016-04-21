@@ -251,12 +251,18 @@ namespace hx_net
         }
 
         excute_task_cmd();
+
+        eErrCode = EC_OPR_ON_GOING;
+
         std::time(&d_OprStartTime);//循环执行计时开始
         tm *pCurTime = localtime(&d_OprStartTime);
-        eErrCode = EC_OPR_ON_GOING;
         m_pSession-> notify_client(d_devInfo.sDevNum,d_devInfo.sDevName,sUser,
                                   d_cur_task_,pCurTime,false,eErrCode);
-        start_task_timeout_timer();
+        //目前只有发射机的开关机进行循环发送
+        if(icmdType >=MSG_TRANSMITTER_TURNON_OPR &&  icmdType < MSG_TRANSMITTER_RISE_POWER_OPR){
+            start_task_timeout_timer();
+        }else
+            m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
     }
 
     //启动任务定时器
