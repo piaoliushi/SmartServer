@@ -7,7 +7,6 @@
 #include "../rapidxml/rapidxml_utils.hpp"
 #include "../protocol/bohui_const_define.h"
 
-#define BOHUI_ALARMID_BASE    4000
 
 namespace db {
 
@@ -560,7 +559,7 @@ bool DataBaseOperation::GetAlarmConfig( string strDevnum,map<int,Alarm_config>& 
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery alarmconfigquery;
     QString strSql=QString("select a.MonitoringIndex,a.LimitValue,a.AlarmLevel,a.JumpLimitType,a.LinkageEnable,a.LinkageRoleNumber,a.delaytime,a.LinkageRoleNumber,a.alarmconfigtype \
-                           from Alarm_Item_config a,device_alarm_switch b where a.DeviceNumber='%1' and b.alarmenable>0 and a.alarmconfigtype<>0 and b.devicenumber=a.DeviceNumber and \
+                         ,a.resumeduration  from Alarm_Item_config a,device_alarm_switch b where a.DeviceNumber='%1' and b.alarmenable>0 and a.alarmconfigtype<>0 and b.devicenumber=a.DeviceNumber and \
             b.alarmswitchtype=a.MonitoringIndex").arg(QString::fromStdString(strDevnum));
             alarmconfigquery.prepare(strSql);
      if(alarmconfigquery.exec()) {
@@ -577,6 +576,7 @@ bool DataBaseOperation::GetAlarmConfig( string strDevnum,map<int,Alarm_config>& 
             acfig.iDelaytime = alarmconfigquery.value(6).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(7).toString().toStdString();
             acfig.iAlarmtype = alarmconfigquery.value(8).toInt();//0:监控量 1:整机
+            acfig.iResumetime = alarmconfigquery.value(9).toInt();
             acfig.iAlarmid = iItemid;
             map_Alarmconfig[iItemid] = acfig;
             }
@@ -597,7 +597,7 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery alarmconfigquery;
     QString strSql=QString("select a.LimitValue,a.AlarmLevel,a.JumpLimitType,a.LinkageEnable,a.LinkageRoleNumber,a.delaytime,a.LinkageRoleNumber,a.alarmconfigtype \
-                           from Alarm_Item_config a ,device_alarm_switch b where a.DeviceNumber='%1' and monitoringindex=%2 and a.alarmconfigtype=0 and b.alarmenable>0 \
+                         ,a.resumeduration  from Alarm_Item_config a ,device_alarm_switch b where a.DeviceNumber='%1' and monitoringindex=%2 and a.alarmconfigtype=0 and b.alarmenable>0 \
             and b.devicenumber=a.DeviceNumber and b.alarmswitchtype=a.MonitoringIndex").arg(QString::fromStdString(strDevnum)).arg(iIndex);
             alarmconfigquery.prepare(strSql);
             if(alarmconfigquery.exec()){
@@ -613,6 +613,7 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
             acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
             acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
             acfig.iAlarmid = iIndex;
+            acfig.iResumetime = alarmconfigquery.value(8).toInt();
             vAlarmconfig.push_back(acfig);
             }
         } else {

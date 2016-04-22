@@ -1043,7 +1043,7 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
             http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
-                                     ,modleInfos.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm. sReason);
+                                     ,modleInfos.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
             // 联动.....
         }
     }
@@ -1123,18 +1123,23 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
             //当前没有告警,判断是否存在此告警,确定是否需要恢复,移除该告警
             boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
             map<int,map<int,CurItemAlarmInfo> >::iterator findIter = mapItemAlarm[devId].find(ItemInfo.iItemIndex);
-            //查找是否有该监控项
+            //查找是否有该告警项
             if(findIter != mapItemAlarm[devId].end()){
                 map<int,CurItemAlarmInfo>::iterator findTypeIter =  findIter->second.find(iLimittype);
                 if(findTypeIter != findIter->second.end()){
-                    time_t curTime = time(0);
-                    double  dtime_during = difftime( curTime, findTypeIter->second.startTime );
-                    if(dtime_during>=ItemInfo.vItemAlarm[nIndex].iResumetime){
-                        //存储告警恢复,通知客户端,移除该告警
-                        record_alarm_and_notify(devId,fValue, ItemInfo.vItemAlarm[nIndex].fLimitvalue,1,ItemInfo,findTypeIter->second);
-                        findIter->second.erase(findTypeIter);//移除该告警类型告警
-                        if( findIter->second.size()<=0)
-                            mapItemAlarm[devId].erase(findIter);//如果监控项告警为空,则移除该监控量告警
+                    if(findTypeIter->second.nLimitId !=ALARM_RESUME){
+                         findTypeIter->second.startTime = time(0);//记录时间
+                         findTypeIter->second.nLimitId = ALARM_RESUME;
+                    }else{
+                        time_t curTime = time(0);
+                        double  dtime_during = difftime( curTime, findTypeIter->second.startTime );
+                        if(dtime_during>=ItemInfo.vItemAlarm[nIndex].iResumetime){
+                            //存储告警恢复,通知客户端,移除该告警
+                            record_alarm_and_notify(devId,fValue, ItemInfo.vItemAlarm[nIndex].fLimitvalue,1,ItemInfo,findTypeIter->second);
+                            findIter->second.erase(findTypeIter);//移除该告警类型告警
+                            if( findIter->second.size()<=0)
+                                mapItemAlarm[devId].erase(findIter);//如果监控项告警为空,则移除该监控量告警
+                        }
                     }
                 }
             }

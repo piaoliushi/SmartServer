@@ -136,6 +136,8 @@ typedef struct
 #define    ALARM_UP_UPPER      2
 #define    ALARM_LOW_LOWER   3
 #define    ALARM_SWITCH          4
+#define    ALARM_DEVICE           5
+#define    ALARM_RESUME         6
 
 const char CONST_STR_ALARM_CONTENT[][32] = {"跃上限","跃下限","跃上上限","跃下下限","报警","恢复正常"};
 typedef struct

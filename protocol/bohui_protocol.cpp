@@ -681,7 +681,7 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
                         curConf.iLimittype = 0;
                         if(itype==(511) || itype==(512))
                              curConf.iLimittype = 4;
-                        curConf.fLimitvalue = atof(atDuration->value());
+                        curConf.fLimitvalue = atof(atTP->value());
                         vAlarmConf.push_back(curConf);
                     }
                }

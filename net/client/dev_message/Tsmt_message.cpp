@@ -71,6 +71,7 @@ namespace hx_net
 	{
         return m_ptransmmit->check_msg_header(data,nDataLen);
 	}
+
     int Tsmt_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
 	{
         int irunstate=dev_unknown;

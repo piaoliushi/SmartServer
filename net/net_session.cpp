@@ -230,6 +230,7 @@ namespace hx_net
 	{
 		devAlarmNfyMsgPtr dev_alarm_nfy_ptr(new DevAlarmStatusNotify);
 		DevAlarmStatus *dev_n_s = dev_alarm_nfy_ptr->add_cdevcuralarmstatus();
+        dev_n_s->set_sstationid(sStationid);
 		dev_n_s->set_edevtype(devType);
 		dev_n_s->set_sdevid(sDevid);
         dev_n_s->set_sdevname(sDevName);
