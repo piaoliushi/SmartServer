@@ -194,9 +194,9 @@ namespace hx_net
 		int ret = -1;
 		struct iec_buf *buf = (struct iec_buf *) &data[0];
 
-		unsigned char xx[128];
-		memset(xx,0,nDataLen);
-		memcpy(xx,data,nDataLen);
+        //unsigned char xx[128];
+        //memset(xx,0,nDataLen);
+        //memcpy(xx,data,nDataLen);
 		switch (frame_type(&(buf->h))) 
 		{
 		case FRAME_TYPE_I:

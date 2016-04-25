@@ -203,7 +203,6 @@ void device_session::connect(std::string hostname,unsigned short port,bool bReco
 //udp连接
 void device_session::udp_connect(std::string hostname,unsigned short port)
 {
-    set_tcp(false);
     boost::system::error_code ec;
     udp::resolver::query query(hostname,boost::lexical_cast<std::string, unsigned short>(port));
     udp::resolver::iterator iter = uresolver_.resolve(query,ec);
@@ -218,6 +217,21 @@ void device_session::udp_connect(std::string hostname,unsigned short port)
         boost::system::error_code err= boost::system::error_code();
         handle_connected(err);
     }
+}
+
+//agent 连接，适用于http,snmp
+void device_session::agent_connect(std::string hostname,unsigned short port)
+{
+
+    set_con_state(con_connected);
+    start_query_timer(moxa_config_ptr->query_interval);
+
+    //初始化最后保存时间
+    time_t curTm = time(0);
+    map<string,time_t>::iterator iter = tmLastSaveTime.begin();
+    for(;iter!=tmLastSaveTime.end();++iter)
+        (*iter).second = curTm;
+    return;
 }
 
 //启动超时定时器
@@ -272,14 +286,12 @@ void device_session::connect_time_event(const boost::system::error_code& error)
         return;
     if(error!= boost::asio::error::operation_aborted)
     {
-        if(is_tcp())
+        if(modleInfos.netMode.inet_type == NET_MOD_TCP)
         {
             socket().async_connect(endpoint_,boost::bind(&device_session::handle_connected,
                                                          this,boost::asio::placeholders::error));
-        }else{
+        }else if(modleInfos.netMode.inet_type == NET_MOD_UDP){
             usocket().open(udp::v4());
-            //const udp::endpoint local_endpoint = udp::endpoint(udp::v4(),modleInfos.netMode.ilocal_port);
-            //usocket().bind(local_endpoint);
             boost::system::error_code err= boost::system::error_code();
             handle_connected(err);
         }
@@ -335,7 +347,10 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
         if(query_timeout_count_<moxa_config_ptr->query_timeout_count)
         {
             ++query_timeout_count_;
-            send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
+            if(modleInfos.netMode.inet_type == NET_MOD_SNMP || modleInfos.netMode.inet_type == NET_MOD_HTTP)
+                get_sync_net_data();//获取同步网络数据，使用http,snmp
+            else
+                send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
         else{
 
@@ -358,7 +373,21 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
         start_query_timer(moxa_config_ptr->query_interval);
     }
 }
-
+//获取同步网络数据，使用http,snmp
+void device_session::get_sync_net_data()
+{
+    query_timeout_count_=0;
+    DevMonitorDataPtr curData_ptr(new Data);
+    int nResult = dev_agent_and_com[cur_dev_id_].second->decode_msg_body(NULL,curData_ptr,0);
+    if(nResult == 0)
+    {
+        if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
+            .schedule(boost::bind(&device_session::handler_data,this,cur_dev_id_,curData_ptr)))
+        {
+            task_count_increase();
+        }
+    }
+}
 //发送消息
 bool device_session::sendRawMessage(unsigned char * data_,int nDatalen)
 {
@@ -383,7 +412,7 @@ void device_session::start_write(unsigned char* commStr,int commLen)
 {
     if(commLen<=0)
         return;
-    if(is_tcp())
+    if(modleInfos.netMode.inet_type == NET_MOD_TCP)
     {
         if(get_con_state()!=con_connected)
             return;
@@ -401,7 +430,7 @@ void device_session::start_write(unsigned char* commStr,int commLen)
             #endif
                     );
     }
-    else
+    else if(modleInfos.netMode.inet_type == NET_MOD_UDP)
     {
         usocket().async_send_to(boost::asio::buffer(commStr,commLen),uendpoint_,
                         #ifdef USE_STRAND
@@ -750,7 +779,7 @@ void device_session::handle_connected(const boost::system::error_code& error)
         else
             start_read(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
 
-        if(is_tcp())	{
+        if(modleInfos.netMode.inet_type == NET_MOD_TCP)	{
             if(dev_agent_and_com[cur_dev_id_].second->is_auto_run()==false)
                 start_query_timer(moxa_config_ptr->query_interval);
             else
@@ -791,13 +820,12 @@ void device_session::handle_read_head(const boost::system::error_code& error, si
 
 void device_session::start_read_head(int msgLen)
 {
-    if(msgLen>receive_msg_ptr_->space())
-    {
+    if(msgLen>receive_msg_ptr_->space()){
         cout<<"data overflow !!!!"<<endl;
         return;
     }
 
-    if(is_tcp())
+    if(modleInfos.netMode.inet_type == NET_MOD_TCP)
     {
         boost::asio::async_read(socket(), boost::asio::buffer(receive_msg_ptr_->w_ptr(),
                                                               msgLen),
@@ -812,7 +840,7 @@ void device_session::start_read_head(int msgLen)
                         #endif
                                 );
     }
-    else
+    else if(modleInfos.netMode.inet_type == NET_MOD_UDP)
     {
         udp::endpoint sender_endpoint;
         usocket().async_receive_from(boost::asio::buffer(receive_msg_ptr_->w_ptr(),receive_msg_ptr_->space()),sender_endpoint,//msgLen
@@ -869,7 +897,7 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
 void device_session::start_read_body(int msgLen)
 {
 
-    if(is_tcp())
+    if(modleInfos.netMode.inet_type == NET_MOD_TCP)
     {
         boost::asio::async_read(socket(), boost::asio::buffer(receive_msg_ptr_->w_ptr(),
                                                               msgLen),
@@ -884,7 +912,7 @@ void device_session::start_read_body(int msgLen)
                         #endif
                                 );
     }
-    else
+    else if(modleInfos.netMode.inet_type == NET_MOD_UDP)
     {
         udp::endpoint sender_endpoint;
         usocket().async_receive_from(boost::asio::buffer(receive_msg_ptr_->w_ptr(),

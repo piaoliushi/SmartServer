@@ -36,6 +36,10 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 		void connect(std::string hostname,unsigned short port,bool bReconnect=false);
 		//udp连接
 		void udp_connect(std::string hostname,unsigned short port);
+        //agent 连接，适用于http,snmp
+        void agent_connect(std::string hostname,unsigned short port);
+        //获取同步网络数据，使用http,snmp
+        void get_sync_net_data();
 		//断开连接
 		void disconnect();
 		//是否已建立连接

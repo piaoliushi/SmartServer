@@ -29,12 +29,7 @@ namespace hx_net
         virtual void dev_base_info(DevBaseInfo& devInfo,string iId="local"){}
 		virtual bool is_contain_dev(string sDevId){return false;}
 
-
-		bool is_tcp();
-		void set_tcp(bool bTcp);
-
-
-		tcp::socket& socket();
+        tcp::socket& socket();
         udp::socket& usocket();
         tcp::endpoint get_addr();
 		udp::endpoint get_udp_addr();
@@ -114,6 +109,7 @@ namespace hx_net
 		//-------------------------------------------client-------------------------------------//
         virtual void connect(std::string hostname,unsigned short port,bool bReconnect=false){}
         virtual void udp_connect(std::string hostname,unsigned short port){}
+        virtual void agent_connect(std::string hostname,unsigned short port){}
 
         virtual void disconnect(){}
 		virtual void close_i();

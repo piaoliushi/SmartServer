@@ -20,12 +20,7 @@ namespace hx_net
         virtual bool IsStandardCommand(){}
         virtual void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit){}
         virtual void GetAllCmd(CommandAttribute &cmdAll){}
-        //int kmp(const unsigned char *matcher, int mlen, const unsigned char *pattern, int plen);
-
-        //unsigned short CRC16_A001(unsigned char * ptr, int len);
-        //unsigned short CRC16_CCITT( unsigned char * ptr, int len );
-    //protected:
-      //  void kmp_init(const unsigned char *pattern, int pattern_size,int *pi);
+        virtual int decode_msg_body(DevMonitorDataPtr data_ptr,int nDataLen){}
 		
 	};
 }

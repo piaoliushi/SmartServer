@@ -87,7 +87,8 @@ typedef enum PROTOCOL
 	DE_XIN                            = 18, //德芯
     ELECTRIC                         =19,  //电力规约
     ANTENNA_CONTROL          = 20, //天线控制器
-    TSC_TMIEDEV                  = 21 //校时设备
+    TSC_TMIEDEV                  = 21, //校时设备
+    LINK_DEVICE                   = 22   //链路设备
 
 }Protocol,*pProtocol;
 
@@ -252,6 +253,11 @@ typedef enum TIMEROTOCOL
 {
     TFS_001 = 0
 }TimeSubProtocol;
+
+typedef enum LINK_DEVICE
+{
+    LINK_STATELITE_RECEVIE = 0,//卫星接收机
+}LinkDeviceSubProtocol;
 
 typedef enum RESOLVE_TAG  //resolve
 {

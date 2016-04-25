@@ -43,7 +43,7 @@ void DevClient::connect_all()
             if((*modle_iter).iCommunicationMode==CON_MOD_NET) {
                 if((*modle_iter).netMode.inet_type == NET_MOD_TCP){
                     new_session->connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);
-                }else if((*modle_iter).netMode.inet_type == NET_MOD_TCP){
+                }else if((*modle_iter).netMode.inet_type == NET_MOD_UDP){
                     new_session->udp_connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);
                 }
             }

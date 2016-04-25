@@ -38,15 +38,6 @@ namespace hx_net
 		return udp_socket_;
 	}
 	
-    bool  net_session::is_tcp()
-	{
-		return bTcp_;
-	}
-
-    void net_session::set_tcp(bool bTcp)
-	{
-		bTcp_ = bTcp;
-	}
     tcp::endpoint net_session::get_addr()
 	{
 		return socket().remote_endpoint();

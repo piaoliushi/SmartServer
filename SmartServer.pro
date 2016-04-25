@@ -56,7 +56,8 @@ SOURCES += main.cpp\
     net/client/dev_message/transmmiter/CDtransmmiter.cpp \
     net/client/dev_message/transmmiter/GmeTransmmit.cpp \
     net/client/dev_message/Timer_message.cpp \
-    net/client/dev_message/transmmiter/LngdTransmmit.cpp
+    net/client/dev_message/transmmiter/LngdTransmmit.cpp \
+    net/client/dev_message/Link_message .cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -115,7 +116,8 @@ HEADERS  += \
     net/client/dev_message/transmmiter/CDtransmmiter.h \
     net/client/dev_message/transmmiter/GmeTransmmit.h \
     net/client/dev_message/Timer_message.h \
-    net/client/dev_message/transmmiter/LngdTransmmit.h
+    net/client/dev_message/transmmiter/LngdTransmmit.h \
+    net/client/dev_message/Link_message.h
 
 FORMS    += mainwindow.ui
 
@@ -136,9 +138,11 @@ LIBS += /usr/local/postgresql_ubuntu_build/lib/libecpg_compat.a
 LIBS += /usr/local/protobuf-2.6.1/ubuntu_build/lib/libprotobuf.a
 LIBS += /usr/local/protobuf-2.6.1/ubuntu_build/lib/libprotoc.a
 LIBS += /usr/local/protobuf-2.6.1/ubuntu_build/lib/libprotobuf-lite.a
+LIBS += /home/piaoliu/Project/build-snmplib-x86_linux-Debug/libsnmplib.a
 INCLUDEPATH += /usr/local/postgresql_ubuntu_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/ubuntu_build/include
 INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
+INCLUDEPATH += /home/piaoliu/Project/snmplib/snmp_pp
 }
 else: {
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_system-mt.a
@@ -153,9 +157,11 @@ LIBS += /usr/local/postgresql_arm_build/lib/libecpg_compat.a
 LIBS += /usr/local/protobuf-2.6.1/arm_build/lib/libprotobuf.a
 LIBS += /usr/local/protobuf-2.6.1/arm_build/lib/libprotoc.a
 LIBS += /usr/local/protobuf-2.6.1/arm_build/lib/libprotobuf-lite.a
+LIBS += /home/piaoliu/Project/build-snmplib-arm_linux-Release/libsnmplib.a
 INCLUDEPATH += /usr/local/postgresql_arm_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/arm_build/include
 INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
+INCLUDEPATH += /home/piaoliu/Project/snmplib/snmp_pp
 }
 INCLUDEPATH += /usr/local/boost_1_48_0
 

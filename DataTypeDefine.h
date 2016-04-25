@@ -36,8 +36,10 @@ enum DEVType
 #define    CON_MOD_NET   1 //网口
 #define    CON_MOD_COM  0 //串口
 
-#define    NET_MOD_TCP   0 //TCP
-#define    NET_MOD_UDP   1 //UDP
+#define    NET_MOD_TCP     0 //TCP
+#define    NET_MOD_UDP    1 //UDP
+#define    NET_MOD_SNMP  2//SNMP
+#define    NET_MOD_HTTP   3// HTTP
 
 #define    RUN_TIME_DAY          2 //运行图-天
 #define    RUN_TIME_WEEK       0 //运行图-星期

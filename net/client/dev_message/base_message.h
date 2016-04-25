@@ -15,7 +15,8 @@ namespace hx_net
         virtual void SetProtocol(int mainprotocol,int subprotocol){}
         virtual int check_msg_header(unsigned char *data,int nDataLen){return -1;}
         virtual int decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen){return -1;}
-		virtual int PreHandleMsg(){return -1;}
+        virtual int decode_msg_body(DevMonitorDataPtr data_ptr,int nDataLen){}
+        virtual int PreHandleMsg(){return -1;}
         virtual void input_params(const vector<string> &vParam){}
 		virtual bool IsStandardCommand(){return false;}
         virtual void GetAllCmd(CommandAttribute &cmdAll){}
