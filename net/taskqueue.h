@@ -18,14 +18,16 @@ namespace hx_net
 		//提交任务
 		void SubmitTask(const Task& task)
 		{
-			boost::mutex::scoped_lock lock(mutex_);
+            boost::recursive_mutex::scoped_lock lock(mutex_);
+            if(list_.size()>500)
+                list_.pop_front();
 			list_.push_back(task);//将任务拷贝到list
 			worktobedone_.notify_all();
 		}
 		//获取任务
 		Task GetTask()
 		{
-			boost::mutex::scoped_lock lock(mutex_);
+            boost::recursive_mutex::scoped_lock lock(mutex_);
 			while(list_.size()==0 && !exitwait_)
 			{//线程没有通知退出且无任务，由condition完成同步等待
 				worktobedone_.wait(lock);
@@ -38,10 +40,16 @@ namespace hx_net
 			list_.pop_front();
 			return tmp;
 		}
+        int get_Task_Size()
+        {
+            boost::recursive_mutex::scoped_lock lock(mutex_);
+            return list_.size();
+        }
+
 		//清空当前任务
 		void ClearTaskList()
 		{
-			boost::mutex::scoped_lock lock(mutex_);
+            boost::recursive_mutex::scoped_lock lock(mutex_);
 			list_.clear();
 		}
 		//由上层代码发起，退出所有任务处理线程
@@ -53,7 +61,7 @@ namespace hx_net
 	private:
 		bool exitwait_;
 		std::list<Task> list_;
-		boost::mutex mutex_;
+        boost::recursive_mutex mutex_;
 		boost::condition worktobedone_;
 	};
 }

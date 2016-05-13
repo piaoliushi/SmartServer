@@ -181,4 +181,12 @@ namespace hx_net
           return m_pDevMgrPtr->update_dev_alarm_config(sDevId,devInfo);
       return EC_OBJECT_NULL;
   }
+
+  //上报http消息
+  e_ErrorCode   SvcMgr::response_http_msg(string sUrl,string &sContent,string sRqstType)
+  {
+      if(m_pDevMgrPtr)
+          return m_pDevMgrPtr->response_http_msg(sUrl,sContent,sRqstType);
+      return EC_OBJECT_NULL;
+  }
 }

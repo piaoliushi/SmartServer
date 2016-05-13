@@ -15,7 +15,7 @@ namespace hx_net
 
 	}
 
-	int Timer_message::check_msg_header( unsigned char *data,int nDataLen )
+    int Timer_message::check_msg_header( unsigned char *data,int nDataLen,CmdType cmdType,int number )
 	{
 		switch(d_devInfo.nSubProtocol)
 		{

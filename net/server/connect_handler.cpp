@@ -63,14 +63,14 @@ namespace hx_net
 	//获得最后心跳时间
 	std::time_t connect_handler::get_last_hb_time()
 	{
-		boost::mutex::scoped_lock lock(hb_mutex_);
+        boost::recursive_mutex::scoped_lock lock(hb_mutex_);
 		return last_hb_time_;
 	}
 
 	//设置最后心跳时间
 	void connect_handler::set_last_hb_time(std::time_t t)
 	{
-		boost::mutex::scoped_lock lock(hb_mutex_);
+        boost::recursive_mutex::scoped_lock lock(hb_mutex_);
 		last_hb_time_ = t;
 	}
 
@@ -101,7 +101,7 @@ namespace hx_net
 	{
 		loginAckMsgPtr sloginAck(new LoginAck);
 		srv_.user_login(shared_from_this(),sUser,sPassword,*sloginAck);
-		const google::protobuf::RepeatedPtrField<DevNetStatus> vNetState = sloginAck->cdevcurnetstatus();
+        //const google::protobuf::RepeatedPtrField<DevNetStatus> vNetState = sloginAck->cdevcurnetstatus();
 
 		sendMessage(MSG_LOGIN_ACK,sloginAck);
 	}
@@ -189,12 +189,10 @@ namespace hx_net
 		}
 		else
 		{
-			if(receive_msg_ptr_->is_flash_check_message())
-			{
+            if(receive_msg_ptr_->is_flash_check_message()){
 				sendFlashCheckMsg();
 			}
-			std::cout << boost::system::system_error(error).what() << std::endl;
-			close_handler();// 出错，清理handler
+            close_handler();
 		}
 	}
 

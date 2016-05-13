@@ -14,7 +14,8 @@ namespace hx_net
 {
 DevClient::DevClient(size_t io_service_pool_size/* =4 */)
     :io_service_pool_(io_service_pool_size)
-    ,http_request_session_ptr_(new http_request_session(io_service_pool_.get_io_service()))
+    ,http_request_session_ptr_(new http_request_session(io_service_pool_.get_io_service(),false))
+    ,http_report_session_ptr_(new http_request_session(io_service_pool_.get_io_service(),false))
 {
 
 }
@@ -37,7 +38,7 @@ void DevClient::connect_all()
     {
        if(device_pool_.find(DevKey(sLocalStationId,(*modle_iter).sModleNumber))==device_pool_.end())
         {
-            session_ptr new_session(new device_session(io_service_pool_.get_io_service(),(*modle_iter),http_request_session_ptr_));
+            session_ptr new_session(new device_session(io_service_pool_.get_io_service(),(*modle_iter),http_report_session_ptr_));
             device_pool_[DevKey(sLocalStationId,(*modle_iter).sModleNumber)]=new_session;
             new_session->init_session_config();
             if((*modle_iter).iCommunicationMode==CON_MOD_NET) {
@@ -45,6 +46,8 @@ void DevClient::connect_all()
                     new_session->connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);
                 }else if((*modle_iter).netMode.inet_type == NET_MOD_UDP){
                     new_session->udp_connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);
+                }else if((*modle_iter).netMode.inet_type == NET_MOD_SNMP){
+                    new_session->agent_connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);
                 }
             }
         }
@@ -205,6 +208,15 @@ int DevClient::get_modle_online_count()
             ++ncount;
     }
     return (ncount>=0)?ncount:-1;
+}
+
+//上报http消息
+e_ErrorCode   DevClient::response_http_msg(string sUrl,string &sContent,string sRqstType)
+{
+   //http_request_session_ptr response_session_ptr(new http_request_session(io_service_pool_.get_io_service()));
+    //http_request_session_ptr_->openUrl(sUrl,sContent,sRqstType);
+    http_request_session_ptr_->putHttpMessage(sUrl,sContent);
+    return EC_OK;
 }
 
 }

@@ -45,7 +45,7 @@ namespace hx_net
         virtual void  clear_dev_state(string sDevId){}
 
         virtual void  set_con_state(con_state s){}
-		virtual bool  is_connected(string sDevId=""){return false;}
+        virtual bool  is_connected(){return false;}//string sDevId=""
         virtual void  reset_netstate(){}
 		virtual bool  is_disconnected(string sDevId=""){return false;}
 
@@ -99,13 +99,13 @@ namespace hx_net
 		//判断是否发短信与打电话
 		void sendSmsAndCallPhone(int nAlarmLevel,string sContent);
 		//开始处理监测数据
-        virtual void start_handler_data(DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true){}
+        virtual void start_handler_data(string sDevId,DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true){}
 		//开始处理mp3数据
         virtual void start_handler_mp3_data(boost::uint8_t nChannel,unchar_ptr curData){}
 		//开始处理mp3数据扩展
         virtual void start_handler_mp3_data_ex(boost::uint8_t nChannel,unsigned char *curData,int nDataLen){}
 		//-------------------------------------------transmitter--------------------------------//
-		virtual void  handler_transmitter_data(DevMonitorDataPtr curDataPtr){};
+        //virtual void  handler_transmitter_data(DevMonitorDataPtr curDataPtr){};
 		//-------------------------------------------client-------------------------------------//
         virtual void connect(std::string hostname,unsigned short port,bool bReconnect=false){}
         virtual void udp_connect(std::string hostname,unsigned short port){}

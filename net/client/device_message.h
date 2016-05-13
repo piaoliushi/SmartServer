@@ -17,10 +17,7 @@ namespace hx_net
 //---------------------------------othdev----------------------------------------------//
 	class MsgHandleAgent;
 	typedef boost::shared_ptr<MsgHandleAgent>        HMsgHandlePtr;
-//	typedef boost::shared_ptr<HDevAgent>                   HDevAgentPtr;
 	typedef boost::shared_ptr<CommandAttribute>    CommandAttrPtr;
-    //class session;
-    //typedef boost::shared_ptr<net_session> session_ptr;
     class net_session;
     typedef boost::shared_ptr<net_session>  session_ptr;
     //typedef boost::weak_ptr<net_session>    session_weak_ptr;

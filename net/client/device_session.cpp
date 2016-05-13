@@ -6,6 +6,11 @@
 #include "../../StationConfig.h"
 #include "../../database/DataBaseOperation.h"
 #include "../../protocol/bohui_const_define.h"
+#include "snmp_pp.h"
+#ifdef SNMP_PP_NAMESPACE
+using namespace Snmp_pp;
+#endif
+
 //#include "../sms/SmsTraffic.h"
 using namespace db;
 namespace hx_net
@@ -30,13 +35,18 @@ device_session::device_session(boost::asio::io_service& io_service,
     ,task_count_(0)
     ,http_ptr_(httpPtr)
     ,io_service_(io_service)
+    ,snmp_ptr_(NULL)
+    ,target_ptr_(NULL)
 {
 
 }
 
 device_session::~device_session()
 {
-
+    if(snmp_ptr_!=NULL)
+        delete snmp_ptr_,snmp_ptr_=NULL;
+    if(target_ptr_!=NULL)
+        delete target_ptr_,target_ptr_=NULL;
 }
 
 //初始化设备配置
@@ -72,6 +82,8 @@ void device_session::init_session_config()
         mapItemAlarm.insert(std::make_pair(iter->first,devAlarmItem));
         //定时数据保存时间初始化
         tmLastSaveTime.insert(std::make_pair(iter->first,time(0)));
+        //定时数据发送时间
+        tmLastSendHttpTime.insert(std::make_pair(iter->first,time(0)));
 
         if(iter->second.iDevType == DEVICE_TRANSMITTER)
             bIsTransmitter=true;
@@ -149,8 +161,10 @@ void device_session::set_con_state(con_state curState)
                     GetInst(SvcMgr).get_notify()->OnDevStatus((*iter).first,-1);
                 }
 
+               // send_device_data_state_notify((*iter).first);
                 //通知http服务器(设备网络异常)
-                if(iter->second.iDevType == DEVICE_TRANSMITTER){
+
+                 if(iter->second.iDevType == DEVICE_TRANSMITTER){
                     int nMod = (curState==con_connected)?1:0;
                     if(netAlarm.nAlarmId==-1 && nMod==0){
                         netAlarm.nAlarmId = time(0);
@@ -163,9 +177,27 @@ void device_session::set_con_state(con_state curState)
                         if(nMod==1)
                             netAlarm.nAlarmId=-1;
                     }
+
                 }
             }
         }
+}
+
+//设备断线告警（博汇）
+void device_session::send_device_data_state_notify(string sDevId,bool bHaveData){
+
+    int nMod = (bHaveData==true)?1:0;
+    if(netAlarm.nAlarmId==-1 && nMod==0){
+        netAlarm.nAlarmId = time(0);
+        netAlarm.startTime = netAlarm.nAlarmId;
+        netAlarm.nType = 2;//发射机断开
+    }
+    if(netAlarm.nAlarmId>0){
+        string sReason;
+        http_ptr_->send_http_alarm_messge_to_platform(sDevId,nMod,netAlarm,sReason);
+        if(nMod==1)
+            netAlarm.nAlarmId=-1;
+    }
 }
 
 //获得发射机报警状态
@@ -188,7 +220,7 @@ void device_session::connect(std::string hostname,unsigned short port,bool bReco
     if(iter != tcp::resolver::iterator())
     {
         //正在连接
-        set_con_state(con_connecting);
+        //set_con_state(con_connecting);
         endpoint_ = (*iter).endpoint();
         socket().async_connect(endpoint_,boost::bind(&device_session::handle_connected,
                                                      this,boost::asio::placeholders::error));
@@ -222,6 +254,17 @@ void device_session::udp_connect(std::string hostname,unsigned short port)
 //agent 连接，适用于http,snmp
 void device_session::agent_connect(std::string hostname,unsigned short port)
 {
+    IpAddress ipAddr(hostname.c_str());
+    if (!ipAddr.valid())
+      return;
+    int status;
+    if(snmp_ptr_==NULL)
+        snmp_ptr_ = new Snmp(status);
+    if(target_ptr_==NULL){
+        target_ptr_ = new CTarget(ipAddr);
+        if (! target_ptr_->valid())
+          return;
+    }
 
     set_con_state(con_connected);
     start_query_timer(moxa_config_ptr->query_interval);
@@ -246,7 +289,9 @@ void device_session::start_timeout_timer(unsigned long nSeconds)
 void device_session::connect_timeout(const boost::system::error_code& error)
 {
     //只有当前状态是正在连接才执行超时。。。
-    if(!is_connecting())
+   // if(!is_connecting())
+   //     return;
+    if(is_connected())
         return;
     //超时了
     if(error!= boost::asio::error::operation_aborted)
@@ -254,7 +299,7 @@ void device_session::connect_timeout(const boost::system::error_code& error)
 }
 
 //是否已经建立连接
-bool device_session::is_connected(string sDevId)
+bool device_session::is_connected()//string sDevId
 {
     return (get_con_state()==con_connected)?true:false;
 }
@@ -272,7 +317,7 @@ bool device_session::is_disconnected(string sDevId)
 
 void device_session::start_connect_timer(unsigned long nSeconds)
 {
-    set_con_state(con_connecting);//设置正在重连标志
+    //set_con_state(con_connecting);//设置正在重连标志
     connect_timer_.expires_from_now(boost::posix_time::seconds(nSeconds));
     connect_timer_.async_wait(boost::bind(&device_session::connect_time_event,
                                           this,boost::asio::placeholders::error));
@@ -282,7 +327,8 @@ void device_session::start_connect_timer(unsigned long nSeconds)
 void device_session::connect_time_event(const boost::system::error_code& error)
 {
     //只有当前状态是正在连接才执行超时。。。
-    if(!is_connecting())
+    //if(!is_connecting())
+    if(is_connected())
         return;
     if(error!= boost::asio::error::operation_aborted)
     {
@@ -368,17 +414,18 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             //	,curData_ptr,modleInfos.mapDevInfo[cur_dev_id_].mapMonitorItem);
             cur_dev_id_ = next_dev_id();
             send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
+
             }
 
         start_query_timer(moxa_config_ptr->query_interval);
     }
 }
-//获取同步网络数据，使用http,snmp
+//获取同步网络数据，适用http,snmp
 void device_session::get_sync_net_data()
 {
     query_timeout_count_=0;
     DevMonitorDataPtr curData_ptr(new Data);
-    int nResult = dev_agent_and_com[cur_dev_id_].second->decode_msg_body(NULL,curData_ptr,0);
+    int nResult = dev_agent_and_com[cur_dev_id_].second->decode_msg_body(snmp_ptr_,curData_ptr,target_ptr_);
     if(nResult == 0)
     {
         if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
@@ -572,28 +619,34 @@ void device_session::notify_client(string sDevId,string devName,string user,int 
                                             DEVICE_TRANSMITTER,devName,user,(e_MsgType)cmdType,(e_ErrorCode)eResult);
     }
     //通知http服务器
-    int CommandType= -1;(user=="timer")?MSG_TRANSMITTER_TURNON_ACK:MSG_TRANSMITTER_TURNOFF_ACK;
+    //int CommandType= -1;//(user=="timer")?MSG_TRANSMITTER_TURNON_ACK:MSG_TRANSMITTER_TURNOFF_ACK;
+    string sDesc = devName;
+    int cmdOpr=-1;
+    int cmdRlt=-1;
     switch (cmdType) {
     case MSG_TRANSMITTER_TURNON_OPR:
     case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:
     case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR: {
-        if(eResult == EC_OPR_ON_GOING)
-            CommandType = (user=="timer")?CMD_AUTO_TURNON_SEND:CMD_MANUAL_TURNON_SEND;
-        else if(eResult == EC_OK)
-            CommandType = (user=="timer")?STATE_AUTO_TURNON:STATE_MANUAL_TURNON;
+        cmdOpr = (user=="timer")?CMD_EXC_A_ON:CMD_EXC_M_ON;
     } break;
     case MSG_TRANSMITTER_TURNOFF_OPR:{
-          if(eResult == EC_OPR_ON_GOING)
-              CommandType = (user=="timer")?CMD_AUTO_TURNOFF_SEND:CMD_MANUAL_TURNOFF_SEND;
-          else if(eResult == EC_OK)
-              CommandType = (user=="timer")?STATE_AUTO_TURNOFF:STATE_MANUAL_TURNOFF;
+        cmdOpr = (user=="timer")?CMD_EXC_A_OFF:CMD_EXC_M_OFF;
     }break;
     default:
         break;
     }
-    if(CommandType>CMD_NODEFINE){
-        string sDesc = devName+DEV_CMD_RESULT_DESC[CommandType];
-        http_ptr_->send_http_excute_result_messge_to_platform(sDevId,str_time,CommandType,sDesc);
+    if(eResult == EC_OPR_ON_GOING)
+        cmdRlt = CMD_EXC_GOING;
+    else if(eResult == EC_OK)
+         cmdRlt = CMD_EXC_SUCCESS;
+    else if(eResult == EC_FAILED)
+        cmdRlt = CMD_EXC_FAILER;
+
+    if(cmdRlt>-1 && cmdOpr>-1){
+        string sDesc = devName+DEV_CMD_OPR_DESC[cmdOpr];
+        sDesc+=DEV_CMD_RESULT_DESC[cmdRlt];
+
+        http_ptr_->send_http_excute_result_messge_to_platform(sDevId,str_time,cmdOpr,sDesc);
     }
 }
 
@@ -651,6 +704,18 @@ bool device_session::is_need_save_data(string sDevId)
     if(ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
         return false;
     tmLastSaveTime[sDevId] = tmCurTime;
+    return true;
+}
+
+//判断当前时间是否需要上传
+bool device_session::is_need_report_data(string sDevId)
+{
+    time_t tmCurTime;
+    time(&tmCurTime);
+    double ninterval = difftime(tmCurTime,tmLastSendHttpTime[sDevId]);
+    if(ninterval<10)//间隔保存时间 need amend;
+        return false;
+    tmLastSendHttpTime[sDevId] = tmCurTime;
     return true;
 }
 
@@ -728,6 +793,17 @@ bool device_session::is_monitor_time(string sDevId)
     return true;
 }
 
+//开始处理监测数据
+void device_session::start_handler_data(string sDevId,DevMonitorDataPtr curDataPtr,bool bCheckAlarm)
+{
+   /* if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
+            .schedule(boost::bind(&device_session::handler_data,this,sDevId,curDataPtr)))
+    {
+        task_count_increase();
+    }*/
+    handler_data(sDevId,curDataPtr);
+}
+
 //2016-3-31------处理设备数据----完成
 void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 {
@@ -738,8 +814,9 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos.mapDevInfo[sDevId].iDevType
                               ,curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
-    http_ptr_->send_http_data_messge_to_platform(sDevId,modleInfos.mapDevInfo[sDevId].iDevType,
-                                                 curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
+    if(is_need_report_data(sDevId))
+       http_ptr_->send_http_data_messge_to_platform(sDevId,modleInfos.mapDevInfo[sDevId].iDevType,
+                                              curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
     //检测当前报警状态
     check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
     //如果在监测时间段则保存当前记录
@@ -802,10 +879,11 @@ void device_session::handle_read_head(const boost::system::error_code& error, si
 {
     if(!is_connected())
         return;
-    if (!error)// || error.value() == ERROR_MORE_DATA
+    if (!error)
     {
-        int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,bytes_transferred,CMD_QUERY,cur_msg_q_id_);
-        if(nResult>0)//检查消息头
+        int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,
+                                                                bytes_transferred,CMD_QUERY,cur_msg_q_id_);
+        if(nResult>0)
             start_read_body(nResult);
         else{
             close_all();
@@ -940,27 +1018,28 @@ void device_session::handle_read_body(const boost::system::error_code& error, si
     if (!error)
     {
 
-        //pTsmtAgentMsgPtr curData_ptr(new TsmtAgentMsg);
-        //int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_,curData_ptr,bytes_transferred);
-        DevMonitorDataPtr curData_ptr(new Data);
-        int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred);
+        DevMonitorDataPtr curData_ptr;//(new Data);
+        //curData_ptr.reset();
+        int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,
+                                                        bytes_transferred);
         if(nResult==0)//查询数据解析正确
         {
             query_timeout_count_ = 0;
-            if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
+            /*if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
                     .schedule(boost::bind(&device_session::handler_data,this,cur_dev_id_,curData_ptr)))
             {
                 task_count_increase();
-            }
+            }*/
 
             if(cur_msg_q_id_<dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY].size()-1)
                 ++cur_msg_q_id_;
             else
                 cur_msg_q_id_=0;
             start_read_head(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
+            //send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
-        else if(nResult>0)//跳过数据(针对数据管理器等设备的非查询指令回复)
-            start_read_head(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
+        //else if(nResult>0)//跳过数据(针对数据管理器等设备的非查询指令回复)
+        //    start_read_head(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
         else{
             close_all();
             start_connect_timer(moxa_config_ptr->connect_timer_interval);

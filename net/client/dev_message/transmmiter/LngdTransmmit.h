@@ -8,7 +8,7 @@ namespace hx_net{
         LngdTransmmit(int subprotocol,int addresscode);
         ~LngdTransmmit();
 
-		int  check_msg_header(unsigned char *data,int nDataLen);
+        int  check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number);
 		int  decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
 		bool IsStandardCommand();
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);

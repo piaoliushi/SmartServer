@@ -8,17 +8,20 @@
 #include "../net_session.h"
 #include "../../DataType.h"
 #include "../../DataTypeDefine.h"
-//#include "../../DevAgent.h"
 #include "MsgHandleAgent.h"
 #include "http_request_session.h"
+//#include "snmp_pp.h"
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
-
+class Snmp;
+class CTarget;
 namespace hx_net
 {
 class device_session;
 typedef boost::shared_ptr<device_session> dev_session_ptr;
 typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
+
+
     class device_session:public net_session
 	{
 	public:
@@ -43,7 +46,7 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 		//断开连接
 		void disconnect();
 		//是否已建立连接
-		bool is_connected(string sDevId="");
+        bool is_connected();//string sDevId=""
 		//是否正在连接
 		bool is_connecting();
 		//是否已断开
@@ -73,6 +76,9 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
                                  vector<Command_Scheduler> &cmmdScheduler);
         //更新告警配置
         void  update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
+
+        //开始处理监测数据
+        void start_handler_data(string sDevId,DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true);
 	protected:
 		void start_read_head(int msgLen);//开始接收头
 		void start_read_body(int msgLen);//开始接收体
@@ -95,6 +101,8 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         void save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtrconst,const map<int,DeviceMonitorItem> &mapMonitorItem);
 
 		bool is_need_save_data(string sDevId);
+        //判断当前时间是否需要上传
+        bool is_need_report_data(string sDevId);
 
 		string next_dev_id();
 
@@ -118,6 +126,8 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         void  parse_item_alarm(string devId,float fValue,DeviceMonitorItem &ItemInfo);
         void  record_alarm_and_notify(string &devId,float fValue,const float &fLimitValue,bool bMod,
                                         DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm);
+        //设备断线告警（博汇）
+        void send_device_data_state_notify(string sDevId,bool bHaveData);
 
 	public:	
 		void handle_connected(const boost::system::error_code& error);
@@ -133,13 +143,13 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         void set_opr_state(string sdevId,dev_opr_state curState);
         dev_opr_state get_opr_state(string sdevId);
 	private:
-		tcp::resolver                      resolver_;	
+        tcp::resolver                     resolver_;
 		udp::resolver                    uresolver_;
 
-		tcp::endpoint                   endpoint_;
-		udp::endpoint                   uendpoint_;
-		boost::recursive_mutex          con_state_mutex_;
-		con_state                       othdev_con_state_;
+        tcp::endpoint                     endpoint_;
+        udp::endpoint                    uendpoint_;
+        boost::recursive_mutex      con_state_mutex_;
+        con_state                          othdev_con_state_;
 		othdevMsgPtr                    receive_msg_ptr_;
 		boost::asio::deadline_timer     connect_timer_;//连接定时器
 		boost::asio::deadline_timer     timeout_timer_;//连接超时定时器
@@ -155,10 +165,11 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         map<string ,map<int,map<int,CurItemAlarmInfo> > > mapItemAlarm;//设备监控量告警信息
         CurItemAlarmInfo  netAlarm;//通讯异常告警
 		map<string,time_t>                               tmLastSaveTime;
+        map<string,time_t>                               tmLastSendHttpTime;
         map<string,pair<CommandAttrPtr,HMsgHandlePtr> >   dev_agent_and_com;//add by lk 2013-11-26
 		string                                           cur_dev_id_;//当前查询设备id
 
-        ModleInfo                          &modleInfos;
+        ModleInfo                            &modleInfos;
         boost::mutex                        task_mutex_;
         int										   task_count_;
         boost::condition                    task_end_conditon_;
@@ -173,12 +184,17 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         http_request_session_ptr   &http_ptr_;
 
         boost::recursive_mutex                    opr_state_mutex_;
-        map<string,dev_opr_state>                   dev_opr_state_;//设备控制命令发送状态
+        map<string,dev_opr_state>              dev_opr_state_;//设备控制命令发送状态
         boost::asio::io_service&                   io_service_;
 
         boost::recursive_mutex                    update_time_schedule_mutex_;//更新运行图锁
         boost::recursive_mutex                    update_cmd_schedule_mutex_;//更新运行图锁
         boost::recursive_mutex                    update_alarm_config_mutex_;//更新告警配置锁
+
+        Snmp    *snmp_ptr_;
+        CTarget *target_ptr_;
+
+
 	};
 }
 #endif

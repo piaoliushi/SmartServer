@@ -895,9 +895,10 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
                       return false;
                   }
              }
+          QSqlDatabase::database().commit();
           }
 
-    QSqlDatabase::database().commit();
+
 
     return true;
   }
@@ -1124,6 +1125,8 @@ bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
         std::cout<<"the database is interrupt"<<std::endl;
         return false;
     }
+    try
+    {
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery userquery;
     QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber from Users where Name='%1'").arg(QString::fromStdString(sName));
@@ -1138,6 +1141,9 @@ bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
         user.nControlLevel = userquery.value(2).toInt();
         user.sHeadship = userquery.value(3).toString().toStdString();
         user.sJobNumber = userquery.value(4).toString().toStdString();
+    }
+    }catch(...){
+        return false;
     }
     return true;
 }

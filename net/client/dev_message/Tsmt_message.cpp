@@ -5,6 +5,7 @@
 #include "./transmmiter/Transmmiter.h"
 #include "./transmmiter/CDtransmmiter.h"
 #include "./transmmiter/GmeTransmmit.h"
+#include "./transmmiter/ShTransmmit.h"
 namespace hx_net
 {
 
@@ -25,9 +26,10 @@ namespace hx_net
         ,d_shutdown_count_(0)
         ,d_run_count_(0)
     {
+        m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
         CreateObject();
 
-        m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
+
         map<int,vector<AssDevChan> >::iterator find_iter = d_devInfo.map_AssDevChan.find(0);
         if(find_iter!=d_devInfo.map_AssDevChan.end()){
             vector<AssDevChan>::iterator dev_iter = find_iter->second.begin();
@@ -67,22 +69,29 @@ namespace hx_net
         m_mainprotocol =  mainprotocol;
     }
 
-    int Tsmt_message::check_msg_header(unsigned char *data,int nDataLen)
+    int Tsmt_message::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
 	{
-        return m_ptransmmit->check_msg_header(data,nDataLen);
+        return m_ptransmmit->check_msg_header(data,nDataLen,cmdType,number);
 	}
 
     int Tsmt_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
 	{
         int irunstate=dev_unknown;
-        int idecresult = m_ptransmmit->decode_msg_body(data,data_ptr,nDataLen,irunstate);
-        if(idecresult == 0) {
-            GetResultData(data_ptr);
+        if(data_ptr!=NULL)
+            d_curData_ptr = data_ptr;
+        int idecresult = m_ptransmmit->decode_msg_body(data,d_curData_ptr,nDataLen,irunstate);
+        if(idecresult == 0 ) {//&& m_ptransmmit->isLastQueryCmd()==true
+            GetResultData(d_curData_ptr);
             if(irunstate==dev_unknown)
-                detect_run_state(data_ptr);
+                detect_run_state(d_curData_ptr);
             else {
                 //设置运行状态
             }
+            if(m_ptransmmit->isMultiQueryCmd())//{
+                m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+                //d_curData_ptr->
+                //d_curData_ptr.reset(new Data);
+           // }
         }
         return idecresult;
 	}
@@ -128,6 +137,11 @@ namespace hx_net
            set_run_state(dev_unknown);
        }
 
+       void  Tsmt_message::check_device_alarm(int nAlarmType)
+       {
+
+       }
+
     //检测发射机运行状态
     void Tsmt_message::detect_run_state(DevMonitorDataPtr curDataPtr)
     {
@@ -140,6 +154,7 @@ namespace hx_net
             ++d_run_count_;
             if(d_run_count_>d_devProperty->run_detect_max_count) {//已开机
                set_run_state(dev_running);
+               //check_device_alarm(nAlarmType);
             }
         } else {
             if(is_shut_down())
@@ -187,12 +202,9 @@ namespace hx_net
             {
                 if((*iter).second.iItemType == 0)
                     data_ptr->mValues[(*iter).first].fValue *= (*iter).second.dRatio;
-                else
-                {
+                else {
                     if((*iter).second.dRatio==0)
-                    {
                         data_ptr->mValues[(*iter).first].fValue = data_ptr->mValues[(*iter).first].fValue==1.0f ? 0:1;
-                    }
                 }
             }
         }
@@ -208,11 +220,15 @@ namespace hx_net
         case BEIJING_BEIGUANG:
             break;
         case CHENGDU_KT_CG:
-            {
-                m_ptransmmit = new CDtransmmiter(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
-            }
+            m_ptransmmit = new CDtransmmiter(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case SHANGUANG:
+            break;
+        case SHANGHAI_ALL_BAND:{
+            d_curData_ptr.reset(new Data);
+            m_ptransmmit = new ShTransmmit(m_pSession,d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+
+        }
             break;
         case HAGUANG:
             break;

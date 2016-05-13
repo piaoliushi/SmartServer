@@ -18,6 +18,7 @@ QClientStatePage::QClientStatePage(QNotifyHandler &Notify,QWidget *parent)
 	
 	pHMainLyt->addLayout(pHlyt);
 	pClientList = new QTableWidget(this);
+    pClientList->horizontalHeader()->setVisible(false);
     pClientList->setColumnCount(3);
     pClientList->setFocusPolicy(Qt::NoFocus);
 	QStringList header; 

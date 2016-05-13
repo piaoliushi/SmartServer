@@ -24,6 +24,7 @@ QDevStatePage::QDevStatePage(QNotifyHandler &Notify,QWidget *parent)
 
 	 pHMainLyt->addLayout(pHlyt);
 	 pDevList = new QTableWidget(this);
+     pDevList->horizontalHeader()->setVisible(false);
      pDevList->setColumnCount(3);
      pDevList->setFocusPolicy(Qt::NoFocus);
 	 QStringList header; 
@@ -71,12 +72,18 @@ void QDevStatePage::LoadDevToList()
                  sIcon.addFile(QString::fromUtf8(":/new/images/envir.png"));
             else
                    sIcon.addFile(QString::fromUtf8(":/new/images/link.png"));
-            pDevList->setItem(nrow,0,new QTableWidgetItem(sIcon,(*iter).second.sDevName.c_str()));
+            QString sName = (*iter).second.sDevName.c_str();
+            if(sName.length()>12)
+                sName = sName.mid(0,12);
+            pDevList->setItem(nrow,0,new QTableWidgetItem(sIcon,sName));//(*iter).second.sDevName.c_str()
             QString sEndpoint = QString(tr("%1:%2")).arg((*Modleiter).netMode.strIp.c_str()).arg((*Modleiter).netMode.ilocal_port);
              //   .arg((*iter).second.iAddressCode);
             //pDevList->setItem(nrow,1,new QTableWidgetItem((*iter).second.sDevNum.c_str()));:%2
             pDevList->setItem(nrow,1,new QTableWidgetItem(sEndpoint));
-            pDevList->setItem(nrow,2,new QTableWidgetItem(tr("未知")));
+            QTableWidgetItem *netItem = new QTableWidgetItem(tr("中断"));
+            netItem->setTextColor(QColor(150,150,150));
+            pDevList->setItem(nrow,2,netItem);
+
 
             m_mapListItems[(*iter).first.c_str()]=nrow;
 		}
@@ -101,15 +108,15 @@ void QDevStatePage::OnDevStatus(QString sDevId,int nResult)
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(150,150,150));
 		break;
     case 0://连接正常
-        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("已连接"));
-        pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,0,255));
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("连接"));
+        pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,255,0));
 		break;
     case 1://已开机
-        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("已开机"));
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("开机"));
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,255,0));
 		break;
     case 2://已关机
-        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("已关机"));
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("关机"));
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(255,255,0));
         break;
     case 3://天线->主机

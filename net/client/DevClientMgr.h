@@ -8,7 +8,7 @@
 #include "DevClient.h"
 
 //using namespace boost::network::http;
-
+class http_work;
 namespace hx_net
 {
 	
@@ -44,10 +44,12 @@ namespace hx_net
                                  vector<Command_Scheduler> &cmmdScheduler);
        //更新告警配置
       e_ErrorCode update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
+      //上报http消息
+      e_ErrorCode   response_http_msg(string sUrl,string &sContent,string sRqstType);
 	private:
 		boost::shared_ptr<boost::thread> _listenthreadptr;//网络监听线程
-        //boost::shared_ptr<boost::thread> _workthreadptr;//工作线程
-        //boost::shared_ptr<client_work> _workerptr;//当前用户任务UserWork
+        boost::shared_ptr<boost::thread> _workthreadptr;//工作线程
+        //boost::shared_ptr<http_work> _workerptr;//当前用户任务http_work
         boost::shared_ptr<DevClient> _devclientptr;//设备服务对象
 	};
 }

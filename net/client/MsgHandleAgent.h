@@ -5,8 +5,10 @@
 #include "include.h"
 #include "DataTypeDefine.h"
 #include "device_session.h"
-using namespace std;
 
+using namespace std;
+class Snmp;
+class CTarget;
 namespace hx_net
 {
 	class session;
@@ -22,8 +24,9 @@ namespace hx_net
 		int start();
 		int stop();
 		bool is_auto_run();
-		int  check_msg_header(unsigned char *data,int nDataLen);
+        int  check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number);
 		int  decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
+        int  decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
 		void input_params(const vector<string> &vParam);
         int   PreHandleMsg();
 		bool IsStandardCommand();

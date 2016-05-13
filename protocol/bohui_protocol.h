@@ -14,7 +14,7 @@ class Bohui_Protocol
 public:
     Bohui_Protocol();
     //分析xml数据是否符合协议
-    bool  parseDataFromStr(string &strMsg,string &responseBody);
+    bool  parseDataFromStr(string &strMsg,string &responseBody,string &srcUrl);
     //创建回复消息
     bool createResponseMsg(int nReplyId,int nValue,const char* nCmdType,string &responseBody);
     //创建上报数据消息
@@ -30,7 +30,7 @@ protected:
     //创建xml头信息
     xml_node<>*  _createResponseXmlHeader(xml_document<>  &xmlMsg,int nCmdId,int nReplyId);
     //检查xml头信息
-    bool  _checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &priority,xml_node<> *rootNode);
+    bool  _checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &priority,string &desUrl,xml_node<> *rootNode);
 
     //查询发射机信息
     void _execTsmtQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue);

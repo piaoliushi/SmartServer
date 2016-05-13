@@ -197,10 +197,11 @@ void QSvcStatePage::timeUpdate()
     QString current_date = lo.toString(current_date_time,"yyyy-MM-dd hh:mm:ss dddd");
     d_plbDateTime->setText(current_date);
 
-    if(IsStart())
-        GetInst(DataBaseOperation).check_database();
-    else
+    if(IsStart()==false)
         StartSvc();
+        //GetInst(DataBaseOperation).check_database();
+    //else
+
     if(d_bUseNtp)
         checkAutoAdjustTime();
 

@@ -26,7 +26,7 @@ typedef enum CMDTYPE
 
 //单个数据结构
 
-
+#define  LASTCMD     100
 typedef struct CMDUnit
 {
     CMDUnit()
@@ -88,7 +88,9 @@ typedef enum PROTOCOL
     ELECTRIC                         =19,  //电力规约
     ANTENNA_CONTROL          = 20, //天线控制器
     TSC_TMIEDEV                  = 21, //校时设备
-    LINK_DEVICE                   = 22   //链路设备
+    LINK_DEVICE                   = 22,  //链路设备
+    SHANGHAI_ALL_BAND      = 23   //上海功放机器
+
 
 }Protocol,*pProtocol;
 
@@ -267,5 +269,10 @@ typedef enum RESOLVE_TAG  //resolve
     RE_UNKNOWDEV  = -3,//未定义的设备类型
     RE_HEADERROR  = -4,//数据头错误
 }ResolveErrorCode;
+
+typedef enum SHANGHAIPROTOCL
+{
+    All_Band_Pa = 0,
+}ShSubProtocol;
 
 #endif

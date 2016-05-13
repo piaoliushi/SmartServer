@@ -109,5 +109,13 @@ namespace hx_net
           return _devclientptr->update_dev_alarm_config(sDevId,devInfo);
       return EC_OBJECT_NULL;
   }
+
+  //上报http消息
+  e_ErrorCode   DevClientMgr::response_http_msg(string sUrl,string &sContent,string sRqstType)
+  {
+      if(_devclientptr)
+          return _devclientptr->response_http_msg(sUrl,sContent,sRqstType);
+      return EC_OBJECT_NULL;
+  }
 }
 

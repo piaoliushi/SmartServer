@@ -63,7 +63,7 @@ namespace hx_net
 		return m_Register;
 	}
 
-    int Electric_message::check_msg_header(unsigned char *data,int nDataLen)
+    int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
     {
         switch(d_devInfo.nDevProtocol){
         case EDA9033:{

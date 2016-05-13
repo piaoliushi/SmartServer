@@ -3,11 +3,12 @@
 #include"../../../protocol/bohui_protocol.h"
 #include"CommonPrecomp.h"
 #include <boost/network/protocol/http/server.hpp>
+//#include "../../client/http_request_session.h"
 struct web_handler;
 typedef boost::network::http::async_server<web_handler> hx_http_server;
 typedef boost::shared_ptr<hx_http_server>  hx_http_server_ptr;
 
-class request_handler
+class request_handler: public boost::enable_shared_from_this<request_handler>
 {
 public:
 	struct is_content_length {
@@ -34,10 +35,10 @@ private:
 	std::size_t content_length_;
 	std::size_t read_content_length_;
     Bohui_Protocol  bohui_protocol_;
-
-private:
 	static hx_http_server::response_header common_headers[3];
 	static std::string bad_request;
+    string d_response_body;
+    string d_sUrl;
 };
 
 typedef boost::shared_ptr<request_handler> request_handler_ptr;

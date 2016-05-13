@@ -15,7 +15,7 @@ public:
 public:
     void SetProtocol(int mainprotocol,int subprotocol);
     void GetAllCmd(CommandAttribute &cmdAll);
-    int  check_msg_header(unsigned char *data,int nDataLen);
+    int  check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number);
     int  decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
     bool IsStandardCommand();
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
@@ -45,6 +45,7 @@ protected:
      void  GetResultData(DevMonitorDataPtr data_ptr);
     void   CreateObject();
     bool  cmd_excute_is_ok();
+    void  check_device_alarm(int nAlarmType);
 private:
     int      m_Subprotocol;//设备子协议号
     int                 m_mainprotocol;//主协议编号
@@ -65,6 +66,6 @@ private:
     bool                d_antenna_Agent_;//天线代理标志
     time_t             d_OprStartTime;//提交控制命令开始时间
     Transmmiter   *m_ptransmmit;
-
+    DevMonitorDataPtr d_curData_ptr;
 };
 }

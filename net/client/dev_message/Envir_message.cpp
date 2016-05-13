@@ -12,7 +12,7 @@ namespace hx_net
 	Envir_message::~Envir_message(void)
 	{
 	}
-	int Envir_message::check_msg_header(unsigned char *data,int nDataLen)
+    int Envir_message::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
 	{
 		switch(d_devInfo.nDevProtocol)
 		{
@@ -67,9 +67,7 @@ namespace hx_net
 						else
 						{
 							if(data[0] == d_devInfo.iAddressCode)
-							{
 								return 0;
-							}
 							else
 							{
 								unsigned char cDes[1]={0x01};
@@ -379,8 +377,14 @@ namespace hx_net
 		{
 			DataInfo dainfo;
 			dainfo.bType = true;
-			dainfo.fValue = (float)(((data[3+2*i]<<8)|data[4+2*i]));
-			data_ptr->mValues[index++] = dainfo;
+            dainfo.fValue = (float)(((data[3+2*i]<<8)|data[4+2*i]));
+            if(dainfo.fValue>0)
+                dainfo.sValue="1";
+            else
+                dainfo.sValue="0";
+            data_ptr->mValues[index] = dainfo;
+
+            index++;
 		}
 		return RE_SUCCESS;
 	}

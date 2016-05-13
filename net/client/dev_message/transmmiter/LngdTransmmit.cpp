@@ -14,7 +14,7 @@ namespace hx_net{
 
 	}
 
-	int LngdTransmmit::check_msg_header( unsigned char *data,int nDataLen )
+    int LngdTransmmit::check_msg_header( unsigned char *data,int nDataLen,CmdType cmdType,int number )
 	{
 		switch(m_subprotocol)
 		{

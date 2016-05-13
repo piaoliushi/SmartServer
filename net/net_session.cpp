@@ -173,8 +173,8 @@ namespace hx_net
         for(;cell_iter!=mapMonitorItem.end();++cell_iter){
 			int cellId = (*cell_iter).first;			
 			//未更新的监测量
-            if(curData->mValues[cellId].bUpdate==false)
-				continue;
+            //if(curData->mValues[cellId].bUpdate==false)
+            //	continue;
 			DevDataNotify_eCellMsg *cell = dev_cur_data_ptr->add_ccelldata();
             cell->set_ecelltype((e_CellType)(*cell_iter).second.iItemType);
             cell->set_scellid((*cell_iter).second.iItemIndex);

@@ -53,18 +53,21 @@ const char TRANSMITTER_TARGET_DESC[][32] = {"频率","入射功率","反射功�
                                             "总电流","模块电压","模块电流","调制度","模块温度","切换模式","激励器"};
 
 enum {
-    CMD_NODEFINE = 0,
-    CMD_AUTO_TURNON_SEND = 1,
-    CMD_MANUAL_TURNON_SEND = 2,
-    CMD_AUTO_TURNOFF_SEND = 3,
-    CMD_MANUAL_TURNOFF_SEND = 4,
-    STATE_AUTO_TURNON = 5,
-    STATE_MANUAL_TURNON = 6,
-    STATE_AUTO_TURNOFF = 7,
-    STATE_MANUAL_TURNOFF = 8,
-    STATE_ANTENNA = 13,
+    CMD_EXC_M_ON=0,
+    CMD_EXC_M_OFF=1,
+    CMD_EXC_A_ON=2,
+    CMD_EXC_A_OFF=3,
+    CMD_H_TO_B = 4,
+    CMD_B_TO_H = 5
 };
-const char DEV_CMD_RESULT_DESC[][64] = {"自动开机命令已下发","手动开机命令已下发","自动关机命令已下发","手动关机命令已下发","自动已开机",
-                                        "手动已开机","自动已关机","手动已关机","","","","","同轴开关已转动到"};
+
+enum {
+    CMD_EXC_SUCCESS=0,
+    CMD_EXC_FAILER=1,
+    CMD_EXC_GOING=2
+};
+
+const char DEV_CMD_OPR_DESC[][64] = {"手动开机","手动关机","自动开机","自动关机","主到备切换","备到主切换"};
+const char DEV_CMD_RESULT_DESC[][64] = {"成功","失败","正在进行"};
 
 #endif // BOHUI_CONST_DEFINE_H

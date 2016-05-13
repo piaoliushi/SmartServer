@@ -75,6 +75,9 @@ namespace hx_net
                                  vector<Command_Scheduler> &cmmdScheduler);
        //更新告警配置
       e_ErrorCode update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
+
+      //上报http消息
+      e_ErrorCode   response_http_msg(string sUrl,string &sContent,string sRqstType="POST");
 	private:
 		svc_state svc_state_;
 		boost::shared_ptr<DevClientMgr> m_pDevMgrPtr;//设备(被动连接)管理对象

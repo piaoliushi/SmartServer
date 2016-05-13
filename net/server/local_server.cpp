@@ -164,6 +164,8 @@ namespace hx_net
                                 {
                                     map<int,CurItemAlarmInfo>::iterator iter_a = iter->second.begin();
                                     for(;iter_a!=iter->second.end();++iter_a){
+                                        if(iter_a->second.bNotifyed==false)
+                                            continue;
                                         DevAlarmStatus_eCellAlarmMsg *pCellAlarm = dev_alarm_s->add_ccellalarm();
                                         //std::string scellid = str(boost::format("%1%")%iter->first);
                                         pCellAlarm->set_scellid(iter->first);

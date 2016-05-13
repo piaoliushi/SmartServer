@@ -293,7 +293,7 @@ struct DevicePropertyEx
 		,data_save_interval(900)//默认15分钟记录一次数据
 		,alarm_detect_max_count(2)//默认报警检测次数为2次
 		,cmd_timeout_interval(10)//10默认命令超时循环间隔为10秒钟
-		,cmd_excut_timeout_duration(120)//默认命令发送超时时长为2分钟,超过此时间将不再尝试发送控制命令
+        ,cmd_excut_timeout_duration(60)//默认命令发送超时时长为2分钟,超过此时间将不再尝试发送控制命令
 		,multi_query_send_interval(30)//默认多查询指令交替间隔为30毫秒
 		,zero_power_value(0.02)//默认0.02kw为关机零功率
 		,u0_range_value(220)//默认电压量程（9033A）

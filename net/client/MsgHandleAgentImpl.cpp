@@ -4,6 +4,7 @@
 #include "./dev_message/Tsmt_message.h"
 #include "./dev_message/Electric_message.h"
 #include "./dev_message/Timer_message.h"
+#include "./dev_message/Link_message.h"
 
 namespace hx_net
 {
@@ -35,6 +36,9 @@ namespace hx_net
 			break;
         case DEVICE_GPS:
             m_pbaseMsg = new Timer_message(m_pSessionPtr,m_devInfo);
+            break;
+        case DEVICE_GS_RECIVE:
+            m_pbaseMsg = new Link_message(m_pSessionPtr,m_devInfo);
             break;
         case HUIXIN:	{
                 //m_pbaseMsg = new Hx_message(m_pSessionPtr);
@@ -90,11 +94,11 @@ namespace hx_net
         return m_pbaseMsg->GetAllCmd(cmdAll);
     }
 
-	int  MsgHandleAgentImpl::check_msg_header(unsigned char *data,int nDataLen)
+    int  MsgHandleAgentImpl::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
 	{
 		if(m_pbaseMsg==NULL)
 			return -1;
-		return m_pbaseMsg->check_msg_header(data,nDataLen);
+        return m_pbaseMsg->check_msg_header(data,nDataLen,cmdType,number);
 	}
 	int  MsgHandleAgentImpl::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
 	{
@@ -102,6 +106,14 @@ namespace hx_net
 			return -1;
 		return m_pbaseMsg->decode_msg_body(data,data_ptr,nDataLen);
 	}
+
+    int  MsgHandleAgentImpl::decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
+    {
+        if(m_pbaseMsg==NULL)
+            return -1;
+        return m_pbaseMsg->decode_msg_body(snmp,data_ptr,target);
+    }
+
     /*HDevAgentPtr MsgHandleAgentImpl::DevAgent()
 	{
 		if(m_pbaseMsg==NULL)

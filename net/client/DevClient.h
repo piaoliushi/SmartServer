@@ -73,11 +73,16 @@ namespace hx_net
                                                    vector<Command_Scheduler> &cmmdScheduler);
         //更新告警配置
         e_ErrorCode update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
+
+        //上报http消息
+        e_ErrorCode   response_http_msg(string sUrl,string &sContent,string sRqstType="POST");
 	private:
 		boost::recursive_mutex         device_pool_mutex_;
 		std::map<DevKey,session_ptr>   device_pool_;
 		io_service_pool                io_service_pool_;
+
         http_request_session_ptr      http_request_session_ptr_;
+        http_request_session_ptr      http_report_session_ptr_;
 	};
 }
 

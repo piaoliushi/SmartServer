@@ -12,7 +12,7 @@ public:
     ~Electric_message(void);
 public:
     void SetProtocol(int mainprotocol,int subprotocol);
-    int    check_msg_header(unsigned char *data,int nDataLen);
+    int    check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number);
     int    decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
     bool IsStandardCommand();
     bool isRegister();

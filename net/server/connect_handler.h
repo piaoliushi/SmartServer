@@ -57,9 +57,9 @@ namespace hx_net
 		msgPointer                      receive_msg_ptr_;
         LocalServer&                         srv_;//服务管理对象
 		boost::asio::deadline_timer     h_b_timer_;//心跳超时定时器
-		boost::mutex                    hb_mutex_;
+        boost::recursive_mutex                    hb_mutex_;
 		std::time_t                     last_hb_time_;
-		boost::mutex                    state_mutex_;
+        boost::recursive_mutex                    state_mutex_;
 		usr_state                       usr_state_;
 #ifdef USE_STRAND
 		boost::asio::io_service::strand strand_;           //消息头与消息体同步

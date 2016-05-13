@@ -1,5 +1,9 @@
 #include "MsgHandleAgent.h"
 #include "MsgHandleAgentImpl.h"
+#include "snmp_pp.h"
+#ifdef SNMP_PP_NAMESPACE
+using namespace Snmp_pp;
+#endif
 namespace hx_net
 {
     MsgHandleAgent::MsgHandleAgent(session_ptr conPtr,boost::asio::io_service& io_service,DeviceInfo &devInfo)
@@ -53,11 +57,11 @@ namespace hx_net
 			return false;
 		return m_msgImpl->is_auto_run();
 	}
-	int  MsgHandleAgent::check_msg_header(unsigned char *data,int nDataLen)
+    int  MsgHandleAgent::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
 	{
 		if(m_msgImpl==NULL)
 			return -1;
-		return m_msgImpl->check_msg_header(data,nDataLen);
+        return m_msgImpl->check_msg_header(data,nDataLen,cmdType,number);
 	}
 	int  MsgHandleAgent::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
 	{
@@ -65,6 +69,13 @@ namespace hx_net
 			return -1;
 		return m_msgImpl->decode_msg_body(data,data_ptr,nDataLen);
 	}
+
+    int  MsgHandleAgent::decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
+    {
+        if(m_msgImpl==NULL)
+            return -1;
+        return m_msgImpl->decode_msg_body(snmp,data_ptr,target);
+    }
 
     /*HDevAgentPtr MsgHandleAgent::DevAgent()
 	{
