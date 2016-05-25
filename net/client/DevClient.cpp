@@ -41,7 +41,8 @@ void DevClient::connect_all()
             session_ptr new_session(new device_session(io_service_pool_.get_io_service(),(*modle_iter),http_report_session_ptr_));
             device_pool_[DevKey(sLocalStationId,(*modle_iter).sModleNumber)]=new_session;
             new_session->init_session_config();
-            if((*modle_iter).iCommunicationMode==CON_MOD_NET) {
+            new_session->connect();
+            /*if((*modle_iter).iCommunicationMode==CON_MOD_NET) {
                 if((*modle_iter).netMode.inet_type == NET_MOD_TCP){
                     new_session->connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);
                 }else if((*modle_iter).netMode.inet_type == NET_MOD_UDP){
@@ -49,7 +50,7 @@ void DevClient::connect_all()
                 }else if((*modle_iter).netMode.inet_type == NET_MOD_SNMP){
                     new_session->agent_connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);
                 }
-            }
+            }*/
         }
     }
 }

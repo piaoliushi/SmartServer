@@ -29,6 +29,8 @@ namespace hx_net
         virtual void dev_base_info(DevBaseInfo& devInfo,string iId="local"){}
 		virtual bool is_contain_dev(string sDevId){return false;}
 
+        virtual int  con_mod(){}
+
         tcp::socket& socket();
         udp::socket& usocket();
         tcp::endpoint get_addr();
@@ -107,6 +109,7 @@ namespace hx_net
 		//-------------------------------------------transmitter--------------------------------//
         //virtual void  handler_transmitter_data(DevMonitorDataPtr curDataPtr){};
 		//-------------------------------------------client-------------------------------------//
+        virtual void connect(){}
         virtual void connect(std::string hostname,unsigned short port,bool bReconnect=false){}
         virtual void udp_connect(std::string hostname,unsigned short port){}
         virtual void agent_connect(std::string hostname,unsigned short port){}
@@ -135,9 +138,9 @@ namespace hx_net
 		virtual void handle_read_body(const boost::system::error_code& error, size_t bytes_transferred);
 		virtual void handle_write(const boost::system::error_code& error, size_t bytes_transferred);
 	private:
-		tcp::socket                     socket_;
-		udp::socket                     udp_socket_;
-		bool                            bTcp_;//是否为tcp连接
+        tcp::socket             socket_;
+        udp::socket            udp_socket_;
+       // int                         mod_;//是否为tcp连接
 		boost::mutex          socket_mutex_;
     };
 

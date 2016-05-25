@@ -23,7 +23,7 @@ enum DEVType
     DEVICE_GS_RECIVE    =100,//卫星接收机
     DEVICE_MW               =101,//微波接收机
     DEVICE_TR                 =102,//光收发器
-
+    DEVICE_ENCODER      =110,//编码器
     DEVICE_MUX              =111,//复用器
     DEVICE_MO                =112,//调制器
     DEVICE_ANTENNA       =114,//同轴开关
@@ -40,9 +40,10 @@ enum DEVType
 #define    NET_MOD_UDP    1 //UDP
 #define    NET_MOD_SNMP  2//SNMP
 #define    NET_MOD_HTTP   3// HTTP
+#define    NET_MOD_COM   4//COM
 
-#define    RUN_TIME_DAY          2 //运行图-天
-#define    RUN_TIME_WEEK       0 //运行图-星期
+#define    RUN_TIME_DAY         2 //运行图-天
+#define    RUN_TIME_WEEK      0 //运行图-星期
 #define    RUN_TIME_MONTH    1 //运行图-月
 
 
@@ -111,11 +112,11 @@ typedef struct
 
 typedef struct
 {
-    int    icomport;
-    int    irate;
-    int    idata_bit;
-    int    istop_bit;
-    int    iparity_bit;
+    int    icomport; //com口ID
+    int    irate;       //波特率
+    int    idata_bit; //数据位
+    int    istop_bit; //停止位
+    int    iparity_bit;//校验位
 }ComCommunicationMode;
 
 typedef struct

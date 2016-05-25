@@ -1,5 +1,6 @@
 #include "device_session.h"
 #include <boost/thread/detail/singleton.hpp>
+#include <boost/asio/serial_port.hpp>
 #include "../../ErrorCode.h"
 #include "../SvcMgr.h"
 #include "../../LocalConfig.h"
@@ -29,7 +30,7 @@ device_session::device_session(boost::asio::io_service& io_service,
     ,schedules_task_timer_(io_service)
     ,receive_msg_ptr_(new othdev_message(2048))
     ,othdev_con_state_(con_disconnected)
-    ,modleInfos(modinfo)
+    ,modleInfos_(modinfo)
     ,cur_msg_q_id_(0)
     ,query_timeout_count_(0)
     ,task_count_(0)
@@ -53,10 +54,10 @@ device_session::~device_session()
 void device_session::init_session_config()
 {
     //获得网络协议转换器相关配置
-    moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos.sModleNumber);
-    map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
+    moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos_.sModleNumber);
+    map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.begin();
     bool bIsTransmitter = false;
-    for(;iter!=modleInfos.mapDevInfo.end();++iter)
+    for(;iter!=modleInfos_.mapDevInfo.end();++iter)
     {
         dev_opr_state_[iter->first] = dev_no_opr;
         HMsgHandlePtr pars_agent = HMsgHandlePtr(new MsgHandleAgent(shared_from_this(),io_service_,iter->second));
@@ -89,9 +90,7 @@ void device_session::init_session_config()
             bIsTransmitter=true;
     }
     cur_dev_id_ = dev_agent_and_com.begin()->first;
-
     netAlarm.nAlarmId = -1;//默认值
-
     //启动发射机任务定时器
     if(bIsTransmitter==true)
         start_task_schedules_timer();
@@ -99,8 +98,8 @@ void device_session::init_session_config()
 
 void device_session::dev_base_info(DevBaseInfo& devInfo,string iId)
 {
-    map<string,DeviceInfo>::iterator find_iter = modleInfos.mapDevInfo.find(iId);
-    if(find_iter !=modleInfos.mapDevInfo.end()){
+    map<string,DeviceInfo>::iterator find_iter = modleInfos_.mapDevInfo.find(iId);
+    if(find_iter !=modleInfos_.mapDevInfo.end()){
         devInfo.sDevNum = find_iter->second.sDevNum;
         devInfo.mapMonitorItem = find_iter->second.map_MonitorItem;
         devInfo.nDevType = find_iter->second.iDevType;
@@ -111,7 +110,7 @@ void device_session::dev_base_info(DevBaseInfo& devInfo,string iId)
 //是否包含该id
 bool device_session::is_contain_dev(string sDevId)
 {
-    if(modleInfos.mapDevInfo.find(sDevId) == modleInfos.mapDevInfo.end())
+    if(modleInfos_.mapDevInfo.find(sDevId) == modleInfos_.mapDevInfo.end())
         return false;
     return true;
 }
@@ -147,8 +146,8 @@ void device_session::set_con_state(con_state curState)
         if(othdev_con_state_!=curState)
         {
             othdev_con_state_ = curState;
-            map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.begin();
-            for(;iter!=modleInfos.mapDevInfo.end();++iter)
+            map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.begin();
+            for(;iter!=modleInfos_.mapDevInfo.end();++iter)
             {
                 //广播设备状态到在线客户端
                 send_net_state_message(GetInst(LocalConfig).local_station_id(),(*iter).first
@@ -208,6 +207,70 @@ void device_session::get_alarm_state(string sDevId,map<int,map<int,CurItemAlarmI
         cellAlarm = mapItemAlarm[sDevId];
 }
 
+ int  device_session::con_mod()
+ {
+     if(modleInfos_.iCommunicationMode==CON_MOD_NET) {
+         return modleInfos_.netMode.inet_type;
+     }else if(modleInfos_.iCommunicationMode==CON_MOD_COM){
+        return NET_MOD_COM;
+     }
+ }
+
+void device_session::connect()
+{
+    if(modleInfos_.iCommunicationMode==CON_MOD_NET) {
+        if(modleInfos_.netMode.inet_type == NET_MOD_TCP){
+            connect(modleInfos_.netMode.strIp,modleInfos_.netMode.iremote_port);
+        }else if(modleInfos_.netMode.inet_type == NET_MOD_UDP){
+            udp_connect(modleInfos_.netMode.strIp,modleInfos_.netMode.iremote_port);
+        }else if(modleInfos_.netMode.inet_type == NET_MOD_SNMP){
+            agent_connect(modleInfos_.netMode.strIp,modleInfos_.netMode.iremote_port);
+        }
+    }else if(modleInfos_.iCommunicationMode==CON_MOD_COM){
+        open_com();
+    }
+}
+
+void   device_session::open_com()
+{
+    try
+    {
+        if (!pSerialPort_ptr_){
+            pSerialPort_ptr_.reset(new boost::asio::serial_port(io_service_));
+        }
+        if(pSerialPort_ptr_->is_open()){
+            boost::system::error_code err= boost::system::error_code();
+            handle_connected(err);
+            return;
+        }
+        boost::system::error_code  ec;
+        pSerialPort_ptr_->set_option(serial_port::baud_rate(modleInfos_.comMode.irate),ec);
+        pSerialPort_ptr_->set_option(serial_port::flow_control(serial_port::flow_control::none),ec);
+        pSerialPort_ptr_->set_option(serial_port::parity(serial_port::parity::none),ec);
+        pSerialPort_ptr_->set_option(serial_port::stop_bits(serial_port::stop_bits::one),ec);
+        if(modleInfos_.comMode.idata_bit>0)
+            pSerialPort_ptr_->set_option(serial_port::character_size(modleInfos_.comMode.idata_bit),ec);
+        else
+            pSerialPort_ptr_->set_option(serial_port::character_size(8),ec);
+        if(modleInfos_.comMode.icomport>=0 && modleInfos_.comMode.icomport<64){
+            string sComStr = str(boost::format("/dev/ttyO%1%")%modleInfos_.comMode.icomport);
+            pSerialPort_ptr_->open(sComStr,ec);//"/dev/tty0"
+            if(ec){
+                //string  sErr = ec.message();
+                //QString xx = QString::fromStdString(sErr);
+                std::cout<< sComStr<<" open error!!"<< ec.message()<<std::endl;
+                return;
+            }
+
+            boost::system::error_code err= boost::system::error_code();
+            handle_connected(err);
+        }
+    }
+    catch (std::exception& e){
+            std::cerr << e.what() << std::endl;
+    }
+
+}
 
 void device_session::connect(std::string hostname,unsigned short port,bool bReconnect)
 {
@@ -317,7 +380,6 @@ bool device_session::is_disconnected(string sDevId)
 
 void device_session::start_connect_timer(unsigned long nSeconds)
 {
-    //set_con_state(con_connecting);//设置正在重连标志
     connect_timer_.expires_from_now(boost::posix_time::seconds(nSeconds));
     connect_timer_.async_wait(boost::bind(&device_session::connect_time_event,
                                           this,boost::asio::placeholders::error));
@@ -327,19 +389,20 @@ void device_session::start_connect_timer(unsigned long nSeconds)
 void device_session::connect_time_event(const boost::system::error_code& error)
 {
     //只有当前状态是正在连接才执行超时。。。
-    //if(!is_connecting())
     if(is_connected())
         return;
     if(error!= boost::asio::error::operation_aborted)
     {
-        if(modleInfos.netMode.inet_type == NET_MOD_TCP)
+        if(modleInfos_.netMode.inet_type == NET_MOD_TCP)
         {
             socket().async_connect(endpoint_,boost::bind(&device_session::handle_connected,
                                                          this,boost::asio::placeholders::error));
-        }else if(modleInfos.netMode.inet_type == NET_MOD_UDP){
+        }else if(modleInfos_.netMode.inet_type == NET_MOD_UDP){
             usocket().open(udp::v4());
             boost::system::error_code err= boost::system::error_code();
             handle_connected(err);
+        }else if(modleInfos_.iCommunicationMode == CON_MOD_COM){
+            open_com();
         }
         start_timeout_timer();//启动超时定时器
     }
@@ -354,11 +417,12 @@ void device_session::disconnect()
 
 void device_session::start_read(int msgLen)
 {
-    if(msgLen > receive_msg_ptr_->space())
-    {
+    if(msgLen > receive_msg_ptr_->space()){
         cout<<"data overflow !!!!"<<endl;
         return;
     }
+    if(modleInfos_.netMode.inet_type == NET_MOD_TCP)
+    {
     boost::asio::async_read(socket(),boost::asio::buffer(receive_msg_ptr_->w_ptr(),msgLen),
                         #ifdef USE_STRAND
                             strand_.wrap(
@@ -370,6 +434,86 @@ void device_session::start_read(int msgLen)
                                 )
                         #endif
                             );
+    }else if(modleInfos_.netMode.inet_type == NET_MOD_UDP){
+
+        udp::endpoint sender_endpoint;
+        usocket().async_receive_from(boost::asio::buffer(receive_msg_ptr_->w_ptr(),receive_msg_ptr_->space()),sender_endpoint,//msgLen
+                             #ifdef USE_STRAND
+                                     strand_.wrap(
+                                 #endif
+                                         boost::bind(&device_session::handle_udp_read,this,
+                                                     boost::asio::placeholders::error,
+                                                     boost::asio::placeholders::bytes_transferred)
+                                 #ifdef USE_STRAND
+                                         )
+                             #endif
+                                     );
+    }else if(modleInfos_.iCommunicationMode==CON_MOD_COM){
+
+        boost::asio::async_read(*pSerialPort_ptr_,boost::asio::buffer(receive_msg_ptr_->w_ptr(),msgLen),
+                            #ifdef USE_STRAND
+                                strand_.wrap(
+                                #endif
+                                    boost::bind(&device_session::handle_read,this,
+                                                boost::asio::placeholders::error,
+                                                boost::asio::placeholders::bytes_transferred)
+                                #ifdef USE_STRAND
+                                    )
+                            #endif
+                                );
+    }
+}
+
+void device_session::start_read_head(int msgLen)
+{
+    if(msgLen>receive_msg_ptr_->space()){
+        cout<<"data overflow !!!!"<<endl;
+        return;
+    }
+
+    if(modleInfos_.netMode.inet_type == NET_MOD_TCP)
+    {
+        boost::asio::async_read(socket(), boost::asio::buffer(receive_msg_ptr_->w_ptr(),
+                                                              msgLen),
+                        #ifdef USE_STRAND
+                                strand_.wrap(
+                            #endif
+                                    boost::bind(&device_session::handle_read_head,this,
+                                                boost::asio::placeholders::error,
+                                                boost::asio::placeholders::bytes_transferred)
+                            #ifdef USE_STRAND
+                                    )
+                        #endif
+                                );
+    }
+    else if(modleInfos_.netMode.inet_type == NET_MOD_UDP){
+        udp::endpoint sender_endpoint;
+        usocket().async_receive_from(boost::asio::buffer(receive_msg_ptr_->w_ptr(),receive_msg_ptr_->space()),sender_endpoint,//msgLen
+                             #ifdef USE_STRAND
+                                     strand_.wrap(
+                                 #endif
+                                         boost::bind(&device_session::handle_udp_read,this,
+                                                     boost::asio::placeholders::error,
+                                                     boost::asio::placeholders::bytes_transferred)
+                                 #ifdef USE_STRAND
+                                         )
+                             #endif
+                                     );
+    }else if(modleInfos_.iCommunicationMode==CON_MOD_COM){
+
+        boost::asio::async_read(*pSerialPort_ptr_, boost::asio::buffer(receive_msg_ptr_->w_ptr(),
+                                                              msgLen),
+                        #ifdef USE_STRAND
+                                strand_.wrap(
+                            #endif
+                                    boost::bind(&device_session::handle_read_head,this,
+                                                boost::asio::placeholders::error,
+                                                boost::asio::placeholders::bytes_transferred)
+                            #ifdef USE_STRAND
+                                    )
+                        #endif
+                                );
+    }
 }
 
 void device_session::start_query_timer(unsigned long nSeconds/* =3 */)
@@ -393,15 +537,18 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
         if(query_timeout_count_<moxa_config_ptr->query_timeout_count)
         {
             ++query_timeout_count_;
-            if(modleInfos.netMode.inet_type == NET_MOD_SNMP || modleInfos.netMode.inet_type == NET_MOD_HTTP)
-                get_sync_net_data();//获取同步网络数据，使用http,snmp
-            else
+            if(modleInfos_.iCommunicationMode == CON_MOD_NET){
+                if(modleInfos_.netMode.inet_type == NET_MOD_SNMP || modleInfos_.netMode.inet_type == NET_MOD_HTTP)
+                    get_sync_net_data();//获取同步网络数据，使用http,snmp
+                else
+                    send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
+            }
+            else if(modleInfos_.iCommunicationMode == CON_MOD_COM)
                 send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
         else{
 
-            if(modleInfos.mapDevInfo.size()<=1)
-            {
+            if(modleInfos_.mapDevInfo.size()<=1){
                 close_all();
                 start_connect_timer(moxa_config_ptr->connect_timer_interval);
                 return;
@@ -410,13 +557,11 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             cur_msg_q_id_ = 0;
             //发送清零数据给客户端,该设备可能连接异常
             //DevMonitorDataPtr curData_ptr(new Data);
-            //send_monitor_data_message(modleInfos.sStationNumber,cur_dev_id_,(e_DevType)modleInfos.mapDevInfo[cur_dev_id_].nDevType
-            //	,curData_ptr,modleInfos.mapDevInfo[cur_dev_id_].mapMonitorItem);
+            //send_monitor_data_message(modleInfos_.sStationNumber,cur_dev_id_,(e_DevType)modleInfos_.mapDevInfo[cur_dev_id_].nDevType
+            //	,curData_ptr,modleInfos_.mapDevInfo[cur_dev_id_].mapMonitorItem);
             cur_dev_id_ = next_dev_id();
             send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
-
             }
-
         start_query_timer(moxa_config_ptr->query_interval);
     }
 }
@@ -426,11 +571,9 @@ void device_session::get_sync_net_data()
     query_timeout_count_=0;
     DevMonitorDataPtr curData_ptr(new Data);
     int nResult = dev_agent_and_com[cur_dev_id_].second->decode_msg_body(snmp_ptr_,curData_ptr,target_ptr_);
-    if(nResult == 0)
-    {
+    if(nResult == 0){
         if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
-            .schedule(boost::bind(&device_session::handler_data,this,cur_dev_id_,curData_ptr)))
-        {
+            .schedule(boost::bind(&device_session::handler_data,this,cur_dev_id_,curData_ptr))) {
             task_count_increase();
         }
     }
@@ -459,7 +602,7 @@ void device_session::start_write(unsigned char* commStr,int commLen)
 {
     if(commLen<=0)
         return;
-    if(modleInfos.netMode.inet_type == NET_MOD_TCP)
+    if(modleInfos_.netMode.inet_type == NET_MOD_TCP)
     {
         if(get_con_state()!=con_connected)
             return;
@@ -477,7 +620,7 @@ void device_session::start_write(unsigned char* commStr,int commLen)
             #endif
                     );
     }
-    else if(modleInfos.netMode.inet_type == NET_MOD_UDP)
+    else if(modleInfos_.netMode.inet_type == NET_MOD_UDP)
     {
         usocket().async_send_to(boost::asio::buffer(commStr,commLen),uendpoint_,
                         #ifdef USE_STRAND
@@ -490,6 +633,23 @@ void device_session::start_write(unsigned char* commStr,int commLen)
                                     )
                         #endif
                                 );
+    }if(modleInfos_.iCommunicationMode == CON_MOD_COM)
+    {
+        if(get_con_state()!=con_connected)
+            return;
+        boost::asio::async_write(
+                    *pSerialPort_ptr_,
+                    boost::asio::buffer(commStr,commLen),
+            #ifdef USE_STRAND
+                    strand_.wrap(
+                #endif
+                        boost::bind(&net_session::handle_write,shared_from_this(),
+                                    boost::asio::placeholders::error,
+                                    boost::asio::placeholders::bytes_transferred)
+                #ifdef USE_STRAND
+                        )
+            #endif
+                    );
     }
 }
 
@@ -497,8 +657,7 @@ void device_session::start_write(unsigned char* commStr,int commLen)
 void device_session::wait_task_end()
 {
     boost::mutex::scoped_lock lock(task_mutex_);
-    while(task_count_>0)
-    {
+    while(task_count_>0){
         task_end_conditon_.wait(task_mutex_);
     }
 }
@@ -552,8 +711,8 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
         tm *pCurTime = localtime(&curTime);
 
         unsigned long cur_tm = pCurTime->tm_hour*3600+pCurTime->tm_min*60+pCurTime->tm_sec;
-        map<string,DeviceInfo>::iterator witer = modleInfos.mapDevInfo.begin();
-        for(;witer!=modleInfos.mapDevInfo.end();++witer)
+        map<string,DeviceInfo>::iterator witer = modleInfos_.mapDevInfo.begin();
+        for(;witer!=modleInfos_.mapDevInfo.end();++witer)
         {
             boost::recursive_mutex::scoped_lock lock(update_cmd_schedule_mutex_);//增加锁防止读写竞争
             vector<Command_Scheduler>::iterator cmd_iter = witer->second.vCommSch.begin();
@@ -729,8 +888,8 @@ bool device_session::is_monitor_time(string sDevId)
 
     boost::recursive_mutex::scoped_lock lock(update_time_schedule_mutex_);
     //运行图----天
-    map<int,vector<Monitoring_Scheduler> >::iterator day_iter = modleInfos.mapDevInfo[sDevId].vMonitorSch.find(RUN_TIME_DAY);
-    if(day_iter!=modleInfos.mapDevInfo[sDevId].vMonitorSch.end()){
+    map<int,vector<Monitoring_Scheduler> >::iterator day_iter = modleInfos_.mapDevInfo[sDevId].vMonitorSch.find(RUN_TIME_DAY);
+    if(day_iter!=modleInfos_.mapDevInfo[sDevId].vMonitorSch.end()){
         vector<Monitoring_Scheduler>::iterator iter = day_iter->second.begin();
         for(;iter!=day_iter->second.end();++iter){
             tm *pCurTime = localtime(&curTime);
@@ -740,8 +899,8 @@ bool device_session::is_monitor_time(string sDevId)
         }
     }
     //运行图----星期
-    map<int,vector<Monitoring_Scheduler> >::iterator week_iter = modleInfos.mapDevInfo[sDevId].vMonitorSch.find(RUN_TIME_WEEK);
-    if(week_iter!=modleInfos.mapDevInfo[sDevId].vMonitorSch.end()){
+    map<int,vector<Monitoring_Scheduler> >::iterator week_iter = modleInfos_.mapDevInfo[sDevId].vMonitorSch.find(RUN_TIME_WEEK);
+    if(week_iter!=modleInfos_.mapDevInfo[sDevId].vMonitorSch.end()){
         vector<Monitoring_Scheduler>::iterator iter = week_iter->second.begin();
         for(;iter!=week_iter->second.end();++iter){
             tm *pCurTime = localtime(&curTime);
@@ -759,22 +918,13 @@ bool device_session::is_monitor_time(string sDevId)
         }
     }
     //运行图----月
-    map<int,vector<Monitoring_Scheduler> >::iterator month_iter = modleInfos.mapDevInfo[sDevId].vMonitorSch.find(RUN_TIME_MONTH);
-    if(month_iter!=modleInfos.mapDevInfo[sDevId].vMonitorSch.end()){
+    map<int,vector<Monitoring_Scheduler> >::iterator month_iter = modleInfos_.mapDevInfo[sDevId].vMonitorSch.find(RUN_TIME_MONTH);
+    if(month_iter!=modleInfos_.mapDevInfo[sDevId].vMonitorSch.end()){
         vector<Monitoring_Scheduler>::iterator iter = month_iter->second.begin();
         for(;iter!=month_iter->second.end();++iter){
-
-            //tm *ltime = localtime(&((*iter).tStartTime));
-            //std::string sTM = str(boost::format("%1%-%2%-%3% %4%:%5%:%6%")%(ltime->tm_year+1900)%(ltime->tm_mon+1)
-            //                           %ltime->tm_mday%ltime->tm_hour%ltime->tm_min%ltime->tm_sec);
-            //ltime = localtime(&((*iter).tEndTime));
-            //std::string eTM = str(boost::format("%1%-%2%-%3% %4%:%5%:%6%")%(ltime->tm_year+1900)%(ltime->tm_mon+1)
-              //                         %ltime->tm_mday%ltime->tm_hour%ltime->tm_min%ltime->tm_sec);
-             tm *pCurTime = localtime(&curTime);
-             //cout<<"按月:"<<(*iter).iMonitorMonth<<"当前月"<<pCurTime->tm_mon<<"开始时间："<<sTM<<"结束时间："<<eTM<<endl;
-
+            tm *pCurTime = localtime(&curTime);
             if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0)
-                  continue;//超过运行图终止时间且终止时间不为0,则跳过
+                continue;//超过运行图终止时间且终止时间不为0,则跳过
 
             if((pCurTime->tm_mon+1)== (*iter).iMonitorMonth ||  (*iter).iMonitorMonth==0){ //如果是当前月或者是all则比较
                 if((pCurTime->tm_mday)== (*iter).iMonitorDay){
@@ -811,17 +961,17 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     //是否在运行图时间
     bool bIsMonitorTime = is_monitor_time(sDevId);
     //打包发送客户端
-    send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos.mapDevInfo[sDevId].iDevType
-                              ,curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
+    send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
+                              ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
     if(is_need_report_data(sDevId))
-       http_ptr_->send_http_data_messge_to_platform(sDevId,modleInfos.mapDevInfo[sDevId].iDevType,
-                                              curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
+       http_ptr_->send_http_data_messge_to_platform(sDevId,modleInfos_.mapDevInfo[sDevId].iDevType,
+                                              curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     //检测当前报警状态
     check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
     //如果在监测时间段则保存当前记录
     if(bIsMonitorTime)
-        save_monitor_record(sDevId,curDataPtr,modleInfos.mapDevInfo[sDevId].map_MonitorItem);
+        save_monitor_record(sDevId,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     //任务数递减
     task_count_decrease();
     return;
@@ -836,7 +986,7 @@ void device_session::clear_dev_alarm(string sDevId)
         for(;typeIter!=iter->second.end();++typeIter) {
             //写入恢复记录,通知客户端
             //.......
-            record_alarm_and_notify(sDevId,0, 0,1,modleInfos.mapDevInfo[sDevId].map_MonitorItem[iter->first],typeIter->second);
+            record_alarm_and_notify(sDevId,0, 0,1,modleInfos_.mapDevInfo[sDevId].map_MonitorItem[iter->first],typeIter->second);
         }
         iter->second.clear();
     }
@@ -856,7 +1006,8 @@ void device_session::handle_connected(const boost::system::error_code& error)
         else
             start_read(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
 
-        if(modleInfos.netMode.inet_type == NET_MOD_TCP)	{
+        if(modleInfos_.netMode.inet_type == NET_MOD_TCP || modleInfos_.iCommunicationMode==CON_MOD_COM)
+        {
             if(dev_agent_and_com[cur_dev_id_].second->is_auto_run()==false)
                 start_query_timer(moxa_config_ptr->query_interval);
             else
@@ -896,44 +1047,7 @@ void device_session::handle_read_head(const boost::system::error_code& error, si
     }
 }
 
-void device_session::start_read_head(int msgLen)
-{
-    if(msgLen>receive_msg_ptr_->space()){
-        cout<<"data overflow !!!!"<<endl;
-        return;
-    }
 
-    if(modleInfos.netMode.inet_type == NET_MOD_TCP)
-    {
-        boost::asio::async_read(socket(), boost::asio::buffer(receive_msg_ptr_->w_ptr(),
-                                                              msgLen),
-                        #ifdef USE_STRAND
-                                strand_.wrap(
-                            #endif
-                                    boost::bind(&device_session::handle_read_head,this,
-                                                boost::asio::placeholders::error,
-                                                boost::asio::placeholders::bytes_transferred)
-                            #ifdef USE_STRAND
-                                    )
-                        #endif
-                                );
-    }
-    else if(modleInfos.netMode.inet_type == NET_MOD_UDP)
-    {
-        udp::endpoint sender_endpoint;
-        usocket().async_receive_from(boost::asio::buffer(receive_msg_ptr_->w_ptr(),receive_msg_ptr_->space()),sender_endpoint,//msgLen
-                             #ifdef USE_STRAND
-                                     strand_.wrap(
-                                 #endif
-                                         boost::bind(&device_session::handle_udp_read,this,
-                                                     boost::asio::placeholders::error,
-                                                     boost::asio::placeholders::bytes_transferred)
-                                 #ifdef USE_STRAND
-                                         )
-                             #endif
-                                     );
-    }
-}
 
 void device_session::handle_udp_read(const boost::system::error_code& error,size_t bytes_transferred)
 {
@@ -975,7 +1089,7 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
 void device_session::start_read_body(int msgLen)
 {
 
-    if(modleInfos.netMode.inet_type == NET_MOD_TCP)
+    if(modleInfos_.netMode.inet_type == NET_MOD_TCP)
     {
         boost::asio::async_read(socket(), boost::asio::buffer(receive_msg_ptr_->w_ptr(),
                                                               msgLen),
@@ -990,7 +1104,7 @@ void device_session::start_read_body(int msgLen)
                         #endif
                                 );
     }
-    else if(modleInfos.netMode.inet_type == NET_MOD_UDP)
+    else if(modleInfos_.netMode.inet_type == NET_MOD_UDP)
     {
         udp::endpoint sender_endpoint;
         usocket().async_receive_from(boost::asio::buffer(receive_msg_ptr_->w_ptr(),
@@ -1067,8 +1181,6 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
                 {
                     ++cur_msg_q_id_;
                     boost::this_thread::sleep(boost::posix_time::milliseconds(200));
-                  //  start_write(dev_agent_and_com[cur_dev_id_].first->queryComm[cur_msg_q_id_].commandId,
-                   //             dev_agent_and_com[cur_dev_id_].first->queryComm[cur_msg_q_id_].commandLen);
                      send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
                 }
                 else   {
@@ -1136,10 +1248,10 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
                                                                    fValue,curAlarm. sReason,curAlarm.nAlarmId);
         if(bRslt==true){
             //提交监控量告警到上级平台
-            http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
+            http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos_.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
             //发送监控量报警到客户端
-            send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
-                                     ,modleInfos.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
+            send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
+                                     ,modleInfos_.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
             // 联动.....
         }
     }else{//1:告警恢复
@@ -1147,10 +1259,10 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
         bool bRslt = GetInst(DataBaseOperation).AddItemEndAlarmRecord(curTime,curAlarm.nAlarmId);
         if(bRslt==true){
             //提交监控量告警到上级平台
-            http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
+            http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos_.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
             //发送监控量报警到客户端
-            send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
-                                     ,modleInfos.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
+            send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
+                                     ,modleInfos_.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
             // 联动.....
         }
     }
@@ -1269,8 +1381,8 @@ void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPt
         clear_dev_alarm(sDevId);
         return;
     }
-    map<string,DeviceInfo>::iterator iter = modleInfos.mapDevInfo.find(sDevId);
-    if(iter== modleInfos.mapDevInfo.end())
+    map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.find(sDevId);
+    if(iter== modleInfos_.mapDevInfo.end())
         return;
     map<int,DeviceMonitorItem>::iterator iterItem = iter->second.map_MonitorItem.begin();
     for(;iterItem!=iter->second.map_MonitorItem.end();++iterItem){
@@ -1370,12 +1482,12 @@ void device_session::update_monitor_time(string devId,map<int,vector<Monitoring_
 {
     {
          boost::recursive_mutex::scoped_lock lock(update_time_schedule_mutex_);
-         modleInfos.mapDevInfo[devId].vMonitorSch = monitorScheduler;
+         modleInfos_.mapDevInfo[devId].vMonitorSch = monitorScheduler;
     }
 
     {
          boost::recursive_mutex::scoped_lock lock(update_cmd_schedule_mutex_);
-         modleInfos.mapDevInfo[devId].vCommSch = cmmdScheduler;
+         modleInfos_.mapDevInfo[devId].vCommSch = cmmdScheduler;
     }
 }
 
@@ -1385,12 +1497,12 @@ void  device_session::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo)
     {
         //更新整机
       boost::recursive_mutex::scoped_lock alarm_lock(update_alarm_config_mutex_);
-      modleInfos.mapDevInfo[sDevId].map_AlarmConfig = devInfo.map_AlarmConfig;
+      modleInfos_.mapDevInfo[sDevId].map_AlarmConfig = devInfo.map_AlarmConfig;
     }
     {
         //更新监控项告警
-        map<int,DeviceMonitorItem>::iterator iterItem = modleInfos.mapDevInfo[sDevId].map_MonitorItem.begin();
-        for(;iterItem!=modleInfos.mapDevInfo[sDevId].map_MonitorItem.end();++iterItem){
+        map<int,DeviceMonitorItem>::iterator iterItem = modleInfos_.mapDevInfo[sDevId].map_MonitorItem.begin();
+        for(;iterItem!=modleInfos_.mapDevInfo[sDevId].map_MonitorItem.end();++iterItem){
             boost::recursive_mutex::scoped_lock alarm_lock(update_alarm_config_mutex_);
             iterItem->second.vItemAlarm = devInfo.map_MonitorItem[iterItem->first].vItemAlarm;
             if(iterItem->second.vItemAlarm.size() ==0)
@@ -1410,7 +1522,7 @@ void device_session::clear_dev_item_alarm(string sDevId,int nitemId)
     for(;typeIter!=iter->second.end();++typeIter) {
         //写入恢复记录,通知客户端
         //.......
-        record_alarm_and_notify(sDevId,0, 0,1,modleInfos.mapDevInfo[sDevId].map_MonitorItem[iter->first],typeIter->second);
+        record_alarm_and_notify(sDevId,0, 0,1,modleInfos_.mapDevInfo[sDevId].map_MonitorItem[iter->first],typeIter->second);
     }
     iter->second.clear();
 }

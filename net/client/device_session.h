@@ -24,6 +24,7 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 
     class device_session:public net_session
 	{
+        friend class Tsmt_message;
 	public:
 		device_session(boost::asio::io_service& io_service, 
             ModleInfo & modinfo,http_request_session_ptr &httpPtr);
@@ -35,6 +36,8 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 		void dev_base_info(DevBaseInfo& devInfo,string iId="local");
 		//该连接是否包含此设备id
 		bool is_contain_dev(string sDevId);
+        //连接
+        void connect();
 		//开始连接
 		void connect(std::string hostname,unsigned short port,bool bReconnect=false);
 		//udp连接
@@ -129,7 +132,11 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         //设备断线告警（博汇）
         void send_device_data_state_notify(string sDevId,bool bHaveData);
 
-	public:	
+        //打开串口
+        void   open_com();
+
+        int  con_mod();
+    protected:
 		void handle_connected(const boost::system::error_code& error);
 		void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);//通用消息头（分消息head，body）
 		void handle_read_body(const boost::system::error_code& error, size_t bytes_transferred);//通用消息体
@@ -169,7 +176,7 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         map<string,pair<CommandAttrPtr,HMsgHandlePtr> >   dev_agent_and_com;//add by lk 2013-11-26
 		string                                           cur_dev_id_;//当前查询设备id
 
-        ModleInfo                            &modleInfos;
+        ModleInfo                            &modleInfos_;
         boost::mutex                        task_mutex_;
         int										   task_count_;
         boost::condition                    task_end_conditon_;
@@ -194,6 +201,7 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
         Snmp    *snmp_ptr_;
         CTarget *target_ptr_;
 
+        boost::shared_ptr<boost::asio::serial_port> pSerialPort_ptr_;//串口操作
 
 	};
 }

@@ -12,6 +12,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SmartServer
 TEMPLATE = app
 
+CONFIG+=precompile_header
+PRECOMPILED_HEADER=stable.h
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -121,7 +123,8 @@ HEADERS  += \
     net/client/dev_message/transmmiter/LngdTransmmit.h \
     net/client/dev_message/Link_message.h \
     net/client/dev_message/transmmiter/ShTransmmit.h \
-    net/client/http_work.h
+    net/client/http_work.h \
+    stable.h
 
 FORMS    += mainwindow.ui
 

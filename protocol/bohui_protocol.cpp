@@ -242,16 +242,21 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
             case DEVICE_GPS://GPS传感器
             case DEVICE_SWITCH://切换设备
             case DEVICE_GPS_TIME://GPS授时器
-            case DEVICE_GS_RECIVE:{//卫星接收机
-                xml_Quality = xml_reportMsg.allocate_node(node_element,"SatelliteRecever");
-                xml_resps->append_node(xml_Quality);
-                xml_dev_node = xml_reportMsg.allocate_node(node_element,"Dev");
-                xml_dev_node->append_attribute(xml_reportMsg.allocate_attribute("ID",xml_reportMsg.allocate_string(sDevId.c_str())));
-            }break;
+                break;
+
+            case DEVICE_GS_RECIVE://卫星接收机
             case DEVICE_MW://微波接收机
             case DEVICE_TR://光收发器
+            case DEVICE_ENCODER://编码器
             case DEVICE_MUX://复用器
-            case DEVICE_MO://调制器
+            case DEVICE_MO:{//调制器
+                //xml_Quality = xml_reportMsg.allocate_node(node_element,"SatelliteRecever");
+                //xml_resps->append_node(xml_Quality);
+                xml_dev_node = xml_reportMsg.allocate_node(node_element,"Dev");
+                xml_dev_node->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(nDevType).c_str())));
+                xml_dev_node->append_attribute(xml_reportMsg.allocate_attribute("ID",xml_reportMsg.allocate_string(sDevId.c_str())));
+                xml_Quality = xml_resps;//接口统一,将上级LinkDevQualityReport节点的指针保存到Quality中
+            }break;
             case DEVICE_ANTENNA://同轴开关
                 break;
             }
@@ -271,8 +276,13 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                  else
                      xml_Quality_Index = xml_reportMsg.allocate_node(node_element,mapTypeToStr[cell_iter->second.iTargetId].second.c_str());
 
-
                  xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
+                  if(nDevType>DEVICE_GPS_TIME){
+                      //暂时链路设备通道未做划分----待修改
+                      xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("QulitySrc","0"));
+                      xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("SrcIndex","0"));
+                  }
+
                  string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
                  if(curData->mValues[cell_iter->first].bType==true)
                      sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
@@ -283,7 +293,7 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                  xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
 
 
-                xml_dev_node ->append_node(xml_Quality_Index);//xml_Quality
+                xml_dev_node ->append_node(xml_Quality_Index);
              }
         }
     }

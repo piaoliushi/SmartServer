@@ -2,6 +2,7 @@
 #define INCLUDE_H
 
 //#define  BOOST_NETWORK_NO_LIB
+/*
 #include <string>
 #include <stdexcept>
 #include <algorithm>
@@ -45,5 +46,6 @@
 #include <boost/network/protocol/http/server/async_server.hpp>
 #include <boost/network/utils/thread_pool.hpp>
 #include "./net/config.h"
+*/
 //#include "MsgDefine.h"
 #endif

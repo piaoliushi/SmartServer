@@ -78,9 +78,7 @@ private:
     bool ntp_upload_use_;
     int ntp_mod_;//0:天1:星期2:月
     int ntp_mod_value_;//星期1-7,月1-12,天1-31
-    //int ntp_month_;//
     string  ntp_time_;//校时时间
-   // int ntp_day_;//
 
     bool   http_upload_use_;//是否接收http请求
     string http_svc_port_;//接收上传服务端口
