@@ -260,7 +260,8 @@ void   device_session::open_com()
                 //QString xx = QString::fromStdString(sErr);
                 std::cout<< sComStr<<" open error!!"<< ec.message()<<std::endl;
                 return;
-            }
+            }else
+                std::cout<< sComStr<<" open success!!"<< ec.message()<<std::endl;
 
             boost::system::error_code err= boost::system::error_code();
             handle_connected(err);
@@ -1120,6 +1121,19 @@ void device_session::start_read_body(int msgLen)
                                          )
                              #endif
                                      );
+    }else if(modleInfos_.iCommunicationMode==CON_MOD_COM){
+        boost::asio::async_read(*pSerialPort_ptr_, boost::asio::buffer(receive_msg_ptr_->w_ptr(),
+                                                              msgLen),
+                        #ifdef USE_STRAND
+                                strand_.wrap(
+                            #endif
+                                    boost::bind(&device_session::handle_read_body,this,
+                                                boost::asio::placeholders::error,
+                                                boost::asio::placeholders::bytes_transferred)
+                            #ifdef USE_STRAND
+                                    )
+                        #endif
+                                );
     }
 
 }
