@@ -89,8 +89,8 @@ typedef enum PROTOCOL
     ANTENNA_CONTROL          = 20, //天线控制器
     TSC_TMIEDEV                  = 21, //校时设备
     LINK_DEVICE                   = 22,  //链路设备
-    SHANGHAI_ALL_BAND      = 23   //上海功放机器
-
+    SHANGHAI_ALL_BAND      = 23,   //上海功放机器
+    MEDIA_DEVICE                 = 24   //媒体设备
 
 }Protocol,*pProtocol;
 
@@ -274,5 +274,10 @@ typedef enum SHANGHAIPROTOCL
 {
     All_Band_Pa = 0,
 }ShSubProtocol;
+
+typedef enum  MEDIASUBPROTOCL_TAG
+{
+    MEDIA_DTMB = 0,
+}MediaSubProtocol;
 
 #endif

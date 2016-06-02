@@ -61,7 +61,8 @@ SOURCES += main.cpp\
     net/client/dev_message/transmmiter/LngdTransmmit.cpp \
     net/client/dev_message/Link_message.cpp \
     net/client/dev_message/transmmiter/ShTransmmit.cpp \
-    net/client/http_work.cpp
+    net/client/http_work.cpp \
+    net/client/dev_message/Media_message.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -124,12 +125,14 @@ HEADERS  += \
     net/client/dev_message/Link_message.h \
     net/client/dev_message/transmmiter/ShTransmmit.h \
     net/client/http_work.h \
-    stable.h
+    stable.h \
+    net/client/dev_message/Media_message.h
 
 FORMS    += mainwindow.ui
 
 DEFINES+=BOOST_NETWORK_NO_LIB
 DEFINES+=URDL_DISABLE_SSL
+DEFINES+=_NO_LOGGING
 #DEFINES+=BOOST_EXCEPTION_DISABLE
 
 linux-g++ {

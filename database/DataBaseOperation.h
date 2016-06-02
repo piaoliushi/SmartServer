@@ -86,6 +86,11 @@ public:
                                                   vector<Command_Scheduler> &cmmdScheduler  );
     //获得更新设备告警信息(用于动态配置回读)
     bool GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& device );
+
+    //节目信号告警/恢复
+    bool AddProgramSignalAlarmRecord(string strDevNum, string strFrqName,time_t startTime,int nlimitType,
+                                      int nalarmTypeId,unsigned long long& irecordid );
+
 protected:
     void StartReOpen();
     bool GetDevMonitorSch(string strDevnum,map<int,vector<Monitoring_Scheduler> >& mapMonitorSch);

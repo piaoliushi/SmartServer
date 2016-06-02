@@ -156,6 +156,14 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
      if(sReportMsg.empty()==false)
          putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
  }
+ //查询dtmb前端频率,节目配置
+ void http_request_session::query_dtmb_program_config()
+ {
+     string sReportMsg;
+     Bohui_Protocol  bh_ptcl;
+     bh_ptcl.creatQueryDtmbPrgInfoMsg(sReportMsg);
+     if(sReportMsg.empty()==false)
+         putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+ }
 
 }
-

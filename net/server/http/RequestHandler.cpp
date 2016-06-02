@@ -67,7 +67,8 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
 
     if ("/" == uri_)
 	{
-        //string response_body,sUrl;
+        boost::asio::ip::address clientaddr = connection->socket().remote_endpoint().address();
+        string sClientIp = clientaddr.to_string();
         cout<<content_.c_str()<<endl;
         cout<<"content_size:------"<<read_content_length_<<endl;
         if(bohui_protocol_.parseDataFromStr(content_,d_response_body,d_sUrl))
@@ -77,7 +78,6 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
             connection->set_headers(boost::make_iterator_range(common_headers, common_headers + 3));
             string sResp=" ";
             connection->write(sResp, boost::bind(&request_handler::write_callback, this, _1));//response_body
-
         }
         else
             connection->write(bad_request, boost::bind(&request_handler::write_callback, this, _1));
@@ -94,7 +94,8 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
 
 void request_handler::write_callback(boost::system::error_code const & ec) 
 {
-    GetInst(SvcMgr).response_http_msg(d_sUrl,d_response_body);
+    if(d_sUrl.empty()==false)
+         GetInst(SvcMgr).response_http_msg(d_sUrl,d_response_body);
     request_handler_factory::get_mutable_instance().destroy(shared_from_this());
 }
 

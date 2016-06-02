@@ -80,18 +80,15 @@ namespace hx_net
         if(data_ptr!=NULL)
             d_curData_ptr = data_ptr;
         int idecresult = m_ptransmmit->decode_msg_body(data,d_curData_ptr,nDataLen,irunstate);
-        if(idecresult == 0 ) {//&& m_ptransmmit->isLastQueryCmd()==true
+        if(idecresult == 0 ) {
             GetResultData(d_curData_ptr);
             if(irunstate==dev_unknown)
                 detect_run_state(d_curData_ptr);
             else {
                 //设置运行状态
             }
-            if(m_ptransmmit->isMultiQueryCmd())//{
+            if(m_ptransmmit->isMultiQueryCmd())
                 m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
-                //d_curData_ptr->
-                //d_curData_ptr.reset(new Data);
-           // }
         }
         return idecresult;
 	}

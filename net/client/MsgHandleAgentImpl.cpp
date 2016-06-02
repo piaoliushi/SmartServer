@@ -5,6 +5,7 @@
 #include "./dev_message/Electric_message.h"
 #include "./dev_message/Timer_message.h"
 #include "./dev_message/Link_message.h"
+#include "./dev_message/Media_message.h"
 
 namespace hx_net
 {
@@ -40,8 +41,8 @@ namespace hx_net
         case DEVICE_GS_RECIVE:
             m_pbaseMsg = new Link_message(m_pSessionPtr,m_devInfo);
             break;
-        case HUIXIN:	{
-                //m_pbaseMsg = new Hx_message(m_pSessionPtr);
+        case MEDIA_DEVICE:	{
+                m_pbaseMsg = new Media_message(m_pSessionPtr,m_io_service,m_devInfo);
 			}
 			break;
         case DEVICE_ELEC:{

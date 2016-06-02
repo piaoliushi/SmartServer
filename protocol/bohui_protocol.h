@@ -14,7 +14,7 @@ class Bohui_Protocol
 public:
     Bohui_Protocol();
     //分析xml数据是否符合协议
-    bool  parseDataFromStr(string &strMsg,string &responseBody,string &srcUrl);
+    bool  parseDataFromStr(string &strMsg,string &responseBody,string &srcUrl,string sIp="");
     //创建回复消息
     bool createResponseMsg(int nReplyId,int nValue,const char* nCmdType,string &responseBody);
     //创建上报数据消息
@@ -26,9 +26,11 @@ public:
     //创建控制结果上报消息
     bool creatExcutResultReportMsg(int nReplyId,int nCmdType,string sDevId,const string &sTime,
                                     int devState,const string &sDesc,string &reportBody);
+    //创建dtmb节目信息查询消息
+    bool creatQueryDtmbPrgInfoMsg(string &reportBody);
 protected:
     //创建xml头信息
-    xml_node<>*  _createResponseXmlHeader(xml_document<>  &xmlMsg,int nCmdId,int nReplyId);
+    xml_node<>*  _createResponseXmlHeader(xml_document<>  &xmlMsg,int nCmdId,int nReplyId,string sDstUrl="");
     //检查xml头信息
     bool  _checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &priority,string &desUrl,xml_node<> *rootNode);
 
@@ -58,6 +60,9 @@ protected:
 
     //从配置数据中获得查询信息
     void _query_devinfo_from_config(xml_document<> &xml_doc,int nCmdType,xml_node<> *rootNode,int  &nValue);
+
+    //分析信号告警,数据上报
+    bool _parseSignalReportMsg(string sIp,xml_node<> * InfoNode);
 public:
     static  map<int,pair<string,string> >   mapTypeToStr;
     static  string  SrcCode;

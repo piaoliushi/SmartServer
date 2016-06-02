@@ -1169,4 +1169,65 @@ bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<st
     return true;
 }
 
+
+//节目信号告警/恢复
+bool DataBaseOperation::AddProgramSignalAlarmRecord(string strDevNum, string strFrqName,time_t startTime,int nlimitType,
+                                  int nalarmTypeId,unsigned long long& irecordid )
+{
+    if(!IsOpen()) {
+           std::cout<<"the database is interrupt"<<std::endl;
+           return false;
+       }
+       boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+       QSqlQuery inquery;
+       QString strSql;
+       if(nlimitType==ALARM_SWITCH)
+       {
+           strSql = QString("insert into dtmb_alarm_record(devicenumer,freq,alarmtype,alarmstarttime) values(:freq,\
+                            :alarmtype,:alarmstarttime)");
+           inquery.prepare(strSql);
+           inquery.bindValue(":freq",atoi(strFrqName.c_str()));
+           inquery.bindValue(":alarmtype",nalarmTypeId);
+           inquery.bindValue(":devicenumer",QString::fromStdString(strDevNum));
+           QDateTime qdt;
+           tm *ltime = localtime(&startTime);
+           qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
+           qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
+           inquery.bindValue(":alarmstarttime",qdt);
+           if(!inquery.exec()){
+                cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
+               return false;
+           }
+           strSql=QString("select max(id) from dtmb_alarm_record");
+           inquery.prepare(strSql);
+           if(inquery.exec()){
+               if(inquery.next()){
+                   irecordid = inquery.value(0).toULongLong();
+               }
+           }else{
+               cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery2---error!"<<endl;
+           }
+           return  true;
+       }
+       else if(nlimitType==ALARM_RESUME)
+       {
+           strSql = QString("update dtmb_alarm_record set alarmendtime=:alarmendtime where id=:id");
+           inquery.prepare(strSql);
+           QDateTime qdt;
+           tm *ltime = localtime(&startTime);
+           qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
+           qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
+           inquery.bindValue(":alarmendtime",qdt);
+           inquery.bindValue(":id",irecordid);
+           if(!inquery.exec()){
+                cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
+               return false;
+           }
+       }
+
+       return true;
+
+}
+
+
 }

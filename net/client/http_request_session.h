@@ -24,6 +24,8 @@ public:
     void send_http_alarm_messge_to_platform(string sDevid,int nDevType,int nMod,CurItemAlarmInfo &alarmInfo,string &reason);
     //上报http消息到上级平台(通讯异常告警)
     void send_http_alarm_messge_to_platform(string sDevid,int nMod,CurItemAlarmInfo &alarmInfo,string &reason);
+    //查询dtmb节目配置
+    void query_dtmb_program_config();
 protected:
     //void  read_handler(const boost::system::error_code& ec, std::size_t length);
     void  open_handler(const boost::system::error_code& ec);

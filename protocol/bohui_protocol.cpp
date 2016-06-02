@@ -7,8 +7,10 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 #include<time.h>
+#include "../net/server/http/RequestHandlerFactory.h"
 using namespace std;
 using namespace db;
+
 string  Bohui_Protocol::SrcCode = "";
 string  Bohui_Protocol::DstCode = "";
 map<int,pair<string,string> > Bohui_Protocol::mapTypeToStr= map<int,pair<string,string> >();
@@ -20,7 +22,7 @@ Bohui_Protocol::Bohui_Protocol()
 }
 
 //分析http请求数据(包括发射机,动环,链路告警门限,运行图,告警开关设置)
-bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody,string &srcUrl)
+bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody,string &srcUrl,string sIp)
 {
     int nMsgId=-100;
     int nPriority=0;
@@ -60,8 +62,16 @@ bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody,string
                 createResponseMsg(nMsgId,11,CONST_STR_BOHUI_TYPE[BH_POTO_XmlContentError],responseBody);
         }
         else {
+
+            xml_node<> *returnNode = rootNode->first_node("ReturnInfo");
+            if(returnNode!=NULL){
+                return _parseSignalReportMsg(sIp,returnNode);
+                //信号上报不用回复xml
+            }else{
+
             //xml内容解析错误（SrcCode，MsgId等）
             createResponseMsg(nMsgId,11,CONST_STR_BOHUI_TYPE[BH_POTO_XmlContentError],responseBody);
+            }
         }
     }
     catch(...)
@@ -356,7 +366,7 @@ bool Bohui_Protocol::createReportAlarmDataMsg(int nReplyId,int nCmdType,string s
 
 //生成xml头
 //说明：xmlMsg--
-xml_node<>*  Bohui_Protocol::_createResponseXmlHeader(xml_document<>  &xmlMsg,int nMsgId,int nReplyId)
+xml_node<>*  Bohui_Protocol::_createResponseXmlHeader(xml_document<>  &xmlMsg,int nMsgId,int nReplyId,string sDstUrl)
 {
     try
     {
@@ -369,6 +379,7 @@ xml_node<>*  Bohui_Protocol::_createResponseXmlHeader(xml_document<>  &xmlMsg,in
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("Type","Up"));//typ.c_str()
         time_t curTime = time(0);
         tm *ltime = localtime(&curTime);
+
         std::string createTM = str(boost::format("%1%-%2%-%3% %4%:%5%:%6%")%(ltime->tm_year+1900)%(ltime->tm_mon+1)
                                    %ltime->tm_mday%ltime->tm_hour%ltime->tm_min%ltime->tm_sec);
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("DateTime",xmlMsg.allocate_string(createTM.c_str())));
@@ -376,7 +387,8 @@ xml_node<>*  Bohui_Protocol::_createResponseXmlHeader(xml_document<>  &xmlMsg,in
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("SrcCode",Bohui_Protocol::SrcCode.c_str()));
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("DstCode",Bohui_Protocol::DstCode.c_str()));
         //string sDstUrl = "http://10.10.0.200:8089";
-        //nodeHeader->append_attribute(xmlMsg.allocate_attribute("SrcURL",xmlMsg.allocate_string(sDstUrl.c_str())));
+        if(sDstUrl.empty()==false)
+            nodeHeader->append_attribute(xmlMsg.allocate_attribute("SrcURL",xmlMsg.allocate_string(sDstUrl.c_str())));
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("Priority","1"));
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("ReplyID",xmlMsg.allocate_string(boost::lexical_cast<std::string>(nReplyId).c_str())));
         xmlMsg.append_node(nodeHeader);
@@ -855,4 +867,56 @@ void Bohui_Protocol::_controlDeviceCommand(int nDevType,xml_node<> *rootNode,int
         else if(nSwitch == 1)//开机
             GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNON_OPR);
     }
+}
+
+//分析信号上报告警,数据上报
+bool Bohui_Protocol::_parseSignalReportMsg(string sIp,xml_node<> * InfoNode)
+{
+    rapidxml::xml_node<>* tranNode = InfoNode->first_node("ReturnInfo");
+    if(tranNode!=NULL){
+        rapidxml::xml_node<>* dataNode = InfoNode->first_node("AlarmSearchFSet");
+        if(tranNode!=NULL){
+            rapidxml::xml_node<> *itemNode = dataNode->first_node("AlarmSearchF");
+            rapidxml::xml_attribute<char> * attr_prgId = itemNode->first_attribute("Freq");
+            if(attr_prgId==NULL)
+                return false;
+            string sPrgFreq = attr_prgId->value();
+            while(itemNode!=NULL){
+                rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Type");
+                rapidxml::xml_attribute<char> * attr_prgValue = itemNode->first_attribute("Value");
+                rapidxml::xml_attribute<char> * attr_prgTime = itemNode->first_attribute("Time");
+                if(attr_prgType==NULL || attr_prgValue==NULL || attr_prgTime==NULL)
+                    continue;
+                int nTypeId = strtol(attr_prgType->value(),NULL,10);
+                int nState = strtol(attr_prgValue->value(),NULL,10);
+                time_t  curTm;
+                QDateTime qdt=QDateTime::fromString(attr_prgTime->value(),"yyyy-MM-dd hh:mm:ss");
+                if(qdt.isValid())
+                    curTm = qdt.toTime_t();
+
+                request_handler_factory::get_mutable_instance().add_new_alarm(sIp,sPrgFreq,nTypeId,nState,curTm);
+                itemNode = itemNode->next_sibling("AlarmSearchF");
+            }
+        }else {
+            dataNode = InfoNode->first_node("GetIndexSet");
+            if(dataNode!=NULL){
+
+            }
+        }
+    }
+    return true;
+}
+
+bool Bohui_Protocol::creatQueryDtmbPrgInfoMsg(string &reportBody)
+{
+     std::string  srcUrl = str(boost::format("http://%1%:%2%")%GetInst(LocalConfig).http_svc_ip()%GetInst(LocalConfig).http_svc_port());
+     xml_document<> xml_reportMsg;
+     xml_node<> *msgRootNode = _createResponseXmlHeader(xml_reportMsg,2,-1,srcUrl);
+     if(msgRootNode!=NULL){
+         xml_node<> *xml_resps = xml_reportMsg.allocate_node(node_element,"ChannelScanQuery");
+         msgRootNode->append_node(xml_resps);
+     }
+
+    rapidxml::print(std::back_inserter(reportBody), xml_reportMsg, 0);
+    return true;
 }

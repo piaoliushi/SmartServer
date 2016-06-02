@@ -42,15 +42,6 @@ void DevClient::connect_all()
             device_pool_[DevKey(sLocalStationId,(*modle_iter).sModleNumber)]=new_session;
             new_session->init_session_config();
             new_session->connect();
-            /*if((*modle_iter).iCommunicationMode==CON_MOD_NET) {
-                if((*modle_iter).netMode.inet_type == NET_MOD_TCP){
-                    new_session->connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);
-                }else if((*modle_iter).netMode.inet_type == NET_MOD_UDP){
-                    new_session->udp_connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);
-                }else if((*modle_iter).netMode.inet_type == NET_MOD_SNMP){
-                    new_session->agent_connect((*modle_iter).netMode.strIp,(*modle_iter).netMode.iremote_port);
-                }
-            }*/
         }
     }
 }
