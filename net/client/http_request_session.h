@@ -1,6 +1,7 @@
 #ifndef HTTP_REQUEST_SESSION_H
 #define HTTP_REQUEST_SESSION_H
 #include "../net_session.h"
+#include "../taskqueue.h"
 #include <urdl/read_stream.hpp>
 namespace hx_net {
 class http_request_session;

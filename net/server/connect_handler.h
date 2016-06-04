@@ -64,7 +64,8 @@ namespace hx_net
 #ifdef USE_STRAND
 		boost::asio::io_service::strand strand_;           //消息头与消息体同步
 #endif 
-	};
+    };
+    typedef boost::shared_ptr<hx_net::connect_handler> connect_handler_ptr;
 }
 
 #endif

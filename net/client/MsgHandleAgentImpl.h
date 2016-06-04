@@ -36,7 +36,10 @@ namespace hx_net
         //获得运行状态
         int  get_run_state();
          void reset_run_state();
-	public:
+         //添加新告警
+         bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime);
+         bool  add_new_data(string sIp,DevMonitorDataPtr &mapData);
+    public:
 		base_message *m_pbaseMsg;
         session_ptr m_pSessionPtr;
 		boost::asio::io_service    &m_io_service;

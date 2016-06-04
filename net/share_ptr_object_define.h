@@ -9,7 +9,6 @@ namespace hx_net
 {
 //typedef boost::shared_ptr<dev_upload_message> uploadMsgPtr;
     typedef boost::shared_ptr<std::vector<unsigned char> > unchar_ptr;
-
 	typedef boost::shared_ptr<google::protobuf::Message>  googleMsgPtr;
 	typedef boost::weak_ptr<google::protobuf::Message>    googleMsgWeakPtr;
 
@@ -61,11 +60,7 @@ namespace hx_net
 	typedef boost::shared_ptr<CommandParam>             commandParamPtr;
 	typedef boost::weak_ptr<CommandParam>               commandParamWeakPtr;
 
-    //typedef boost::shared_ptr<vector<commandParamPtr>>             ;
-    //typedef boost::weak_ptr<vector<commandParamPtr>>               vCommandParamWeakPtr;
 
-    //typedef boost::shared_ptr<TransmitterPropertyEx> pTransmitterPropertyExPtr;
-    //typedef boost::shared_ptr<Data> DevMonitorDataPtr;
-    //typedef boost::shared_ptr<MoxaPropertyEx> pMoxaPropertyExPtr;
+
 }
 #endif

@@ -1,28 +1,20 @@
 #ifndef NET_SESSION_H
 #define NET_SESSION_H
-#include "taskqueue.h"
-#include "message.h"
-//#include "./server/dev_upload_message.h"
-#include "./client/device_message.h"
 #include "share_ptr_object_define.h"
 #include <string>
 #include "../DataType.h"
+#include "../MsgDefine.h"
 #pragma once
 using boost::asio::ip::tcp;
 using boost::asio::ip::udp;
 using namespace std;
 namespace hx_net
 {		
-    class net_session;
-    typedef boost::shared_ptr<net_session>  session_ptr;
-    typedef boost::weak_ptr<net_session>    session_weak_ptr;
-
     class message;
-    typedef boost::shared_ptr<message> msgPointer;
+    typedef boost::shared_ptr<hx_net::message> msgPointer;
     class net_session: public boost::enable_shared_from_this<net_session>
 	{
 	public:
-
         net_session(boost::asio::io_service& io_service);
         virtual ~net_session(void);
 		virtual Dev_Type dev_type(){return DEV_NODEFIN;}
@@ -140,10 +132,11 @@ namespace hx_net
 	private:
         tcp::socket             socket_;
         udp::socket            udp_socket_;
-       // int                         mod_;//是否为tcp连接
 		boost::mutex          socket_mutex_;
     };
-
+    typedef boost::shared_ptr<hx_net::net_session>  session_ptr;
+    typedef boost::weak_ptr<hx_net::net_session>    session_weak_ptr;
 }
+
 
 #endif

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <boost/shared_ptr.hpp>
 using namespace std;
 
 
@@ -55,6 +56,9 @@ typedef struct
 
     map<int,vector<CommandUnit> > mapCommand;//命令
 }CommandAttribute;
+
+typedef boost::shared_ptr<CommandAttribute>    CommandAttrPtr;
+
 
 typedef struct
 {

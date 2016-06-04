@@ -227,5 +227,20 @@ namespace hx_net
             return;
         return m_pbaseMsg->reset_run_state();
     }
+
+    //添加新告警
+    bool  MsgHandleAgentImpl::add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime)
+    {
+        if(m_pbaseMsg==NULL)
+            return false;
+        return m_pbaseMsg->add_new_alarm(sPrgName,alarmId,nState, startTime);
+    }
+
+    bool  MsgHandleAgentImpl::add_new_data(string sIp,DevMonitorDataPtr &mapData)
+    {
+        if(m_pbaseMsg==NULL)
+            return false;
+        return m_pbaseMsg->add_new_data(sIp,mapData);
+    }
 }
 

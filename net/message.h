@@ -3,28 +3,22 @@
 #pragma once
 
 #include "MsgDefine.h" 
-#include "include.h"
 #include "./protocol/protocol.pb.h"
 #include "share_ptr_object_define.h"
-#include "net_session.h"
 typedef std::vector<boost::uint8_t> data_buffer;
 namespace hx_net
 {
-    class net_session;
-    typedef boost::shared_ptr<net_session> session_ptr;
-	class connect_handler;
-	typedef boost::shared_ptr<connect_handler> connect_handler_ptr;
+class net_session;
+typedef boost::shared_ptr<hx_net::net_session>  session_ptr;
+typedef boost::weak_ptr<hx_net::net_session>    session_weak_ptr;
+class message
+{
+public:
 
-	class message;
-	typedef boost::shared_ptr<message> msgPointer;
-	class message
-	{
-	public:
-		
-		message(void);
-		message(const message& msg);
+    message(void);
+    message(const message& msg);
 
-		data_buffer& data();
+    data_buffer& data();
 		void   reset_head_size();
 		void   reset_size(int msglen);
 		size_t length()const;
@@ -59,15 +53,15 @@ namespace hx_net
 		bool is_flash_check_message();
 
 	private:
-		data_buffer              data_;
-		size_t                   body_length_;
-        boost::weak_ptr<net_session> session_;
-        //session_weak_ptr session_;
+        data_buffer               data_;
+        size_t                        body_length_;
+        session_weak_ptr      session_;
 		packHeadPtr              msg_;
 
 		//flash 沙箱验证
 		bool                     bflash_check_;
-	};
+    };
+    typedef boost::shared_ptr<hx_net::message> msgPointer;
 }
 
 #endif

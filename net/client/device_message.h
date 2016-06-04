@@ -1,26 +1,16 @@
 #ifndef TRANSMITTER_MESSAGE
 #define TRANSMITTER_MESSAGE
 
-#pragma once
+//#pragma once
 
 #include <vector>
-//#include "DevAgent.h"
-//#include "../net_session.h"
-#include "../../DataType.h"
+//#include "../../DataType.h"
 #include "../net_session.h"
+#include "MsgHandleAgent.h"
 using namespace std;
-
+//class MsgHandleAgent;
 namespace hx_net
 {
-	class othdev_message;
-	typedef boost::shared_ptr<othdev_message> othdevMsgPtr;
-//---------------------------------othdev----------------------------------------------//
-	class MsgHandleAgent;
-	typedef boost::shared_ptr<MsgHandleAgent>        HMsgHandlePtr;
-	typedef boost::shared_ptr<CommandAttribute>    CommandAttrPtr;
-    class net_session;
-    typedef boost::shared_ptr<net_session>  session_ptr;
-    //typedef boost::weak_ptr<net_session>    session_weak_ptr;
 	class othdev_message
 	{
 	public:
@@ -64,8 +54,11 @@ namespace hx_net
 		vector<unsigned char>    data_;
 		size_t          w_pos_;
 		size_t          r_pos_;
-        boost::weak_ptr<net_session>    session_;
-	};
+         session_weak_ptr   session_;//boost::weak_ptr<net_session>
+    };
+    typedef boost::shared_ptr<hx_net::othdev_message> othdevMsgPtr;
 }
+
+
 
 #endif

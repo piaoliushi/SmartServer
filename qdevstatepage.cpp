@@ -76,7 +76,7 @@ void QDevStatePage::LoadDevToList()
             if(sName.length()>12)
                 sName = sName.mid(0,12);
             pDevList->setItem(nrow,0,new QTableWidgetItem(sIcon,sName));//(*iter).second.sDevName.c_str()
-            QString sEndpoint = QString(tr("%1:%2")).arg((*Modleiter).netMode.strIp.c_str()).arg((*Modleiter).netMode.ilocal_port);
+            QString sEndpoint = QString(tr("%1:%2")).arg((*Modleiter).netMode.strIp.c_str()).arg((*Modleiter).netMode.iremote_port);
              //   .arg((*iter).second.iAddressCode);
             //pDevList->setItem(nrow,1,new QTableWidgetItem((*iter).second.sDevNum.c_str()));:%2
             pDevList->setItem(nrow,1,new QTableWidgetItem(sEndpoint));

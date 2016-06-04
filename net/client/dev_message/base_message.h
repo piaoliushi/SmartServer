@@ -40,6 +40,10 @@ namespace hx_net
         //获得运行状态
         virtual int  get_run_state(){return dev_unknown;}
         virtual void reset_run_state(){}
+
+        //添加新告警
+        bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime){return false;}
+        bool  add_new_data(string sIp,DevMonitorDataPtr &mapData){return false;}
 	public:
         static void Char2Hex(unsigned char ch, char* szHex);
 		static void CharStr2HexStr(unsigned char const* pucCharStr, string &pszHexStr, int iSize);

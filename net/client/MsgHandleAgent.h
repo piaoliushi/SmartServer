@@ -1,17 +1,17 @@
 #pragma once
 #include <map>
-#include "device_message.h"
+//#include "device_message.h"
 #include "../share_ptr_object_define.h"
-#include "include.h"
 #include "DataTypeDefine.h"
-#include "device_session.h"
+#include "../net_session.h"
+//#include "device_session.h"
 
 using namespace std;
 class Snmp;
 class CTarget;
 namespace hx_net
 {
-	class session;
+    //class session;
 	class MsgHandleAgentImpl;
 	class MsgHandleAgent
 	{
@@ -47,8 +47,12 @@ namespace hx_net
         int get_run_state();
         //设置运行状态
         void reset_run_state();
+        //添加新告警
+        bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime);
+        bool  add_new_data(string sIp,DevMonitorDataPtr &mapData);
 	private:
 		MsgHandleAgentImpl *m_msgImpl;
 	};
-	typedef boost::shared_ptr<MsgHandleAgent>        HMsgHandlePtr;
+    typedef boost::shared_ptr<hx_net::MsgHandleAgent>        HMsgHandlePtr;
 }
+

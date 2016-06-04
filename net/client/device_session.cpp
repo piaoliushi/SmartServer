@@ -8,6 +8,7 @@
 #include "../../database/DataBaseOperation.h"
 #include "../../protocol/bohui_const_define.h"
 #include "snmp_pp.h"
+#include "../server/http/RequestHandlerFactory.h"
 #ifdef SNMP_PP_NAMESPACE
 using namespace Snmp_pp;
 #endif
@@ -77,6 +78,12 @@ void device_session::init_session_config()
         }
 
         dev_agent_and_com[iter->first]=pair<CommandAttrPtr,HMsgHandlePtr>(tmpCommand,pars_agent);
+        //判断是否时http代理设置
+        if(modleInfos_.iCommunicationMode==CON_MOD_NET &&
+            modleInfos_.netMode.inet_type == NET_MOD_HTTP){
+            if(iter->second.map_DevProperty.find("Agent")!=iter->second.map_DevProperty.end())
+                request_handler_factory::get_mutable_instance().register_data_callback(modleInfos_.netMode.strIp,pars_agent);
+        }
 
         //报警项初始化
         map<int,map<int,CurItemAlarmInfo> > devAlarmItem;
@@ -85,7 +92,7 @@ void device_session::init_session_config()
         tmLastSaveTime.insert(std::make_pair(iter->first,time(0)));
         //定时数据发送时间
         tmLastSendHttpTime.insert(std::make_pair(iter->first,time(0)));
-
+        //目前只有发射机类型设备才启用定时任务(定时开关机)
         if(iter->second.iDevType == DEVICE_TRANSMITTER)
             bIsTransmitter=true;
     }

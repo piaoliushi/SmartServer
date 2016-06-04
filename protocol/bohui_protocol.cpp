@@ -877,10 +877,12 @@ bool Bohui_Protocol::_parseSignalReportMsg(string sIp,xml_node<> * InfoNode)
         rapidxml::xml_node<>* dataNode = InfoNode->first_node("AlarmSearchFSet");
         if(tranNode!=NULL){
             rapidxml::xml_node<> *itemNode = dataNode->first_node("AlarmSearchF");
-            rapidxml::xml_attribute<char> * attr_prgId = itemNode->first_attribute("Freq");
-            if(attr_prgId==NULL)
+            rapidxml::xml_attribute<char> * attr_FreqId = itemNode->first_attribute("Freq");
+            if(attr_FreqId==NULL)
                 return false;
-            string sPrgFreq = attr_prgId->value();
+            string sPrgFreq = attr_FreqId->value();
+            if(sPrgFreq.empty())
+                return false;
             while(itemNode!=NULL){
                 rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Type");
                 rapidxml::xml_attribute<char> * attr_prgValue = itemNode->first_attribute("Value");
@@ -900,7 +902,43 @@ bool Bohui_Protocol::_parseSignalReportMsg(string sIp,xml_node<> * InfoNode)
         }else {
             dataNode = InfoNode->first_node("GetIndexSet");
             if(dataNode!=NULL){
+                rapidxml::xml_attribute<char> * attr_FreqId = dataNode->first_attribute("Freq");
+                rapidxml::xml_attribute<char> * attr_ChannelId = dataNode->first_attribute("Index");
+                if(attr_FreqId==NULL || attr_ChannelId==NULL)
+                    return false;
+                string sPrgFreq = attr_FreqId->value();
+                int nChannelId = atoi(attr_ChannelId->value());
+                if(sPrgFreq.empty() || nChannelId<0 || nChannelId>100)
+                    return false;
 
+                rapidxml::xml_node<> *itemNode = dataNode->first_node("GetIndex");
+                DevMonitorDataPtr  curValues(new Data);
+                DataInfo curFrqInfo;
+                curFrqInfo.bType=0;
+                curFrqInfo.sValue = sPrgFreq;
+                curFrqInfo.fValue = 0.0f;
+                curValues->mValues[0+4*nChannelId] = curFrqInfo;
+                 while(itemNode!=NULL){
+                     DataInfo curItemInfo;
+                     curItemInfo.bType=0;
+                     curItemInfo.fValue = 0.0f;
+                     rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Type");
+                     if(attr_prgType!=NULL){
+                         int nTypeId = atoi(attr_prgType->value());
+                         if(nTypeId>=0 && nTypeId<4){
+                             rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Value");
+                             if(attr_prgType!=NULL){
+                                  curItemInfo.sValue = attr_prgType->value();
+                                  curValues->mValues[nTypeId+4*nChannelId] = curItemInfo;
+                             }
+                         }
+                     }
+
+                     itemNode = itemNode->next_sibling("GetIndex");
+                 }
+
+                 if(curValues.size()>0)
+                      request_handler_factory::get_mutable_instance().add_new_data(sIp,curValues);
             }
         }
     }

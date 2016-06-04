@@ -77,13 +77,6 @@ namespace hx_net
         return m_msgImpl->decode_msg_body(snmp,data_ptr,target);
     }
 
-    /*HDevAgentPtr MsgHandleAgent::DevAgent()
-	{
-		if(m_msgImpl==NULL)
-			return HDevAgentPtr();
-		return m_msgImpl->DevAgent();
-    }*/
-
 	void  MsgHandleAgent::input_params(const vector<string> &vParam)
 	{
 		if(m_msgImpl==NULL)
@@ -196,5 +189,17 @@ namespace hx_net
          return m_msgImpl->reset_run_state();
      }
 
-
+     //添加新告警
+     bool  MsgHandleAgent::add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime)
+     {
+         if(m_msgImpl==NULL)
+             return false;
+         return m_msgImpl->add_new_alarm(sPrgName,alarmId,nState, startTime);
+     }
+     bool  MsgHandleAgent::add_new_data(string sIp,DevMonitorDataPtr &mapData)
+     {
+         if(m_msgImpl==NULL)
+             return false;
+         return m_msgImpl->add_new_data(sIp,mapData);
+     }
 }

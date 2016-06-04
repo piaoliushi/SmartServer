@@ -11,19 +11,18 @@
 #include "MsgHandleAgent.h"
 #include "http_request_session.h"
 //#include "snmp_pp.h"
-using boost::asio::io_service;
+//using boost::asio::io_service;
 using boost::asio::ip::tcp;
+using boost::asio::ip::udp;
 class Snmp;
 class CTarget;
 namespace hx_net
 {
-class device_session;
-typedef boost::shared_ptr<device_session> dev_session_ptr;
-typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
-
-
+//class device_session;
+//typedef boost::shared_ptr<device_session> dev_session_ptr;
+//typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
     class device_session:public net_session
-	{
+    {
         friend class Tsmt_message;
 	public:
 		device_session(boost::asio::io_service& io_service, 
@@ -203,6 +202,10 @@ typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
 
         boost::shared_ptr<boost::asio::serial_port> pSerialPort_ptr_;//串口操作
 
-	};
+    };
+    typedef boost::shared_ptr<hx_net::device_session> dev_session_ptr;
+    typedef boost::weak_ptr<hx_net::device_session>    dev_session_weak_ptr;
 }
+
+
 #endif
