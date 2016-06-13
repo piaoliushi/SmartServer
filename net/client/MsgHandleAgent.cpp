@@ -196,10 +196,10 @@ namespace hx_net
              return false;
          return m_msgImpl->add_new_alarm(sPrgName,alarmId,nState, startTime);
      }
-     bool  MsgHandleAgent::add_new_data(string sIp,DevMonitorDataPtr &mapData)
+     bool  MsgHandleAgent::add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData)
      {
          if(m_msgImpl==NULL)
              return false;
-         return m_msgImpl->add_new_data(sIp,mapData);
+         return m_msgImpl->add_new_data(sIp,nChannel,mapData);
      }
 }

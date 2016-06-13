@@ -14,7 +14,7 @@ public:
     void register_data_callback(string  sIpAddress,HMsgHandlePtr pMsgHandle );
     HMsgHandlePtr   get_callback_by_ip(string sIpAddress);
     bool  add_new_alarm(string sIp,string sPrgName,int alarmId,int nState,time_t  startTime);
-    bool add_new_data(string sIp,DevMonitorDataPtr &mapData);
+    bool add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData);
 protected:
 
 private:

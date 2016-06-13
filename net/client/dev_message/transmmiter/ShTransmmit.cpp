@@ -1,6 +1,21 @@
 #include "ShTransmmit.h"
 #include "../../../../utility.h"
+#include <QString>
+#include<QtCore/qmath.h>
 namespace hx_net{
+const char LDPCQAM[][16]={"0.8&4QAMNR","0.4&4QAM","0.6&4QAM",
+                          "0.8&4QAM","0.4&16QAM","0.6&16QAM",
+                          "0.8&16QAM","0.8&32QAM","0.4&64QAM",
+                          "0.6&64QAM","0.8&64QAM"};
+const char chPN[][32]={"420固定相位","420旋转相位","595",
+                       "945固定相位","945旋转相位"};
+const char CPILOT[][32]={"单载波关导频","单载波开导频","多载波无导频"};
+const char ADPC[][32]={"关闭","开启","更新"};
+const char ADPCCheckInfo[][32]={"OK","FEEDBACK LINK TOO LARGE","FEEDBACK LINK TOO SMALL",
+                                "","POWER UNSTABLE","ADPC ERROR","IN_B TOO SMALL",
+                                "TIMEOUT(15分钟)"};
+const char AGCstate[][10]={"OFF","INT","A_IN","IN_A"};
+const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"};
     ShTransmmit::ShTransmmit(dev_session_ptr pSession,int subprotocol,int addresscode)
         :Transmmiter()
         ,m_subprotocol(subprotocol)
@@ -30,6 +45,13 @@ namespace hx_net{
 				else
 					return -1;
 			}
+        case All_Band_Exc:
+        {
+            if(data[0]==0x00 && data[1]==0x76 && data[3]==0x80)
+                return (data[2]-4);
+            else
+                return -1;
+        }
 		default:
 			return -1;
 		}
@@ -48,6 +70,7 @@ namespace hx_net{
 		switch(m_subprotocol)
 		{
 		case All_Band_Pa:
+        case All_Band_Exc:
 			return true;
 		}
 		return false;
@@ -67,6 +90,10 @@ namespace hx_net{
         case All_Band_Pa:{
             nResult = OnAllBandData(data,data_ptr,nDataLen,runstate);
 
+            break;
+        }
+        case All_Band_Exc:{
+            nResult = OnAllBandExcData(data,data_ptr,nDataLen,runstate);
             break;
         }
         }
@@ -141,6 +168,27 @@ namespace hx_net{
                 m_maxMsgId = 3;
 			}
 			break;
+        case All_Band_Exc:
+            {
+               CommandUnit tmUnit;
+               tmUnit.ackLen = 4;
+               tmUnit.commandLen=6;
+               tmUnit.commandId[0] = 0x80;
+               tmUnit.commandId[1] = 0x46;
+               tmUnit.commandId[2] = 0x06;
+               tmUnit.commandId[3] = 0x31;
+               tmUnit.commandId[4] = 0xFD;
+               tmUnit.commandId[5] = 0x96;
+               vector<CommandUnit> vtUnit;
+               vtUnit.push_back(tmUnit);
+               tmUnit.commandId[3] = 0x32;
+               vtUnit.push_back(tmUnit);
+               tmUnit.commandId[3] = 0x33;
+               vtUnit.push_back(tmUnit);
+               cmdAll.mapCommand[MSG_DEVICE_QUERY] = vtUnit;
+               m_maxMsgId = 3;
+            }
+            break;
 		}
 	}
 
@@ -167,6 +215,7 @@ namespace hx_net{
 					dainfo.fValue = nValue*0.01;
                     if(i==0)
                         dainfo.fValue/=1000;
+                    dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                     data_ptr->mValues[index++] = dainfo;
 				}
 
@@ -181,6 +230,7 @@ namespace hx_net{
 				for(int i=0;i<9;++i)
 				{
 					dainfo.fValue = data[basebit+i];
+                    dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
                     data_ptr->mValues[index++] = dainfo;
 				}
 			}
@@ -199,6 +249,7 @@ namespace hx_net{
 						nValue = ((nValue<<8)|data[basebit+j+4*i]);
 					}
 					dainfo.fValue = nValue*0.01;
+                    dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                     data_ptr->mValues[index++] = dainfo;
 				}
 			}
@@ -212,6 +263,7 @@ namespace hx_net{
 				for(int i=0;i<6;++i)
 				{
 					dainfo.fValue = data[basebit+i];
+                    dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
                     data_ptr->mValues[index++] = dainfo;
 				}
 			}
@@ -223,23 +275,32 @@ namespace hx_net{
 				DataInfo dainfo;
 				dainfo.bType = true;
 				dainfo.fValue = data[basebit];
+                dainfo.sValue = (data[basebit]==0 ? "正常":"告警");
                 data_ptr->mValues[index++] = dainfo;
 				dainfo.bType = false;
 				dainfo.fValue = data[basebit+1];
+                dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
 				dainfo.fValue = ((data[basebit+3]<<8)|data[basebit+2]);
+                dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
 				dainfo.fValue = data[basebit+4];
+                dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
 				dainfo.fValue = data[basebit+5];
+                dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
 				dainfo.fValue = data[basebit+6];
+                dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
 				dainfo.fValue = data[basebit+7];
+                dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
 				dainfo.fValue = ((data[basebit+9]<<8)|data[basebit+8]);
+                dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
 				dainfo.fValue = data[basebit+10];
+                dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
 			}
 			break;
@@ -321,12 +382,14 @@ namespace hx_net{
 				nValue = ((nValue<<8)|data[basebit+j+4*i]);
 			}
 			dainfo.fValue = nValue*0.01;
+            dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
 			pBandData->mValues[index++] = dainfo;
 		}
 		basebit = 48;
 		for(int j=0;j<3;++j)
 		{
 			dainfo.fValue = ((data[basebit+j+1]<<8)|data[basebit+j])*0.01;
+            dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
 			pBandData->mValues[index++] = dainfo;
 		}
 	}
@@ -340,7 +403,338 @@ namespace hx_net{
 		for(int i=0;i<12;++i)
 		{
 			dainfo.fValue = data[basebit+i];
+            dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
 			pBandData->mValues[index++] = dainfo;
-		}
-	}
+        }
+    }
+
+    int ShTransmmit::OnAllBandExcData(unsigned char *data, DevMonitorDataPtr pBandData, int nDataLen, int &runstate)
+    {
+        int index = 0;
+        DataInfo dainfo;
+        QString saveStr;
+        if(m_curMsgId==0)
+        {
+            dainfo.bType = false;
+            dainfo.fValue =data[4];
+            int iFreq=0;
+            if(data[4]>2 && data[4]<10)
+            {
+                iFreq = 171+(data[4]-3)*8;
+            }
+            else if(data[4]>=10)
+            {
+                iFreq = 450+(data[4]-10)*8;
+            }
+            saveStr = QString("%1MHz").arg(iFreq);
+            dainfo.sValue = saveStr.toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[5];
+            dainfo.sValue = (data[5]==0 ? "SFN单频网":"MFN多频网");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[6];//LDPCQAM
+            if(data[6]<=0x0A)
+               dainfo.sValue = LDPCQAM[data[6]];
+            pBandData->mValues[index++] = dainfo;
+            //chPN
+            dainfo.fValue =data[7];
+            if(data[7]<=0x04)
+               dainfo.sValue = chPN[data[7]];
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[8];
+            if(data[8]<=0x02)
+               dainfo.sValue = chPN[data[8]];
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[9];
+            dainfo.sValue = (data[9]==0x00 ? "240浅交织":"720深交织");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[10];
+            if(data[10]<0x03)
+                dainfo.sValue = ADPC[data[10]];
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[11];
+            if(data[11]==0x00)
+                dainfo.sValue = "TS1_USED";
+            else if(data[11]==0x01)
+                dainfo.sValue = "TS2_USED";
+            else
+                dainfo.sValue = "NONE";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[12];
+            dainfo.bType = true;
+            dainfo.sValue = (data[12]==0x00 ? "LOCK":"ERROR");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[13];
+            dainfo.bType = false;
+            if(data[13]==0x00)
+                dainfo.sValue = "NoGPS";
+            else if(data[13]==0x01)
+                dainfo.sValue = "UnLOCK";
+            else
+                dainfo.sValue = "LOCK";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[14];
+            dainfo.bType = true;
+            dainfo.sValue = (data[14]==0x00 ? "LOCK":"ERROR");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[15];
+            dainfo.sValue = (data[15]==0x00 ? "LOCK":"ERROR");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[16];
+            dainfo.sValue = (data[16]==0x00 ? "正常":"大于70度");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.bType = false;
+            int iMark = ((data[18]&0x03)>>1);
+            int iTemp = (((data[18]&0x01)<<8)|data[17]);
+            if(iMark==1)
+            {
+                dainfo.fValue = iTemp*(-0.25);
+            }
+            else
+            {
+                dainfo.fValue = iTemp*(0.25);
+            }
+            saveStr = QString("%1°C").arg(dainfo.fValue);
+            dainfo.sValue = saveStr.toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[19];
+            if(data[19]==0x00)
+                dainfo.sValue = "9600 bps";
+            else if(data[19]==0x01)
+                dainfo.sValue = "19200 bps";
+            else if(data[19]==0x02)
+                dainfo.sValue = "38400 bps";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.bType = true;
+            dainfo.fValue =data[20];
+            dainfo.sValue = (data[20]==0x00 ? "射频关闭":"射频打开");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.bType = false;
+            dainfo.fValue =data[21];
+            if(data[21]==0x00)
+                dainfo.sValue = "外部GPS";
+            else if(data[21]==0x01)
+                dainfo.sValue = "内部GPS";
+            else if(data[21]==0x02)
+                dainfo.sValue = "自动选择";
+            else if(data[21]==0x03)
+                dainfo.sValue = "外部高级GPS";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =((data[23]<<8)|data[22])*0.05-10.00;
+            dainfo.sValue = (QString("%1dBm").arg(dainfo.fValue)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =((((((data[27]<<8)|data[26])<<8)|data[25])<<8)|data[24]);
+            dainfo.sValue = (QString("%1bps").arg(dainfo.fValue)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.bType = true;
+            dainfo.fValue =data[28];
+            dainfo.sValue = (data[28]==0x00 ? "正常":"失锁");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[29];
+            dainfo.sValue = (data[29]==0x00 ? "DISA":"ENA");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[31];
+            dainfo.sValue = (data[31]==0x00 ? "OVERFLOW":"OK");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[32];
+            dainfo.sValue = (data[32]==0x00 ? "失锁":"正常");
+            pBandData->mValues[index++] = dainfo;
+            //ADPCCheckInfo
+            dainfo.bType = false;
+            dainfo.fValue =data[33];
+            if(data[33]>=0 && data[33]<=0x07)
+                dainfo.sValue = ADPCCheckInfo[data[33]];
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[34];
+            dainfo.sValue = (data[34]==0x00 ? "CTTB":"CMMB");
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[35];
+            if(data[35]==0x00)
+                dainfo.sValue = "未锁定";
+            else if(data[35]==0x01)
+                dainfo.sValue = "188字节";
+            else if(data[35]==0x02)
+                dainfo.sValue = "204字节";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =((data[37]<<8)|data[36]);
+            dainfo.sValue = (QString("%1ms").arg(dainfo.fValue)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+        }
+        else if(m_curMsgId==1)
+        {
+            index = 27;
+            dainfo.bType = false;
+            dainfo.fValue = ((data[6]<<8)|data[3]);
+            dainfo.sValue = (QString("%1Hz").arg(0.25*dainfo.fValue-200)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.bType = true;
+            dainfo.fValue = data[7];
+            if(data[7]==0x00)
+                dainfo.sValue = "单音关闭";
+            else
+                dainfo.sValue = "单音打开";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.bType = false;
+            int idealy = (((((data[10]<<8)|data[9])<<8)|data[8]));
+            dainfo.fValue = idealy;
+            dainfo.sValue = (QString("%1μs").arg(0.1*dainfo.fValue)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = data[11];
+            if(data[11]==0x00)
+                dainfo.sValue = "KEEP";
+            else
+                dainfo.sValue = "DELETE";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = data[12];
+            if(data[12]==0x00)
+                dainfo.sValue = "正常模式";
+            else
+                dainfo.sValue = "ZP1S开启";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = data[14];
+            if(data[14]>=0 && data[14]<4)
+                dainfo.sValue = AGCstate[data[14]];
+            else
+                dainfo.sValue = "未知";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = ((data[16]<<8)|data[15]);
+            dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.bType = true;
+            dainfo.fValue = data[17];
+            if(data[17]==0x00)
+                dainfo.sValue = "CF关闭";
+            else
+                dainfo.sValue = "CF开启";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.bType = false;
+            dainfo.fValue = ((((((data[18]<<8)|data[19])<<8)|data[20])<<8)|data[21]);
+            dainfo.sValue = (QString("%1.%2.%3.%4").arg(data[18]).arg(data[19]).arg(data[20]).arg(data[21])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = ((((((data[22]<<8)|data[23])<<8)|data[24])<<8)|data[25]);
+            dainfo.sValue = (QString("%1.%2.%3.%4").arg(data[22]).arg(data[23]).arg(data[24]).arg(data[25])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = ((((((data[26]<<8)|data[27])<<8)|data[28])<<8)|data[29]);
+            dainfo.sValue = (QString("%1.%2.%3.%4").arg(data[26]).arg(data[27]).arg(data[28]).arg(data[29])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = data[30];
+            dainfo.sValue = (QString("%1").arg(data[30])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = (data[31]&0x0F);
+            dainfo.sValue = (QString("%1分钟").arg((data[31]&0x0F))).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = (data[32]);
+            dainfo.sValue = (QString("%1").arg((data[32]))).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = (data[33])*0.5;
+            dainfo.sValue = (QString("%1").arg((data[33])*0.5)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = (data[34])*0.5;
+            dainfo.sValue = (QString("%1").arg((data[34])*0.5)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = (data[35])*0.5;
+            dainfo.sValue = (QString("%1").arg((data[35])*0.5)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = (data[36]);
+            dainfo.sValue = (QString("%1").arg(data[36])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = (data[37]);
+            dainfo.sValue = (QString("%1").arg(data[37])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = (data[38]);
+            dainfo.sValue = (QString("%1").arg(data[38])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+        }
+        else if(m_curMsgId==2)
+        {
+            index = 47;
+            dainfo.bType = false;
+            dainfo.fValue = (data[4]);
+            if(data[4]==0x00)
+                dainfo.sValue = "8MHz";
+            else
+                dainfo.sValue = "6MHz";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.bType = true;
+            dainfo.fValue = (data[5]);
+            if(data[5]==0x00)
+                dainfo.sValue = "关闭";
+            else
+                dainfo.sValue = "开启";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.bType = false;
+            dainfo.fValue = ((((((data[8]<<8)|data[9])<<8)|data[10])<<8)|data[11]);
+            dainfo.sValue = (QString("%1.%2.%3.%4").arg(data[8]).arg(data[9]).arg(data[10]).arg(data[11])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = ((((((data[12]<<8)|data[13])<<8)|data[14])<<8)|data[15]);
+            dainfo.sValue = (QString("%1.%2.%3.%4").arg(data[12]).arg(data[13]).arg(data[14]).arg(data[15])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = ((((((data[16]<<8)|data[17])<<8)|data[18])<<8)|data[19]);
+            dainfo.sValue = (QString("%1.%2.%3.%4").arg(data[16]).arg(data[17]).arg(data[18]).arg(data[19])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = ((((((data[20]<<8)|data[21])<<8)|data[22])<<8)|data[23]);
+            dainfo.sValue = (QString("%1.%2.%3.%4").arg(data[20]).arg(data[21]).arg(data[22]).arg(data[23])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = ((data[25]<<8)|data[24]);
+            dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue = (data[26]);
+            if(data[26]==0x00)
+                dainfo.sValue = "UDP";
+            else
+                dainfo.sValue = "TCP";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[27];
+            if(data[27]==0x00)
+                dainfo.sValue = "188字节";
+            else
+                dainfo.sValue = "204字节";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[28];
+            if(data[28]==0x00)
+                dainfo.sValue = "组播";
+            else
+                dainfo.sValue = "单播";
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[29];
+            dainfo.sValue = (QString("%1").arg(data[29])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[30];
+            dainfo.sValue = (QString("%1").arg(data[30])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[31];
+            dainfo.sValue = (QString("%1").arg(data[31])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[32];
+            dainfo.sValue = (QString("%1").arg(data[32])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[33];
+            dainfo.sValue = (QString("%1").arg(data[33])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[34];
+            dainfo.sValue = (QString("%1").arg(data[34])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[35];
+            dainfo.sValue = (QString("%1").arg(data[35])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[36];
+            dainfo.sValue = (QString("%1").arg(data[36])).toStdString();
+            pBandData->mValues[index++] = dainfo;
+
+            dainfo.fValue = qPow(10,((data[37]&0x0F))*-1)*((data[37]&0xF0)>>4); //data[37];
+            dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
+            pBandData->mValues[index++] = dainfo;
+
+            dainfo.fValue =data[38];
+            dainfo.sValue = GPSState[data[38]];
+            pBandData->mValues[index++] = dainfo;
+            dainfo.fValue =data[39];
+            if(data[39]==0x00)
+                dainfo.sValue = "+";
+            else
+                dainfo.sValue = "-";
+            pBandData->mValues[index++] = dainfo;
+        }
+     return 0;
+    }
 }

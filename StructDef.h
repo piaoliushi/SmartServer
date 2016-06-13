@@ -277,6 +277,7 @@ typedef enum RESOLVE_TAG  //resolve
 typedef enum SHANGHAIPROTOCL
 {
     All_Band_Pa = 0,
+    All_Band_Exc = 1,
 }ShSubProtocol;
 
 typedef enum  MEDIASUBPROTOCL_TAG

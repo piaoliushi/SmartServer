@@ -57,10 +57,10 @@ HMsgHandlePtr   request_handler_factory::get_callback_by_ip(string sIpAddress)
     return true;
  }
 
-  bool request_handler_factory::add_new_data(string sIp,DevMonitorDataPtr &mapData)
+  bool request_handler_factory::add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData)
   {
       HMsgHandlePtr curPtr =  get_callback_by_ip(sIp);
       if(curPtr!=NULL)
-          curPtr->add_new_data(sIp,mapData);
+          curPtr->add_new_data(sIp,nChannel,mapData);
       return true;
   }

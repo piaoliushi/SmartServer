@@ -534,7 +534,7 @@ bool DataBaseOperation::GetAssDevChan( QString strDevNum,map<int,vector<AssDevCh
          cout<<itemschquery.lastError().text().toStdString()<<"GetAssDevChan---itemschquery---error!"<<endl;
         return false;
     }
-    strSql=QString("select objectnumbera,channelnumbera,channelnumberb from associate_object  where objectnumberb='%1'").arg(strDevNum);
+    /*strSql=QString("select objectnumbera,channelnumbera,channelnumberb from associate_object  where objectnumberb='%1'").arg(strDevNum);
     itemschquery.prepare(strSql);
     if(itemschquery.exec()){
         while(itemschquery.next()){
@@ -547,7 +547,7 @@ bool DataBaseOperation::GetAssDevChan( QString strDevNum,map<int,vector<AssDevCh
     else {
         cout<<itemschquery.lastError().text().toStdString()<<"GetAssDevChan---itemschquery2---error!"<<endl;
         return false;
-    }
+    }*/
     return true;
 }
 bool DataBaseOperation::GetAlarmConfig( string strDevnum,map<int,Alarm_config>& map_Alarmconfig )
@@ -1183,16 +1183,17 @@ bool DataBaseOperation::AddProgramSignalAlarmRecord(string strDevNum, string str
        QString strSql;
        if(nlimitType==ALARM_SWITCH)
        {
-           strSql = QString("insert into dtmb_alarm_record(devicenumer,freq,alarmtype,alarmstarttime) values(:freq,\
-                            :alarmtype,:alarmstarttime)");
+           strSql = QString("insert into dtmb_alarm_record(devicenumber,freq,alarmtype,alarmstarttime,alarmid) values(:devicenumer,:freq,:alarmtype,:alarmstarttime,:alarmid)");
            inquery.prepare(strSql);
-           inquery.bindValue(":freq",atoi(strFrqName.c_str()));
+           inquery.bindValue(":freq",atoi(strFrqName.c_str()));//
            inquery.bindValue(":alarmtype",nalarmTypeId);
            inquery.bindValue(":devicenumer",QString::fromStdString(strDevNum));
+           inquery.bindValue(":alarmid",0);
            QDateTime qdt;
-           tm *ltime = localtime(&startTime);
-           qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
-           qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
+         //  tm *ltime = localtime(&startTime);
+           qdt=QDateTime::fromTime_t(startTime);
+           //qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
+          // qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
            inquery.bindValue(":alarmstarttime",qdt);
            if(!inquery.exec()){
                 cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
@@ -1211,7 +1212,7 @@ bool DataBaseOperation::AddProgramSignalAlarmRecord(string strDevNum, string str
        }
        else if(nlimitType==ALARM_RESUME)
        {
-           strSql = QString("update dtmb_alarm_record set alarmendtime=:alarmendtime where id=:id");
+           strSql = QString("update dtmb_alarm_record set alarmendtime=:alarmendtime where alarmid=:id");
            inquery.prepare(strSql);
            QDateTime qdt;
            tm *ltime = localtime(&startTime);

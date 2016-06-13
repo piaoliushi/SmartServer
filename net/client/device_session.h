@@ -201,7 +201,7 @@ namespace hx_net
         CTarget *target_ptr_;
 
         boost::shared_ptr<boost::asio::serial_port> pSerialPort_ptr_;//串口操作
-
+        bool all_dev_is_use_;
     };
     typedef boost::shared_ptr<hx_net::device_session> dev_session_ptr;
     typedef boost::weak_ptr<hx_net::device_session>    dev_session_weak_ptr;

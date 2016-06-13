@@ -41,8 +41,8 @@ namespace hx_net
         case DEVICE_GS_RECIVE:
             m_pbaseMsg = new Link_message(m_pSessionPtr,m_devInfo);
             break;
-        case MEDIA_DEVICE:	{
-                m_pbaseMsg = new Media_message(m_pSessionPtr,m_io_service,m_devInfo);
+        case DEVICE_MEDIA:	{
+                m_pbaseMsg = new Media_message(m_pSessionPtr,m_io_service,m_devInfo,devProperty);
 			}
 			break;
         case DEVICE_ELEC:{
@@ -236,11 +236,11 @@ namespace hx_net
         return m_pbaseMsg->add_new_alarm(sPrgName,alarmId,nState, startTime);
     }
 
-    bool  MsgHandleAgentImpl::add_new_data(string sIp,DevMonitorDataPtr &mapData)
+    bool  MsgHandleAgentImpl::add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData)
     {
         if(m_pbaseMsg==NULL)
             return false;
-        return m_pbaseMsg->add_new_data(sIp,mapData);
+        return m_pbaseMsg->add_new_data(sIp,nChannel,mapData);
     }
 }
 

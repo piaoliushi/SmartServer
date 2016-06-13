@@ -58,20 +58,19 @@ bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody,string
                     _controlDeviceCommand(BH_POTO_ManualPowerControl,requestNode,nRsltValue);//发射机控制
 
                 createResponseMsg(nMsgId,nRsltValue,cmdType.c_str(),responseBody);
-            }else
-                createResponseMsg(nMsgId,11,CONST_STR_BOHUI_TYPE[BH_POTO_XmlContentError],responseBody);
+            }else {
+                xml_node<> *returnNode = rootNode->first_node("ReturnInfo");
+                if(returnNode!=NULL){
+                    return _parseSignalReportMsg(sIp,returnNode);
+                    //信号上报不用回复xml
+                }else{
+                     createResponseMsg(nMsgId,11,CONST_STR_BOHUI_TYPE[BH_POTO_XmlContentError],responseBody);
+                }
+            }
         }
         else {
-
-            xml_node<> *returnNode = rootNode->first_node("ReturnInfo");
-            if(returnNode!=NULL){
-                return _parseSignalReportMsg(sIp,returnNode);
-                //信号上报不用回复xml
-            }else{
-
             //xml内容解析错误（SrcCode，MsgId等）
             createResponseMsg(nMsgId,11,CONST_STR_BOHUI_TYPE[BH_POTO_XmlContentError],responseBody);
-            }
         }
     }
     catch(...)
@@ -96,9 +95,13 @@ bool Bohui_Protocol::_checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &pri
             if(ver!=NULL)
                 sVer = ver->value();
             msgId = strtol(rootNode->first_attribute("MsgID")->value(),NULL,10);
-            priority = strtol( rootNode->first_attribute("Priority")->value(),NULL,10);
-            desUrl =  rootNode->first_attribute("SrcURL")->value();
-            if(!desUrl.empty())// && priority>=0
+           // xml_attribute<char> *prity =  rootNode->first_attribute("Priority");
+           // if(prity!=NULL)
+            //    priority = strtol( rootNode->first_attribute("Priority")->value(),NULL,10);
+            xml_attribute<char> *srcUrl =  rootNode->first_attribute("SrcURL");
+            if(srcUrl!=NULL)
+                 desUrl =  rootNode->first_attribute("SrcURL")->value();
+            //if(!desUrl.empty())// && priority>=0
                 return true;
         }
     }
@@ -872,17 +875,15 @@ void Bohui_Protocol::_controlDeviceCommand(int nDevType,xml_node<> *rootNode,int
 //分析信号上报告警,数据上报
 bool Bohui_Protocol::_parseSignalReportMsg(string sIp,xml_node<> * InfoNode)
 {
-    rapidxml::xml_node<>* tranNode = InfoNode->first_node("ReturnInfo");
-    if(tranNode!=NULL){
         rapidxml::xml_node<>* dataNode = InfoNode->first_node("AlarmSearchFSet");
-        if(tranNode!=NULL){
-            rapidxml::xml_node<> *itemNode = dataNode->first_node("AlarmSearchF");
-            rapidxml::xml_attribute<char> * attr_FreqId = itemNode->first_attribute("Freq");
+        if(dataNode!=NULL){
+            rapidxml::xml_attribute<char> * attr_FreqId = dataNode->first_attribute("Freq");
             if(attr_FreqId==NULL)
                 return false;
             string sPrgFreq = attr_FreqId->value();
             if(sPrgFreq.empty())
                 return false;
+            rapidxml::xml_node<> *itemNode = dataNode->first_node("AlarmSearchF");
             while(itemNode!=NULL){
                 rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Type");
                 rapidxml::xml_attribute<char> * attr_prgValue = itemNode->first_attribute("Value");
@@ -917,7 +918,7 @@ bool Bohui_Protocol::_parseSignalReportMsg(string sIp,xml_node<> * InfoNode)
                 curFrqInfo.bType=0;
                 curFrqInfo.sValue = sPrgFreq;
                 curFrqInfo.fValue = 0.0f;
-                curValues->mValues[0+4*nChannelId] = curFrqInfo;
+                curValues->mValues[0+5*nChannelId] = curFrqInfo;
                  while(itemNode!=NULL){
                      DataInfo curItemInfo;
                      curItemInfo.bType=0;
@@ -925,11 +926,11 @@ bool Bohui_Protocol::_parseSignalReportMsg(string sIp,xml_node<> * InfoNode)
                      rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Type");
                      if(attr_prgType!=NULL){
                          int nTypeId = atoi(attr_prgType->value());
-                         if(nTypeId>=0 && nTypeId<4){
+                         if(nTypeId>=0 && nTypeId<5){
                              rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Value");
                              if(attr_prgType!=NULL){
                                   curItemInfo.sValue = attr_prgType->value();
-                                  curValues->mValues[nTypeId+4*nChannelId] = curItemInfo;
+                                  curValues->mValues[nTypeId+5*nChannelId] = curItemInfo;
                              }
                          }
                      }
@@ -937,11 +938,11 @@ bool Bohui_Protocol::_parseSignalReportMsg(string sIp,xml_node<> * InfoNode)
                      itemNode = itemNode->next_sibling("GetIndex");
                  }
 
-                 if(curValues.size()>0)
-                      request_handler_factory::get_mutable_instance().add_new_data(sIp,curValues);
+                 if(curValues->mValues.size()>0)
+                      request_handler_factory::get_mutable_instance().add_new_data(sIp,nChannelId,curValues);
             }
         }
-    }
+   // }
     return true;
 }
 

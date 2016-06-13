@@ -68,10 +68,10 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
     if ("/" == uri_)
 	{
         boost::asio::ip::address clientaddr = connection->socket().remote_endpoint().address();
-        string sClientIp = clientaddr.to_string();
+        string sClientIp = clientaddr.to_v4().to_string();
         cout<<content_.c_str()<<endl;
         cout<<"content_size:------"<<read_content_length_<<endl;
-        if(bohui_protocol_.parseDataFromStr(content_,d_response_body,d_sUrl))
+        if(bohui_protocol_.parseDataFromStr(content_,d_response_body,d_sUrl,sClientIp))
         {
             connection->set_status(hx_http_server::connection::ok);
             common_headers[2].value = boost::lexical_cast<std::string>(1);//response_body.size()

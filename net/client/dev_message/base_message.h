@@ -42,8 +42,8 @@ namespace hx_net
         virtual void reset_run_state(){}
 
         //添加新告警
-        bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime){return false;}
-        bool  add_new_data(string sIp,DevMonitorDataPtr &mapData){return false;}
+        virtual bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime){return false;}
+        virtual bool  add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData){return false;}
 	public:
         static void Char2Hex(unsigned char ch, char* szHex);
 		static void CharStr2HexStr(unsigned char const* pucCharStr, string &pszHexStr, int iSize);

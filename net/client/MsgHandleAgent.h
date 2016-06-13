@@ -49,7 +49,7 @@ namespace hx_net
         void reset_run_state();
         //添加新告警
         bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime);
-        bool  add_new_data(string sIp,DevMonitorDataPtr &mapData);
+        bool  add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData);
 	private:
 		MsgHandleAgentImpl *m_msgImpl;
 	};

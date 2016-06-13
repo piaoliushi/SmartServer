@@ -27,6 +27,9 @@ enum DEVType
     DEVICE_MUX              =111,//复用器
     DEVICE_MO                =112,//调制器
     DEVICE_ANTENNA       =114,//同轴开关
+    DEVICE_EXCITATION    =115,//激励器单设备
+    DEVICE_POWER          =116,//功放单设备
+    DEVICE_MEDIA           =117,//媒体设备
 
 };
 
@@ -84,7 +87,7 @@ typedef struct
     int      gid;
     int      iCommandType; //命令类型
     int      iDateType;         //时间类型
-    int      iWeek;              //星期
+    int      iWeek;              //星期(1-7)
     int      iMonitorMonth;  //月（0-12，0=all）
     int      iMonitorDay;      //日(1-31)
     time_t  tCmdEndTime;  //月运行计划终止日期

@@ -38,6 +38,7 @@ void DevClient::connect_all()
     {
        if(device_pool_.find(DevKey(sLocalStationId,(*modle_iter).sModleNumber))==device_pool_.end())
         {
+
             session_ptr new_session(new device_session(io_service_pool_.get_io_service(),(*modle_iter),http_report_session_ptr_));
             device_pool_[DevKey(sLocalStationId,(*modle_iter).sModleNumber)]=new_session;
             new_session->init_session_config();

@@ -12,8 +12,6 @@
 #ifdef SNMP_PP_NAMESPACE
 using namespace Snmp_pp;
 #endif
-
-//#include "../sms/SmsTraffic.h"
 using namespace db;
 namespace hx_net
 {
@@ -39,6 +37,7 @@ device_session::device_session(boost::asio::io_service& io_service,
     ,io_service_(io_service)
     ,snmp_ptr_(NULL)
     ,target_ptr_(NULL)
+    ,all_dev_is_use_(false)
 {
 
 }
@@ -60,6 +59,8 @@ void device_session::init_session_config()
     bool bIsTransmitter = false;
     for(;iter!=modleInfos_.mapDevInfo.end();++iter)
     {
+        if(iter->second.bUsed)
+            all_dev_is_use_ = true;
         dev_opr_state_[iter->first] = dev_no_opr;
         HMsgHandlePtr pars_agent = HMsgHandlePtr(new MsgHandleAgent(shared_from_this(),io_service_,iter->second));
         boost::shared_ptr<CommandAttribute> tmpCommand(new CommandAttribute);
@@ -225,6 +226,9 @@ int  device_session::con_mod()
 
 void device_session::connect()
 {
+
+    if(all_dev_is_use_==false)
+        return;
     if(modleInfos_.iCommunicationMode==CON_MOD_NET) {
         if(modleInfos_.netMode.inet_type == NET_MOD_TCP){
             connect(modleInfos_.netMode.strIp,modleInfos_.netMode.iremote_port);
@@ -1201,6 +1205,12 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
         return;
     if(!error)
     {
+        static  char str_time[64];
+        time_t curTm = time(0);
+        tm *local_time = localtime(&curTm);
+        strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+        cout<<"收到数据-----------"<<str_time<<endl;
+
         int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,
                                                                 bytes_transferred,CMD_QUERY,cur_msg_q_id_);
         if(nResult == 0)
@@ -1218,7 +1228,6 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
                 nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,0);
                 if(nResult == 0)
                 {
-
                     if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
                             .schedule(boost::bind(&device_session::handler_data,this,cur_dev_id_,curData_ptr)))
                     {

@@ -197,8 +197,12 @@ namespace hx_net
             map<int,DataInfo>::iterator diter = data_ptr->mValues.find((*iter).first);
             if(diter!=data_ptr->mValues.end())
             {
-                if((*iter).second.iItemType == 0)
+
+                if((*iter).second.iItemType == 0){
                     data_ptr->mValues[(*iter).first].fValue *= (*iter).second.dRatio;
+                    if(data_ptr->mValues[(*iter).first].sValue.empty())//data_ptr->mValues[(*iter).first].fValue
+                        data_ptr->mValues[(*iter).first].sValue = QString::number(data_ptr->mValues[(*iter).first].fValue,'g',2).toStdString();
+                }
                 else {
                     if((*iter).second.dRatio==0)
                         data_ptr->mValues[(*iter).first].fValue = data_ptr->mValues[(*iter).first].fValue==1.0f ? 0:1;

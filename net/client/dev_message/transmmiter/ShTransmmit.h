@@ -20,6 +20,7 @@ namespace hx_net{
         int OnAllBandData(unsigned char *data,DevMonitorDataPtr pBandData,int nDataLen,int& runstate);
         void LastBandRunData(unsigned char *data,DevMonitorDataPtr pBandData,int nDataLen,int nmodenum);
         void LastBandSateData(unsigned char *data,DevMonitorDataPtr pBandData,int nDataLen,int nmodenum);
+        int OnAllBandExcData(unsigned char *data,DevMonitorDataPtr pBandData,int nDataLen,int& runstate);
 	private:
 		int m_subprotocol;
 		int m_addresscode;

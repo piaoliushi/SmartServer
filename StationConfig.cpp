@@ -22,39 +22,6 @@ bool StationConfig::load_station_config()
         return false;
     if(!GetInst(DataBaseOperation).GetDataDictionary(Bohui_Protocol::mapTypeToStr))
         return false;
-    /*mapTransmitterInfo.clear();
-	mapAntennaInfo.clear();
-	mapAssociateInfo.clear();
-	mapModleInfo.clear();
-	vSmsInfo.clear();
-	vecUploadDevInfo.clear();
-	mapTransmitAgentInfo.clear();
-	vLinkageInfo.clear();
-	vecMediaDevInfo.clear();
-
-	cur_station_id = GetInst(LocalConfig).local_station_id();
-	cur_devSvc_id = GetInst(LocalConfig).local_dev_server_number();
-
-    if(!GetInst(DbManager).GetTransmitters(cur_station_id,cur_devSvc_id,mapTransmitterInfo))
-		return false;
-    if(!GetInst(DbManager).GetAntennaInfo(cur_station_id,cur_devSvc_id,mapAntennaInfo))
-		return false;
-    if(!GetInst(DbManager).GetAssociateInfo(cur_station_id,cur_devSvc_id,mapAssociateInfo))
-		return false;
-    if(!GetInst(DbManager).GetModleInfo(cur_station_id,cur_devSvc_id,mapModleInfo))
-		return false;
-    if(!GetInst(DbManager).GetThransmitterAgentInfo(cur_station_id,cur_devSvc_id,mapTransmitAgentInfo))
-		return false;
-    if(!GetInst(DbManager).GetUploadDevInfo(cur_station_id,cur_devSvc_id,vecUploadDevInfo))
-		return false;
-    if(!GetInst(DbManager).GetTelInfoByStation(cur_station_id,vSmsInfo))
-		return false;
-    if(!GetInst(DbManager).GetAllLinkageRoleNumber(cur_station_id,vLinkageInfo))
-		return false;
-
-    if(!GetInst(DbManager).GetConnectMediaDevInfo(cur_station_id,cur_devSvc_id,vecMediaDevInfo))
-        return false;*/
-
 	return true;
 }
 
