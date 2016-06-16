@@ -44,8 +44,10 @@ device_session::device_session(boost::asio::io_service& io_service,
 
 device_session::~device_session()
 {
-    if(snmp_ptr_!=NULL)
+    if(snmp_ptr_!=NULL){
+        snmp_ptr_->stop_poll_thread();
         delete snmp_ptr_,snmp_ptr_=NULL;
+    }
     if(target_ptr_!=NULL)
         delete target_ptr_,target_ptr_=NULL;
 }
@@ -96,6 +98,10 @@ void device_session::init_session_config()
         //目前只有发射机类型设备才启用定时任务(定时开关机)
         if(iter->second.iDevType == DEVICE_TRANSMITTER)
             bIsTransmitter=true;
+        //创建和分析关联设备信息
+        parse_ass_dev_ptr  ass_dev_ptr(new Parse_Ass_Device(iter->second));
+        map_dev_ass_parse_ptr_[iter->first] = ass_dev_ptr;
+
     }
     cur_dev_id_ = dev_agent_and_com.begin()->first;
     netAlarm.nAlarmId = -1;//默认值
@@ -331,8 +337,10 @@ void device_session::agent_connect(std::string hostname,unsigned short port)
     if (!ipAddr.valid())
         return;
     int status;
-    if(snmp_ptr_==NULL)
+    if(snmp_ptr_==NULL){
         snmp_ptr_ = new Snmp(status);
+        snmp_ptr_->start_poll_thread(10);
+    }
     if(target_ptr_==NULL){
         target_ptr_ = new CTarget(ipAddr);
         if (! target_ptr_->valid())
@@ -555,8 +563,7 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
                     get_sync_net_data();//获取网络数据(同步)，使用http,snmp
                 else
                     send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
-            }
-            else if(modleInfos_.iCommunicationMode == CON_MOD_COM)
+            }else if(modleInfos_.iCommunicationMode == CON_MOD_COM)
                 send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
         else{
@@ -585,12 +592,12 @@ void device_session::get_sync_net_data()
     query_timeout_count_=0;
     DevMonitorDataPtr curData_ptr(new Data);
     int nResult = dev_agent_and_com[cur_dev_id_].second->decode_msg_body(snmp_ptr_,curData_ptr,target_ptr_);
-    if(nResult == 0){
+   /* if(nResult == 0){
         if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
                 .schedule(boost::bind(&device_session::handler_data,this,cur_dev_id_,curData_ptr))) {
             task_count_increase();
         }
-    }
+    }*/
 }
 //发送消息
 bool device_session::sendRawMessage(unsigned char * data_,int nDatalen)
@@ -743,7 +750,8 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                         bool bRslt =  start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
                         //通知客户端正在执行
                         if(bRslt==true)
-                            notify_client(witer->first,witer->second.sDevName,"timer",(*cmd_iter).iCommandType,pCurTime,true,eResult);
+                            notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
+                                                         (*cmd_iter).iCommandType,pCurTime,true,eResult);
                     }
                 }
                 //按星期控制
@@ -757,7 +765,8 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                             bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
                             //通知客户端正在执行
                             if(bRslt==true)
-                                notify_client(witer->first,witer->second.sDevName,"timer",(*cmd_iter).iCommandType,pCurTime,true,eResult);
+                                notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
+                                                             (*cmd_iter).iCommandType,pCurTime,true,eResult);
                         }
                     }
                 }
@@ -773,7 +782,8 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                             bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
                             //通知客户端正在执行
                             if(bRslt==true)
-                                notify_client(witer->first,witer->second.sDevName,"timer",(*cmd_iter).iCommandType,pCurTime,true,eResult);
+                                notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
+                                                             (*cmd_iter).iCommandType,pCurTime,true,eResult);
                         }
                     }
                 }
@@ -784,7 +794,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
     }
 }
 
-void device_session::notify_client(string sDevId,string devName,string user,int cmdType, tm *pCurTime,
+void device_session::notify_client_execute_result(string sDevId,string devName,string user,int cmdType, tm *pCurTime,
                                    bool bNtfFlash,int eResult)
 {
     static  char str_time[64];
@@ -821,7 +831,6 @@ void device_session::notify_client(string sDevId,string devName,string user,int 
     if(cmdRlt>-1 && cmdOpr>-1){
         string sDesc = devName+DEV_CMD_OPR_DESC[cmdOpr];
         sDesc+=DEV_CMD_RESULT_DESC[cmdRlt];
-
         http_ptr_->send_http_excute_result_messge_to_platform(sDevId,str_time,cmdOpr,sDesc);
     }
 }
@@ -866,8 +875,10 @@ void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curData
     double ninterval = difftime(tmCurTime,tmLastSaveTime[sDevId]);
     if(ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
         return ;
-    if(GetInst(DataBaseOperation).AddItemMonitorRecord(sDevId,tmCurTime,curDataPtr,mapMonitorItem))
+    if(GetInst(DataBaseOperation).AddItemMonitorRecord(sDevId,tmCurTime,curDataPtr,mapMonitorItem)){
         tmLastSaveTime[sDevId] = tmCurTime;
+        cout<<"save data to database success!!!"<<endl;
+    }
 
 }
 
@@ -1309,7 +1320,7 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
     }
 }
 //分析告警---2016-4-1--完成
-void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorItem &ItemInfo)
+void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorItem &ItemInfo,bool &bAlarmNow)
 {
     boost::recursive_mutex::scoped_lock lock(update_alarm_config_mutex_);
     //遍历监控量告警配置
@@ -1352,6 +1363,8 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                         //存储告警,通知告警,联动告警
                         record_alarm_and_notify(devId,fValue, ItemInfo.vItemAlarm[nIndex].fLimitvalue,0,ItemInfo,alarm_type_findIter->second);
                         alarm_type_findIter->second.bNotifyed = true;
+                        //标志当前有新的告警发生
+                        bAlarmNow = true;
                     }
                 }else{ //没有找到,增加该告警类型
 
@@ -1425,10 +1438,19 @@ void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPt
     map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.find(sDevId);
     if(iter== modleInfos_.mapDevInfo.end())
         return;
+    bool bTmpAlarmNow = false;
     map<int,DeviceMonitorItem>::iterator iterItem = iter->second.map_MonitorItem.begin();
     for(;iterItem!=iter->second.map_MonitorItem.end();++iterItem){
         double dbValue =curDataPtr->mValues[iterItem->first].fValue;
-        parse_item_alarm(sDevId,dbValue,iterItem->second);
+        parse_item_alarm(sDevId,dbValue,iterItem->second,bTmpAlarmNow);
+    }
+    //如果有新告警产生,则立刻发送一次监控数据
+    if(bTmpAlarmNow==true){
+        string sDesDevId = sDevId;
+
+
+        http_ptr_->send_http_data_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[sDevId].iDevType,
+                                                     curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     }
 }
 

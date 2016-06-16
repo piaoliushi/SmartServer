@@ -93,19 +93,19 @@ public:
 
 protected:
     void StartReOpen();
-    bool GetDevMonitorSch(string strDevnum,map<int,vector<Monitoring_Scheduler> >& mapMonitorSch);
-    bool GetCmdParam(string strCmdnum,CmdParam& param);
-    bool GetCmd(string strDevnum,vector<Command_Scheduler>& vcmdsch);
-    bool GetDevMonItem(string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item);
-    bool GetDevProperty(string strDevnum,map<string,DevProperty>& map_property);
-    bool GetNetProperty(string strConTypeNumber,NetCommunicationMode& nmode);
-    bool GetComProperty(string strConTypeNumber,ComCommunicationMode& cmode);
-    bool GetLinkActionParam(string strParamnum,map<int,ActionParam>& map_Params);
-    bool GetLinkAction(string strLinkRolenum,vector<LinkAction>& vLinkAction);
-    bool GetAlarmConfig(string strDevnum,map<int,Alarm_config>& map_Alarmconfig);
-    bool GetItemAlarmConfig(string strDevnum,int iIndex,vector<Alarm_config>& vAlarmconfig);
-    bool GetDevInfo(string strDevnum,DeviceInfo& device);
-    bool GetAssDevChan( QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev );
+    bool GetDevMonitorSch(QSqlDatabase &db,string strDevnum,map<int,vector<Monitoring_Scheduler> >& mapMonitorSch);
+    bool GetCmdParam(QSqlDatabase &db,string strCmdnum,CmdParam& param);
+    bool GetCmd(QSqlDatabase &db,string strDevnum,vector<Command_Scheduler>& vcmdsch);
+    bool GetDevMonItem(QSqlDatabase &db,string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item);
+    bool GetDevProperty(QSqlDatabase &db,string strDevnum,map<string,DevProperty>& map_property);
+    bool GetNetProperty(QSqlDatabase &db,string strConTypeNumber,NetCommunicationMode& nmode);
+    bool GetComProperty(QSqlDatabase &db,string strConTypeNumber,ComCommunicationMode& cmode);
+    bool GetLinkActionParam(QSqlDatabase &db,string strParamnum,map<int,ActionParam>& map_Params);
+    bool GetLinkAction(QSqlDatabase &db,string strLinkRolenum,vector<LinkAction>& vLinkAction);
+    bool GetAlarmConfig(QSqlDatabase &db,string strDevnum,map<int,Alarm_config>& map_Alarmconfig);
+    bool GetItemAlarmConfig(QSqlDatabase &db,string strDevnum,int iIndex,vector<Alarm_config>& vAlarmconfig);
+    bool GetDevInfo(QSqlDatabase &db,string strDevnum,DeviceInfo& device);
+    bool GetAssDevChan(QSqlDatabase &db, QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev );
 private:
     QString d_serveraddress;
     QString d_database;

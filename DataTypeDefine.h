@@ -310,5 +310,14 @@ typedef struct
     string sNote;
 } UserInformation;
 
+enum _tagAssType
+{
+    TSMT_TO_ATTENA = 0,//发射机关联天线
+    DEV_TO_CHANNEL = 1,//设备关联通道
+    DEV_TO_MOUDLE  = 2,//设备关联模块
+    ATTENA_TO_TSMT = 3,//天线关联发射机
+    CHNNEL_TO_DEV  = 4,//通道关联设备
+    MOUDLE_TO_DEV = 5,//模块关联设备
+};
 
 #endif

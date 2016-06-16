@@ -6,32 +6,32 @@
 #include "../rapidxml/rapidxml_print.hpp"
 #include "../rapidxml/rapidxml_utils.hpp"
 #include "../protocol/bohui_const_define.h"
-
+#include "ConnectionPool.h"
 
 namespace db {
 
 DataBaseOperation::DataBaseOperation()
 {
-    reconnect_thread_.reset();
-    d_db_check_time = QDateTime::currentDateTime();
+    //reconnect_thread_.reset();
+    //d_db_check_time = QDateTime::currentDateTime();
 }
 
 DataBaseOperation::~DataBaseOperation()
 {
-    if(reconnect_thread_!=NULL)
+    /*if(reconnect_thread_!=NULL)
     {
         if(reconnect_thread_->joinable())
         {
             reconnect_thread_->interrupt();
             reconnect_thread_->join();
         }
-    }
+    }*/
 }
 
 bool DataBaseOperation::OpenDb( const std::string& serveraddress, const std::string& database, const std::string& uid, const std::string& pwd, int timeout, std::string link_driver,std::string driverName/*="SQL Native Client"*/ )
 {
     //boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlDatabase q_db = QSqlDatabase::addDatabase("QPSQL");
+   /* QSqlDatabase q_db = QSqlDatabase::addDatabase("QPSQL");
     q_db.setHostName(QString::fromStdString(serveraddress));//设置主机名
     q_db.setDatabaseName(QString::fromStdString(database));//设置数据库名
     q_db.setUserName(QString::fromStdString(uid));//设置用户名
@@ -42,19 +42,22 @@ bool DataBaseOperation::OpenDb( const std::string& serveraddress, const std::str
     d_uid = QString::fromStdString(uid);
     d_pwd=QString::fromStdString(pwd);
     if(!q_db.open())
-        return false;
+        return false;*/
+
+   ConnectionPool::initDb(QString::fromStdString(serveraddress),QString::fromStdString(database)
+                          ,QString::fromStdString(uid),QString::fromStdString(pwd));
     return true;
 }
 
 bool DataBaseOperation::CloseDb()
 {
-    QString dbName;
+    /*QString dbName;
     {
         QSqlDatabase db = QSqlDatabase::database();
         dbName = QSqlDatabase::database().connectionName();
         db.close();
     }
-    QSqlDatabase::removeDatabase(dbName);
+    QSqlDatabase::removeDatabase(dbName);*/
     return true;
 }
 
@@ -112,33 +115,37 @@ bool DataBaseOperation::ReOpen()
 //获得数据字典映射表
 bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicry)
 {
-    if(!IsOpen()) {
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetDataDictionary is error ------------------------------ the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery query;
+    QSqlQuery query(db);
     QString strSql=QString("select code,name,remark from data_dictionary where type='IndexType' union select alarmswitch,alarmswitchname,remark from alarm_switch");
     query.prepare(strSql);
     if(!query.exec()){
         cout<<query.lastError().text().toStdString()<<"GetDataDictionary---query---error!"<<endl;
+         ConnectionPool::closeConnection(db);
         return false;
     }
     while(query.next()) {
         mapDicry[query.value(0).toInt()] = pair<string,string>(query.value(1).toString().toStdString(),query.value(2).toString().toStdString());
     }
+     ConnectionPool::closeConnection(db);
     return true;
 }
 
-bool DataBaseOperation::GetDevInfo( string strDevnum,DeviceInfo& device )
+bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo& device )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetDevInfo is error ------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
 
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery devquery;
+    QSqlQuery devquery(db);
     QString strSql=QString("select a.DeviceNumber,a.AssociateNumber,a.DeviceName,a.DeviceType,a.IsAssociate,a.IsMultiChannel,a.ChannelSize,a.IsUse,a.AddressCode,b.MainCategoryNumber,b.SubCategoryNumber,a.ProtocolNumber\
                            from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and b.ProtocolNumber=a.ProtocolNumber").arg(QString::fromStdString(strDevnum));
             devquery.prepare(strSql);
@@ -155,12 +162,12 @@ bool DataBaseOperation::GetDevInfo( string strDevnum,DeviceInfo& device )
             device.nDevProtocol = devquery.value(9).toInt();
             device.nSubProtocol = devquery.value(10).toInt();
             QString sprotoclnum = devquery.value(11).toString();
-            GetDevMonItem(strDevnum,sprotoclnum,device.map_MonitorItem);
-            GetDevMonitorSch(strDevnum,device.vMonitorSch);
-            GetCmd(strDevnum,device.vCommSch);
-            GetDevProperty(strDevnum,device.map_DevProperty);
-            GetAlarmConfig(strDevnum,device.map_AlarmConfig);
-            GetAssDevChan(QString::fromStdString(strDevnum),device.map_AssDevChan);
+            GetDevMonItem(db,strDevnum,sprotoclnum,device.map_MonitorItem);
+            GetDevMonitorSch(db,strDevnum,device.vMonitorSch);
+            GetCmd(db,strDevnum,device.vCommSch);
+            GetDevProperty(db,strDevnum,device.map_DevProperty);
+            GetAlarmConfig(db,strDevnum,device.map_AlarmConfig);
+            GetAssDevChan(db,QString::fromStdString(strDevnum),device.map_AssDevChan);
 
             }
         }else {
@@ -171,12 +178,14 @@ bool DataBaseOperation::GetDevInfo( string strDevnum,DeviceInfo& device )
 }
 bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetAllDevInfo is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
+
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery netquery;
+    QSqlQuery netquery(db);
     QString strSql=QString("select NetType,IpAddress,LocalPort,PeerPort,ConnectType,CommTypeNumber from Net_Communication_Mode");
     netquery.prepare(strSql);
     if(netquery.exec()){
@@ -192,11 +201,11 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
             QString qtrNum = netquery.value(5).toString();
             info.sModleNumber = qtrNum.toStdString();
             QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
-            QSqlQuery net1query;
+            QSqlQuery net1query(db);
             if(net1query.exec(strQdev)) {
                 while(net1query.next()) {
                     DeviceInfo dev;
-                    GetDevInfo(net1query.value(0).toString().toStdString(),dev);
+                    GetDevInfo(db,net1query.value(0).toString().toStdString(),dev);
                     info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
                 }
             }
@@ -208,7 +217,7 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
     else {
           cout<<netquery.lastError().text().toStdString()<<"GetAllDevInfo---netquery---error!"<<endl;
     }
-    QSqlQuery comquery;
+    QSqlQuery comquery(db);
     strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode");
     comquery.prepare(strSql);
     if(comquery.exec()){
@@ -223,11 +232,11 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
 
             QString qtrNum = comquery.value(5).toString();
             QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
-            QSqlQuery net1query;
+            QSqlQuery net1query(db);
             if(net1query.exec(strQdev)) {
                 while(net1query.next()){
                     DeviceInfo dev;
-                    GetDevInfo(net1query.value(0).toString().toStdString(),dev);
+                    GetDevInfo(db,net1query.value(0).toString().toStdString(),dev);
                     info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
                 }
             }
@@ -239,16 +248,18 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
           cout<<comquery.lastError().text().toStdString()<<"GetAllDevInfo---comquery---error!"<<endl;
     }
 
+    ConnectionPool::closeConnection(db);
     return true;
 }
-bool DataBaseOperation::GetDevMonitorSch( string strDevnum,map<int,vector<Monitoring_Scheduler> >& mapMonitorSch )
+bool DataBaseOperation::GetDevMonitorSch(QSqlDatabase &db, string strDevnum,map<int,vector<Monitoring_Scheduler> >& mapMonitorSch )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetDevMonitorSch is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery schquery;
+    QSqlQuery schquery(db);
     QString strSql=QString("select id,ObjectNumber,WeekDay,Enable,StartTime,EndTime,datetype,month,day, \
                            alarmendtime from Monitoring_Scheduler where ObjectNumber='%1'").arg(QString::fromStdString(strDevnum));
     schquery.prepare(strSql);
@@ -274,14 +285,15 @@ bool DataBaseOperation::GetDevMonitorSch( string strDevnum,map<int,vector<Monito
     return true;
 }
 
-bool DataBaseOperation::GetCmdParam( string strCmdnum,CmdParam& param )
+bool DataBaseOperation::GetCmdParam(QSqlDatabase &db, string strCmdnum,CmdParam& param )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetCmdParam is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery cmdparquery;
+    QSqlQuery cmdparquery(db);
     QString strSql=QString("select Param0,HasParam1,Param1 from Param_Define where ParamNumber='%1'").arg(QString::fromStdString(strCmdnum));
     cmdparquery.prepare(strSql);
     if(cmdparquery.exec()){
@@ -298,14 +310,15 @@ bool DataBaseOperation::GetCmdParam( string strCmdnum,CmdParam& param )
     return true;
 }
 
-bool DataBaseOperation::GetCmd( string strDevnum,vector<Command_Scheduler>& vcmdsch )
+bool DataBaseOperation::GetCmd(QSqlDatabase &db, string strDevnum,vector<Command_Scheduler>& vcmdsch )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetCmd is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery cmdschquery;
+    QSqlQuery cmdschquery(db);
     QString strSql=QString("select id,CommandType,WeekDay,StartTime,HasParam,ParamNumber,month,day,commandendtime,datetype from Command_Scheduler where ObjectNumber='%1' and Enable=1").arg(QString::fromStdString(strDevnum));
     cmdschquery.prepare(strSql);
     if(cmdschquery.exec()){
@@ -318,7 +331,7 @@ bool DataBaseOperation::GetCmd( string strDevnum,vector<Command_Scheduler>& vcmd
             cmd_sch.iHasParam = cmdschquery.value(4).toInt();
             if(cmd_sch.iHasParam>=1){
                 string sparnum = cmdschquery.value(5).toString().toStdString();
-                GetCmdParam(sparnum,cmd_sch.cParam);
+                GetCmdParam(db,sparnum,cmd_sch.cParam);
             }
             cmd_sch.iMonitorMonth = cmdschquery.value(6).toInt();
             cmd_sch.iMonitorDay = cmdschquery.value(7).toInt();
@@ -334,14 +347,15 @@ bool DataBaseOperation::GetCmd( string strDevnum,vector<Command_Scheduler>& vcmd
     return true;
 }
 
-bool DataBaseOperation::GetDevMonItem( string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item )
+bool DataBaseOperation::GetDevMonItem(QSqlDatabase &db, string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetDevMonItem is error --------------------------------the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery itemschquery;
+    QSqlQuery itemschquery(db);
     QString strSql=QString("select a.MonitoringIndex,a.MonitoringName,a.Ratio,a.ItemType,a.ItemValueType,a.AlarmEnable,a.IsUpload,c.name,b.alarmtype,b.type,b.moduletype,b.moduleid \
                            from Monitoring_Device_Item a left join data_dictionary c on c.code=a.unitstring and c.type='CompanyType',base_device_item b\
                            where a.DeviceNumber='%1' and b.monitoringindex=a.monitoringindex and b.protocolnumber='%2'").arg(QString::fromStdString(strDevnum)).arg(qsPrtocolNum);
@@ -358,7 +372,7 @@ bool DataBaseOperation::GetDevMonItem( string strDevnum,QString qsPrtocolNum,map
                     item.bUpload = itemschquery.value(6).toBool();
                     item.sUnit = itemschquery.value(7).toString().toStdString();
                     int iAlarmid = itemschquery.value(8).toInt();
-                    GetItemAlarmConfig(strDevnum,iAlarmid,item.vItemAlarm);
+                    GetItemAlarmConfig(db,strDevnum,iAlarmid,item.vItemAlarm);
 
                     item.iTargetId = itemschquery.value(9).toInt();
                     item.iModTypeId = itemschquery.value(10).toInt();
@@ -372,14 +386,15 @@ bool DataBaseOperation::GetDevMonItem( string strDevnum,QString qsPrtocolNum,map
     return true;
 }
 
-bool DataBaseOperation::GetDevProperty( string strDevnum,map<string,DevProperty>& map_property )
+bool DataBaseOperation::GetDevProperty(QSqlDatabase &db, string strDevnum,map<string,DevProperty>& map_property )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetDevProperty is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery itemschquery;
+    QSqlQuery itemschquery(db);
     QString strSql=QString("select a.BasePropertyNumber,a.PropertyValueType,a.PropertyValue,b.PropertyName from Device_Property_Role_Bind a,Base_Property b \
                            where a.DeviceNumber='%1' and b.BasePropertyNumber=a.BasePropertyNumber").arg(QString::fromStdString(strDevnum));
             itemschquery.prepare(strSql);
@@ -399,14 +414,15 @@ bool DataBaseOperation::GetDevProperty( string strDevnum,map<string,DevProperty>
     return true;
 }
 
-bool DataBaseOperation::GetNetProperty( string strConTypeNumber,NetCommunicationMode& nmode )
+bool DataBaseOperation::GetNetProperty(QSqlDatabase &db, string strConTypeNumber,NetCommunicationMode& nmode )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetNetProperty is error --------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery netquery;
+    QSqlQuery netquery(db);
     QString strSql=QString("select NetType,IpAddress,LocalPort,PeerPort,ConnectType from Net_Communication_Mode \
                            where CommTypeNumber='%1'").arg(QString::fromStdString(strConTypeNumber));
             netquery.prepare(strSql);
@@ -427,14 +443,15 @@ bool DataBaseOperation::GetNetProperty( string strConTypeNumber,NetCommunication
             return true;
 }
 
-bool DataBaseOperation::GetComProperty( string strConTypeNumber,ComCommunicationMode& cmode )
+bool DataBaseOperation::GetComProperty(QSqlDatabase &db, string strConTypeNumber,ComCommunicationMode& cmode )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetComProperty is error --------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery comquery;
+    QSqlQuery comquery(db);
     QString strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity from Com_Communication_Mode \
                            where CommTypeNumber='%1'").arg(QString::fromStdString(strConTypeNumber));
             comquery.prepare(strSql);
@@ -456,14 +473,15 @@ bool DataBaseOperation::GetComProperty( string strConTypeNumber,ComCommunication
 }
 
 
-bool DataBaseOperation::GetLinkActionParam( string strParamnum,map<int,ActionParam>& map_Params )
+bool DataBaseOperation::GetLinkActionParam(QSqlDatabase &db, string strParamnum,map<int,ActionParam>& map_Params )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetLinkActionParam is error --------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery actpquery;
+    QSqlQuery actpquery(db);
     QString strSql=QString("select a.parameterindex,b.ParameterContent,b.ActionParameterType from Action_Parameter_Bind_Content a,Action_Parameter_Content b \
                            where a.ParameterNumber='%1' and b.ActionParameterContentNumber=a.ActionParameterContentNumber order by a.parameterindex"
             ).arg(QString::fromStdString(strParamnum));
@@ -482,14 +500,15 @@ bool DataBaseOperation::GetLinkActionParam( string strParamnum,map<int,ActionPar
     }
     return true;
 }
-bool DataBaseOperation::GetLinkAction( string strLinkRolenum,vector<LinkAction>& vLinkAction )
+bool DataBaseOperation::GetLinkAction(QSqlDatabase &db, string strLinkRolenum,vector<LinkAction>& vLinkAction )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetLinkAction is error ---------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery actquery;
+    QSqlQuery actquery(db);
     QString strSql=QString("select b.ActionNumber,b.ActionName,b.ActionType,b.IsParam,b.ParameterNumber from Linkage_Role_Bind_Action a,Action b \
                            where a.LinkageRoleNumber='%1' and b.ActionNumber=a.ActionNumber").arg(QString::fromStdString(strLinkRolenum));
             actquery.prepare(strSql);
@@ -500,7 +519,7 @@ bool DataBaseOperation::GetLinkAction( string strLinkRolenum,vector<LinkAction>&
                 laction.strActionNam = actquery.value(1).toString().toStdString();
                 laction.iActionType = actquery.value(2).toInt();
                 laction.iIshaveParam = actquery.value(3).toInt();
-                if(!GetLinkActionParam(actquery.value(4).toString().toStdString(),laction.map_Params))
+                if(!GetLinkActionParam(db,actquery.value(4).toString().toStdString(),laction.map_Params))
                     laction.iIshaveParam = 0;
                 vLinkAction.push_back(laction);
                 }
@@ -512,14 +531,15 @@ bool DataBaseOperation::GetLinkAction( string strLinkRolenum,vector<LinkAction>&
       return true;
 }
 
-bool DataBaseOperation::GetAssDevChan( QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev )
+bool DataBaseOperation::GetAssDevChan(QSqlDatabase &db, QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetAssDevChan is error ----------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery itemschquery;
+    QSqlQuery itemschquery(db);
     QString strSql=QString("select objectnumberb,channelnumberb,channelnumbera from associate_object  where objectnumbera='%1'").arg(strDevNum);
     itemschquery.prepare(strSql);
     if(itemschquery.exec()){
@@ -550,14 +570,15 @@ bool DataBaseOperation::GetAssDevChan( QString strDevNum,map<int,vector<AssDevCh
     }*/
     return true;
 }
-bool DataBaseOperation::GetAlarmConfig( string strDevnum,map<int,Alarm_config>& map_Alarmconfig )
+bool DataBaseOperation::GetAlarmConfig(QSqlDatabase &db, string strDevnum,map<int,Alarm_config>& map_Alarmconfig )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetAlarmConfig is error ----------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery alarmconfigquery;
+    QSqlQuery alarmconfigquery(db);
     QString strSql=QString("select a.MonitoringIndex,a.LimitValue,a.AlarmLevel,a.JumpLimitType,a.LinkageEnable,a.LinkageRoleNumber,a.delaytime,a.LinkageRoleNumber,a.alarmconfigtype \
                          ,a.resumeduration  from Alarm_Item_config a,device_alarm_switch b where a.DeviceNumber='%1' and b.alarmenable>0 and a.alarmconfigtype<>0 and b.devicenumber=a.DeviceNumber and \
             b.alarmswitchtype=a.MonitoringIndex").arg(QString::fromStdString(strDevnum));
@@ -571,7 +592,7 @@ bool DataBaseOperation::GetAlarmConfig( string strDevnum,map<int,Alarm_config>& 
             acfig.iLimittype = alarmconfigquery.value(3).toInt();
             acfig.iLinkageEnable = alarmconfigquery.value(4).toInt();
             if(acfig.iLinkageEnable>0)
-                GetLinkAction(alarmconfigquery.value(5).toString().toStdString(),acfig.vLinkAction);
+                GetLinkAction(db,alarmconfigquery.value(5).toString().toStdString(),acfig.vLinkAction);
 
             acfig.iDelaytime = alarmconfigquery.value(6).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(7).toString().toStdString();
@@ -588,14 +609,15 @@ bool DataBaseOperation::GetAlarmConfig( string strDevnum,map<int,Alarm_config>& 
 }
 
 
-bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<Alarm_config>& vAlarmconfig )
+bool DataBaseOperation::GetItemAlarmConfig(QSqlDatabase &db, string strDevnum,int iIndex,vector<Alarm_config>& vAlarmconfig )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    //QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetItemAlarmConfig is error ------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery alarmconfigquery;
+    QSqlQuery alarmconfigquery(db);
     QString strSql=QString("select a.LimitValue,a.AlarmLevel,a.JumpLimitType,a.LinkageEnable,a.LinkageRoleNumber,a.delaytime,a.LinkageRoleNumber,a.alarmconfigtype \
                          ,a.resumeduration  from Alarm_Item_config a ,device_alarm_switch b where a.DeviceNumber='%1' and monitoringindex=%2 and a.alarmconfigtype=0 and b.alarmenable>0 \
             and b.devicenumber=a.DeviceNumber and b.alarmswitchtype=a.MonitoringIndex").arg(QString::fromStdString(strDevnum)).arg(iIndex);
@@ -608,7 +630,7 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
             acfig.iLimittype = alarmconfigquery.value(2).toInt();
             acfig.iLinkageEnable = alarmconfigquery.value(3).toInt();
             if(acfig.iLinkageEnable>0)
-                GetLinkAction(alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
+                GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
             acfig.iDelaytime = alarmconfigquery.value(5).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
             acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
@@ -626,29 +648,33 @@ bool DataBaseOperation::GetItemAlarmConfig( string strDevnum,int iIndex,vector<A
 
 bool DataBaseOperation::SetEnableMonitor( string strDevnum,int iItemIndex,bool bEnabled/*=true*/ )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"SetEnableMonitor is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery qquery;
+    QSqlQuery qquery(db);
     QString strSql=QString("update alarm_item_config set alarmenable=%1 where DeviceNumber='%2' and MonitoringIndex=%3").arg(bEnabled).arg(QString::fromStdString(strDevnum)).arg(iItemIndex);
     qquery.prepare(strSql);
     if(!qquery.exec()){
          cout<<qquery.lastError().text().toStdString()<<"SetEnableMonitor---qquery---error!"<<endl;
+          ConnectionPool::closeConnection(db);
         return false;
     }
+     ConnectionPool::closeConnection(db);
     return true;
 }
 
 bool DataBaseOperation::UpdateMonitorItem( string strDevnum,DeviceMonitorItem ditem )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"UpdateMonitorItem is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery qquery;
+    QSqlQuery qquery(db);
     QString strSql=QString("update Monitoring_Device_Item set MonitoringName=:MonitoringName,Ratio=:Ratio,ItemType=:ItemType,ItemValueType=:ItemValueType,\
                            AlarmEnable=:AlarmEnable,IsUpload=:IsUpload,UnitString:UnitString where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
             qquery.prepare(strSql);
@@ -670,13 +696,14 @@ bool DataBaseOperation::UpdateMonitorItem( string strDevnum,DeviceMonitorItem di
 
 bool DataBaseOperation::UpdateMonitorItems( string strDevnum,vector<DeviceMonitorItem> v_ditem )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"UpdateMonitorItems is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
 
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery qquery;
+    QSqlQuery qquery(db);
     QString strSql=QString("update Monitoring_Device_Item set MonitoringName=:MonitoringName,Ratio=:Ratio,ItemType=:ItemType,ItemValueType=:ItemValueType,\
                            AlarmEnable=:AlarmEnable,IsUpload=:IsUpload,UnitString:UnitString where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
             qquery.prepare(strSql);
@@ -696,22 +723,25 @@ bool DataBaseOperation::UpdateMonitorItems( string strDevnum,vector<DeviceMonito
         if(!qquery.exec()) {
             cout<<qquery.lastError().text().toStdString()<<"UpdateMonitorItems---qquery---error!"<<endl;
             QSqlDatabase::database().rollback();
+             ConnectionPool::closeConnection(db);
             return false;
         }
     }
 
     QSqlDatabase::database().commit();
+     ConnectionPool::closeConnection(db);
     return true;
 }
 
 bool DataBaseOperation::UpdateItemAlarmConfig( string strDevnum,int iIndex,Alarm_config alarm_config )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"UpdateItemAlarmConfig is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery qquery;
+    QSqlQuery qquery(db);
     QString strSql=QString("update action_parameter_content set LimitValue=:LimitValue,AlarmLevel=:AlarmLevel,JumpLimitType=:JumpLimitType,LinkageEnable=:LinkageEnable,\
                            LinkageRoleNumber=:LinkageRoleNumber where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
     qquery.prepare(strSql);
@@ -724,19 +754,22 @@ bool DataBaseOperation::UpdateItemAlarmConfig( string strDevnum,int iIndex,Alarm
     qquery.bindValue(":MonitoringIndex",iIndex);
     if(!qquery.exec()){
         cout<<qquery.lastError().text().toStdString()<<"UpdateItemAlarmConfig---qquery---error!"<<endl;
+         ConnectionPool::closeConnection(db);
         return false;
     }
+     ConnectionPool::closeConnection(db);
     return true;
 }
 
 bool DataBaseOperation::UpdateItemAlarmConfigs( string strDevnum,map<int,Alarm_config> mapAlarmConfig )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"UpdateItemAlarmConfigs is error ---------------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery qquery;
+    QSqlQuery qquery(db);
     QString strSql=QString("update Monitoring_Device_Item set LimitValue=:LimitValue,AlarmLevel=:AlarmLevel,JumpLimitType=:JumpLimitType,LinkageEnable=:LinkageEnable,\
                            LinkageRoleNumber=:LinkageRoleNumber where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
             qquery.prepare(strSql);
@@ -753,22 +786,25 @@ bool DataBaseOperation::UpdateItemAlarmConfigs( string strDevnum,map<int,Alarm_c
         if(!qquery.exec()){
              cout<<qquery.lastError().text().toStdString()<<"UpdateItemAlarmConfigs---qquery---error!"<<endl;
             QSqlDatabase::database().rollback();
+             ConnectionPool::closeConnection(db);
             return false;
         }
     }
     QSqlDatabase::database().commit();
+     ConnectionPool::closeConnection(db);
     return true;
 }
 
 bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,int nMonitoringIndex,int nlimitType,int nalarmTypeId,double dValue,
                                             const string &sreason,unsigned long long& irecordid )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"AddItemAlarmRecord is error ---------------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery inquery;
+    QSqlQuery inquery(db);
     QString strSql=QString("insert into device_alarm_record(devicenumber,monitoringindex,alarmstarttime,limittype,alarmvalue,alarmtypeid,alarmreason) values(:devicenumber,:monitoringindex,\
                            :alarmstarttime,:limittype,:alarmvalue,:alarmtypeid,:alarmreason)");
             inquery.prepare(strSql);
@@ -785,6 +821,7 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
     inquery.bindValue(":alarmreason",QString::fromStdString(sreason));
     if(!inquery.exec()){
          cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
+          ConnectionPool::closeConnection(db);
         return false;
     }
     strSql=QString("select max(id) from device_alarm_record");
@@ -796,17 +833,19 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
     }else{
         cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery2---error!"<<endl;
     }
+     ConnectionPool::closeConnection(db);
     return  true;
 }
 
 bool DataBaseOperation::AddItemEndAlarmRecord( time_t endTime,unsigned long long irecordid )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"AddItemEndAlarmRecord is error ------------------the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery inquery;
+    QSqlQuery inquery(db);
     QString strSql=QString("update device_alarm_record set alarmendtime=:alarmendtime where id=:id ");//:alarmendtime,
     inquery.prepare(strSql);
     inquery.bindValue(":id",irecordid);
@@ -818,19 +857,22 @@ bool DataBaseOperation::AddItemEndAlarmRecord( time_t endTime,unsigned long long
     inquery.bindValue(":alarmendtime",qdt);
     if(!inquery.exec()){
         cout<<inquery.lastError().text().toStdString()<<"AddItemEndAlarmRecord---inquery---error!"<<endl;
+         ConnectionPool::closeConnection(db);
         return false;
     }
 
+     ConnectionPool::closeConnection(db);
     return  true;
 }
 bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,DevMonitorDataPtr pdata,const map<int,DeviceMonitorItem> &mapMonitorItem)
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"AddItemMonitorRecord is error  ------------ the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery inquery;
+    QSqlQuery inquery(db);
     QString strSql=QString("insert into device_monitoring_record(devicenumber,monitoringindex,monitoringtime,monitoringvalue) values(:devicenumber,:monitoringindex,\
                            :monitoringtime,:monitoringvalue)");
             inquery.prepare(strSql);
@@ -851,18 +893,21 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
         if(!inquery.exec()){
             cout<<inquery.lastError().text().toStdString()<<"AddItemMonitorRecord---inquery---error!"<<endl;
             QSqlDatabase::database().rollback();
+             ConnectionPool::closeConnection(db);
             return false;
         }
     }
     QSqlDatabase::database().commit();
+     ConnectionPool::closeConnection(db);
     return true;
 }
 //改完待测2016-03-30 16:53
   bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &mapAlarmSwitchSet,int& resValue)
   {
-      if(!IsOpen()) {
-          std::cout<<"the database is interrupt"<<std::endl;
+      QSqlDatabase db = ConnectionPool::openConnection();
+      if(!db.isOpen() || !db.isValid()) {//IsOpen()
           resValue = 3;
+          std::cout<<"SetEnableAlarm is error ----------------------- the database is interrupt"<<std::endl;
           return false;
       }
       boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -872,14 +917,15 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
           QString qsTransNum = QString::fromStdString(iter->first);
           QSqlDatabase::database().transaction();
           QString strDel = QString("delete from device_alarm_switch where devicenumber='%1'").arg(qsTransNum);
-          QSqlQuery qsDel;
+          QSqlQuery qsDel(db);
           if(!qsDel.exec(strDel)) {
               cout<<qsDel.lastError().text().toStdString()<<"SetEnableAlarm---qsDel---error!"<<endl;
               QSqlDatabase::database().rollback();
               resValue = 3;
+               ConnectionPool::closeConnection(db);
               return false;
           }
-          QSqlQuery qsInsert;
+          QSqlQuery qsInsert(db);
           QString strSql = QString("insert into device_alarm_switch(devicenumber,alarmswitchtype,alarmenable,description) values(:devicenumber,:alarmswitchtype,:alarmenable,:description)");
           qsInsert.prepare(strSql);
           qsInsert.bindValue(":devicenumber",qsTransNum);
@@ -892,6 +938,7 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
                   if(!qsInsert.exec()) {
                       QSqlDatabase::database().rollback();
                       resValue = 3;
+                       ConnectionPool::closeConnection(db);
                       return false;
                   }
              }
@@ -899,16 +946,17 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
           }
 
 
-
+    ConnectionPool::closeConnection(db);
     return true;
   }
 
 //改完待测2016-03-30 16:40
 bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlarmSet,int& resValue)
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
         resValue = 3;
+        std::cout<<"SetAlarmLimit is error --------------- the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -916,7 +964,7 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
     for(;iter!=mapAlarmSet.end();++iter) {
         QString qsTransNum = QString::fromStdString(iter->first);
         QSqlDatabase::database().transaction();
-        QSqlQuery qsDel;
+        QSqlQuery qsDel(db);
         QString strSql=QString("delete from alarm_item_config where devicenumber=:devicenumber");
         qsDel.prepare(strSql);
         qsDel.bindValue(":devicenumber",qsTransNum);
@@ -924,10 +972,11 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
             cout<<qsDel.lastError().text().toStdString()<<"SetEnableAlarm---qsDel2---error!"<<endl;
             QSqlDatabase::database().rollback();
             resValue = 3;
+             ConnectionPool::closeConnection(db);
             return false;
         }
 
-        QSqlQuery qsInsert;
+        QSqlQuery qsInsert(db);
         strSql=QString("insert into alarm_item_config(devicenumber,monitoringindex,limitvalue,jumplimittype,delaytime,resumeduration,alarmconfigtype,alarmenable) \
                        values(:devicenumber,:monitoringindex,:limitvalue,:jumplimittype,:delaytime,:resumeduration,:alarmconfigtype,1)");
                        qsInsert.prepare(strSql);
@@ -951,21 +1000,24 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
                 cout<<qsInsert.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
                 QSqlDatabase::database().rollback();
                 resValue = 3;
+                 ConnectionPool::closeConnection(db);
                 return false;
             }
         }
         QSqlDatabase::database().commit();
     }
     resValue = 0;
+     ConnectionPool::closeConnection(db);
     return true;
 }
 
 //设置发射机运行图
 bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > &mapSch,int& resValue)
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
         resValue = 3;
+        std::cout<<"SetAlarmTime is error ------------------the database is interrupt"<<std::endl;
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -973,7 +1025,7 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
     map<string,vector<Monitoring_Scheduler> >::iterator iter= mapSch.begin();
     for(;iter!=mapSch.end();++iter){
         QString sDevNum = QString::fromStdString(iter->first);
-        QSqlQuery qsDel;
+        QSqlQuery qsDel(db);
         QString strSql=QString("delete from monitoring_scheduler where objectnumber=:objectnumber");
         qsDel.prepare(strSql);
         qsDel.bindValue(":objectnumber",sDevNum);
@@ -981,6 +1033,7 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
             cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel---error!"<<endl;
             QSqlDatabase::database().rollback();
             resValue = 3;
+             ConnectionPool::closeConnection(db);
             return false;
         }
 
@@ -991,22 +1044,23 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
             cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel2---error!"<<endl;
             QSqlDatabase::database().rollback();
             resValue = 3;
+             ConnectionPool::closeConnection(db);
             return false;
         }
 
 
-        QSqlQuery insertQuery;//0:星期 1:月 2:天
+        QSqlQuery insertQuery(db);//0:星期 1:月 2:天
         strSql = QString("insert into monitoring_scheduler(objectnumber,weekday,enable,starttime,endtime,datetype,month,day,alarmendtime) \
                          values(:objectnumber,:weekday,:enable,:starttime,:endtime,:datetype,:month,:day,:alarmendtime)");
         insertQuery.prepare(strSql);
         insertQuery.bindValue(":objectnumber",sDevNum);
         QString strCmd = QString("insert into command_scheduler(objectnumber,paramnumber,enable,weekday,starttime,commandtype,hasparam,datetype,month,day,commandendtime) \
                                  values(:objectnumber,'',1,:weekday,:starttime,:commandtype,0,:datetype,:month,:day,:commandendtime)");
-                                 QSqlQuery insertCmdopenQuery;
+                                 QSqlQuery insertCmdopenQuery(db);
         insertCmdopenQuery.prepare(strCmd);
         insertCmdopenQuery.bindValue(":objectnumber",sDevNum);
         insertCmdopenQuery.bindValue(":commandtype",15);
-        QSqlQuery insertCmdcloseQuery;
+        QSqlQuery insertCmdcloseQuery(db);
         insertCmdcloseQuery.prepare(strCmd);
         insertCmdcloseQuery.bindValue(":objectnumber",sDevNum);
         insertCmdcloseQuery.bindValue(":commandtype",19);
@@ -1054,66 +1108,79 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
                 cout<<insertQuery.lastError().text().toStdString()<<"SetAlarmTime---insertQuery---error!"<<endl;
                 QSqlDatabase::database().rollback();
                 resValue = 3;
+                 ConnectionPool::closeConnection(db);
                 return false;
             }
             if(!insertCmdopenQuery.exec()) {
                 cout<<insertCmdopenQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdopenQuery---error!"<<endl;
                 QSqlDatabase::database().rollback();
                 resValue = 3;
+                 ConnectionPool::closeConnection(db);
                 return false;
             }
             if(!insertCmdcloseQuery.exec()) {
                 cout<<insertCmdcloseQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdcloseQuery---error!"<<endl;
                 QSqlDatabase::database().rollback();
                 resValue = 3;
+                 ConnectionPool::closeConnection(db);
                 return false;
             }
         }
 
     }
     QSqlDatabase::database().commit();
+     ConnectionPool::closeConnection(db);
     return true;
 }
 
 bool DataBaseOperation::GetUpdateDevTimeScheduleInfo( string strDevnum,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                                               vector<Command_Scheduler> &cmmdScheduler  )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetUpdateDevTimeScheduleInfo is error ------------------the database is interrupt"<<std::endl;
         return false;
     }
-    GetDevMonitorSch(strDevnum,monitorScheduler);
-    GetCmd(strDevnum,cmmdScheduler);
+    GetDevMonitorSch(db,strDevnum,monitorScheduler);
+    GetCmd(db,strDevnum,cmmdScheduler);
 
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
 bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& device )
 {
-    if(!IsOpen()) {
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetUpdateDevAlarmInfo error  ------ the database is interrupt"<<std::endl;
         return false;
     }
 
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery devquery;
+    QSqlQuery devquery(db);
     QString strSql=QString("select a.DeviceNumber,a.ProtocolNumber\
                            from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and b.ProtocolNumber=a.ProtocolNumber").arg(QString::fromStdString(strDevnum));
             devquery.prepare(strSql);
-       if(devquery.exec())   {
+            if(devquery.exec())   {
             if(devquery.next())  {
             device.sDevNum = devquery.value(0).toString().toStdString();
             QString sprotoclnum = devquery.value(1).toString();
-            if(GetDevMonItem(strDevnum,sprotoclnum,device.map_MonitorItem)==false)
-                    return false;
-            if(GetAlarmConfig(strDevnum,device.map_AlarmConfig)==false)
-                return false;
-            }
-        }else {
-            std::cout<<devquery.lastError().text().toStdString()<<"GetUpdateDevAlarmInfo---query---error!"<<std::endl;
+            if(GetDevMonItem(db,strDevnum,sprotoclnum,device.map_MonitorItem)==false){
+            ConnectionPool::closeConnection(db);
             return false;
-        }
-       return true;
+}
+            if(GetAlarmConfig(db,strDevnum,device.map_AlarmConfig)==false){
+            ConnectionPool::closeConnection(db);
+            return false;
+}
+}
+}else {
+            std::cout<<devquery.lastError().text().toStdString()<<"GetUpdateDevAlarmInfo---query---error!"<<std::endl;
+            ConnectionPool::closeConnection(db);
+            return false;
+}
+            ConnectionPool::closeConnection(db);
+            return true;
 }
 
 
@@ -1121,17 +1188,20 @@ bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& devi
 //获取用户信息
 bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetUserInfo error  ------ the database is interrupt"<<std::endl;
         return false;
     }
+
     try
     {
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery userquery;
+    QSqlQuery userquery(db);
     QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber from Users where Name='%1'").arg(QString::fromStdString(sName));
     if(!userquery.exec(strSql)){
         cout<<userquery.lastError().text().toStdString()<<"GetUserInfo---userquery---error!"<<endl;
+         ConnectionPool::closeConnection(db);
         return false;
     }
     if(userquery.next()){
@@ -1143,22 +1213,27 @@ bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
         user.sJobNumber = userquery.value(4).toString().toStdString();
     }
     }catch(...){
+         ConnectionPool::closeConnection(db);
         return false;
     }
+     ConnectionPool::closeConnection(db);
     return true;
 }
 
 bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice )
 {
-    if(!IsOpen()){
-        std::cout<<"the database is interrupt"<<std::endl;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetAllAuthorizeDevByUser error  ------ the database is interrupt"<<std::endl;
         return false;
     }
+
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery query;
+    QSqlQuery query(db);
     QString strSql=QString("select a.objectnumber from user_role_object a,users b where b.number='%1' and a.rolenumber=b.rolenumber").arg(QString::fromStdString(sUserId));
     if(!query.exec(strSql)){
          cout<<query.lastError().text().toStdString()<<"GetAllAuthorizeDevByUser---query---error!"<<endl;
+         ConnectionPool::closeConnection(db);
         return false;
     }
     while(query.next()){
@@ -1166,6 +1241,7 @@ bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<st
         sdevnum = query.value(0).toString().toStdString();
         vDevice.push_back(sdevnum);
     }
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
@@ -1174,12 +1250,13 @@ bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<st
 bool DataBaseOperation::AddProgramSignalAlarmRecord(string strDevNum, string strFrqName,time_t startTime,int nlimitType,
                                   int nalarmTypeId,unsigned long long& irecordid )
 {
-    if(!IsOpen()) {
-           std::cout<<"the database is interrupt"<<std::endl;
-           return false;
-       }
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"AddProgramSignalAlarmRecord error  ------ the database is interrupt"<<std::endl;
+        return false;
+    }
        boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-       QSqlQuery inquery;
+       QSqlQuery inquery(db);
        QString strSql;
        if(nlimitType==ALARM_SWITCH)
        {
@@ -1197,6 +1274,7 @@ bool DataBaseOperation::AddProgramSignalAlarmRecord(string strDevNum, string str
            inquery.bindValue(":alarmstarttime",qdt);
            if(!inquery.exec()){
                 cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
+                ConnectionPool::closeConnection(db);
                return false;
            }
            strSql=QString("select max(id) from dtmb_alarm_record");
@@ -1208,6 +1286,7 @@ bool DataBaseOperation::AddProgramSignalAlarmRecord(string strDevNum, string str
            }else{
                cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery2---error!"<<endl;
            }
+           ConnectionPool::closeConnection(db);
            return  true;
        }
        else if(nlimitType==ALARM_RESUME)
@@ -1222,10 +1301,12 @@ bool DataBaseOperation::AddProgramSignalAlarmRecord(string strDevNum, string str
            inquery.bindValue(":id",irecordid);
            if(!inquery.exec()){
                 cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
+                ConnectionPool::closeConnection(db);
                return false;
            }
        }
 
+       ConnectionPool::closeConnection(db);
        return true;
 
 }

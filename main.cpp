@@ -8,7 +8,8 @@
 #include <QMessageBox>
 #include "LocalConfig.h"
 #include "./net/config.h"
-
+#include "./database/ConnectionPool.h"
+#include "snmp_pp.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -52,7 +53,12 @@ int main(int argc, char *argv[])
         QMessageBox::information(NULL,QObject::tr("错误"),QObject::tr("加载本地配置文件失败！"));
         return -1;
     }
+
+    DefaultLog::log()->set_filter(DEBUG_LOG, 0);
+    DefaultLog::log()->set_filter(INFO_LOG, 0);
     MainWindow w;
     w.showMaximized();
-    return a.exec();
+    int nyet = a.exec();
+    ConnectionPool::release();
+    return nyet;
 }

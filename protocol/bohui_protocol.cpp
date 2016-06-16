@@ -28,7 +28,6 @@ bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody,string
     int nPriority=0;
     try
     {
-        cout<<strMsg<<endl;
         xml_document<>   xml_doc;
         xml_doc.parse<0>(const_cast<char*>(strMsg.c_str()));
         xml_node<> *rootNode = xml_doc.first_node("Msg");
@@ -452,7 +451,7 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
             int temType=(*iter).second.iDevType;
             if(temType>DEVICE_TRANSMITTER && temType<DEVICE_GS_RECIVE)
                 temType = BH_POTO_EnvMonDevQuery;//动环设备
-            else if(temType>=DEVICE_GS_RECIVE)
+            else if(temType>=DEVICE_GS_RECIVE && temType<DEVICE_ANTENNA )
                 temType = BH_POTO_LinkDevQuery;     //链路设备
             else if(temType==DEVICE_TRANSMITTER)
                 temType = BH_POTO_TransmitterQuery;//发射机设备

@@ -10,17 +10,14 @@
 #include "../../DataTypeDefine.h"
 #include "MsgHandleAgent.h"
 #include "http_request_session.h"
-//#include "snmp_pp.h"
-//using boost::asio::io_service;
+#include "parse_ass_device.h"
 using boost::asio::ip::tcp;
 using boost::asio::ip::udp;
 class Snmp;
 class CTarget;
+
 namespace hx_net
 {
-//class device_session;
-//typedef boost::shared_ptr<device_session> dev_session_ptr;
-//typedef boost::weak_ptr<device_session>    dev_session_weak_ptr;
     class device_session:public net_session
     {
         friend class Tsmt_message;
@@ -125,7 +122,7 @@ namespace hx_net
 
 
         //-------2016-3-30------------------------//
-        void  parse_item_alarm(string devId,float fValue,DeviceMonitorItem &ItemInfo);
+        void  parse_item_alarm(string devId,float fValue,DeviceMonitorItem &ItemInfo,bool &bAlarmNow);
         void  record_alarm_and_notify(string &devId,float fValue,const float &fLimitValue,bool bMod,
                                         DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm);
         //设备断线告警（博汇）
@@ -145,7 +142,7 @@ namespace hx_net
 		virtual void handle_write(const boost::system::error_code& error,size_t bytes_transferred);
        //开始执行任务
         bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType);
-        void notify_client(string sDevId,string devName,string user,int cmdType, tm *pCurTime,bool bNtfFlash,int eResult);
+        void notify_client_execute_result(string sDevId,string devName,string user,int cmdType, tm *pCurTime,bool bNtfFlash,int eResult);
         void set_opr_state(string sdevId,dev_opr_state curState);
         dev_opr_state get_opr_state(string sdevId);
 	private:
@@ -202,6 +199,8 @@ namespace hx_net
 
         boost::shared_ptr<boost::asio::serial_port> pSerialPort_ptr_;//串口操作
         bool all_dev_is_use_;
+
+        map<string,parse_ass_dev_ptr>   map_dev_ass_parse_ptr_;//
     };
     typedef boost::shared_ptr<hx_net::device_session> dev_session_ptr;
     typedef boost::weak_ptr<hx_net::device_session>    dev_session_weak_ptr;

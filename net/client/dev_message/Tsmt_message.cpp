@@ -274,7 +274,7 @@ namespace hx_net
 
         std::time(&d_OprStartTime);//循环执行计时开始
         tm *pCurTime = localtime(&d_OprStartTime);
-        m_pSession-> notify_client(d_devInfo.sDevNum,d_devInfo.sDevName,sUser,
+        m_pSession-> notify_client_execute_result(d_devInfo.sDevNum,d_devInfo.sDevName,sUser,
                                   d_cur_task_,pCurTime,false,eErrCode);
         //目前只有发射机的开关机进行循环发送
         if(icmdType >=MSG_TRANSMITTER_TURNON_OPR &&  icmdType < MSG_TRANSMITTER_RISE_POWER_OPR){
@@ -341,7 +341,7 @@ namespace hx_net
 
              if(cmd_excute_is_ok()){
                 //通知到客户端...
-                m_pSession->notify_client(d_devInfo.sDevNum,d_devInfo.sDevName,d_cur_user_,
+                m_pSession->notify_client_execute_result(d_devInfo.sDevNum,d_devInfo.sDevName,d_cur_user_,
                                           d_cur_task_,pCurTime,true,EC_OK);
                 m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
                 d_cur_user_.clear();
@@ -351,7 +351,7 @@ namespace hx_net
                 //超时
                 if(ninterval>=d_devProperty->cmd_excut_timeout_duration) {
                     //通知到客户端...
-                    m_pSession->notify_client(d_devInfo.sDevNum,d_devInfo.sDevName,d_cur_user_,
+                    m_pSession->notify_client_execute_result(d_devInfo.sDevNum,d_devInfo.sDevName,d_cur_user_,
                                               d_cur_task_,pCurTime,true,EC_FAILED);
                     m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
                     d_cur_user_.clear();

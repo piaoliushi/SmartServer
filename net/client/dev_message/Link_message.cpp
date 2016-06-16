@@ -41,10 +41,8 @@ namespace hx_net
              {
                  switch (d_devInfo.nSubProtocol)
                  {
-                 case LINK_STATELITE_RECEVIE:{
+                 case LINK_STATELITE_RECEVIE:
                      return parse_SatelliteReceive_data(snmp,data_ptr,target);
-                     }
-                     break;
                  default:
                      return RE_NOPROTOCOL;
                  }
@@ -72,6 +70,96 @@ namespace hx_net
 	{
     }
 
+
+    void aysnc_callback(int reason, Snmp *session,
+                Pdu &pdu, SnmpTarget &target, void *cd)
+    {
+        if (cd)
+          ((Link_message*)cd)->Link_Callback(reason, session, pdu, target);
+    }
+
+
+    void Link_message::Link_Callback(int reason, Snmp *session,Pdu &pdu, SnmpTarget &target)
+    {
+        int pdu_error = pdu.get_error_status();
+        if (pdu_error)
+            return;
+        if (pdu.get_vb_count() == 0)
+            return;
+
+        switch (d_devInfo.nSubProtocol)
+        {
+        case LINK_STATELITE_RECEVIE:
+            return parse_Satellite_data_(pdu,target);
+        }
+         cout<<"satellite_Callback  reason="<<d_devInfo.sDevNum<<endl;
+    }
+
+    void Link_message::parse_Satellite_data_(Pdu &pdu, SnmpTarget &target)
+    {
+        for (int i=0; i<pdu.get_vb_count(); i++)
+        {
+            Vb nextVb;
+            pdu.get_vb(nextVb, i);
+            DataInfo dainfo;
+            Oid cur_oid = nextVb.get_oid();
+            string cur_value =nextVb.get_printable_value();
+            if(cur_oid == rflevel){
+                dainfo.sValue = cur_value;
+                dainfo.bType=false;
+                dainfo.fValue =  atof(cur_value.c_str());
+                if(d_data_ptr!=NULL)
+                    d_data_ptr->mValues[0] = dainfo;
+            }else if(cur_oid == signalLock){
+                dainfo.bType=true;
+                int nRlt = cur_value.find("CB F8 B6 A8");
+                if(nRlt!=-1){//信号锁
+                    dainfo.sValue = "1";
+                    dainfo.fValue=1.0f;
+                }else{
+                    dainfo.sValue = "0";
+                    dainfo.fValue=0.0f;
+                }
+                if(d_data_ptr!=NULL)
+                    d_data_ptr->mValues[1] = dainfo;
+            }else if(cur_oid == singalber){
+                dainfo.bType=false;
+                dainfo.sValue = cur_value;
+                string_replace(cur_value,"dB","");
+                string_replace(cur_value," ","");
+                if(cur_value=="N/A")
+                    dainfo.fValue=0.0f;
+                else
+                    dainfo.fValue =  atof(cur_value.c_str());
+                if(d_data_ptr!=NULL)
+                    d_data_ptr->mValues[2] = dainfo;
+            }else if(cur_oid == signalcn){
+                dainfo.bType=false;
+                dainfo.sValue = cur_value;
+                string_replace(cur_value,"dB","");
+                string_replace(cur_value," ","");
+                dainfo.fValue = atof(cur_value.c_str());
+                if(d_data_ptr!=NULL)
+                    d_data_ptr->mValues[3] = dainfo;
+            }else if(cur_oid == totalrate){
+                dainfo.bType=false;
+                dainfo.sValue = cur_value;
+                dainfo.fValue = atof(cur_value.c_str());
+                if(d_data_ptr!=NULL)
+                    d_data_ptr->mValues[4] = dainfo;
+            }else if(cur_oid == frequency){
+                dainfo.bType=false;
+                dainfo.sValue = cur_value;
+                string_replace(cur_value,"MHz","");
+                string_replace(cur_value," ","");
+                dainfo.fValue = atof(cur_value.c_str());
+                if(d_data_ptr!=NULL)
+                    d_data_ptr->mValues[5] = dainfo;
+            }
+
+        }
+    }
+
     int  Link_message::parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
     {
         Pdu pdu;
@@ -84,11 +172,15 @@ namespace hx_net
         vbl[5].set_oid(frequency);
         for (int i=0; i<NUM_SYS_VBS;i++)
             pdu += vbl[i];
-        int status = snmp->get(pdu, *target);
+
+        d_data_ptr = data_ptr;
+        int status = snmp->get(pdu,*target, aysnc_callback,this);
         if (status){
             return -1;
         }else{
-            int vbcount = pdu.get_vb_count();
+
+           /*
+             int vbcount = pdu.get_vb_count();
             int index = 0; //解析位置
             DataInfo dainfo;
             if ( vbcount == NUM_SYS_VBS ) {
@@ -145,7 +237,8 @@ namespace hx_net
                 data_ptr->mValues[index++] = dainfo;
 
                 return 0;
-            }
+            }*/
+            return 0;
        }
         return -1;
 

@@ -112,7 +112,6 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
      string sReportMsg;
      Bohui_Protocol  bh_ptcl;
      bh_ptcl.createReportDataMsg(-1,sDevid,nDevType,curData,mapMonitorItem,sReportMsg);
-     //std::cout<<sReportMsg.c_str()<<endl;
      if(sReportMsg.empty()==false)
          putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
  }

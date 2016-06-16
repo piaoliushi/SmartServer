@@ -2,6 +2,8 @@
 #include "base_message.h"
 using namespace std;
 
+class Pdu;
+class SnmpTarget;
 namespace hx_net
 {
 class Link_message:public base_message
@@ -15,11 +17,15 @@ public:
     int decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
     bool IsStandardCommand();
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
-	void GetAllCmd(CommandAttribute &cmdAll);
+    void GetAllCmd(CommandAttribute &cmdAll);
+    void Link_Callback(int reason, Snmp *session,Pdu &pdu, SnmpTarget &target);
 protected:
     int  parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
+    void parse_Satellite_data_(Pdu &pdu, SnmpTarget &target);
+
 private:
     session_ptr m_pSession;//关联连接对象
     DeviceInfo           &d_devInfo;//设备信息
+    DevMonitorDataPtr d_data_ptr;
 };
 }

@@ -21,6 +21,7 @@ void request_handler::start(const hx_http_server::request &request, hx_http_serv
 {
     if (request.method == "POST")
 	{
+        //std::cout<< "post request recive: " << ec << std::endl;
 		hx_http_server::request::headers_container_type::iterator found =
 			boost::find_if(request.headers, is_content_length());
 		if (found == request.headers.end()) 
@@ -70,7 +71,7 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
         boost::asio::ip::address clientaddr = connection->socket().remote_endpoint().address();
         string sClientIp = clientaddr.to_v4().to_string();
         cout<<content_.c_str()<<endl;
-        cout<<"content_size:------"<<read_content_length_<<endl;
+        //cout<<"content_size:------"<<read_content_length_<<endl;
         if(bohui_protocol_.parseDataFromStr(content_,d_response_body,d_sUrl,sClientIp))
         {
             connection->set_status(hx_http_server::connection::ok);

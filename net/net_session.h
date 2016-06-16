@@ -21,7 +21,7 @@ namespace hx_net
         virtual void dev_base_info(DevBaseInfo& devInfo,string iId="local"){}
 		virtual bool is_contain_dev(string sDevId){return false;}
 
-        virtual int  con_mod(){}
+        virtual int  con_mod(){return -1;}
 
         tcp::socket& socket();
         udp::socket& usocket();

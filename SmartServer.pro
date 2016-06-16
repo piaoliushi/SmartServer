@@ -62,7 +62,9 @@ SOURCES += main.cpp\
     net/client/dev_message/Link_message.cpp \
     net/client/dev_message/transmmiter/ShTransmmit.cpp \
     net/client/http_work.cpp \
-    net/client/dev_message/Media_message.cpp
+    net/client/dev_message/Media_message.cpp \
+    database/ConnectionPool.cpp \
+    net/client/parse_ass_device.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -126,7 +128,9 @@ HEADERS  += \
     net/client/dev_message/transmmiter/ShTransmmit.h \
     net/client/http_work.h \
     stable.h \
-    net/client/dev_message/Media_message.h
+    net/client/dev_message/Media_message.h \
+    database/ConnectionPool.h \
+    net/client/parse_ass_device.h
 
 FORMS    += mainwindow.ui
 
