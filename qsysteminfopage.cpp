@@ -31,11 +31,11 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
 
     QVBoxLayout *pHMainLyt = new QVBoxLayout();
 
-    pHMainLyt->addLayout(createTitleLayout(tr("台站属性")));
+    pHMainLyt->addLayout(createTitleLayout(tr("Station Config")));
     //QHBoxLayout *pHlyt = new QHBoxLayout();
     QGridLayout *pGridLayout = new QGridLayout();
     pGridLayout->setContentsMargins(10,0,0,10);
-    QLabel *staticLabel = new QLabel(tr("台站编号:"),this);
+    QLabel *staticLabel = new QLabel(tr("StationId:"),this);
     staticLabel->setFixedWidth(70);
     pGridLayout->addWidget(staticLabel,0,0,1,1);
 
@@ -45,7 +45,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     //d_stationNumber->setFrameShadow(QLabel::Sunken);
 
     pGridLayout->addWidget(d_stationNumber,0,1,1,1);
-    staticLabel = new QLabel(tr("台站名称:"),this);
+    staticLabel = new QLabel(tr("StationName:"),this);
     staticLabel->setFixedWidth(70);
 
     pGridLayout->addWidget(staticLabel,0,2,1,1);
@@ -55,14 +55,14 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
 
     pGridLayout->addWidget(d_stationName,0,3,1,1);
 
-    staticLabel = new QLabel(tr("设备标识:"),this);
+    staticLabel = new QLabel(tr("DevIdentify:"),this);
     staticLabel->setFixedWidth(70);
     pGridLayout->addWidget(staticLabel,1,0,1,1);
     d_deviceId = new QLabel(this);
     d_deviceId->setStyleSheet("color:#5fff53");
     pGridLayout->addWidget(d_deviceId,1,1,1,1);
 
-    staticLabel = new QLabel(tr("平台标识:"),this);
+    staticLabel = new QLabel(tr("StationIdentify:"),this);
     staticLabel->setFixedWidth(70);
     pGridLayout->addWidget(staticLabel,1,2,1,1);
 
@@ -71,12 +71,12 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     pGridLayout->addWidget(d_platformId,1,3,1,1);
     pHMainLyt->addLayout(pGridLayout);
 
-    pHMainLyt->addLayout(createTitleLayout(tr("平台属性")));
+    pHMainLyt->addLayout(createTitleLayout(tr("Platform Attribute")));
     QVBoxLayout *pPltVlyt = new QVBoxLayout();
     pPltVlyt->setContentsMargins(10,0,0,10);
      QHBoxLayout * pRptHlyt = new QHBoxLayout();
 
-     staticLabel = new QLabel(tr("平台服务:"),this);
+     staticLabel = new QLabel(tr("Platform server:"),this);
      staticLabel->setFixedWidth(70);
      pRptHlyt->addWidget(staticLabel);
      d_RptUrl = new QLabel(this);
@@ -85,7 +85,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
      pPltVlyt->addLayout(pRptHlyt);
 
      QHBoxLayout * pNptHlyt = new QHBoxLayout();
-     staticLabel = new QLabel(tr("校时服务:"),this);
+     staticLabel = new QLabel(tr("AjustTimeServer:"),this);
      staticLabel->setFixedWidth(70);
      pNptHlyt->addWidget(staticLabel);
      d_NtpIp = new QLabel(this);
@@ -101,7 +101,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
      d_NtpEnable->setEnabled(false);
      d_NtpEnable->setCheckable(true);
      pNptHlyt->addWidget(d_NtpEnable);
-     staticLabel = new QLabel(tr("启用"),this);
+     staticLabel = new QLabel(tr("using"),this);
      staticLabel->setFixedWidth(40);
      pNptHlyt->addWidget(staticLabel);
      QSpacerItem *pNtpSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding,QSizePolicy::Maximum );
@@ -110,10 +110,10 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
 
      pHMainLyt->addLayout(pPltVlyt);
 
-     pHMainLyt->addLayout(createTitleLayout(tr("本机网络")));
+     pHMainLyt->addLayout(createTitleLayout(tr("Local network")));
     QHBoxLayout * pHlyt = new QHBoxLayout();
     pHlyt->setContentsMargins(10,0,0,10);
-    staticLabel = new QLabel(tr("网卡1:"));
+    staticLabel = new QLabel(tr("Card1:"));
     staticLabel->setFixedWidth(65);
     pHlyt->addWidget(staticLabel);
     QLabel *ethIp0 = new QLabel(this);
@@ -123,7 +123,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     QList<QNetworkAddressEntry>  netlist0 = interface0.addressEntries();
     if(!netlist0.isEmpty())
         ethIp0->setText(netlist0.at(0).ip().toString());
-    staticLabel = new QLabel(tr("网卡2:"));
+    staticLabel = new QLabel(tr("Card2:"));
     staticLabel->setFixedWidth(65);
     pHlyt->addWidget(staticLabel);
     QLabel *ethIp1 = new QLabel(this);
@@ -134,7 +134,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     if(!netlist1.isEmpty())
         ethIp1->setText(netlist1.at(0).ip().toString());
     else
-        ethIp1->setText(tr("无"));
+        ethIp1->setText(tr("without"));
 
     pHMainLyt->addLayout(pHlyt);
 
@@ -146,10 +146,10 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     pBottomSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding,QSizePolicy::Maximum );
     pAboutHlyt->addSpacerItem(pBottomSpace);
     QVBoxLayout *pAboutVlyt = new QVBoxLayout();
-    QLabel *lbAboult = new QLabel("版权所有 © 2006-2016 安徽汇鑫电子有限公司",this);
+    QLabel *lbAboult = new QLabel(tr("copyright © 2006-2016 Anhui Huixin Electronics Co. Ltd."),this);//安徽汇鑫电子有限公司版权所有
     lbAboult->setStyleSheet(tr("font: 9pt; color:#45c9d5;"));
     pAboutVlyt->addWidget(lbAboult);
-    lbAboult = new QLabel("电话:0551-65319365 , 65314565",this);
+    lbAboult = new QLabel(tr("Tel:0551-65319365 , 65314565"),this);
     lbAboult->setStyleSheet(tr("font: 10pt; color:#45c9d5;"));
      pAboutVlyt->addWidget(lbAboult);
 

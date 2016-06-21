@@ -97,6 +97,7 @@ namespace hx_net
 
     void Link_message::parse_Satellite_data_(Pdu &pdu, SnmpTarget &target)
     {
+        //boost::recursive_mutex::scoped_lock llock(data_mutex);
         for (int i=0; i<pdu.get_vb_count(); i++)
         {
             Vb nextVb;
@@ -121,7 +122,7 @@ namespace hx_net
                     dainfo.fValue=0.0f;
                 }
                 if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[1] = dainfo;
+                    d_data_ptr->mValues.insert(pair<int,DataInfo>(1,dainfo));
             }else if(cur_oid == singalber){
                 dainfo.bType=false;
                 dainfo.sValue = cur_value;
@@ -132,7 +133,7 @@ namespace hx_net
                 else
                     dainfo.fValue =  atof(cur_value.c_str());
                 if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[2] = dainfo;
+                    d_data_ptr->mValues.insert(pair<int,DataInfo>(2,dainfo));// = ;
             }else if(cur_oid == signalcn){
                 dainfo.bType=false;
                 dainfo.sValue = cur_value;
@@ -140,13 +141,13 @@ namespace hx_net
                 string_replace(cur_value," ","");
                 dainfo.fValue = atof(cur_value.c_str());
                 if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[3] = dainfo;
+                    d_data_ptr->mValues.insert(pair<int,DataInfo>(3,dainfo));
             }else if(cur_oid == totalrate){
                 dainfo.bType=false;
                 dainfo.sValue = cur_value;
                 dainfo.fValue = atof(cur_value.c_str());
                 if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[4] = dainfo;
+                    d_data_ptr->mValues.insert(pair<int,DataInfo>(4,dainfo));
             }else if(cur_oid == frequency){
                 dainfo.bType=false;
                 dainfo.sValue = cur_value;
@@ -154,7 +155,7 @@ namespace hx_net
                 string_replace(cur_value," ","");
                 dainfo.fValue = atof(cur_value.c_str());
                 if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[5] = dainfo;
+                    d_data_ptr->mValues.insert(pair<int,DataInfo>(5,dainfo));
             }
 
         }

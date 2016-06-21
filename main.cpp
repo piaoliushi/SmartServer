@@ -6,6 +6,7 @@
 #include <QWSServer>
 #include <QtPlugin>
 #include <QMessageBox>
+#include <QTranslator>
 #include "LocalConfig.h"
 #include "./net/config.h"
 #include "./database/ConnectionPool.h"
@@ -13,6 +14,16 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    QTranslator qtTranslator;
+    if(qtTranslator.load("SmartServer_CN.qm")==true)
+        a.installTranslator(&qtTranslator);
+
+    QTranslator sys_translator;
+    sys_translator.load("qt_zh_CN.qm");
+    a.installTranslator(&sys_translator);
+
+
     //QWSServer::setCursorVisible(false);
     //Q_IMPORT_PLUGIN(qsqlpsql)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));

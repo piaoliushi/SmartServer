@@ -19,7 +19,7 @@ QDevStatePage::QDevStatePage(QNotifyHandler &Notify,QWidget *parent)
 	QVBoxLayout *pHMainLyt = new QVBoxLayout(this);
 	
 	QHBoxLayout *pHlyt = new QHBoxLayout();
-      pDevSize = new QLabel(tr("设备信息："));
+      pDevSize = new QLabel(tr("DevInfo:"));
       pHlyt->addWidget(pDevSize);
 
 	 pHMainLyt->addLayout(pHlyt);
@@ -28,7 +28,7 @@ QDevStatePage::QDevStatePage(QNotifyHandler &Notify,QWidget *parent)
      pDevList->setColumnCount(3);
      pDevList->setFocusPolicy(Qt::NoFocus);
 	 QStringList header; 
-     header<<tr("设备名称")<<tr("IP地址")<<tr("当前状态");
+     header<<tr("DevName")<<tr("IPAddress")<<tr("CurState");
 	 pDevList->setHorizontalHeaderLabels(header); 
 	 pDevList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	 pDevList->setSelectionBehavior ( QAbstractItemView::SelectRows); //设置选择行为，以行为单位
@@ -80,7 +80,7 @@ void QDevStatePage::LoadDevToList()
              //   .arg((*iter).second.iAddressCode);
             //pDevList->setItem(nrow,1,new QTableWidgetItem((*iter).second.sDevNum.c_str()));:%2
             pDevList->setItem(nrow,1,new QTableWidgetItem(sEndpoint));
-            QTableWidgetItem *netItem = new QTableWidgetItem(tr("中断"));
+            QTableWidgetItem *netItem = new QTableWidgetItem(tr("disconnect"));
             netItem->setTextColor(QColor(150,150,150));
             pDevList->setItem(nrow,2,netItem);
 
@@ -104,27 +104,27 @@ void QDevStatePage::OnDevStatus(QString sDevId,int nResult)
     switch (nResult)
 	{
     case -1://连接中断
-        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("中断"));
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("Disconnect"));
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(150,150,150));
 		break;
     case 0://连接正常
-        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("连接"));
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("connect"));
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,255,0));
 		break;
     case 1://已开机
-        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("开机"));
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("trunon"));
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,255,0));
 		break;
     case 2://已关机
-        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("关机"));
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("trunoff"));
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(255,255,0));
         break;
     case 3://天线->主机
-        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("天线->主机"));
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("attenna->host"));
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,255,0));
         break;
     case 4://天线->备机
-        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("天线->备机"));
+        pDevList->item(m_mapListItems[sDevId],2)->setText(tr("attenna->backup"));
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,255,0));
         break;
 	}

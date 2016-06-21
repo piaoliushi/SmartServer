@@ -26,6 +26,7 @@ protected:
 private:
     session_ptr m_pSession;//关联连接对象
     DeviceInfo           &d_devInfo;//设备信息
+    boost::recursive_mutex          data_mutex;
     DevMonitorDataPtr d_data_ptr;
 };
 }

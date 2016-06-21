@@ -15,7 +15,16 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout">
-    <property name="margin">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
      <number>0</number>
     </property>
     <property name="spacing">
@@ -66,7 +75,7 @@ background:#181f3f;
 </string>
           </property>
           <property name="text">
-           <string>服务状态</string>
+           <string>SrvState</string>
           </property>
           <property name="icon">
            <iconset resource="image/resource.qrc">
@@ -123,7 +132,7 @@ background:#181f3f;
 } </string>
           </property>
           <property name="text">
-           <string>设备状态</string>
+           <string>DevState</string>
           </property>
           <property name="icon">
            <iconset resource="image/resource.qrc">
@@ -181,7 +190,7 @@ background:#181f3f;
 </string>
           </property>
           <property name="text">
-           <string>在线用户</string>
+           <string>OnlineUsers</string>
           </property>
           <property name="icon">
            <iconset resource="image/resource.qrc">
@@ -238,7 +247,7 @@ background:#181f3f;
 } </string>
           </property>
           <property name="text">
-           <string>系统信息</string>
+           <string>SystemInfo</string>
           </property>
           <property name="icon">
            <iconset resource="image/resource.qrc">

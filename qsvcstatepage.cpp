@@ -50,30 +50,30 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     pHLyt->addSpacerItem(pSpaceLeft);
     QGridLayout *pGridLayout = new QGridLayout();
     pGridLayout->setObjectName(QString::fromUtf8("SvcStateLayout"));
-    QLabel *pSvcStateLabel = new QLabel(QObject::tr("本地服务:"));
+    QLabel *pSvcStateLabel = new QLabel(QObject::tr("LocalServer:"));
     pSvcStateLabel->setFixedSize(80,30);
     pGridLayout->addWidget(pSvcStateLabel,0,0,1,1);
 
-    d_pSvcStateValueLabel = new QLabel(QObject::tr("已停止"));
+    d_pSvcStateValueLabel = new QLabel(QObject::tr("Stopped"));
     d_pSvcStateValueLabel->setFixedHeight(30);
     d_pSvcStateValueLabel->setStyleSheet(tr("font: 18pt; color:rgb(117,250,0);"));
     pGridLayout->addWidget(d_pSvcStateValueLabel,0,1,1,1);
 
 
-    QLabel *pHttpServerStateLabel = new QLabel(QObject::tr("上传服务:"));
+    QLabel *pHttpServerStateLabel = new QLabel(QObject::tr("UploadServer:"));
     pHttpServerStateLabel->setFixedSize(80,30);
     pGridLayout->addWidget(pHttpServerStateLabel,1,0,1,1);
 
-    d_pHttpServerStateValueLabel = new QLabel(QObject::tr("已停止"));
+    d_pHttpServerStateValueLabel = new QLabel(QObject::tr("Stopped"));
     d_pHttpServerStateValueLabel->setFixedHeight(30);
     d_pHttpServerStateValueLabel->setStyleSheet(tr("font: 18pt; color:rgb(117,250,0);"));
     pGridLayout->addWidget(d_pHttpServerStateValueLabel,1,1,1,1);
 
-    QLabel *pDatabaseStateLabel = new QLabel(QObject::tr("数 据 库:"));
+    QLabel *pDatabaseStateLabel = new QLabel(QObject::tr("Database:"));
     pDatabaseStateLabel->setFixedSize(80,30);
     pGridLayout->addWidget(pDatabaseStateLabel,2,0,1,1);
 
-    d_pDatabaseStateValueLabel = new QLabel(QObject::tr("已断开"));
+    d_pDatabaseStateValueLabel = new QLabel(QObject::tr("Disconnect"));
     d_pDatabaseStateValueLabel->setFixedHeight(30);
     d_pDatabaseStateValueLabel->setStyleSheet(tr("font: 18pt; color:red;"));
     pGridLayout->addWidget(d_pDatabaseStateValueLabel,2,1,1,1);
@@ -81,14 +81,14 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
 
     GetInst(LocalConfig).ntp_config(d_bUseNtp,d_nModNtp,d_nValueNtp,d_sTimeNtp);
 
-    QLabel *pAdjustTime = new QLabel(QObject::tr("自动校时:"));
+    QLabel *pAdjustTime = new QLabel(QObject::tr("AutoAjustTime:"));
     pAdjustTime->setFixedSize(80,30);
     pGridLayout->addWidget(pAdjustTime,3,0,1,1);
-    d_pABaseTimeLabel = new QLabel(QObject::tr("00:00:00"));
+    d_pABaseTimeLabel = new QLabel(tr("00:00:00"));
     d_pABaseTimeLabel->setStyleSheet(tr("font: 16pt; color:rgb(117,250,0);"));
     d_pABaseTimeLabel->setFixedHeight(60);
     pGridLayout->addWidget(d_pABaseTimeLabel,3,1,1,1);
-     d_pAdjustTimeModLabel = new QLabel(QObject::tr("每周"));
+     d_pAdjustTimeModLabel = new QLabel(QObject::tr("Weekly"));
      d_pAdjustTimeModLabel->setStyleSheet(tr("font: 16pt; color:rgb(117,250,0);"));
      pGridLayout->addWidget(d_pAdjustTimeModLabel,3,2,1,1);
 
@@ -99,9 +99,9 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
      }else
      {
          if(d_nModNtp==0)
-             d_pAdjustTimeModLabel->setText("每天");
+             d_pAdjustTimeModLabel->setText(QObject::tr("Daily"));
          else if(d_nModNtp==2)
-              d_pAdjustTimeModLabel->setText("每月");
+              d_pAdjustTimeModLabel->setText(QObject::tr("Monthly"));
 
      }
 
@@ -150,7 +150,7 @@ void QSvcStatePage::StartSvc()
                                              GetInst(LocalConfig).database_password()))
         {
             d_pDatabaseStateValueLabel->setStyleSheet("font: 18pt;color:rgb(117,250,0)");
-            d_pDatabaseStateValueLabel->setText(tr("连接正常"));
+            d_pDatabaseStateValueLabel->setText(tr("connect ok"));
             if(GetInst(StationConfig).load_station_config()==true){
                 emit updateDevList(true);
             }
@@ -163,8 +163,8 @@ void QSvcStatePage::StartSvc()
         GetInst(hx_net::SvcMgr).set_notify(&m_Notify);
         GetInst(hx_net::SvcMgr).Start();
         m_IsRunning=true;
-        d_pSvcStateValueLabel->setText(tr("正在运行"));
-        d_pHttpServerStateValueLabel->setText("正在运行");
+        d_pSvcStateValueLabel->setText(tr("running"));
+        d_pHttpServerStateValueLabel->setText(tr("running"));
 
     }
     else
@@ -182,11 +182,11 @@ void QSvcStatePage::OnDatabase(bool bOk)
 {
     if(bOk){
         d_pDatabaseStateValueLabel->setStyleSheet("font: 18pt;color:rgb(117,250,0)");
-        d_pDatabaseStateValueLabel->setText(tr("连接正常"));
+        d_pDatabaseStateValueLabel->setText(tr("connect ok"));
     }else
     {
         d_pDatabaseStateValueLabel->setStyleSheet("font: 18pt;color:red");
-        d_pDatabaseStateValueLabel->setText(tr("已断开"));
+        d_pDatabaseStateValueLabel->setText(tr("disconnect"));
     }
 }
 

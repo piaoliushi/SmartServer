@@ -11,7 +11,7 @@ QClientStatePage::QClientStatePage(QNotifyHandler &Notify,QWidget *parent)
 {
 	QVBoxLayout *pHMainLyt = new QVBoxLayout(this);
 	QHBoxLayout *pHlyt = new QHBoxLayout();
-    QLabel*pClientStatic = new QLabel(tr("在线用户:"));
+    QLabel*pClientStatic = new QLabel(tr("onlineusers:"));
 	pHlyt->addWidget(pClientStatic);
     QLabel*pClientSize = new QLabel(tr(""));
 	pHlyt->addWidget(pClientSize);
@@ -22,7 +22,7 @@ QClientStatePage::QClientStatePage(QNotifyHandler &Notify,QWidget *parent)
     pClientList->setColumnCount(3);
     pClientList->setFocusPolicy(Qt::NoFocus);
 	QStringList header; 
-    header<<tr("用户名")<<tr("IP地址")<<tr("登陆时间");
+    header<<tr("username")<<tr("IPaddress")<<tr("logintime");
 	pClientList->setHorizontalHeaderLabels(header); 
 	pClientList->setEditTriggers(QAbstractItemView::NoEditTriggers);
 	pClientList->setSelectionBehavior ( QAbstractItemView::SelectRows); //设置选择行为，以行为单位
