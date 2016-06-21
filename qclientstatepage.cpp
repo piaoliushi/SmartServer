@@ -1,4 +1,4 @@
-#include "qclientstatepage.h"
+﻿#include "qclientstatepage.h"
 #include <QHeaderView>
 #include <QBoxLayout>
 #include <QLabel>
@@ -11,7 +11,7 @@ QClientStatePage::QClientStatePage(QNotifyHandler &Notify,QWidget *parent)
 {
 	QVBoxLayout *pHMainLyt = new QVBoxLayout(this);
 	QHBoxLayout *pHlyt = new QHBoxLayout();
-    QLabel*pClientStatic = new QLabel(tr("在线用户："));
+    QLabel*pClientStatic = new QLabel(tr("在线用户:"));
 	pHlyt->addWidget(pClientStatic);
     QLabel*pClientSize = new QLabel(tr(""));
 	pHlyt->addWidget(pClientSize);
@@ -29,8 +29,6 @@ QClientStatePage::QClientStatePage(QNotifyHandler &Notify,QWidget *parent)
 	pClientList->setSelectionMode ( QAbstractItemView::SingleSelection); //设置选择模式，选择单行
 	pHMainLyt->addWidget(pClientList);
 
-
- 	
 	connect(&m_Notify,SIGNAL(S_OnClientOnline(QString)),this,SLOT(OnClientOnline(QString)));
 	connect(&m_Notify,SIGNAL(S_OnClientOffline(QString)),this,SLOT(OnClientOffline(QString)));
 	connect(&m_Notify,SIGNAL(S_OnClientLogin(QString,QString,QString)),this,SLOT(OnClientLogin(QString,QString,QString)));

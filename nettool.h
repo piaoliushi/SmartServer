@@ -1,6 +1,8 @@
 #ifndef NETTOOL_H
 #define NETTOOL_H
 
+
+
 class netTool
 {
 public:

@@ -1,4 +1,4 @@
-#include "qsvcstatepage.h"
+﻿#include "qsvcstatepage.h"
 #include <QGridLayout>
 #include <QProcess>
 #include <QDebug>

@@ -59,8 +59,8 @@ void MainWindow::testSetTime()
     nowtime.tm_mon=8-1;/* Month.[0-11]*/
     nowtime.tm_year=2013-1900;/* Year- 1900.*/
     nowtime.tm_isdst=-1;/*DST.[-1/0/1]*/
-    t=mktime(&nowtime);
-    int nRt = stime(&t);
+    //t=mktime(&nowtime);
+    int nRt;// = stime(&t);
     if(nRt>0)
         return;
 }

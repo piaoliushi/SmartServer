@@ -1,6 +1,6 @@
 #include "Link_message.h"
 #include"../../../utility.h"
-#include "snmp_pp.h"
+#include "./snmp_pp/snmp_pp.h"
 
 #define NUM_SYS_VBS	6
 //信号电平

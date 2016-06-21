@@ -136,7 +136,7 @@ FORMS    += mainwindow.ui
 
 DEFINES+=BOOST_NETWORK_NO_LIB
 DEFINES+=URDL_DISABLE_SSL
-DEFINES+=_NO_LOGGING
+DEFINES+=URDL_NO_LIB
 #DEFINES+=BOOST_EXCEPTION_DISABLE
 
 linux-g++ {
@@ -158,8 +158,9 @@ INCLUDEPATH += /usr/local/postgresql_ubuntu_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/ubuntu_build/include
 INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
 INCLUDEPATH += /home/piaoliu/Project/snmplib/snmp_pp
+INCLUDEPATH += /usr/local/boost_1_48_0
 }
-else: {
+else: !win32{
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_system-mt.a
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_thread-mt.a
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_date_time-mt.a
@@ -177,11 +178,34 @@ INCLUDEPATH += /usr/local/postgresql_arm_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/arm_build/include
 INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
 INCLUDEPATH += /home/piaoliu/Project/snmplib/snmp_pp
-}
 INCLUDEPATH += /usr/local/boost_1_48_0
+}
+else:{
+
+QMAKE_CXXFLAGS +=-Zm300
+win32:CONFIG(release, debug|release): {
+LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib -llibprotobuf -llibprotoc -llibprotobuf-lite
+LIBS += -LD:/ThirdSdk/snmp++/lib -lsnmplib
+LIBS += -LD:/ThirdSdk/boost_1_48_0/stage/lib -llibboost_system-vc100-mt-1_48 -llibboost_date_time-vc100-mt-1_48 -llibboost_thread-vc100-mt-1_48
+}
+else:win32:CONFIG(debug, debug|release): {
+LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib/ -llibprotobufD -llibprotocD -llibprotobuf-liteD
+LIBS += -LD:/ThirdSdk/snmp++/lib/ -lsnmplib
+LIBS += -LD:/ThirdSdk/boost_1_48_0/stage/lib -llibboost_system-vc100-mt-gd-1_48 -llibboost_date_time-vc100-mt-gd-1_48 -llibboost_thread-vc100-mt-gd-1_48
+
+}
+INCLUDEPATH += 'D:/ThirdSdk/boost_1_48_0'
+INCLUDEPATH += 'D:/ThirdSdk/protobuf-2.6.1/protobuf-2.6.1/src'
+INCLUDEPATH += 'D:/ThirdSdk/boost_1_48_0/boost/urdl-0.1/include'
+INCLUDEPATH += 'D:/ThirdSdk/snmp++/include'
+
+}
+
 
 OTHER_FILES += \
     rapidxml/manual.html
 
 RESOURCES += \
     image/resource.qrc
+
+

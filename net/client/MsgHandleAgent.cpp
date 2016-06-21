@@ -1,6 +1,6 @@
 #include "MsgHandleAgent.h"
 #include "MsgHandleAgentImpl.h"
-#include "snmp_pp.h"
+#include "./snmp_pp/snmp_pp.h"
 #ifdef SNMP_PP_NAMESPACE
 using namespace Snmp_pp;
 #endif

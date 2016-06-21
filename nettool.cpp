@@ -1,4 +1,5 @@
 #include "nettool.h"
+#ifdef Q_WS_X11
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -8,6 +9,9 @@
 #include <net/if.h>
 #include <error.h>
 #include <net/route.h>
+#elif Q_WS_WIN
+
+#endif
 #include<string.h>
 
 netTool::netTool()
@@ -17,6 +21,7 @@ netTool::netTool()
 
 int netTool::get_gw_ip(char *eth, char *ipaddr)
 {
+    #ifdef Q_WS_X11
     int sock_fd;
     struct  sockaddr_in my_addr;
     struct ifreq ifr;
@@ -33,13 +38,17 @@ int netTool::get_gw_ip(char *eth, char *ipaddr)
     memcpy(&my_addr, &ifr.ifr_addr, sizeof(my_addr));
     strcpy(ipaddr, inet_ntoa(my_addr.sin_addr));
     close(sock_fd);
+#endif
     return 0;
 }
 
 int netTool::set_If_addr(char *ifname, char *Ipaddr, char *mask,char *gateway)
 {
+
     int fd;
     int rc;
+
+#ifdef Q_WS_X11
     struct ifreq ifr;
     struct sockaddr_in *sin;
     struct rtentry  rt;
@@ -78,5 +87,6 @@ int netTool::set_If_addr(char *ifname, char *Ipaddr, char *mask,char *gateway)
         return -1;
     }
     close(fd);
+#endif
     return rc;
 }

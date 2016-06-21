@@ -7,7 +7,7 @@
 #include "../../StationConfig.h"
 #include "../../database/DataBaseOperation.h"
 #include "../../protocol/bohui_const_define.h"
-#include "snmp_pp.h"
+#include "./snmp_pp/snmp_pp.h"
 #include "../server/http/RequestHandlerFactory.h"
 #ifdef SNMP_PP_NAMESPACE
 using namespace Snmp_pp;

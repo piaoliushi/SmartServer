@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include <QApplication>
 #include <QTextCodec>
 #include <QPalette>
@@ -9,7 +9,7 @@
 #include "LocalConfig.h"
 #include "./net/config.h"
 #include "./database/ConnectionPool.h"
-#include "snmp_pp.h"
+#include "./snmp_pp/snmp_pp.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);

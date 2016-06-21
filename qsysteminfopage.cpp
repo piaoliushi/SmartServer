@@ -1,4 +1,4 @@
-#include "qsysteminfopage.h"
+﻿#include "qsysteminfopage.h"
 #include <QHeaderView>
 #include <QPushButton>
 #include <QBoxLayout>
@@ -264,4 +264,5 @@ void QSystemInfoPage::setAutoStart(bool is_auto_start)
 
 bool QSystemInfoPage::isAutoStart()
 {
+    return false;
 }

@@ -1,4 +1,4 @@
-#ifndef DATA_TYPE_DEFINE
+﻿#ifndef DATA_TYPE_DEFINE
 #define DATA_TYPE_DEFINE
 #include <string>
 #include <vector>

@@ -1,4 +1,4 @@
-#ifndef BOHUI_CONST_DEFINE_H
+﻿#ifndef BOHUI_CONST_DEFINE_H
 #define BOHUI_CONST_DEFINE_H
 
 typedef enum
