@@ -1,4 +1,4 @@
-﻿#include "qsysteminfopage.h"
+#include "qsysteminfopage.h"
 #include <QHeaderView>
 #include <QPushButton>
 #include <QBoxLayout>

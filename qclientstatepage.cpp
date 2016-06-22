@@ -1,4 +1,4 @@
-﻿#include "qclientstatepage.h"
+#include "qclientstatepage.h"
 #include <QHeaderView>
 #include <QBoxLayout>
 #include <QLabel>

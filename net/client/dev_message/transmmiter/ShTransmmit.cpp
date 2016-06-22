@@ -1,4 +1,4 @@
-﻿#include "ShTransmmit.h"
+#include "ShTransmmit.h"
 #include "../../../../utility.h"
 #include <QString>
 #include<QtCore/qmath.h>
