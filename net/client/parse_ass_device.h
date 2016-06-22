@@ -8,6 +8,8 @@ class Parse_Ass_Device
 {
 public:
     Parse_Ass_Device(DeviceInfo &devInfo);
+    bool get_parent_device_id(string &parentId);
+    bool get_parent_device_id_by_channel(const int nChannel,string &parentId);
 protected:
     void _parse_dev_associate_info();
 private:

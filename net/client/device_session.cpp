@@ -186,7 +186,7 @@ void device_session::set_con_state(con_state curState)
                 }
                 if(netAlarm.nAlarmId>0){
                     string sReason;
-                    http_ptr_->send_http_alarm_messge_to_platform((*iter).first,nMod,netAlarm,sReason);
+                    //http_ptr_->send_http_alarm_messge_to_platform((*iter).first,nMod,netAlarm,sReason);
                     if(nMod==1)
                         netAlarm.nAlarmId=-1;
                 }
@@ -570,7 +570,7 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
 
             if(modleInfos_.mapDevInfo.size()<=1){
                 close_all();
-                cout<<"query_send_time_event----close"<<endl;
+                //cout<<"query_send_time_event----close"<<endl;
                 start_connect_timer(moxa_config_ptr->connect_timer_interval);
                 return;
             }
@@ -974,12 +974,12 @@ bool device_session::is_monitor_time(string sDevId)
 //开始处理监测数据
 void device_session::start_handler_data(string sDevId,DevMonitorDataPtr curDataPtr,bool bCheckAlarm)
 {
-    /* if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
+   if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
             .schedule(boost::bind(&device_session::handler_data,this,sDevId,curDataPtr)))
     {
         task_count_increase();
-    }*/
-    handler_data(sDevId,curDataPtr);
+    }
+    //handler_data(sDevId,curDataPtr);
 }
 
 //2016-3-31------处理设备数据----完成
@@ -992,9 +992,12 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
                               ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
-    if(is_need_report_data(sDevId))
-        http_ptr_->send_http_data_messge_to_platform(sDevId,modleInfos_.mapDevInfo[sDevId].iDevType,
+    if(is_need_report_data(sDevId)){
+        string sDesDevId = sDevId;
+        map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
+        http_ptr_->send_http_data_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[sDevId].iDevType,
                                                      curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+    }
     //检测当前报警状态
     check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
     //如果在监测时间段则保存当前记录
@@ -1220,7 +1223,7 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
         time_t curTm = time(0);
         tm *local_time = localtime(&curTm);
         strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
-        cout<<"收到数据-----------"<<str_time<<endl;
+        //cout<<"收到数据-----------"<<str_time<<endl;
 
         int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,
                                                                 bytes_transferred,CMD_QUERY,cur_msg_q_id_);
@@ -1300,7 +1303,9 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
                                                                    fValue,curAlarm. sReason,curAlarm.nAlarmId);
         if(bRslt==true){
             //提交监控量告警到上级平台
-            http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos_.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
+            string sDesDevId = devId;
+            map_dev_ass_parse_ptr_[devId]->get_parent_device_id(sDesDevId);
+            http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
                                      ,modleInfos_.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
@@ -1311,7 +1316,9 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
         bool bRslt = GetInst(DataBaseOperation).AddItemEndAlarmRecord(curTime,curAlarm.nAlarmId);
         if(bRslt==true){
             //提交监控量告警到上级平台
-            http_ptr_->send_http_alarm_messge_to_platform(devId,modleInfos_.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
+            string sDesDevId = devId;
+            map_dev_ass_parse_ptr_[devId]->get_parent_device_id(sDesDevId);
+            http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
                                      ,modleInfos_.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
@@ -1447,8 +1454,7 @@ void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPt
     //如果有新告警产生,则立刻发送一次监控数据
     if(bTmpAlarmNow==true){
         string sDesDevId = sDevId;
-
-
+        map_dev_ass_parse_ptr_[sDesDevId]->get_parent_device_id(sDesDevId);
         http_ptr_->send_http_data_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[sDevId].iDevType,
                                                      curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     }

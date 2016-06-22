@@ -20,18 +20,18 @@ namespace hx_net
 {
 
     Link_message::Link_message(session_ptr pSession,DeviceInfo &devInfo)
-		:m_pSession(pSession)
+        :m_pSession(pSession)
         ,d_devInfo(devInfo)
-	{
-	}
+    {
+    }
 
     Link_message::~Link_message(void)
-	{
-	}
+    {
+    }
     int Link_message::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
-	{
+    {
         return RE_UNKNOWDEV;
-	}
+    }
 
      int Link_message::decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
      {
@@ -53,21 +53,21 @@ namespace hx_net
      }
 
     int Link_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
-	{
-		return RE_UNKNOWDEV;
-	}
+    {
+        return RE_UNKNOWDEV;
+    }
 
     bool Link_message::IsStandardCommand()
-	{
-		return false;
-	}
-	
+    {
+        return false;
+    }
+
     void Link_message::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)
-	{
-	}
+    {
+    }
 
     void Link_message::GetAllCmd( CommandAttribute &cmdAll )
-	{
+    {
     }
 
 
@@ -97,15 +97,20 @@ namespace hx_net
 
     void Link_message::parse_Satellite_data_(Pdu &pdu, SnmpTarget &target)
     {
-        //boost::recursive_mutex::scoped_lock llock(data_mutex);
         for (int i=0; i<pdu.get_vb_count(); i++)
         {
+
             Vb nextVb;
             pdu.get_vb(nextVb, i);
-            DataInfo dainfo;
-            Oid cur_oid = nextVb.get_oid();
+
+            string cur_oid = nextVb.get_printable_oid();//Oid
             string cur_value =nextVb.get_printable_value();
+            //if(cur_value.empty())
+             //   continue;
+            DataInfo dainfo;
             if(cur_oid == rflevel){
+                if(cur_value.empty())
+                    cur_value ="-94";
                 dainfo.sValue = cur_value;
                 dainfo.bType=false;
                 dainfo.fValue =  atof(cur_value.c_str());
@@ -122,8 +127,10 @@ namespace hx_net
                     dainfo.fValue=0.0f;
                 }
                 if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues.insert(pair<int,DataInfo>(1,dainfo));
+                    d_data_ptr->mValues[1] = dainfo;
             }else if(cur_oid == singalber){
+                if(cur_value.empty())
+                    cur_value ="45";
                 dainfo.bType=false;
                 dainfo.sValue = cur_value;
                 string_replace(cur_value,"dB","");
@@ -133,32 +140,42 @@ namespace hx_net
                 else
                     dainfo.fValue =  atof(cur_value.c_str());
                 if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues.insert(pair<int,DataInfo>(2,dainfo));// = ;
+                    d_data_ptr->mValues[2] = dainfo;
             }else if(cur_oid == signalcn){
+                if(cur_value.empty())
+                    cur_value ="30";
                 dainfo.bType=false;
                 dainfo.sValue = cur_value;
                 string_replace(cur_value,"dB","");
                 string_replace(cur_value," ","");
                 dainfo.fValue = atof(cur_value.c_str());
                 if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues.insert(pair<int,DataInfo>(3,dainfo));
+                    d_data_ptr->mValues[3] = dainfo;
             }else if(cur_oid == totalrate){
+                if(cur_value.empty())
+                    cur_value ="10";
                 dainfo.bType=false;
                 dainfo.sValue = cur_value;
                 dainfo.fValue = atof(cur_value.c_str());
                 if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues.insert(pair<int,DataInfo>(4,dainfo));
+                    d_data_ptr->mValues[4] = dainfo;
             }else if(cur_oid == frequency){
+                if(cur_value.empty())
+                    cur_value ="658";
                 dainfo.bType=false;
                 dainfo.sValue = cur_value;
                 string_replace(cur_value,"MHz","");
                 string_replace(cur_value," ","");
                 dainfo.fValue = atof(cur_value.c_str());
                 if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues.insert(pair<int,DataInfo>(5,dainfo));
+                    d_data_ptr->mValues[5] = dainfo;
             }
-
         }
+        if(d_data_ptr->mValues.size()>0){
+            DevMonitorDataPtr  curCloneData_ptr(new Data(*d_data_ptr.get()));
+            m_pSession->start_handler_data(d_devInfo.sDevNum,curCloneData_ptr);
+        }
+
     }
 
     int  Link_message::parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
@@ -174,7 +191,7 @@ namespace hx_net
         for (int i=0; i<NUM_SYS_VBS;i++)
             pdu += vbl[i];
 
-        d_data_ptr = data_ptr;
+        d_data_ptr = data_ptr;//保存
         int status = snmp->get(pdu,*target, aysnc_callback,this);
         if (status){
             return -1;

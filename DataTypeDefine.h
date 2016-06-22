@@ -207,6 +207,7 @@ typedef struct
 {
     string sAstNum;//关联设备编号
     int    iChannel;//关联设备通道
+    int    iAssType;//关联类型
 }AssDevChan;
 
 typedef struct
@@ -286,8 +287,11 @@ typedef struct DATA_INFO_TAG
     //bool       bUpdate;//是否已经更新（适应多指令分数据段解析）
 }DataInfo,*pDataInfo;
 
-typedef struct
+typedef struct _tagData
 {
+    //_tagData(Data &srcData){
+    //        mValues = srcData.mValues;
+    //}
      map<int,DataInfo> mValues;
 }Data,pData;
 typedef boost::shared_ptr<Data> DevMonitorDataPtr;

@@ -158,7 +158,7 @@ LIBS += /home/piaoliu/Project/build-snmplib-x86_linux-Debug/libsnmplib.a
 INCLUDEPATH += /usr/local/postgresql_ubuntu_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/ubuntu_build/include
 INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
-INCLUDEPATH += /home/piaoliu/Project/snmplib/snmp_pp
+INCLUDEPATH += /home/piaoliu/Project/snmplib
 INCLUDEPATH += /usr/local/boost_1_48_0
 }
 else: !win32{
@@ -178,7 +178,7 @@ LIBS += /home/piaoliu/Project/build-snmplib-arm_linux-Release/libsnmplib.a
 INCLUDEPATH += /usr/local/postgresql_arm_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/arm_build/include
 INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
-INCLUDEPATH += /home/piaoliu/Project/snmplib/snmp_pp
+INCLUDEPATH += /home/piaoliu/Project/snmplib
 INCLUDEPATH += /usr/local/boost_1_48_0
 }
 else:{

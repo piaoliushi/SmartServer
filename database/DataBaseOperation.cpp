@@ -122,7 +122,7 @@ bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicr
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery query(db);
-    QString strSql=QString("select code,name,remark from data_dictionary where type='IndexType' union select alarmswitch,alarmswitchname,remark from alarm_switch");
+    QString strSql=QString("select code,name,remark from data_dictionary where type='IndexType' union select alarmswitch,alarmswitchname,remark from alarm_switch where alarmswitchtype<>5");
     query.prepare(strSql);
     if(!query.exec()){
         cout<<query.lastError().text().toStdString()<<"GetDataDictionary---query---error!"<<endl;
@@ -540,14 +540,15 @@ bool DataBaseOperation::GetAssDevChan(QSqlDatabase &db, QString strDevNum,map<in
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery itemschquery(db);
-    QString strSql=QString("select objectnumberb,channelnumberb,channelnumbera from associate_object  where objectnumbera='%1'").arg(strDevNum);
+    QString strSql=QString("select objectnumberb,channelnumberb,associatetype,channelnumbera from associate_object  where objectnumbera='%1'").arg(strDevNum);
     itemschquery.prepare(strSql);
     if(itemschquery.exec()){
         while(itemschquery.next()){
             AssDevChan ac;
             ac.sAstNum = itemschquery.value(0).toString().toStdString();
             ac.iChannel = itemschquery.value(1).toInt();
-            mapAssDev[itemschquery.value(2).toInt()].push_back(ac);
+            ac.iAssType = itemschquery.value(2).toInt();
+            mapAssDev[itemschquery.value(3).toInt()].push_back(ac);
         }
     }
     else{
