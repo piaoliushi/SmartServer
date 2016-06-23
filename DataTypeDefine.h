@@ -145,10 +145,10 @@ typedef struct
 #define    ALARM_DEVICE           5
 #define    ALARM_RESUME         6
 
-const char CONST_STR_ALARM_CONTENT[][32] = {"跃上限","跃下限","跃上上限","跃下下限","报警","恢复正常"};
+//const char CONST_STR_ALARM_CONTENT[][32]={"",""};// = {"跃上限","跃下限","跃上上限","跃下下限","报警","恢复正常"};
 typedef struct
 {
-    int iAlarmid;            //告警类型id
+    int iAlarmid;         //告警类型id
     double fLimitvalue;//门限值
     int iAlarmlevel;      //告警等级
     int iLimittype;        //0:上限,1:下线,2:上上限,3:下下限,4:状态量

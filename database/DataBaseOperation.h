@@ -42,6 +42,9 @@ public:
     //获得数据字典映射表(不包含设备类型字段)
     bool GetDataDictionary(map<int,pair<string,string> >& mapDicry);
 
+    //获得数据字典服务器字符串常量
+    bool GetDeviceDataDictionary(map<string,map<int,string> >& mapDicry);
+
     //打开关闭监控量报警
     bool SetEnableMonitor(string strDevnum,int iItemIndex,bool bEnabled=true);
 

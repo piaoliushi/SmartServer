@@ -7,44 +7,44 @@ const char LDPCQAM[][16]={"0.8&4QAMNR","0.4&4QAM","0.6&4QAM",
                           "0.8&4QAM","0.4&16QAM","0.6&16QAM",
                           "0.8&16QAM","0.8&32QAM","0.4&64QAM",
                           "0.6&64QAM","0.8&64QAM"};
-const char chPN[][32]={"420固定相位","420旋转相位","595",
-                       "945固定相位","945旋转相位"};
-const char CPILOT[][32]={"单载波关导频","单载波开导频","多载波无导频"};
-const char ADPC[][32]={"关闭","开启","更新"};
+const char chPN[][32]={"",""};//{"420固定相位","420旋转相位","595",
+                       //"945固定相位","945旋转相位"};
+const char CPILOT[][32]={"",""};//{"单载波关导频","单载波开导频","多载波无导频"};
+const char ADPC[][32]={"",""};//{"关闭","开启","更新"};
 const char ADPCCheckInfo[][32]={"OK","FEEDBACK LINK TOO LARGE","FEEDBACK LINK TOO SMALL",
                                 "","POWER UNSTABLE","ADPC ERROR","IN_B TOO SMALL",
                                 "TIMEOUT(15分钟)"};
 const char AGCstate[][10]={"OFF","INT","A_IN","IN_A"};
-const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"};
+const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路","开路"};
     ShTransmmit::ShTransmmit(dev_session_ptr pSession,int subprotocol,int addresscode)
         :Transmmiter()
         ,m_subprotocol(subprotocol)
-		,m_addresscode(addresscode)
+        ,m_addresscode(addresscode)
         ,m_curMsgType(NO_CMDTYPE)
         ,m_curMsgId(0)
         ,m_pSession(pSession)
         //,m_sDevId(sDevId)
-	{
-	}
+    {
+    }
 
-	ShTransmmit::~ShTransmmit()
-	{
+    ShTransmmit::~ShTransmmit()
+    {
 
-	}
+    }
 
     int ShTransmmit::check_msg_header( unsigned char *data,int nDataLen ,CmdType cmdType,int number)
-	{
+    {
         m_curMsgType = cmdType;
         m_curMsgId = number;
-		switch(m_subprotocol)
-		{
-		case All_Band_Pa:
-			{
-				if(data[0]==0xA5 && data[1]==0x5A)
+        switch(m_subprotocol)
+        {
+        case All_Band_Pa:
+            {
+                if(data[0]==0xA5 && data[1]==0x5A)
                     return (((data[3]<<8)|data[2])-4);
-				else
-					return -1;
-			}
+                else
+                    return -1;
+            }
         case All_Band_Exc:
         {
             if(data[0]==0x00 && data[1]==0x76 && data[3]==0x80)
@@ -52,11 +52,11 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
             else
                 return -1;
         }
-		default:
-			return -1;
-		}
-		return -1;
-	}
+        default:
+            return -1;
+        }
+        return -1;
+    }
 
     bool ShTransmmit::isLastQueryCmd()
     {
@@ -65,24 +65,24 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
           return false;
     }
 
-	bool ShTransmmit::IsStandardCommand()
-	{
-		switch(m_subprotocol)
-		{
-		case All_Band_Pa:
+    bool ShTransmmit::IsStandardCommand()
+    {
+        switch(m_subprotocol)
+        {
+        case All_Band_Pa:
         case All_Band_Exc:
-			return true;
-		}
-		return false;
-	}
+            return true;
+        }
+        return false;
+    }
 
-	void ShTransmmit::GetSignalCommand( devCommdMsgPtr lpParam,CommandUnit &cmdUnit )
-	{
+    void ShTransmmit::GetSignalCommand( devCommdMsgPtr lpParam,CommandUnit &cmdUnit )
+    {
 
-	}
+    }
 
-	int ShTransmmit::decode_msg_body( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate )
-	{
+    int ShTransmmit::decode_msg_body( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate )
+    {
 
         int nResult=-1;
         switch(m_subprotocol)
@@ -98,7 +98,7 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
         }
         }
         return nResult;
-	}
+    }
 
      bool ShTransmmit::isMultiQueryCmd()
      {
@@ -110,64 +110,64 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
          return false;
      }
 
-	void ShTransmmit::GetAllCmd( CommandAttribute &cmdAll )
-	{
-		switch(m_subprotocol)
-		{
-		case All_Band_Pa:
-			{
-				CommandUnit tmUnit;
-				tmUnit.ackLen = 4;
-				tmUnit.commandLen=16;
+    void ShTransmmit::GetAllCmd( CommandAttribute &cmdAll )
+    {
+        switch(m_subprotocol)
+        {
+        case All_Band_Pa:
+            {
+                CommandUnit tmUnit;
+                tmUnit.ackLen = 4;
+                tmUnit.commandLen=16;
                 tmUnit.commandId[0] = 0xA5;
                 tmUnit.commandId[1] = 0x5A;
-				tmUnit.commandId[2] = 0x10;
-				tmUnit.commandId[3] = 0x00;
-				tmUnit.commandId[4] = 0x00;
-				tmUnit.commandId[5] = 0x00;
-				tmUnit.commandId[6] = 0x00;
-				tmUnit.commandId[7] = 0x00;
-				tmUnit.commandId[8] = 0x01;
-				tmUnit.commandId[9] = 0x00;
-				tmUnit.commandId[10] = 0x01;
-				tmUnit.commandId[11] = 0x00;
-				/*int isum=0;
-				for(int i=0;i<12;++i)
-				{
-					isum+=tmUnit.commandId[i];
-				}
-				isum = isum&0xFFFF;
-				tmUnit.commandId[12] = ((isum&0xFF00)>>8);
-				tmUnit.commandId[13] = (isum&0xFF);*/
-				tmUnit.commandId[12] = 0x11;
-				tmUnit.commandId[13] = 0x01;
-				
-				tmUnit.commandId[14] = 0xEF;
-				tmUnit.commandId[15] = 0xFE;
-				vector<CommandUnit> vtUnit;
+                tmUnit.commandId[2] = 0x10;
+                tmUnit.commandId[3] = 0x00;
+                tmUnit.commandId[4] = 0x00;
+                tmUnit.commandId[5] = 0x00;
+                tmUnit.commandId[6] = 0x00;
+                tmUnit.commandId[7] = 0x00;
+                tmUnit.commandId[8] = 0x01;
+                tmUnit.commandId[9] = 0x00;
+                tmUnit.commandId[10] = 0x01;
+                tmUnit.commandId[11] = 0x00;
+                /*int isum=0;
+                for(int i=0;i<12;++i)
+                {
+                    isum+=tmUnit.commandId[i];
+                }
+                isum = isum&0xFFFF;
+                tmUnit.commandId[12] = ((isum&0xFF00)>>8);
+                tmUnit.commandId[13] = (isum&0xFF);*/
+                tmUnit.commandId[12] = 0x11;
+                tmUnit.commandId[13] = 0x01;
+
+                tmUnit.commandId[14] = 0xEF;
+                tmUnit.commandId[15] = 0xFE;
+                vector<CommandUnit> vtUnit;
                 vtUnit.push_back(tmUnit);
                 /*tmUnit.commandId[10] = 0x02;
-				tmUnit.commandId[12] = 0x12;
+                tmUnit.commandId[12] = 0x12;
                 vtUnit.push_back(tmUnit);*/
-				tmUnit.commandId[10] = 0x20;
-				tmUnit.commandId[12] = 0x30;
-				vtUnit.push_back(tmUnit);
+                tmUnit.commandId[10] = 0x20;
+                tmUnit.commandId[12] = 0x30;
+                vtUnit.push_back(tmUnit);
                 tmUnit.commandId[10] = 0x03;
-				tmUnit.commandId[12] = 0x13;
-				vtUnit.push_back(tmUnit);
+                tmUnit.commandId[12] = 0x13;
+                vtUnit.push_back(tmUnit);
                 /*tmUnit.commandId[10] = 0x04;
-				tmUnit.commandId[12] = 0x14;
-				vtUnit.push_back(tmUnit);
-				tmUnit.commandId[10] = 0x05;
-				tmUnit.commandId[12] = 0x15;
-				vtUnit.push_back(tmUnit);
-				tmUnit.commandId[10] = 0x10;
-				tmUnit.commandId[12] = 0x20;
+                tmUnit.commandId[12] = 0x14;
+                vtUnit.push_back(tmUnit);
+                tmUnit.commandId[10] = 0x05;
+                tmUnit.commandId[12] = 0x15;
+                vtUnit.push_back(tmUnit);
+                tmUnit.commandId[10] = 0x10;
+                tmUnit.commandId[12] = 0x20;
                 vtUnit.push_back(tmUnit);*/
-				cmdAll.mapCommand[MSG_DEVICE_QUERY] = vtUnit;
+                cmdAll.mapCommand[MSG_DEVICE_QUERY] = vtUnit;
                 m_maxMsgId = 3;
-			}
-			break;
+            }
+            break;
         case All_Band_Exc:
             {
                CommandUnit tmUnit;
@@ -189,222 +189,222 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
                m_maxMsgId = 3;
             }
             break;
-		}
-	}
+        }
+    }
 
-	int ShTransmmit::OnAllBandData( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate )
-	{
-		int nDataType = data[10];
-		switch(nDataType)
-		{
-		case 0x01://功放整体运行状态
-			{
-				int index = 0;
+    int ShTransmmit::OnAllBandData( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate )
+    {
+        int nDataType = data[10];
+        switch(nDataType)
+        {
+        case 0x01://功放整体运行状态
+            {
+                int index = 0;
                 int basebit=11;
-				DataInfo dainfo;
-				dainfo.bType = false;
-				for(int i=0;i<9;++i)
-				{
-					int nValue=0;
+                DataInfo dainfo;
+                dainfo.bType = false;
+                for(int i=0;i<9;++i)
+                {
+                    int nValue=0;
 
                     for(int j=4;j>0;--j)
-					{
+                    {
                         int num = basebit+j+4*i;
                         nValue = ((nValue<<8)|data[num]);
-					}
-					dainfo.fValue = nValue*0.01;
+                    }
+                    dainfo.fValue = nValue*0.01;
                     if(i==0)
                         dainfo.fValue/=1000;
                     dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                     data_ptr->mValues[index++] = dainfo;
-				}
+                }
 
-			}
-			break;
-		case 0x02://功放整体告警状态
-			{
-				int index = 9;
-				int basebit=12;
-				DataInfo dainfo;
-				dainfo.bType = true;
-				for(int i=0;i<9;++i)
-				{
-					dainfo.fValue = data[basebit+i];
+            }
+            break;
+        case 0x02://功放整体告警状态
+            {
+                int index = 9;
+                int basebit=12;
+                DataInfo dainfo;
+                dainfo.bType = true;
+                for(int i=0;i<9;++i)
+                {
+                    dainfo.fValue = data[basebit+i];
                     dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
                     data_ptr->mValues[index++] = dainfo;
-				}
-			}
-			break;
-		case 0x03://预放运行状态
-			{
-				int index = 28;
-				int basebit=11;
-				DataInfo dainfo;
-				dainfo.bType = false;
-				for(int i=0;i<9;++i)
-				{
-					int nValue=0;
+                }
+            }
+            break;
+        case 0x03://预放运行状态
+            {
+                int index = 28;
+                int basebit=11;
+                DataInfo dainfo;
+                dainfo.bType = false;
+                for(int i=0;i<9;++i)
+                {
+                    int nValue=0;
                     for(int j=4;j>0;--j)
-					{
-						nValue = ((nValue<<8)|data[basebit+j+4*i]);
-					}
-					dainfo.fValue = nValue*0.01;
+                    {
+                        nValue = ((nValue<<8)|data[basebit+j+4*i]);
+                    }
+                    dainfo.fValue = nValue*0.01;
                     dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                     data_ptr->mValues[index++] = dainfo;
-				}
-			}
-			break;
-		case 0x04://预放告警状态
-			{
-				int index = 39;
-				int basebit=12;
-				DataInfo dainfo;
-				dainfo.bType = true;
-				for(int i=0;i<6;++i)
-				{
-					dainfo.fValue = data[basebit+i];
+                }
+            }
+            break;
+        case 0x04://预放告警状态
+            {
+                int index = 39;
+                int basebit=12;
+                DataInfo dainfo;
+                dainfo.bType = true;
+                for(int i=0;i<6;++i)
+                {
+                    dainfo.fValue = data[basebit+i];
                     dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
                     data_ptr->mValues[index++] = dainfo;
-				}
-			}
-			break;
-		case 0x20://功放整体运行参数
-			{
-				int index = 18;
-				int basebit=12;
-				DataInfo dainfo;
-				dainfo.bType = true;
-				dainfo.fValue = data[basebit];
+                }
+            }
+            break;
+        case 0x20://功放整体运行参数
+            {
+                int index = 18;
+                int basebit=12;
+                DataInfo dainfo;
+                dainfo.bType = true;
+                dainfo.fValue = data[basebit];
                 dainfo.sValue = (data[basebit]==0 ? "正常":"告警");
                 data_ptr->mValues[index++] = dainfo;
-				dainfo.bType = false;
-				dainfo.fValue = data[basebit+1];
+                dainfo.bType = false;
+                dainfo.fValue = data[basebit+1];
                 dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
-				dainfo.fValue = ((data[basebit+3]<<8)|data[basebit+2]);
+                dainfo.fValue = ((data[basebit+3]<<8)|data[basebit+2]);
                 dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
-				dainfo.fValue = data[basebit+4];
+                dainfo.fValue = data[basebit+4];
                 dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
-				dainfo.fValue = data[basebit+5];
+                dainfo.fValue = data[basebit+5];
                 dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
-				dainfo.fValue = data[basebit+6];
+                dainfo.fValue = data[basebit+6];
                 dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
-				dainfo.fValue = data[basebit+7];
+                dainfo.fValue = data[basebit+7];
                 dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
-				dainfo.fValue = ((data[basebit+9]<<8)|data[basebit+8]);
+                dainfo.fValue = ((data[basebit+9]<<8)|data[basebit+8]);
                 dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
-				dainfo.fValue = data[basebit+10];
+                dainfo.fValue = data[basebit+10];
                 dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
                 data_ptr->mValues[index++] = dainfo;
-			}
-			break;
-		case 0x05://后级功放模块1运行状态
+            }
+            break;
+        case 0x05://后级功放模块1运行状态
             LastBandRunData(data,data_ptr,nDataLen,0);
-			break;
-		case 0x06://后级功放模块2运行状态
+            break;
+        case 0x06://后级功放模块2运行状态
             LastBandRunData(data,data_ptr,nDataLen,1);
-			break;
-		case 0x07://后级功放模块3运行状态
+            break;
+        case 0x07://后级功放模块3运行状态
             LastBandRunData(data,data_ptr,nDataLen,2);
-			break;
-		case 0x08://后级功放模块4运行状态
+            break;
+        case 0x08://后级功放模块4运行状态
             LastBandRunData(data,data_ptr,nDataLen,3);
-			break;
-		case 0x09://后级功放模块5运行状态
+            break;
+        case 0x09://后级功放模块5运行状态
             LastBandRunData(data,data_ptr,nDataLen,4);
-			break;
-		case 0x0A://后级功放模块6运行状态
+            break;
+        case 0x0A://后级功放模块6运行状态
             LastBandRunData(data,data_ptr,nDataLen,5);
-			break;
-		case 0x0B://后级功放模块7运行状态
+            break;
+        case 0x0B://后级功放模块7运行状态
             LastBandRunData(data,data_ptr,nDataLen,6);
-			break;
-		case 0x0C://后级功放模块8运行状态
+            break;
+        case 0x0C://后级功放模块8运行状态
             LastBandRunData(data,data_ptr,nDataLen,7);
-			break;
-		case 0x0D://后级功放模块9运行状态
+            break;
+        case 0x0D://后级功放模块9运行状态
             LastBandRunData(data,data_ptr,nDataLen,8);
-			break;
-		case 0x0E://后级功放模块10运行状态
+            break;
+        case 0x0E://后级功放模块10运行状态
             LastBandRunData(data,data_ptr,nDataLen,9);
-			break;
-		case 0x10://后级功放模块1告警状态
+            break;
+        case 0x10://后级功放模块1告警状态
             LastBandSateData(data,data_ptr,nDataLen,0);
-			break;
-		case 0x11://后级功放模块2告警状态
+            break;
+        case 0x11://后级功放模块2告警状态
             LastBandSateData(data,data_ptr,nDataLen,1);
-			break;
-		case 0x12://后级功放模块3告警状态
+            break;
+        case 0x12://后级功放模块3告警状态
             LastBandSateData(data,data_ptr,nDataLen,2);
-			break;
-		case 0x13://后级功放模块4告警状态
+            break;
+        case 0x13://后级功放模块4告警状态
             LastBandSateData(data,data_ptr,nDataLen,3);
-			break;
-		case 0x14://后级功放模块5告警状态
+            break;
+        case 0x14://后级功放模块5告警状态
             LastBandSateData(data,data_ptr,nDataLen,4);
-			break;
-		case 0x15://后级功放模块6告警状态
+            break;
+        case 0x15://后级功放模块6告警状态
             LastBandSateData(data,data_ptr,nDataLen,5);
-			break;
-		case 0x16://后级功放模块7告警状态
+            break;
+        case 0x16://后级功放模块7告警状态
             LastBandSateData(data,data_ptr,nDataLen,6);
-			break;
-		case 0x17://后级功放模块8告警状态
+            break;
+        case 0x17://后级功放模块8告警状态
             LastBandSateData(data,data_ptr,nDataLen,7);
-			break;
-		case 0x18://后级功放模块9告警状态
+            break;
+        case 0x18://后级功放模块9告警状态
             LastBandSateData(data,data_ptr,nDataLen,8);
-			break;
-		case 0x19://后级功放模块10告警状态
+            break;
+        case 0x19://后级功放模块10告警状态
             LastBandSateData(data,data_ptr,nDataLen,9);
-			break;
-		}
-		return 0;
-	}
+            break;
+        }
+        return 0;
+    }
 
     void ShTransmmit::LastBandRunData( unsigned char *data,DevMonitorDataPtr pBandData,int nDataLen,int nmodenum )
-	{
-		int index = 45+24*nmodenum;
-		int basebit=12;
-		DataInfo dainfo;
-		dainfo.bType = false;
-		for(int i=0;i<9;++i)
-		{
-			int nValue=0;
-			for(int j=4;j>=0;--j)
-			{
-				nValue = ((nValue<<8)|data[basebit+j+4*i]);
-			}
-			dainfo.fValue = nValue*0.01;
+    {
+        int index = 45+24*nmodenum;
+        int basebit=12;
+        DataInfo dainfo;
+        dainfo.bType = false;
+        for(int i=0;i<9;++i)
+        {
+            int nValue=0;
+            for(int j=4;j>=0;--j)
+            {
+                nValue = ((nValue<<8)|data[basebit+j+4*i]);
+            }
+            dainfo.fValue = nValue*0.01;
             dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
-			pBandData->mValues[index++] = dainfo;
-		}
-		basebit = 48;
-		for(int j=0;j<3;++j)
-		{
-			dainfo.fValue = ((data[basebit+j+1]<<8)|data[basebit+j])*0.01;
+            pBandData->mValues[index++] = dainfo;
+        }
+        basebit = 48;
+        for(int j=0;j<3;++j)
+        {
+            dainfo.fValue = ((data[basebit+j+1]<<8)|data[basebit+j])*0.01;
             dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
-			pBandData->mValues[index++] = dainfo;
-		}
-	}
+            pBandData->mValues[index++] = dainfo;
+        }
+    }
 
     void ShTransmmit::LastBandSateData( unsigned char *data,DevMonitorDataPtr pBandData,int nDataLen,int nmodenum )
-	{
-		int index = 57+24*nmodenum;
-		int basebit=12;
-		DataInfo dainfo;
-		dainfo.bType = true;
-		for(int i=0;i<12;++i)
-		{
-			dainfo.fValue = data[basebit+i];
+    {
+        int index = 57+24*nmodenum;
+        int basebit=12;
+        DataInfo dainfo;
+        dainfo.bType = true;
+        for(int i=0;i<12;++i)
+        {
+            dainfo.fValue = data[basebit+i];
             dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
-			pBandData->mValues[index++] = dainfo;
+            pBandData->mValues[index++] = dainfo;
         }
     }
 
@@ -430,7 +430,8 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
             dainfo.sValue = saveStr.toStdString();
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[5];
-            dainfo.sValue = (data[5]==0 ? "SFN单频网":"MFN多频网");
+            //dainfo.sValue = (data[5]==0 ? "SFN单频网":"MFN多频网");
+            dainfo.sValue = (data[5]==0 ? "":"");
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[6];//LDPCQAM
             if(data[6]<=0x0A)
@@ -446,7 +447,8 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
                dainfo.sValue = chPN[data[8]];
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[9];
-            dainfo.sValue = (data[9]==0x00 ? "240浅交织":"720深交织");
+            //dainfo.sValue = (data[9]==0x00 ? "240浅交织":"720深交织");
+            dainfo.sValue = (data[9]==0x00 ? "":"");
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[10];
             if(data[10]<0x03)
@@ -481,7 +483,8 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
             dainfo.sValue = (data[15]==0x00 ? "LOCK":"ERROR");
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[16];
-            dainfo.sValue = (data[16]==0x00 ? "正常":"大于70度");
+            //dainfo.sValue = (data[16]==0x00 ? "正常":"大于70度");
+            dainfo.sValue = (data[16]==0x00 ? "":"");
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = false;
             int iMark = ((data[18]&0x03)>>1);
@@ -507,18 +510,19 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = true;
             dainfo.fValue =data[20];
-            dainfo.sValue = (data[20]==0x00 ? "射频关闭":"射频打开");
+            //dainfo.sValue = (data[20]==0x00 ? "射频关闭":"射频打开");
+            dainfo.sValue = (data[20]==0x00 ? "":"");
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = false;
             dainfo.fValue =data[21];
             if(data[21]==0x00)
-                dainfo.sValue = "外部GPS";
+                dainfo.sValue = "";//"外部GPS";
             else if(data[21]==0x01)
-                dainfo.sValue = "内部GPS";
+                dainfo.sValue = "";//"内部GPS";
             else if(data[21]==0x02)
-                dainfo.sValue = "自动选择";
+                dainfo.sValue = "";//"自动选择";
             else if(data[21]==0x03)
-                dainfo.sValue = "外部高级GPS";
+                dainfo.sValue = "";//"外部高级GPS";
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =((data[23]<<8)|data[22])*0.05-10.00;
             dainfo.sValue = (QString("%1dBm").arg(dainfo.fValue)).toStdString();
@@ -550,7 +554,7 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[35];
             if(data[35]==0x00)
-                dainfo.sValue = "未锁定";
+                dainfo.sValue = "未知";
             else if(data[35]==0x01)
                 dainfo.sValue = "188字节";
             else if(data[35]==0x02)
@@ -589,7 +593,7 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
             if(data[12]==0x00)
                 dainfo.sValue = "正常模式";
             else
-                dainfo.sValue = "ZP1S开启";
+                dainfo.sValue= "";//"ZP1S开启";//"ZP1S开启";
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue = data[14];
             if(data[14]>=0 && data[14]<4)
@@ -603,9 +607,9 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
             dainfo.bType = true;
             dainfo.fValue = data[17];
             if(data[17]==0x00)
-                dainfo.sValue = "CF关闭";
+                dainfo.sValue ="";// "CF关闭";
             else
-                dainfo.sValue = "CF开启";
+                dainfo.sValue ="";// "CF开启";
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = false;
             dainfo.fValue = ((((((data[18]<<8)|data[19])<<8)|data[20])<<8)|data[21]);
@@ -658,9 +662,9 @@ const char GPSState[][32]={"初始化","未知状态","正常","短路","开路"
             dainfo.bType = true;
             dainfo.fValue = (data[5]);
             if(data[5]==0x00)
-                dainfo.sValue = "关闭";
+                dainfo.sValue = "";// "关闭";
             else
-                dainfo.sValue = "开启";
+                dainfo.sValue ="";// "开启";
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = false;
             dainfo.fValue = ((((((data[8]<<8)|data[9])<<8)|data[10])<<8)|data[11]);

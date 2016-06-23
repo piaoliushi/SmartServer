@@ -2,13 +2,20 @@
 #define STATION_CONFIG
 #pragma once
 
-//#include "./database/dbmanager.h"
 #include "./database/DataBaseOperation.h"
 #include "DataType.h"
 #include "DataTypeDefine.h"
 #include <map>
 using namespace std;
-//#include "./message/protocol.pb.h"
+
+#define GET_CONST_STR(X,Y)  GetInst(StationConfig).get_dictionary_value(X,Y)
+#define CONST_STR_RESPONSE_VALUE_DESC(Y)  GetInst(StationConfig).get_dictionary_value("s_rsps_result_desc",Y)
+#define DEV_CMD_OPR_DESC(Y)    GetInst(StationConfig).get_dictionary_value("s_cmd_opr_desc",Y)
+#define DEV_CMD_RESULT_DESC(Y)      GetInst(StationConfig).get_dictionary_value("s_cmd_result_desc",Y)
+#define CONST_STR_ALARM_CONTENT(Y)  GetInst(StationConfig).get_dictionary_value("s_alarm_event",Y)
+
+
+
 
 class StationConfig
 {
@@ -61,6 +68,8 @@ public:
 	 vector<MediaDeviceParamInfo>& get_media_dev_info();
 	 //获得制定地址码的信息
 	 bool get_media_dev_info(int ndevAddr,MediaDeviceParamInfo& mediaDevInfo);
+     //获得数据字典值
+     string get_dictionary_value(string sType,int nCode);
 private:
 	vector<TransmitterInformation>mapTransmitterInfo;//台站id为索引
     vector<AntennaInformation> mapAntennaInfo;//台站id为索引
@@ -75,5 +84,7 @@ private:
 
 	string cur_station_id;//当前台站id
 	string cur_devSvc_id; //当前服务id
+
+    map<string,map<int,string> > mapDeviceDicry;
 };
 #endif

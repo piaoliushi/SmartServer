@@ -153,6 +153,8 @@ void QSvcStatePage::StartSvc()
             d_pDatabaseStateValueLabel->setText(tr("connect ok"));
             if(GetInst(StationConfig).load_station_config()==true){
                 emit updateDevList(true);
+
+                //string xx = TRANSMITTER_TARGET_DESC(5);
             }
         }
         else  {

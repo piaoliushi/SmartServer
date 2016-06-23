@@ -22,7 +22,21 @@ bool StationConfig::load_station_config()
         return false;
     if(!GetInst(DataBaseOperation).GetDataDictionary(Bohui_Protocol::mapTypeToStr))
         return false;
-	return true;
+    if(!GetInst(DataBaseOperation).GetDeviceDataDictionary(mapDeviceDicry))
+        return false;
+    return true;
+}
+
+//获得数据字典值
+string StationConfig::get_dictionary_value(string sType,int nCode)
+{
+    map<string,map<int,string> >::iterator iter = mapDeviceDicry.find(sType);
+    if(iter!= mapDeviceDicry.end()){
+        map<int,string>::iterator iter_code = iter->second.find(nCode);
+        if(iter_code!= iter->second.end())
+            return iter_code->second;
+    }
+    return "";
 }
 
 //获取某台站的发射机信息

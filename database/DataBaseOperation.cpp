@@ -112,7 +112,7 @@ bool DataBaseOperation::ReOpen()
     return true;
 }
 
-//获得数据字典映射表
+//获得数据字典映射表(告警与监控量id)
 bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicry)
 {
     QSqlDatabase db = ConnectionPool::openConnection();
@@ -132,6 +132,47 @@ bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicr
     while(query.next()) {
         mapDicry[query.value(0).toInt()] = pair<string,string>(query.value(1).toString().toStdString(),query.value(2).toString().toStdString());
     }
+     ConnectionPool::closeConnection(db);
+    return true;
+}
+
+
+//获得数据字典服务器字符串常量
+bool DataBaseOperation::GetDeviceDataDictionary(map<string,map<int,string> >& mapDicry)
+{
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"GetDataDictionary is error ------------------------------ the database is interrupt"<<std::endl;
+        return false;
+    }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    QSqlQuery query(db);
+    QString strSql=QString("select type,code,name,remark from data_dictionary where type in('s_tsmt_target_desc','s_sh_tsmt_rf_mod','s_sh_tsmt_gps_s',\
+'s_sh_tsmt_cpilot','s_sh_tsmt_chpn','s_rsps_result_desc','s_dtmb_mod','s_dtmb_base','s_cmd_result_desc','s_cmd_opr_desc','s_base','s_alarm_event') order by type,code");
+    query.prepare(strSql);
+    if(!query.exec()){
+        cout<<query.lastError().text().toStdString()<<"GetDataDictionary---query---error!"<<endl;
+         ConnectionPool::closeConnection(db);
+        return false;
+    }
+    while(query.next()) {
+            string sType = query.value(0).toString().toStdString();
+            int nCode = query.value(1).toInt();
+            QString qname = query.value(2).toString();
+
+        map<string,map<int,string> >::iterator iter = mapDicry.find(sType);
+        if(iter!=mapDicry.end()){
+            mapDicry[sType][nCode] = qname.toStdString();
+        }else {
+             map<int,string> curInfo;
+            curInfo[nCode]=qname.toStdString();
+            mapDicry[sType]=curInfo;
+        }
+    }
+    //map<string,map<int,string> >::iterator iter_size = mapDicry.begin();
+    //for(;iter_size!=mapDicry.end();++iter_size){
+    //    cout<<"type:"<<iter_size->first<<"---size:"<<iter_size->second.size()<<endl;
+    //}
      ConnectionPool::closeConnection(db);
     return true;
 }

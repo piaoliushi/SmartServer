@@ -139,7 +139,7 @@ bool Bohui_Protocol::createResponseMsg(int nReplyId,int nValue,const char* nCmdT
             xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Value",xml_responseMsg.allocate_string(boost::lexical_cast<std::string>(nValue).c_str())));
 
 
-        xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Desc",CONST_STR_RESPONSE_VALUE_DESC[nValue]));
+        xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Desc",CONST_STR_RESPONSE_VALUE_DESC(nValue).c_str()));
         xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Comment",""));
     }
 
@@ -173,10 +173,11 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
 {
     xml_document<> xml_reportMsg;
     //本地MsgId暂时固定为2
-    time_t curTime = time(0);
-    tm *local_time = localtime(&curTime);
-    static  char str_time[64];
-    strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+    //time_t curTime = time(0);
+    //tm *local_time = localtime(&curTime);
+    //static  char str_time[64];
+    //strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+    string str_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString();
     //类型分类判断
     int nCmdType = -1;
     if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE)
@@ -199,7 +200,7 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
         if(BH_POTO_QualityRealtimeReport == nCmdType){
             xml_Quality = xml_reportMsg.allocate_node(node_element,"Quality");
             xml_Quality->append_attribute(xml_reportMsg.allocate_attribute("TransmitterID",xml_reportMsg.allocate_string(sDevId.c_str())));
-            xml_Quality->append_attribute(xml_reportMsg.allocate_attribute("CheckDateTime",xml_reportMsg.allocate_string(str_time)));
+            xml_Quality->append_attribute(xml_reportMsg.allocate_attribute("CheckDateTime",xml_reportMsg.allocate_string(str_time.c_str())));
             xml_resps->append_node(xml_Quality);
 
             map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
@@ -351,13 +352,14 @@ bool Bohui_Protocol::createReportAlarmDataMsg(int nReplyId,int nCmdType,string s
            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Desc",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[alarmInfo.nType].first).c_str())));
         if(sReason.empty()==false)
             xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Reason",xml_reportMsg.allocate_string(sReason.c_str())));
-        tm * local_time = localtime(&(alarmInfo.startTime));
-        static  char str_time[64];
-        strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+        //tm * local_time = localtime(&(alarmInfo.startTime));
+        //static  char str_time[64];
+        //strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+        string str_time = QDateTime::fromTime_t(alarmInfo.startTime).toString("yyyy-MM-dd hh:mm:ss").toStdString();
          if(BH_POTO_CommunicationReport == nCmdType)
-            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Time",xml_reportMsg.allocate_string(str_time)));
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Time",xml_reportMsg.allocate_string(str_time.c_str())));
          else
-            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("CheckTime",xml_reportMsg.allocate_string(str_time)));
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("CheckTime",xml_reportMsg.allocate_string(str_time.c_str())));
 
         xml_resps->append_node(xml_Alarm);
     }
@@ -379,11 +381,13 @@ xml_node<>*  Bohui_Protocol::_createResponseXmlHeader(xml_document<>  &xmlMsg,in
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("MsgID",xmlMsg.allocate_string(boost::lexical_cast<std::string>(nReplyId).c_str())));
         //string typ=nType>0?"Down":"Up";
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("Type","Up"));//typ.c_str()
-        time_t curTime = time(0);
-        tm *ltime = localtime(&curTime);
+       // time_t curTime = time(0);
+        //tm *ltime = localtime(&curTime);
 
-        std::string createTM = str(boost::format("%1%-%2%-%3% %4%:%5%:%6%")%(ltime->tm_year+1900)%(ltime->tm_mon+1)
-                                   %ltime->tm_mday%ltime->tm_hour%ltime->tm_min%ltime->tm_sec);
+        //std::string createTM = str(boost::format("%1%-%2%-%3% %4%:%5%:%6%")%(ltime->tm_year+1900)%(ltime->tm_mon+1)
+        //                           %ltime->tm_mday%ltime->tm_hour%ltime->tm_min%ltime->tm_sec);
+        std::string createTM = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString();
+
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("DateTime",xmlMsg.allocate_string(createTM.c_str())));
 
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("SrcCode",Bohui_Protocol::SrcCode.c_str()));

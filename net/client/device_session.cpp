@@ -829,8 +829,8 @@ void device_session::notify_client_execute_result(string sDevId,string devName,s
         cmdRlt = CMD_EXC_FAILER;
 
     if(cmdRlt>-1 && cmdOpr>-1){
-        string sDesc = devName+DEV_CMD_OPR_DESC[cmdOpr];
-        sDesc+=DEV_CMD_RESULT_DESC[cmdRlt];
+        string sDesc = devName+DEV_CMD_OPR_DESC(cmdOpr);
+        sDesc+=DEV_CMD_RESULT_DESC(cmdRlt);
         http_ptr_->send_http_excute_result_messge_to_platform(sDevId,str_time,cmdOpr,sDesc);
     }
 }
@@ -1297,7 +1297,7 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
     if(!bMod){//0:告警产生
 
         curAlarm. sReason = str(boost::format("%1%%2%,当前值:%3%%4%,门限值:%5%%6%")
-                                %ItemInfo.sItemName%CONST_STR_ALARM_CONTENT[curAlarm.nLimitId]%fValue%ItemInfo.sUnit%fLimitValue%ItemInfo.sUnit);
+                                %ItemInfo.sItemName%CONST_STR_ALARM_CONTENT(curAlarm.nLimitId)%fValue%ItemInfo.sUnit%fLimitValue%ItemInfo.sUnit);
 
         bool bRslt = GetInst(DataBaseOperation).AddItemAlarmRecord(devId,curAlarm.startTime,ItemInfo.iItemIndex,curAlarm.nLimitId,curAlarm.nType,
                                                                    fValue,curAlarm. sReason,curAlarm.nAlarmId);

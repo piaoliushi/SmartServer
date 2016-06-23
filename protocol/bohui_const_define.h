@@ -42,15 +42,15 @@ const char CONST_STR_BOHUI_TYPE[][32] = { "TransmitterQuery","EnvMonDevQuery","L
                                           "CommunicationReport","EnvQualityRealtimeReport","EnvAlarmReport","LinkDevQualityReport",
                                           "LinkDevAlarmReport","XmlParseError","XmlContentError"};
 
-const char CONST_STR_RESPONSE_VALUE_DESC[][64] = { "成功","删除的任务不存在","没有权限",
-                                                                    "内部错误","省监管平台未找到","用户名密码错",
-                                          "资源不足","任务冲突"," "," ","XML解析错误","XML内容错误",
-                                          "任务执行异常","没有检索到数据"};
+//const char CONST_STR_RESPONSE_VALUE_DESC[][64] = {"",""};//{ "成功","删除的任务不存在","没有权限",
+                                                 //                   "内部错误","省监管平台未找到","用户名密码错",
+                                          //"资源不足","任务冲突"," "," ","XML解析错误","XML内容错误",
+                                          //"任务执行异常","没有检索到数据"};
 
 const char DEVICE_TYPE_XML_DESC[][32]={"Transmitter","EnvMonDev","DevList"};
 
-const char TRANSMITTER_TARGET_DESC[][32] = {"频率","入射功率","反射功率","驻波比","温度","不平衡功率","模块功率","总电压",
-                                            "总电流","模块电压","模块电流","调制度","模块温度","切换模式","激励器"};
+//const char TRANSMITTER_TARGET_DESC[][32] = {"",""};//{ "频率","入射功率","反射功率","驻波比","温度","不平衡功率","模块功率","总电压",
+//                                           // "总电流","模块电压","模块电流","调制度","模块温度","切换模式","激励器"};
 
 enum {
     CMD_EXC_M_ON=0,
@@ -67,7 +67,7 @@ enum {
     CMD_EXC_GOING=2
 };
 
-const char DEV_CMD_OPR_DESC[][64] = {"手动开机","手动关机","自动开机","自动关机","主到备切换","备到主切换"};
-const char DEV_CMD_RESULT_DESC[][64] = {"成功","失败","正在进行"};
+//const char DEV_CMD_OPR_DESC[][64] = {"",""};//{"手动开机","手动关机","自动开机","自动关机","主到备切换","备到主切换"};
+//const char DEV_CMD_RESULT_DESC[][64] = {"",""};//{"成功","失败","正在进行"};
 
 #endif // BOHUI_CONST_DEFINE_H
