@@ -1,4 +1,4 @@
-﻿#include "GmeTransmmit.h"
+#include "GmeTransmmit.h"
 
 namespace hx_net{
 
@@ -8,7 +8,7 @@ namespace hx_net{
 		,m_addresscode(addresscode)
 	{
 
-	}
+    }
 
 	GmeTransmmit::~GmeTransmmit()
 	{

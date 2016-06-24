@@ -1,4 +1,4 @@
-﻿#include "Tsmt_message.h"
+#include "Tsmt_message.h"
 #include "../../../LocalConfig.h"
 #include "../../../StationConfig.h"
 #include "./net/SvcMgr.h"

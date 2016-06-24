@@ -1,4 +1,4 @@
-﻿#include "AhhxTransmmit.h"
+#include "AhhxTransmmit.h"
 
 namespace hx_net{
 

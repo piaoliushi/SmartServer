@@ -1,8 +1,8 @@
-﻿#pragma once
+#pragma once
 #include "Transmmiter.h"
 namespace hx_net{
     class AhhxTransmmit:public Transmmiter
-	{
+    {
 	public:
         AhhxTransmmit(int subprotocol,int addresscode);
         ~AhhxTransmmit();
