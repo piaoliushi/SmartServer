@@ -13,7 +13,7 @@ using namespace std;
 #define DEV_CMD_OPR_DESC(Y)    GetInst(StationConfig).get_dictionary_value("s_cmd_opr_desc",Y)
 #define DEV_CMD_RESULT_DESC(Y)      GetInst(StationConfig).get_dictionary_value("s_cmd_result_desc",Y)
 #define CONST_STR_ALARM_CONTENT(Y)  GetInst(StationConfig).get_dictionary_value("s_alarm_event",Y)
-
+#define GLOBAL_STR(Y)  GetInst(StationConfig).get_dictionary_value("s_base",Y)
 
 
 

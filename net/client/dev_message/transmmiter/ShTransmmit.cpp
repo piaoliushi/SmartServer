@@ -1,5 +1,6 @@
 #include "ShTransmmit.h"
 #include "../../../../utility.h"
+#include "../../../../StationConfig.h"
 #include <QString>
 #include<QtCore/qmath.h>
 namespace hx_net{
@@ -7,15 +8,24 @@ const char LDPCQAM[][16]={"0.8&4QAMNR","0.4&4QAM","0.6&4QAM",
                           "0.8&4QAM","0.4&16QAM","0.6&16QAM",
                           "0.8&16QAM","0.8&32QAM","0.4&64QAM",
                           "0.6&64QAM","0.8&64QAM"};
-const char chPN[][32]={"",""};//{"420固定相位","420旋转相位","595",
-                       //"945固定相位","945旋转相位"};
-const char CPILOT[][32]={"",""};//{"单载波关导频","单载波开导频","多载波无导频"};
-const char ADPC[][32]={"",""};//{"关闭","开启","更新"};
+//const char chPN[][32]={"",""};//{"420固定相位","420旋转相位","595",
+//                       //"945固定相位","945旋转相位"};
+//const char CPILOT[][32]={"",""};//{"单载波关导频","单载波开导频","多载波无导频"};
+//const char ADPC[][32]={"",""};//{"关闭","开启","更新"};
 const char ADPCCheckInfo[][32]={"OK","FEEDBACK LINK TOO LARGE","FEEDBACK LINK TOO SMALL",
                                 "","POWER UNSTABLE","ADPC ERROR","IN_B TOO SMALL",
                                 "TIMEOUT(15分钟)"};
 const char AGCstate[][10]={"OFF","INT","A_IN","IN_A"};
-const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路","开路"};
+//const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路","开路"};
+
+#define DTMB_CHPN_STR(Y)  GetInst(StationConfig).get_dictionary_value("s_sh_tsmt_chpn",Y)
+#define DTMB_CPILOT_STR(Y)  GetInst(StationConfig).get_dictionary_value("s_sh_tsmt_cpilot",Y)
+#define DTMB_BASE_STR(Y)  GetInst(StationConfig).get_dictionary_value("s_dtmb_base",Y)
+#define DTMB_GPS_STR(Y)  GetInst(StationConfig).get_dictionary_value("s_sh_tsmt_gps_s",Y)
+#define DTMB_RF_MOD_STR(Y)  GetInst(StationConfig).get_dictionary_value("s_sh_tsmt_rf_mod",Y)
+#define DTMB_DTMB_MOD_STR(Y)  GetInst(StationConfig).get_dictionary_value("s_dtmb_mod",Y)
+
+
     ShTransmmit::ShTransmmit(dev_session_ptr pSession,int subprotocol,int addresscode)
         :Transmmiter()
         ,m_subprotocol(subprotocol)
@@ -230,7 +240,8 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
                 for(int i=0;i<9;++i)
                 {
                     dainfo.fValue = data[basebit+i];
-                    dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
+                    //dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
+                    dainfo.sValue = (data[basebit+i]==0 ? GLOBAL_STR(3):GLOBAL_STR(4));
                     data_ptr->mValues[index++] = dainfo;
                 }
             }
@@ -263,7 +274,8 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
                 for(int i=0;i<6;++i)
                 {
                     dainfo.fValue = data[basebit+i];
-                    dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
+                    //dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
+                    dainfo.sValue = (data[basebit+i]==0 ? GLOBAL_STR(3):GLOBAL_STR(4));
                     data_ptr->mValues[index++] = dainfo;
                 }
             }
@@ -275,7 +287,8 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
                 DataInfo dainfo;
                 dainfo.bType = true;
                 dainfo.fValue = data[basebit];
-                dainfo.sValue = (data[basebit]==0 ? "正常":"告警");
+                //dainfo.sValue = (data[basebit]==0 ? "正常":"告警");
+                dainfo.sValue = (data[basebit]==0 ? GLOBAL_STR(3):GLOBAL_STR(4));
                 data_ptr->mValues[index++] = dainfo;
                 dainfo.bType = false;
                 dainfo.fValue = data[basebit+1];
@@ -403,7 +416,8 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
         for(int i=0;i<12;++i)
         {
             dainfo.fValue = data[basebit+i];
-            dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
+            //dainfo.sValue = (data[basebit+i]==0 ? "正常":"告警");
+            dainfo.sValue = (data[basebit+i]==0 ? GLOBAL_STR(3):GLOBAL_STR(4));
             pBandData->mValues[index++] = dainfo;
         }
     }
@@ -431,7 +445,7 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[5];
             //dainfo.sValue = (data[5]==0 ? "SFN单频网":"MFN多频网");
-            dainfo.sValue = (data[5]==0 ? "":"");
+            dainfo.sValue = (data[5]==0 ? DTMB_DTMB_MOD_STR(0):DTMB_DTMB_MOD_STR(1));
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[6];//LDPCQAM
             if(data[6]<=0x0A)
@@ -440,19 +454,23 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             //chPN
             dainfo.fValue =data[7];
             if(data[7]<=0x04)
-               dainfo.sValue = chPN[data[7]];
+               dainfo.sValue = DTMB_CHPN_STR(data[7]);//chPN[data[7]];
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[8];
             if(data[8]<=0x02)
-               dainfo.sValue = chPN[data[8]];
+               dainfo.sValue = DTMB_CPILOT_STR(data[8]);//[data[8]];
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[9];
             //dainfo.sValue = (data[9]==0x00 ? "240浅交织":"720深交织");
-            dainfo.sValue = (data[9]==0x00 ? "":"");
+            dainfo.sValue = (data[9]==0x00 ? DTMB_BASE_STR(15):DTMB_BASE_STR(16));
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[10];
-            if(data[10]<0x03)
-                dainfo.sValue = ADPC[data[10]];
+            if(data[10]== 0x00)
+                dainfo.sValue = GLOBAL_STR(0);//ADPC[data[10]];
+            else if(data[10]== 0x01)
+                dainfo.sValue = GLOBAL_STR(1);//ADPC[data[10]];
+            else if(data[10]== 0x02)
+                dainfo.sValue = GLOBAL_STR(2);//ADPC[data[10]];
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[11];
             if(data[11]==0x00)
@@ -484,7 +502,7 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[16];
             //dainfo.sValue = (data[16]==0x00 ? "正常":"大于70度");
-            dainfo.sValue = (data[16]==0x00 ? "":"");
+            dainfo.sValue = (data[16]==0x00 ? GLOBAL_STR(3):DTMB_BASE_STR(0));
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = false;
             int iMark = ((data[18]&0x03)>>1);
@@ -511,18 +529,18 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             dainfo.bType = true;
             dainfo.fValue =data[20];
             //dainfo.sValue = (data[20]==0x00 ? "射频关闭":"射频打开");
-            dainfo.sValue = (data[20]==0x00 ? "":"");
+            dainfo.sValue = (data[20]==0x00 ? DTMB_RF_MOD_STR(1):DTMB_RF_MOD_STR(0));
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = false;
             dainfo.fValue =data[21];
             if(data[21]==0x00)
-                dainfo.sValue = "";//"外部GPS";
+                dainfo.sValue = DTMB_BASE_STR(1);//"外部GPS";
             else if(data[21]==0x01)
-                dainfo.sValue = "";//"内部GPS";
+                dainfo.sValue = DTMB_BASE_STR(2);//"内部GPS";
             else if(data[21]==0x02)
-                dainfo.sValue = "";//"自动选择";
+                dainfo.sValue = DTMB_BASE_STR(3);//"自动选择";
             else if(data[21]==0x03)
-                dainfo.sValue = "";//"外部高级GPS";
+                dainfo.sValue = DTMB_BASE_STR(4);//"外部高级GPS";
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =((data[23]<<8)|data[22])*0.05-10.00;
             dainfo.sValue = (QString("%1dBm").arg(dainfo.fValue)).toStdString();
@@ -532,7 +550,8 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = true;
             dainfo.fValue =data[28];
-            dainfo.sValue = (data[28]==0x00 ? "正常":"失锁");
+            //dainfo.sValue = (data[28]==0x00 ? "正常":"失锁");
+             dainfo.sValue = (data[28]==0x00 ? GLOBAL_STR(3):DTMB_BASE_STR(6));
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[29];
             dainfo.sValue = (data[29]==0x00 ? "DISA":"ENA");
@@ -541,7 +560,8 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             dainfo.sValue = (data[31]==0x00 ? "OVERFLOW":"OK");
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[32];
-            dainfo.sValue = (data[32]==0x00 ? "失锁":"正常");
+            //dainfo.sValue = (data[32]==0x00 ? "失锁":"正常");
+            dainfo.sValue = (data[28]==0x00 ? GLOBAL_STR(6):DTMB_BASE_STR(3));
             pBandData->mValues[index++] = dainfo;
             //ADPCCheckInfo
             dainfo.bType = false;
@@ -554,11 +574,11 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[35];
             if(data[35]==0x00)
-                dainfo.sValue = "未知";
+                dainfo.sValue = GLOBAL_STR(5);//"未知";
             else if(data[35]==0x01)
-                dainfo.sValue = "188字节";
+                dainfo.sValue = DTMB_BASE_STR(7);//"188字节";
             else if(data[35]==0x02)
-                dainfo.sValue = "204字节";
+                dainfo.sValue = DTMB_BASE_STR(8);//"204字节";
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =((data[37]<<8)|data[36]);
             dainfo.sValue = (QString("%1ms").arg(dainfo.fValue)).toStdString();
@@ -574,9 +594,9 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             dainfo.bType = true;
             dainfo.fValue = data[7];
             if(data[7]==0x00)
-                dainfo.sValue = "单音关闭";
+                dainfo.sValue = DTMB_BASE_STR(9);//"单音关闭";
             else
-                dainfo.sValue = "单音打开";
+                dainfo.sValue = DTMB_BASE_STR(10);//"单音打开";
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = false;
             int idealy = (((((data[10]<<8)|data[9])<<8)|data[8]));
@@ -591,15 +611,15 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue = data[12];
             if(data[12]==0x00)
-                dainfo.sValue = "正常模式";
+                dainfo.sValue = DTMB_BASE_STR(11);//"正常模式";
             else
-                dainfo.sValue= "";//"ZP1S开启";//"ZP1S开启";
+                dainfo.sValue= DTMB_BASE_STR(12);//"ZP1S开启";//"ZP1S开启";
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue = data[14];
             if(data[14]>=0 && data[14]<4)
                 dainfo.sValue = AGCstate[data[14]];
             else
-                dainfo.sValue = "未知";
+                dainfo.sValue = GLOBAL_STR(5);//"未知";
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue = ((data[16]<<8)|data[15]);
             dainfo.sValue = (QString("%1").arg(dainfo.fValue)).toStdString();
@@ -607,9 +627,9 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             dainfo.bType = true;
             dainfo.fValue = data[17];
             if(data[17]==0x00)
-                dainfo.sValue ="";// "CF关闭";
+                dainfo.sValue =DTMB_BASE_STR(13);// "CF关闭";
             else
-                dainfo.sValue ="";// "CF开启";
+                dainfo.sValue =DTMB_BASE_STR(14);// "CF开启";
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = false;
             dainfo.fValue = ((((((data[18]<<8)|data[19])<<8)|data[20])<<8)|data[21]);
@@ -625,7 +645,7 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             dainfo.sValue = (QString("%1").arg(data[30])).toStdString();
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue = (data[31]&0x0F);
-            dainfo.sValue = (QString("%1分钟").arg((data[31]&0x0F))).toStdString();
+            dainfo.sValue = (QString("%1Minute").arg((data[31]&0x0F))).toStdString();
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue = (data[32]);
             dainfo.sValue = (QString("%1").arg((data[32]))).toStdString();
@@ -662,9 +682,9 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             dainfo.bType = true;
             dainfo.fValue = (data[5]);
             if(data[5]==0x00)
-                dainfo.sValue = "";// "关闭";
+                dainfo.sValue = GLOBAL_STR(0);// "关闭";
             else
-                dainfo.sValue ="";// "开启";
+                dainfo.sValue =GLOBAL_STR(1);// "开启";
             pBandData->mValues[index++] = dainfo;
             dainfo.bType = false;
             dainfo.fValue = ((((((data[8]<<8)|data[9])<<8)|data[10])<<8)|data[11]);
@@ -690,15 +710,15 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[27];
             if(data[27]==0x00)
-                dainfo.sValue = "188字节";
+                dainfo.sValue = DTMB_BASE_STR(7);//"188字节";
             else
-                dainfo.sValue = "204字节";
+                dainfo.sValue = DTMB_BASE_STR(8);//"204字节";
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[28];
             if(data[28]==0x00)
-                dainfo.sValue = "组播";
+                dainfo.sValue = GLOBAL_STR(7);//"组播";
             else
-                dainfo.sValue = "单播";
+                dainfo.sValue = GLOBAL_STR(8);//"单播";
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[29];
             dainfo.sValue = (QString("%1").arg(data[29])).toStdString();
@@ -730,7 +750,7 @@ const char GPSState[][32]={"",""};//{"初始化","未知状态","正常","短路
             pBandData->mValues[index++] = dainfo;
 
             dainfo.fValue =data[38];
-            dainfo.sValue = GPSState[data[38]];
+            dainfo.sValue = DTMB_GPS_STR(data[38]);//GPSState[data[38]];
             pBandData->mValues[index++] = dainfo;
             dainfo.fValue =data[39];
             if(data[39]==0x00)
