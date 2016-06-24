@@ -128,14 +128,12 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="main.cpp" line="64"/>
         <source>??</source>
-        <translation type="unfinished">错误</translation>
+        <translation type="obsolete">错误</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="64"/>
         <source>???????????</source>
-        <translation type="unfinished">加载本地配置文件失败！</translation>
+        <translation type="obsolete">加载本地配置文件失败！</translation>
     </message>
     <message>
         <location filename="qsvcstatepage.cpp" line="53"/>
@@ -182,6 +180,20 @@
         <location filename="qsvcstatepage.cpp" line="104"/>
         <source>Monthly</source>
         <translation type="unfinished">按月</translation>
+    </message>
+    <message>
+        <location filename="main.cpp" line="64"/>
+        <source>error</source>
+        <translation type="unfinished">错误</translation>
+    </message>
+    <message>
+        <location filename="main.cpp" line="64"/>
+        <source>Load local config file error!</source>
+        <translation type="unfinished">载入本地文件错误！</translation>
+    </message>
+    <message>
+        <source>Failed to load the local configuration file !</source>
+        <translation type="obsolete">载入本地配置文件失败！</translation>
     </message>
 </context>
 <context>
@@ -257,23 +269,23 @@
     </message>
     <message>
         <location filename="qsvcstatepage.cpp" line="153"/>
-        <location filename="qsvcstatepage.cpp" line="185"/>
+        <location filename="qsvcstatepage.cpp" line="187"/>
         <source>connect ok</source>
         <translation type="unfinished">连接正常</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="166"/>
-        <location filename="qsvcstatepage.cpp" line="167"/>
+        <location filename="qsvcstatepage.cpp" line="168"/>
+        <location filename="qsvcstatepage.cpp" line="169"/>
         <source>running</source>
         <translation type="unfinished">正在运行</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="189"/>
+        <location filename="qsvcstatepage.cpp" line="191"/>
         <source>disconnect</source>
         <translation type="unfinished">已断开</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="213"/>
+        <location filename="qsvcstatepage.cpp" line="215"/>
         <source>./ntpclient -s -t -i 1 -h %1 &amp;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -281,9 +293,8 @@
 <context>
     <name>QSystemInfoPage</name>
     <message>
-        <location filename="qsysteminfopage.cpp" line="251"/>
         <source>??</source>
-        <translation type="unfinished">错误</translation>
+        <translation type="obsolete">错误</translation>
     </message>
     <message>
         <location filename="qsysteminfopage.cpp" line="34"/>
@@ -352,8 +363,9 @@
     </message>
     <message>
         <location filename="qsysteminfopage.cpp" line="149"/>
-        <source>copyright © 2006-2016 Anhui Huixin Electronics Co. Ltd.</source>
-        <translation type="unfinished">版权所有 © 2006-2016 安徽汇鑫电子有限公司</translation>
+        <source>Copyright Â© 2006-2016 Anhui Huixin Electronics Co. Ltd.</source>
+        <oldsource>CopyrightÂ©2006-2016 Anhui Huixin Electronics Co. Ltd.</oldsource>
+        <translation type="unfinished">版权所有©2006-2016 安徽汇鑫电子有限公司</translation>
     </message>
     <message>
         <location filename="qsysteminfopage.cpp" line="150"/>
@@ -372,8 +384,21 @@
     </message>
     <message>
         <location filename="qsysteminfopage.cpp" line="251"/>
-        <source>???????????????</source>
+        <source>æ³¨æ</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="qsysteminfopage.cpp" line="251"/>
+        <source>ä¿å­æ¬å°éç½®åæ°å¤±è´¥ï¼è¯·æ£æ¥ï¼</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Note</source>
+        <translation type="obsolete">注意</translation>
+    </message>
+    <message>
+        <source>Failed to save the local configuration fileï¼Please check again !</source>
+        <translation type="obsolete">保存本地配置文件失败，请重新检查！</translation>
     </message>
 </context>
 </TS>

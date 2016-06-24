@@ -146,7 +146,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     pBottomSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding,QSizePolicy::Maximum );
     pAboutHlyt->addSpacerItem(pBottomSpace);
     QVBoxLayout *pAboutVlyt = new QVBoxLayout();
-    QLabel *lbAboult = new QLabel(tr("copyright © 2006-2016 Anhui Huixin Electronics Co. Ltd."),this);//安徽汇鑫电子有限公司版权所有
+    QLabel *lbAboult = new QLabel(tr("Copyright © 2006-2016 Anhui Huixin Electronics Co. Ltd."),this);
     lbAboult->setStyleSheet(tr("font: 9pt; color:#45c9d5;"));
     pAboutVlyt->addWidget(lbAboult);
     lbAboult = new QLabel(tr("Tel:0551-65319365 , 65314565"),this);
