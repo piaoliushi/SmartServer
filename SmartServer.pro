@@ -145,17 +145,17 @@ linux-g++ {
 LIBS += /usr/local/boost_1_48_0/boost_sdk_ubuntu/lib/libboost_system-mt.a
 LIBS += /usr/local/boost_1_48_0/boost_sdk_ubuntu/lib/libboost_thread-mt.a
 LIBS += /usr/local/boost_1_48_0/boost_sdk_ubuntu/lib/libboost_date_time-mt.a
-LIBS += /usr/local/postgresql_ubuntu_build/lib/libpq.a
-LIBS += /usr/local/postgresql_ubuntu_build/lib/libpgport.a
-LIBS += /usr/local/postgresql_ubuntu_build/lib/libpgtypes.a
-LIBS += /usr/local/postgresql_ubuntu_build/lib/libecpg.a
-LIBS += /usr/local/postgresql_ubuntu_build/lib/libpgcommon.a
-LIBS += /usr/local/postgresql_ubuntu_build/lib/libecpg_compat.a
+#LIBS += /usr/local/postgresql_ubuntu_build/lib/libpq.a
+#LIBS += /usr/local/postgresql_ubuntu_build/lib/libpgport.a
+#LIBS += /usr/local/postgresql_ubuntu_build/lib/libpgtypes.a
+#LIBS += /usr/local/postgresql_ubuntu_build/lib/libecpg.a
+#LIBS += /usr/local/postgresql_ubuntu_build/lib/libpgcommon.a
+#LIBS += /usr/local/postgresql_ubuntu_build/lib/libecpg_compat.a
 LIBS += /usr/local/protobuf-2.6.1/ubuntu_build/lib/libprotobuf.a
 LIBS += /usr/local/protobuf-2.6.1/ubuntu_build/lib/libprotoc.a
 LIBS += /usr/local/protobuf-2.6.1/ubuntu_build/lib/libprotobuf-lite.a
 LIBS += /home/piaoliu/Project/build-snmplib-x86_linux-Debug/libsnmplib.a
-INCLUDEPATH += /usr/local/postgresql_ubuntu_build/include
+#INCLUDEPATH += /usr/local/postgresql_ubuntu_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/ubuntu_build/include
 INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
 INCLUDEPATH += /home/piaoliu/Project/snmplib
@@ -165,17 +165,17 @@ else: !win32{
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_system-mt.a
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_thread-mt.a
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_date_time-mt.a
-LIBS += /usr/local/postgresql_arm_build/lib/libpq.a
-LIBS += /usr/local/postgresql_arm_build/lib/libpgport.a
-LIBS += /usr/local/postgresql_arm_build/lib/libpgtypes.a
-LIBS += /usr/local/postgresql_arm_build/lib/libecpg.a
-LIBS += /usr/local/postgresql_arm_build/lib/libpgcommon.a
-LIBS += /usr/local/postgresql_arm_build/lib/libecpg_compat.a
+#LIBS += /usr/local/postgresql_arm_build/lib/libpq.a
+#LIBS += /usr/local/postgresql_arm_build/lib/libpgport.a
+#LIBS += /usr/local/postgresql_arm_build/lib/libpgtypes.a
+#LIBS += /usr/local/postgresql_arm_build/lib/libecpg.a
+#LIBS += /usr/local/postgresql_arm_build/lib/libpgcommon.a
+#LIBS += /usr/local/postgresql_arm_build/lib/libecpg_compat.a
 LIBS += /usr/local/protobuf-2.6.1/arm_build/lib/libprotobuf.a
 LIBS += /usr/local/protobuf-2.6.1/arm_build/lib/libprotoc.a
 LIBS += /usr/local/protobuf-2.6.1/arm_build/lib/libprotobuf-lite.a
 LIBS += /home/piaoliu/Project/build-snmplib-arm_linux-Release/libsnmplib.a
-INCLUDEPATH += /usr/local/postgresql_arm_build/include
+#INCLUDEPATH += /usr/local/postgresql_arm_build/include
 INCLUDEPATH += /usr/local/protobuf-2.6.1/arm_build/include
 INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
 INCLUDEPATH += /home/piaoliu/Project/snmplib
@@ -213,26 +213,22 @@ DISTFILES += \
     SmartServer_CN.ts
 
 CONFIG(debug, debug|release) {
-  #设置debug配置下编译生成文件的路径
-  TARGET = $$join(TARGET,,,d)   #为debug版本生成的文件增加d的后缀
-
+  #TARGET = $$join(TARGET,,,d)
   contains(TEMPLATE, "lib") {
-    DESTDIR = ../output/debug/lib        #将库放在lib文件夹下
-    DLLDESTDIR = ../output/debug/bin     #将动态库自动拷贝至bin目录下
+    DESTDIR = ../output/debug/lib
+    DLLDESTDIR = ../output/debug/bin
   } else {
-    DESTDIR = ../output/debug/bin        #将应用程序放在bin目录下
+    DESTDIR = ../output/debug/bin
   }
-  OBJECTS_DIR = ./debug/obj     #将生成的对象文件放在专门的obj文件夹下
-  MOC_DIR = ./debug/moc         #将QT自动生成的对象放在moc文件夹下
+  OBJECTS_DIR = ./debug/obj
+  MOC_DIR = ./debug/moc
 } else {
-  #设置release配置下编译生成文件的路径
-
   contains(TEMPLATE, "lib") {
-    DESTDIR = ../output/release/lib        #将库放在lib文件夹下
-    DLLDESTDIR = ../output/release/bin     #将动态库自动拷贝至bin目录下
+    DESTDIR = ../output/release/lib
+    DLLDESTDIR = ../output/release/bin
   } else {
-    DESTDIR = ../output/release/bin        #将应用程序放在bin目录下
+    DESTDIR = ../output/release/bin
   }
-  OBJECTS_DIR = ./release/obj   #将生成的对象文件放在专门的obj文件夹下
-  MOC_DIR = ./release/moc       #将QT自动生成的对象放在moc文件夹下
+  OBJECTS_DIR = ./release/obj
+  MOC_DIR = ./release/moc
 }
