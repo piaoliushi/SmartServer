@@ -65,7 +65,8 @@ SOURCES += main.cpp\
     net/client/http_work.cpp \
     net/client/dev_message/Media_message.cpp \
     database/ConnectionPool.cpp \
-    net/client/parse_ass_device.cpp
+    net/client/parse_ass_device.cpp \
+    net/client/dev_message/transmmiter/AhhxTransmmit.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -131,7 +132,8 @@ HEADERS  += \
     stable.h \
     net/client/dev_message/Media_message.h \
     database/ConnectionPool.h \
-    net/client/parse_ass_device.h
+    net/client/parse_ass_device.h \
+    net/client/dev_message/transmmiter/AhhxTransmmit.h
 
 FORMS    += mainwindow.ui
 

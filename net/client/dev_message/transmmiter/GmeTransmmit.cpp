@@ -1,4 +1,4 @@
-#include "GmeTransmmit.h"
+﻿#include "GmeTransmmit.h"
 
 namespace hx_net{
 
@@ -96,14 +96,14 @@ namespace hx_net{
 
 	int GmeTransmmit::decode_msg_body( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate )
 	{
-		switch(m_subprotocol)
-		{
-		case BEIJING_JIZHAO_FM:
-			return GmeFMData(data,data_ptr,nDataLen,runstate);
-		case BEIJING_JIZHAO_SIMTV:
-			return GmeSIMData(data,data_ptr,nDataLen,runstate);
-		}
-		return -1;
+        switch(m_subprotocol)
+        {
+        case BEIJING_JIZHAO_FM:
+            return GmeFMData(data,data_ptr,nDataLen,runstate);
+        case BEIJING_JIZHAO_SIMTV:
+            return GmeSIMData(data,data_ptr,nDataLen,runstate);
+        }
+        return -1;
 	}
 
 	bool GmeTransmmit::IsStandardCommand()

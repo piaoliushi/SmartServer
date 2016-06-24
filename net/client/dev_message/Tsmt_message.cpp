@@ -1,4 +1,4 @@
-#include "Tsmt_message.h"
+﻿#include "Tsmt_message.h"
 #include "../../../LocalConfig.h"
 #include "../../../StationConfig.h"
 #include "./net/SvcMgr.h"
@@ -6,6 +6,7 @@
 #include "./transmmiter/CDtransmmiter.h"
 #include "./transmmiter/GmeTransmmit.h"
 #include "./transmmiter/ShTransmmit.h"
+#include "./transmmiter/AhhxTransmmit.h"
 namespace hx_net
 {
 
@@ -209,6 +210,21 @@ namespace hx_net
                 }
             }
         }
+        if(d_devInfo.nDevProtocol==HUIXIN)
+        {
+            if(d_devInfo.iDevType==0)
+            {
+                float fdata1 = sqrt(data_ptr->mValues[0].fValue*1000)+sqrt(data_ptr->mValues[1].fValue);
+                float fdata2 = sqrt(data_ptr->mValues[0].fValue*1000)-sqrt(data_ptr->mValues[1].fValue);
+                DataInfo dtinfo;
+                dtinfo.bType = false;
+                if(fdata2>0.0001)
+                    dtinfo.fValue = fdata1/fdata2;
+                else
+                    dtinfo.fValue = 0;
+                data_ptr->mValues[2] = dtinfo;
+            }
+        }
     }
 
     void Tsmt_message::CreateObject()
@@ -229,6 +245,10 @@ namespace hx_net
             d_curData_ptr.reset(new Data);
             m_ptransmmit = new ShTransmmit(m_pSession,d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
 
+        }
+            break;
+        case HUIXIN:{
+             m_ptransmmit = new AhhxTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
         }
             break;
         case HAGUANG:
