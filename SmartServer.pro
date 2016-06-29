@@ -164,6 +164,8 @@ INCLUDEPATH += /home/piaoliu/Project/snmplib
 INCLUDEPATH += /usr/local/boost_1_48_0
 }
 else: !win32{
+DEFINES+=ARM_LINUX_DEF
+
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_system-mt.a
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_thread-mt.a
 LIBS += /usr/local/boost_1_48_0/boost_sdk_arm/lib/libboost_date_time-mt.a

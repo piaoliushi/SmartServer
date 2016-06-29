@@ -14,18 +14,19 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
+    QString AppDir = QCoreApplication::applicationDirPath();
     QTranslator qtTranslator;
-    if(qtTranslator.load("SmartServer_CN.qm")==true)
+    if(qtTranslator.load(AppDir + "/SmartServer_CN.qm")==true)
         a.installTranslator(&qtTranslator);
 
     QTranslator sys_translator;
     sys_translator.load("qt_zh_CN.qm");
     a.installTranslator(&sys_translator);
 
-
-    //QWSServer::setCursorVisible(false);
-    //Q_IMPORT_PLUGIN(qsqlpsql)
+#ifdef ARM_LINUX_DEF
+    QWSServer::setCursorVisible(false);
+    Q_IMPORT_PLUGIN(qsqlpsql)
+#endif
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
@@ -58,7 +59,7 @@ int main(int argc, char *argv[])
     QFont font  = a.font();
     font.setPointSize(16);
     a.setFont(font);
-    QString AppDir = QCoreApplication::applicationDirPath();
+
     AppDir.append("/ServerLocalConfig.xml");
     if(!GetInst(LocalConfig).load_local_config(AppDir.toLatin1().constData())){
         QMessageBox::information(NULL,QObject::tr("error"),QObject::tr("Load local config file error!"));

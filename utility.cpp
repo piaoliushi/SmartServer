@@ -49,6 +49,35 @@ int StrToHex( string str,unsigned char* Data )
 }
 
 
+void Char2Hex(unsigned char ch, char* szHex)
+{
+    unsigned char byte[2];
+    byte[0] = ch/16;
+    byte[1] = ch%16;
+    for(int i=0; i<2; i++)
+    {
+        if(byte[i] >= 0 && byte[i] <= 9)
+            szHex[i] = '0' + byte[i];
+        else
+            szHex[i] = 'A' + byte[i] - 10;
+    }
+    szHex[2] = 0;
+}
+
+void CharStr2HexStr(unsigned char const* pucCharStr, string &pszHexStr, int iSize)
+{
+
+    int i;
+    char szHex[3];
+    pszHexStr[0] = 0;
+    for(i=0; i<iSize; i++)
+    {
+        Char2Hex(pucCharStr[i], szHex);
+        pszHexStr.append(szHex);
+        pszHexStr.append(" ");
+    }
+}
+
 void kmp_init( const unsigned char *pattern, int pattern_size,int *pi )
 {
     if(pi==NULL)

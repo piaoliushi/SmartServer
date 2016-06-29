@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QDesktopWidget>
 #include <time.h>
+#include <QProcess>
 #include "qsysteminfopage.h"
 #include "qsvcstatepage.h"
 #include "qdevstatepage.h"
@@ -13,6 +14,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     d_Notify(parent)
+    //d_close_backlight_count(0),
+    //d_cur_backlight(0)
 {
     setWindowFlags(Qt::FramelessWindowHint);
     ui->setupUi(this);
@@ -30,15 +33,26 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->swContainter->addWidget(d_pSystemInfoPage);
 
     connect(ui->tbServer,SIGNAL(clicked()),this,SLOT(ShowSvcStatePage()));
+    //ui->tbServer->installEventFilter(this);
     connect(ui->tbDeviceState,SIGNAL(clicked()),this,SLOT(ShowDevStatePage()));
+     //ui->tbDeviceState->installEventFilter(this);
     connect(ui->tbOnlineUser,SIGNAL(clicked()),this,SLOT(ShowClientStatePage()));
+     //ui->tbOnlineUser->installEventFilter(this);
     connect(ui->tbSystem,SIGNAL(clicked()),this,SLOT(ShowSystemInfoPage()));
+     //ui->tbSystem->installEventFilter(this);
     connect(d_pSvcStatePage,SIGNAL(updateDevList(bool)),this,SLOT(OnUpdateDevList(bool)));
 
     ui->tbServer->setChecked(true);
     ShowSvcStatePage();
 
-    //d_pSvcStatePage->StartSvc();
+   // QTimer *pTime = new QTimer(this);
+    //connect(pTime,SIGNAL(timeout()),this,SLOT(timeUpdate()));
+    //pTime->start(1000);
+    //d_process_ptr = new QProcess(this);
+    //connect(d_process_ptr,SIGNAL(readyReadStandardOutput()),this,SLOT(readStandardOutput()));
+    //QString sexecute = QString("cat /sys/class/backlight/pwm-backlight/brightness");
+
+    //d_process_ptr->execute(sexecute);
 
 
 }
@@ -88,3 +102,56 @@ void MainWindow::OnUpdateDevList(bool bLoad)
     else
         d_pDevStatePage->clearDevList();
 }
+
+/*bool MainWindow::event(QEvent *event)
+{
+    switch(event->type()) {
+    case QEvent::MouseButtonPress:
+        OpenBacklight();
+        break;
+    }
+    return QMainWindow::event(event);
+}
+
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() == QEvent::MouseButtonPress) {
+             OpenBacklight();
+    }
+    return QMainWindow::eventFilter(object,event);
+}
+
+void MainWindow::timeUpdate()
+{
+    if(d_close_backlight_count>60){
+        if(d_cur_backlight<20)
+            return;
+       // QString sexecute = QString("cat /sys/class/backlight/pwm-backlight/brightness");
+       //  d_process_ptr->execute(sexecute);
+        if(d_cur_backlight>20){
+            QString  sexecute = QString("echo echo 10 >/sys/class/backlight/pwm-backlight/brightness");
+            d_process_ptr->execute(sexecute);
+            d_cur_backlight = 10;
+        }
+    }else
+        d_close_backlight_count++;
+}
+
+void MainWindow::readStandardOutput()
+{
+    QString  sResult = d_process_ptr->readAllStandardOutput();
+    d_cur_backlight = sResult.toInt();
+    cout<<"d_cur_backlight="<<d_cur_backlight<<"----readall = "<<sResult.toStdString().c_str()<<endl;
+}
+
+void MainWindow::OpenBacklight()
+{
+    d_close_backlight_count = 0;
+    //QString sexecute = QString("cat /sys/class/backlight/pwm-backlight/brightness");
+    //d_process_ptr->execute(sexecute);
+  //  if(d_cur_backlight>20){
+       QString  sexecute = QString("echo echo 80 >/sys/class/backlight/pwm-backlight/brightness");
+        d_process_ptr->execute(sexecute);
+        d_cur_backlight = 80;
+   // }
+}*/

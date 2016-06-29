@@ -22,6 +22,7 @@ namespace hx_net
     Link_message::Link_message(session_ptr pSession,DeviceInfo &devInfo)
         :m_pSession(pSession)
         ,d_devInfo(devInfo)
+        ,d_task_queue_ptr(new TaskQueue< DevMonitorDataPtr >)
     {
     }
 
@@ -97,12 +98,14 @@ namespace hx_net
 
     void Link_message::parse_Satellite_data_(Pdu &pdu, SnmpTarget &target)
     {
+        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
+        if(cur_data_ptr==NULL)
+            return;
+        //boost::recursive_mutex::scoped_lock lock(data_mutex);
         for (int i=0; i<pdu.get_vb_count(); i++)
         {
-
             Vb nextVb;
             pdu.get_vb(nextVb, i);
-
             string cur_oid = nextVb.get_printable_oid();//Oid
             string cur_value =nextVb.get_printable_value();
             //if(cur_value.empty())
@@ -114,8 +117,7 @@ namespace hx_net
                 dainfo.sValue = cur_value;
                 dainfo.bType=false;
                 dainfo.fValue =  atof(cur_value.c_str());
-                if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[0] = dainfo;
+                cur_data_ptr->mValues[0] = dainfo;
             }else if(cur_oid == signalLock){
                 dainfo.bType=true;
                 int nRlt = cur_value.find("CB F8 B6 A8");
@@ -126,8 +128,7 @@ namespace hx_net
                     dainfo.sValue = "0";
                     dainfo.fValue=0.0f;
                 }
-                if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[1] = dainfo;
+                cur_data_ptr->mValues[1] = dainfo;
             }else if(cur_oid == singalber){
                 if(cur_value.empty())
                     cur_value ="45";
@@ -139,8 +140,7 @@ namespace hx_net
                     dainfo.fValue=0.0f;
                 else
                     dainfo.fValue =  atof(cur_value.c_str());
-                if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[2] = dainfo;
+                cur_data_ptr->mValues[2] = dainfo;
             }else if(cur_oid == signalcn){
                 if(cur_value.empty())
                     cur_value ="30";
@@ -149,16 +149,14 @@ namespace hx_net
                 string_replace(cur_value,"dB","");
                 string_replace(cur_value," ","");
                 dainfo.fValue = atof(cur_value.c_str());
-                if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[3] = dainfo;
+                cur_data_ptr->mValues[3] = dainfo;
             }else if(cur_oid == totalrate){
                 if(cur_value.empty())
                     cur_value ="10";
                 dainfo.bType=false;
                 dainfo.sValue = cur_value;
                 dainfo.fValue = atof(cur_value.c_str());
-                if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[4] = dainfo;
+                cur_data_ptr->mValues[4] = dainfo;
             }else if(cur_oid == frequency){
                 if(cur_value.empty())
                     cur_value ="658";
@@ -167,19 +165,22 @@ namespace hx_net
                 string_replace(cur_value,"MHz","");
                 string_replace(cur_value," ","");
                 dainfo.fValue = atof(cur_value.c_str());
-                if(d_data_ptr!=NULL)
-                    d_data_ptr->mValues[5] = dainfo;
+                cur_data_ptr->mValues[5] = dainfo;
             }
         }
-        if(d_data_ptr->mValues.size()>0){
-            DevMonitorDataPtr  curCloneData_ptr(new Data(*d_data_ptr.get()));
-            m_pSession->start_handler_data(d_devInfo.sDevNum,curCloneData_ptr);
+        if(cur_data_ptr->mValues.size()>0){
+            //DevMonitorDataPtr  curCloneData_ptr(new Data(*d_data_ptr.get()));
+            m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
         }
 
     }
 
     int  Link_message::parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
     {
+        if(d_task_queue_ptr->get_Task_Size()>10)
+            return -1;
+        //cout<<"snmp--------task-----size -------"<<d_task_queue_ptr->get_Task_Size()<<endl;
+        d_task_queue_ptr->SubmitTask(data_ptr);
         Pdu pdu;
         Vb vbl[NUM_SYS_VBS];
         vbl[0].set_oid(rflevel);
@@ -190,8 +191,7 @@ namespace hx_net
         vbl[5].set_oid(frequency);
         for (int i=0; i<NUM_SYS_VBS;i++)
             pdu += vbl[i];
-
-        d_data_ptr = data_ptr;//保存
+        //d_data_ptr = data_ptr;//保存
         int status = snmp->get(pdu,*target, aysnc_callback,this);
         if (status){
             return -1;

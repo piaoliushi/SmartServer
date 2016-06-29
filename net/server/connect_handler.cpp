@@ -1,6 +1,5 @@
 #include "connect_handler.h"
 #include "../../LocalConfig.h"
-//#include "../../database/dbmanager.h"
 namespace hx_net
 {
 	connect_handler::connect_handler(boost::asio::io_service& io_service, 
@@ -101,8 +100,6 @@ namespace hx_net
 	{
 		loginAckMsgPtr sloginAck(new LoginAck);
 		srv_.user_login(shared_from_this(),sUser,sPassword,*sloginAck);
-        //const google::protobuf::RepeatedPtrField<DevNetStatus> vNetState = sloginAck->cdevcurnetstatus();
-
 		sendMessage(MSG_LOGIN_ACK,sloginAck);
 	}
 

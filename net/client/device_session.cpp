@@ -9,6 +9,7 @@
 #include "../../protocol/bohui_const_define.h"
 #include "./snmp_pp/snmp_pp.h"
 #include "../server/http/RequestHandlerFactory.h"
+#include "../../utility.h"
 #ifdef SNMP_PP_NAMESPACE
 using namespace Snmp_pp;
 #endif
@@ -614,8 +615,12 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId)
 {
     map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
     if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
-        if(iter->second.size()>childId)
+        if(iter->second.size()>childId){
             start_write(iter->second[childId].commandId,iter->second[childId].commandLen);
+            string outputStr;
+            CharStr2HexStr(iter->second[childId].commandId,outputStr,iter->second[childId].commandLen);
+            cout<<"query cmd :"<<outputStr<<endl;
+        }
     }
 }
 
@@ -974,12 +979,12 @@ bool device_session::is_monitor_time(string sDevId)
 //开始处理监测数据
 void device_session::start_handler_data(string sDevId,DevMonitorDataPtr curDataPtr,bool bCheckAlarm)
 {
-   if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
+   /*if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
             .schedule(boost::bind(&device_session::handler_data,this,sDevId,curDataPtr)))
     {
         task_count_increase();
-    }
-    //handler_data(sDevId,curDataPtr);
+    }*/
+    handler_data(sDevId,curDataPtr);
 }
 
 //2016-3-31------处理设备数据----完成
@@ -1003,6 +1008,8 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     //如果在监测时间段则保存当前记录
     if(bIsMonitorTime)
         save_monitor_record(sDevId,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+    else
+        cout<<"deviceId="<<sDevId<<"----bIsMonitorTime   is  false "<<endl;
     //任务数递减
     task_count_decrease();
     return;

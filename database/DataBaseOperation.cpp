@@ -909,7 +909,7 @@ bool DataBaseOperation::AddItemEndAlarmRecord( time_t endTime,unsigned long long
 bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,DevMonitorDataPtr pdata,const map<int,DeviceMonitorItem> &mapMonitorItem)
 {
     QSqlDatabase db = ConnectionPool::openConnection();
-    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+    if(!db.isOpen() || !db.isValid()) {
         std::cout<<"AddItemMonitorRecord is error  ------------ the database is interrupt"<<std::endl;
         return false;
     }

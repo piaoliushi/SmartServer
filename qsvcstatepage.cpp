@@ -201,9 +201,6 @@ void QSvcStatePage::timeUpdate()
 
     if(IsStart()==false)
         StartSvc();
-        //GetInst(DataBaseOperation).check_database();
-    //else
-
     if(d_bUseNtp)
         checkAutoAdjustTime();
 
@@ -211,8 +208,7 @@ void QSvcStatePage::timeUpdate()
 
  void QSvcStatePage::onMunualAdjustTime()
  {
-     GetInst(DataBaseOperation).CloseDb();
-     QString sexecute = QString(tr("./ntpclient -s -t -i 1 -h %1 &")).arg(GetInst(LocalConfig).ntp_svc_ip().c_str());
+     QString sexecute = QString("./ntpclient -s -t -i 1 -h %1 &").arg(GetInst(LocalConfig).ntp_svc_ip().c_str());
      QProcess::execute(sexecute);
  }
 
