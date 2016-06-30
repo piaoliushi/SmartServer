@@ -14,10 +14,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     d_Notify(parent)
-    //d_close_backlight_count(0),
-    //d_cur_backlight(0)
 {
+#ifdef ARM_LINUX_DEF
     setWindowFlags(Qt::FramelessWindowHint);
+#endif
     ui->setupUi(this);
 
     d_pSvcStatePage = new QSvcStatePage(d_Notify,this);
@@ -33,13 +33,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->swContainter->addWidget(d_pSystemInfoPage);
 
     connect(ui->tbServer,SIGNAL(clicked()),this,SLOT(ShowSvcStatePage()));
-    //ui->tbServer->installEventFilter(this);
     connect(ui->tbDeviceState,SIGNAL(clicked()),this,SLOT(ShowDevStatePage()));
-     //ui->tbDeviceState->installEventFilter(this);
     connect(ui->tbOnlineUser,SIGNAL(clicked()),this,SLOT(ShowClientStatePage()));
-     //ui->tbOnlineUser->installEventFilter(this);
     connect(ui->tbSystem,SIGNAL(clicked()),this,SLOT(ShowSystemInfoPage()));
-     //ui->tbSystem->installEventFilter(this);
     connect(d_pSvcStatePage,SIGNAL(updateDevList(bool)),this,SLOT(OnUpdateDevList(bool)));
 
     ui->tbServer->setChecked(true);

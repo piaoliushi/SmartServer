@@ -30,8 +30,12 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
 
     QSpacerItem *pLeftTopSpace = new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Maximum);
     d_plbDateTime = new QLabel(this);
-    d_plbDateTime->setFixedSize(245,20);
+    d_plbDateTime->setFixedSize(260,20);
+#ifdef ARM_LINUX_DEF
     d_plbDateTime->setStyleSheet(tr("font: 18pt; color:#45c9d5;"));
+#else
+    d_plbDateTime->setStyleSheet(tr("font: 14pt; color:#45c9d5;"));
+#endif
     pTopLyt->addSpacerItem(pLeftTopSpace);
     QPushButton *pAdjustTimeBt = new QPushButton(this);
     pAdjustTimeBt->setFocusPolicy(Qt::NoFocus);

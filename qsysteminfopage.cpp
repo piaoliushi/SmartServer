@@ -17,7 +17,9 @@
 #include<QMessageBox>
 #include <QNetworkInterface>
 #include <QNetworkAddressEntry>
+#include <QAbstractSocket>
 #include <QPalette>
+#include <QHostInfo>
 #include "./net/SvcMgr.h"
 #include "DataType.h"
 #include "StationConfig.h"
@@ -119,22 +121,41 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     QLabel *ethIp0 = new QLabel(this);
     ethIp0->setStyleSheet("color:#5fff53");
     pHlyt->addWidget(ethIp0);
-    QNetworkInterface   interface0 = QNetworkInterface::interfaceFromName("eth0");
+
+    QNetworkInterface   interface0 = QNetworkInterface::interfaceFromIndex(0);//"eth0"
     QList<QNetworkAddressEntry>  netlist0 = interface0.addressEntries();
     if(!netlist0.isEmpty())
         ethIp0->setText(netlist0.at(0).ip().toString());
+
     staticLabel = new QLabel(tr("Card2:"));
     staticLabel->setFixedWidth(65);
     pHlyt->addWidget(staticLabel);
     QLabel *ethIp1 = new QLabel(this);
     ethIp1->setStyleSheet("color:#5fff53");
     pHlyt->addWidget(ethIp1);
-    QNetworkInterface   interface1 = QNetworkInterface::interfaceFromName("eth1");
+
+    QList<QNetworkInterface> networkInterface = QNetworkInterface::allInterfaces();
+    QList<QNetworkInterface>::const_iterator i = networkInterface.begin();
+    for (; i != networkInterface.end(); ++i) {
+        if((*i).isValid()==false || (*i).flags()==QNetworkInterface::IsLoopBack)
+            continue;
+        QList<QNetworkAddressEntry>entryList=(*i).addressEntries();
+        foreach(QNetworkAddressEntry entry,entryList){
+            if(entry.ip().protocol()!=QAbstractSocket::IPv4Protocol)
+                continue;
+            if(ethIp0->text().isEmpty())
+                ethIp0->setText(entry.ip().toString());
+            else
+                ethIp1->setText(entry.ip().toString());
+        }
+
+    }
+   /* QNetworkInterface   interface1 = QNetworkInterface::interfaceFromIndex(1);//"eth1"
     QList<QNetworkAddressEntry>  netlist1 = interface1.addressEntries();
     if(!netlist1.isEmpty())
         ethIp1->setText(netlist1.at(0).ip().toString());
     else
-        ethIp1->setText(tr("without"));
+        ethIp1->setText(tr("without"));*/
 
     pHMainLyt->addLayout(pHlyt);
 
@@ -248,7 +269,7 @@ void QSystemInfoPage::saveCurConfig()
                                                ,svcNumber,svcPort,databaseIp,databaseUser)==false ||
             GetInst(LocalConfig).writeSmsParToXml(AppDir.toLocal8Bit().constData(),bsms_use,comId,baudRate,centerNumber)==false)
     {
-        QMessageBox::information(this,tr("注意"),tr("保存本地配置参数失败，请检查！"));
+        QMessageBox::information(this,tr("note"),tr("Failed to save the local configuration parameters, please check!"));
     }
     else
     {

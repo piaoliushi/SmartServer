@@ -15,7 +15,7 @@ TRANSLATIONS = SmartServer_CN.ts
 
 CONFIG+=precompile_header
 PRECOMPILED_HEADER=stable.h
-CONFIG += console
+#CONFIG += console
 SOURCES += main.cpp\
         mainwindow.cpp \
     net/SvcMgr.cpp \

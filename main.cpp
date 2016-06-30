@@ -7,6 +7,7 @@
 #include <QtPlugin>
 #include <QMessageBox>
 #include <QTranslator>
+#include <QDebug>
 #include "LocalConfig.h"
 #include "./net/config.h"
 #include "./database/ConnectionPool.h"
@@ -30,7 +31,7 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
-   //QApplication::setStyle(QStyleFactory::create("plastique"));
+    QApplication::setStyle(QStyleFactory::create("plastique"));
     QPalette pal = QApplication::palette();
     pal.setBrush(QPalette::Window,QColor(15,15,45));
     pal.setBrush(QPalette::WindowText,Qt::cyan);
@@ -49,17 +50,19 @@ int main(int argc, char *argv[])
     pal.setBrush(QPalette::Mid,QColor(60,60,60));
     pal.setBrush(QPalette::Dark,QColor(30,30,30));
     pal.setBrush(QPalette::Highlight, QColor(40,40,70,150));
-    //pal.setBrush(QPalette::HighlightedText, Qt::white);
+    pal.setBrush(QPalette::HighlightedText, Qt::white);
     pal.setBrush(QPalette::Link, QColor(85,170,255));
     //pal.setBrush(QPalette::LinkVisited, QColor(170,100,240));
 
 
     QApplication::setPalette(pal);
-
     QFont font  = a.font();
+#ifdef ARM_LINUX_DEF
     font.setPointSize(16);
+#else
+    font.setPointSize(12);
+#endif
     a.setFont(font);
-
     AppDir.append("/ServerLocalConfig.xml");
     if(!GetInst(LocalConfig).load_local_config(AppDir.toLatin1().constData())){
         QMessageBox::information(NULL,QObject::tr("error"),QObject::tr("Load local config file error!"));
@@ -68,8 +71,14 @@ int main(int argc, char *argv[])
 
     DefaultLog::log()->set_filter(DEBUG_LOG, 0);
     DefaultLog::log()->set_filter(INFO_LOG, 0);
+
     MainWindow w;
+
+#ifdef ARM_LINUX_DEF
     w.showMaximized();
+#else
+    w.show();
+#endif
     int nyet = a.exec();
     ConnectionPool::release();
     return nyet;

@@ -36,6 +36,8 @@ namespace hx_net
             vector<AssDevChan>::iterator dev_iter = find_iter->second.begin();
             for(;dev_iter!=find_iter->second.end();++dev_iter){
                 DeviceInfo *curDev =  GetInst(StationConfig).get_devinfo_by_id((*dev_iter).sAstNum);
+                if(curDev==NULL)
+                    continue;
                 if(curDev->iDevType == DEVICE_TRANSMITTER)
                     d_relate_tsmt_ptr_ = curDev;
                 if(curDev->iDevType == DEVICE_ANTENNA)
