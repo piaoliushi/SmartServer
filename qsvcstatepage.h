@@ -44,6 +44,8 @@ private:
     int       d_nModNtp;
     int       d_nValueNtp;
     string   d_sTimeNtp;
+
+    int   d_fd;
 };
 
 #endif // QSVCSTATEPAGE_H

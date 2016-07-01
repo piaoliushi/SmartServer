@@ -263,22 +263,24 @@ void   device_session::open_com()
             return;
         }
         boost::system::error_code  ec;
-        pSerialPort_ptr_->set_option(serial_port::baud_rate(modleInfos_.comMode.irate),ec);
-        pSerialPort_ptr_->set_option(serial_port::flow_control(serial_port::flow_control::none),ec);
-        pSerialPort_ptr_->set_option(serial_port::parity(serial_port::parity::none),ec);
-        pSerialPort_ptr_->set_option(serial_port::stop_bits(serial_port::stop_bits::one),ec);
-        if(modleInfos_.comMode.idata_bit>0)
-            pSerialPort_ptr_->set_option(serial_port::character_size(modleInfos_.comMode.idata_bit),ec);
-        else
-            pSerialPort_ptr_->set_option(serial_port::character_size(8),ec);
+
         if(modleInfos_.comMode.icomport>=0 && modleInfos_.comMode.icomport<64){
             string sComStr = str(boost::format("/dev/ttyO%1%")%modleInfos_.comMode.icomport);
-            pSerialPort_ptr_->open(sComStr,ec);//"/dev/tty0"
+            pSerialPort_ptr_->open(sComStr,ec);
             if(ec){
                 std::cout<< sComStr<<" open error!!"<< ec.message()<<std::endl;
                 return;
-            }else
-                std::cout<< sComStr<<" open success!!"<< ec.message()<<std::endl;
+            }else {
+                std::cout<< sComStr<<" open success!!"<< "---baud rat:"<<modleInfos_.comMode.irate<<std::endl;
+                pSerialPort_ptr_->set_option(serial_port::baud_rate(modleInfos_.comMode.irate),ec);
+                pSerialPort_ptr_->set_option(serial_port::flow_control(serial_port::flow_control::none),ec);
+                pSerialPort_ptr_->set_option(serial_port::parity(serial_port::parity::none),ec);
+                pSerialPort_ptr_->set_option(serial_port::stop_bits(serial_port::stop_bits::one),ec);
+                if(modleInfos_.comMode.idata_bit>0)
+                    pSerialPort_ptr_->set_option(serial_port::character_size(modleInfos_.comMode.idata_bit),ec);
+                else
+                    pSerialPort_ptr_->set_option(serial_port::character_size(8),ec);
+            }
 
             boost::system::error_code err= boost::system::error_code();
             handle_connected(err);
