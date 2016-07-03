@@ -3,7 +3,9 @@
 
 #include <QMainWindow>
 #include <QDateTime>
+#ifdef Q_OS_WIN
 #include <QSystemTrayIcon>
+#endif
 #include "qnotifyhandler.h"
 using namespace std;
 namespace Ui {
@@ -14,7 +16,10 @@ class  QSvcStatePage;
 class  QDevStatePage;
 class  QClientStatePage;
 class  QSystemInfoPage;
+
+#ifdef Q_OS_WIN
 class  QSystemTrayIcon;
+#endif
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -22,13 +27,15 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 public slots:
-    void startSvc();
+
     void testSetTime();
     void ShowSvcStatePage();
     void ShowDevStatePage();
     void ShowClientStatePage();
     void ShowSystemInfoPage();
     void OnUpdateDevList(bool bLoad);
+#ifdef Q_OS_WIN
+    void startSvc();
     void OnUpdateMenu();
     void showMessage(QString &sHeader,QString &sContent);
     void timeUpdate();
@@ -40,6 +47,7 @@ protected:
 private:
     void createTrayIcon();
     void createActions();
+#endif
 private:
     Ui::MainWindow *ui;
     QNotifyHandler         d_Notify;
@@ -47,7 +55,7 @@ private:
     QDevStatePage      *d_pDevStatePage;
     QClientStatePage   *d_pClientStatePage;
     QSystemInfoPage   *d_pSystemInfoPage;
-
+#ifdef Q_OS_WIN
     QAction *startupAction;
     QAction *restoreAction;
     QAction *quitAction;
@@ -55,6 +63,7 @@ private:
     QSystemTrayIcon *trayIcon;
     QMenu *trayIconMenu;
     QDateTime tSvcStartTime;
+#endif
 };
 
 #endif // MAINWINDOW_H

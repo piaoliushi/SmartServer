@@ -7,13 +7,15 @@
 #include <QtPlugin>
 #include <QMessageBox>
 #include <QTranslator>
-#include <QSystemTrayIcon>
-#include <QDebug>
 #include "LocalConfig.h"
 #include "./net/config.h"
 #include "./database/ConnectionPool.h"
 #include "./snmp_pp/snmp_pp.h"
+#ifdef Q_OS_WIN
+#include <QSystemTrayIcon>
+#include <QDebug>
 #include "./signalApp/qtsingleapplication.h"
+#endif
 
 int main(int argc, char *argv[])
 {

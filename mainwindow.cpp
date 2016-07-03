@@ -1,4 +1,4 @@
-﻿#include "mainwindow.h"
+#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QTimer>
 #include <QDateTime>
@@ -44,23 +44,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tbServer->setChecked(true);
     ShowSvcStatePage();
 
+#ifdef Q_OS_WIN
     QTimer *pTime = new QTimer(this);
     connect(pTime,SIGNAL(timeout()),this,SLOT(timeUpdate()));
     pTime->start(1000);
-
-
     createActions();
     createTrayIcon();
-
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
         this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
-
     trayIcon->setIcon(QIcon(tr(":/new/images/server.png")));
     trayIcon->show();
-
+#endif
     setWindowIcon(QIcon(tr(":/new/images/server.png")));
 
-    setWindowTitle(tr("Device monitor server(Ver:2.0.0.1)"));//设备监测服务器(版本:2.0.0.1)
+    setWindowTitle(tr("Device monitor server(Ver:2.0.0.1)"));
 
 
 }
@@ -102,6 +99,15 @@ void MainWindow::ShowClientStatePage(){
 void MainWindow::ShowSystemInfoPage(){
     ui->swContainter->setCurrentWidget(d_pSystemInfoPage);
 }
+void MainWindow::OnUpdateDevList(bool bLoad)
+{
+    if(bLoad)
+        d_pDevStatePage->LoadDevToList();
+    else
+        d_pDevStatePage->clearDevList();
+}
+
+#ifdef Q_OS_WIN
 
 void MainWindow::showMessage(QString &sHeader,QString &sContent)
 {
@@ -120,13 +126,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 }
 
-void MainWindow::OnUpdateDevList(bool bLoad)
-{
-    if(bLoad)
-        d_pDevStatePage->LoadDevToList();
-    else
-        d_pDevStatePage->clearDevList();
-}
 
 void MainWindow::startSvc(){
     d_pSvcStatePage->StartSvc();
@@ -222,3 +221,4 @@ void MainWindow::signalAppSlot(const QString& activeMsg )
 {
     showNormal();
 }
+#endif
