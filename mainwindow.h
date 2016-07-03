@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QDateTime>
+#include <QSystemTrayIcon>
 #include "qnotifyhandler.h"
 using namespace std;
 namespace Ui {
@@ -12,28 +14,32 @@ class  QSvcStatePage;
 class  QDevStatePage;
 class  QClientStatePage;
 class  QSystemInfoPage;
-class  QProcess;
+class  QSystemTrayIcon;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 public slots:
+    void startSvc();
     void testSetTime();
     void ShowSvcStatePage();
     void ShowDevStatePage();
     void ShowClientStatePage();
     void ShowSystemInfoPage();
     void OnUpdateDevList(bool bLoad);
-
-    //void  timeUpdate();
-    //void readStandardOutput();
+    void OnUpdateMenu();
+    void showMessage(QString &sHeader,QString &sContent);
+    void timeUpdate();
+    void signalAppSlot(const QString& activeMsg );
+    void iconActivated(QSystemTrayIcon::ActivationReason reason);
+    void quitApp();
 protected:
-    //void OpenBacklight();
-    //bool event(QEvent *event);
-    //bool eventFilter(QObject *object, QEvent *event);
+    void closeEvent(QCloseEvent *event);
+private:
+    void createTrayIcon();
+    void createActions();
 private:
     Ui::MainWindow *ui;
     QNotifyHandler         d_Notify;
@@ -42,9 +48,13 @@ private:
     QClientStatePage   *d_pClientStatePage;
     QSystemInfoPage   *d_pSystemInfoPage;
 
-    int    d_close_backlight_count;
-    int    d_cur_backlight;
-     //QProcess *d_process_ptr;
+    QAction *startupAction;
+    QAction *restoreAction;
+    QAction *quitAction;
+
+    QSystemTrayIcon *trayIcon;
+    QMenu *trayIconMenu;
+    QDateTime tSvcStartTime;
 };
 
 #endif // MAINWINDOW_H

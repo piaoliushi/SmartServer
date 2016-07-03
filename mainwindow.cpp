@@ -1,10 +1,12 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QTimer>
 #include <QDateTime>
 #include <QDesktopWidget>
 #include <time.h>
 #include <QProcess>
+#include <QMenu>
+#include <QCloseEvent>
 #include "qsysteminfopage.h"
 #include "qsvcstatepage.h"
 #include "qdevstatepage.h"
@@ -15,7 +17,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     d_Notify(parent)
 {
-#ifdef ARM_LINUX_DEF
+#ifdef Q_OS_WIN
+#else
     setWindowFlags(Qt::FramelessWindowHint);
 #endif
     ui->setupUi(this);
@@ -41,14 +44,23 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tbServer->setChecked(true);
     ShowSvcStatePage();
 
-   // QTimer *pTime = new QTimer(this);
-    //connect(pTime,SIGNAL(timeout()),this,SLOT(timeUpdate()));
-    //pTime->start(1000);
-    //d_process_ptr = new QProcess(this);
-    //connect(d_process_ptr,SIGNAL(readyReadStandardOutput()),this,SLOT(readStandardOutput()));
-    //QString sexecute = QString("cat /sys/class/backlight/pwm-backlight/brightness");
+    QTimer *pTime = new QTimer(this);
+    connect(pTime,SIGNAL(timeout()),this,SLOT(timeUpdate()));
+    pTime->start(1000);
 
-    //d_process_ptr->execute(sexecute);
+
+    createActions();
+    createTrayIcon();
+
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+        this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+
+    trayIcon->setIcon(QIcon(tr(":/new/images/server.png")));
+    trayIcon->show();
+
+    setWindowIcon(QIcon(tr(":/new/images/server.png")));
+
+    setWindowTitle(tr("Device monitor server(Ver:2.0.0.1)"));//设备监测服务器(版本:2.0.0.1)
 
 
 }
@@ -91,6 +103,23 @@ void MainWindow::ShowSystemInfoPage(){
     ui->swContainter->setCurrentWidget(d_pSystemInfoPage);
 }
 
+void MainWindow::showMessage(QString &sHeader,QString &sContent)
+{
+    trayIcon->showMessage(sHeader,sContent, QSystemTrayIcon::Information,3000);
+
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+
+    if (trayIcon->isVisible()) //程序将在托盘区继续运行,想要退出程序请在快捷菜单中选择\"退出程序\"
+    {
+        showMessage(tr("remind"),tr("Program will continue to run in the area of the tray, you want to quit the program, please select the shortcut menu in the \"exit\""));
+        hide();
+        event->ignore();
+    }
+}
+
 void MainWindow::OnUpdateDevList(bool bLoad)
 {
     if(bLoad)
@@ -99,55 +128,97 @@ void MainWindow::OnUpdateDevList(bool bLoad)
         d_pDevStatePage->clearDevList();
 }
 
-/*bool MainWindow::event(QEvent *event)
-{
-    switch(event->type()) {
-    case QEvent::MouseButtonPress:
-        OpenBacklight();
-        break;
-    }
-    return QMainWindow::event(event);
+void MainWindow::startSvc(){
+    d_pSvcStatePage->StartSvc();
+    OnUpdateMenu();
 }
 
-bool MainWindow::eventFilter(QObject *object, QEvent *event)
+void MainWindow::OnUpdateMenu()
 {
-    if (event->type() == QEvent::MouseButtonPress) {
-             OpenBacklight();
+    if(d_pSvcStatePage->IsStart())
+    {
+        startupAction->setText(tr("StopSvc"));
+        startupAction->setIcon(QIcon(tr(":/new/images/player_stop.png")));
+
+        tSvcStartTime = QDateTime::currentDateTime();
+        trayIcon->setToolTip(QString(tr("Server is running...\n%1")).arg(tSvcStartTime.toString(tr("yyyy-MM-dd hh:mm:ss dddd"))));
+
     }
-    return QMainWindow::eventFilter(object,event);
+    else
+    {
+        startupAction->setText(tr("StartSvc"));
+        startupAction->setIcon(QIcon(tr(":/new/images/player_play.png")));
+        trayIcon->setToolTip(QString(tr("Server is stopped!")));
+    }
 }
+
 
 void MainWindow::timeUpdate()
 {
-    if(d_close_backlight_count>60){
-        if(d_cur_backlight<20)
-            return;
-       // QString sexecute = QString("cat /sys/class/backlight/pwm-backlight/brightness");
-       //  d_process_ptr->execute(sexecute);
-        if(d_cur_backlight>20){
-            QString  sexecute = QString("echo echo 10 >/sys/class/backlight/pwm-backlight/brightness");
-            d_process_ptr->execute(sexecute);
-            d_cur_backlight = 10;
-        }
-    }else
-        d_close_backlight_count++;
+    if(!d_pSvcStatePage->IsStart())
+        return ;
+
+    double ninterval = difftime(QDateTime::currentDateTime().toTime_t(),tSvcStartTime.toTime_t());
+    QString printStr = QDateTime::fromTime_t(ninterval).toString("yyyy-MM-dd hh:mm:ss");
+    int secondsPerDay = 3600*24;
+    int ndays = (int)ninterval/secondsPerDay;//dataCur.day()-tSvcStartTime.date().day();
+    int hourSpan = (int)ninterval%secondsPerDay;
+    int nHours = hourSpan/3600;
+    int minuteSpan = hourSpan%3600;
+    int nMinutes = minuteSpan/60;
+    int nSeconds = minuteSpan%60;
+
+    trayIcon->setToolTip(QString(tr("Server is running...\n%1\n Run length：%2day%3hour%4minute%5second")).arg(tSvcStartTime.toString(tr("yyyy-MM-dd hh:mm:ss dddd")))\
+                         .arg(ndays).arg(nHours).arg(nMinutes).arg(nSeconds));
+
 }
 
-void MainWindow::readStandardOutput()
+void MainWindow::createTrayIcon()
 {
-    QString  sResult = d_process_ptr->readAllStandardOutput();
-    d_cur_backlight = sResult.toInt();
-    cout<<"d_cur_backlight="<<d_cur_backlight<<"----readall = "<<sResult.toStdString().c_str()<<endl;
+    trayIconMenu = new QMenu(this);
+    trayIconMenu->addAction(startupAction);
+    trayIconMenu->addAction(restoreAction);
+    trayIconMenu->addSeparator();
+    trayIconMenu->addAction(quitAction);
+
+    trayIcon = new QSystemTrayIcon(this);
+    trayIcon->setContextMenu(trayIconMenu);
 }
 
-void MainWindow::OpenBacklight()
+void MainWindow::createActions()
 {
-    d_close_backlight_count = 0;
-    //QString sexecute = QString("cat /sys/class/backlight/pwm-backlight/brightness");
-    //d_process_ptr->execute(sexecute);
-  //  if(d_cur_backlight>20){
-       QString  sexecute = QString("echo echo 80 >/sys/class/backlight/pwm-backlight/brightness");
-        d_process_ptr->execute(sexecute);
-        d_cur_backlight = 80;
-   // }
-}*/
+    startupAction = new QAction(QIcon(tr(":/new/images/player_play.png")),tr("StartSvc(&S)"), this);
+    connect(startupAction, SIGNAL(triggered()), this, SLOT(startSvc()));//
+    restoreAction = new QAction(QIcon(tr(":/new/images/video_display.png")),tr("StopSvc(&R)"), this);
+    connect(restoreAction, SIGNAL(triggered()), this, SLOT(showNormal()));
+    quitAction = new QAction(QIcon(tr(":/new/images/stock_exit.png")),tr("Exit(&E)"), this);
+    connect(quitAction, SIGNAL(triggered()), this, SLOT(quitApp()));
+}
+
+void MainWindow::quitApp()
+{
+    d_pSvcStatePage->disconnect();
+    d_pDevStatePage->disconnect();
+    if(d_pSvcStatePage->IsStart())
+        d_pSvcStatePage->StartSvc();
+
+    qApp->quit();
+}
+
+
+void MainWindow::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::Trigger:
+    case QSystemTrayIcon::DoubleClick:
+        showNormal();
+        break;
+    default:
+        ;
+    }
+}
+
+void MainWindow::signalAppSlot(const QString& activeMsg )
+{
+    showNormal();
+}

@@ -69,7 +69,6 @@ void CharStr2HexStr(unsigned char const* pucCharStr, string &pszHexStr, int iSiz
 
     int i;
     char szHex[3];
-    pszHexStr[0] = 0;
     for(i=0; i<iSize; i++)
     {
         Char2Hex(pucCharStr[i], szHex);

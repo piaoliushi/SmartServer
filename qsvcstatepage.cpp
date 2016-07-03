@@ -186,11 +186,11 @@ void QSvcStatePage::StartSvc()
     }
     else
     {
-        //GetInst(hx_net::SvcMgr).Stop();
+        GetInst(hx_net::SvcMgr).Stop();
         //GetInst(DataBaseOperation).CloseDb();//清理数据库
-        //m_IsRunning=false;
-        //d_pSvcStateValueLabel->setText(tr("已停止"));
-        //emit updateDevList(false);
+        m_IsRunning=false;
+        d_pSvcStateValueLabel->setText(tr("stopped"));
+        emit updateDevList(false);
     }
 
 }

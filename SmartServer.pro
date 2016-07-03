@@ -15,7 +15,7 @@ TRANSLATIONS = SmartServer_CN.ts
 
 CONFIG+=precompile_header
 PRECOMPILED_HEADER=stable.h
-#CONFIG += console
+CONFIG += console
 SOURCES += main.cpp\
         mainwindow.cpp \
     net/SvcMgr.cpp \
@@ -66,7 +66,12 @@ SOURCES += main.cpp\
     net/client/dev_message/Media_message.cpp \
     database/ConnectionPool.cpp \
     net/client/parse_ass_device.cpp \
-    net/client/dev_message/transmmiter/AhhxTransmmit.cpp
+    net/client/dev_message/transmmiter/AhhxTransmmit.cpp \
+    signalApp/qtlocalpeer.cpp \
+    signalApp/qtlockedfile.cpp \
+    signalApp/qtlockedfile_unix.cpp \
+    signalApp/qtlockedfile_win.cpp \
+    signalApp/qtsingleapplication.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -133,7 +138,10 @@ HEADERS  += \
     net/client/dev_message/Media_message.h \
     database/ConnectionPool.h \
     net/client/parse_ass_device.h \
-    net/client/dev_message/transmmiter/AhhxTransmmit.h
+    net/client/dev_message/transmmiter/AhhxTransmmit.h \
+    signalApp/qtlocalpeer.h \
+    signalApp/qtlockedfile.h \
+    signalApp/qtsingleapplication.h
 
 FORMS    += mainwindow.ui
 

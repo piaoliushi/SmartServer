@@ -28,6 +28,97 @@
         <source>SystemInfo</source>
         <translation type="unfinished">系统信息</translation>
     </message>
+    <message>
+        <location filename="mainwindow.cpp" line="58"/>
+        <location filename="mainwindow.cpp" line="61"/>
+        <source>:/server.png</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="63"/>
+        <source>Device monitor server(Ver:2.0.0.1)</source>
+        <translation type="unfinished">设备监测服务器（版本：2.0.0.1）</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="117"/>
+        <source>remind</source>
+        <translation type="unfinished">提醒</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="117"/>
+        <source>Program will continue to run in the area of the tray, you want to quit the program, please select the shortcut menu in the &quot;exit&quot;</source>
+        <translation type="unfinished">程序将在托盘区继续运行，想要退出程序请在快捷菜单中选择“退出程序”</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="140"/>
+        <source>StopSvc</source>
+        <translation type="unfinished">停止服务</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="141"/>
+        <source>:/player_stop.png</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="144"/>
+        <source>Server is running...
+%1</source>
+        <translation type="unfinished">服务器正在运行...</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="144"/>
+        <location filename="mainwindow.cpp" line="182"/>
+        <source>yyyy-MM-dd hh:mm:ss dddd</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="149"/>
+        <source>StartSvc</source>
+        <translation type="unfinished">启动服务</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="150"/>
+        <location filename="mainwindow.cpp" line="201"/>
+        <source>:/player_play.png</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="151"/>
+        <source>Server is stopped!</source>
+        <translation type="unfinished">服务已停止！</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="182"/>
+        <source>Server is running...
+%1
+ Run length?%2day%3hour%4minute%5second</source>
+        <translation type="unfinished">服务正在运行...%1运行时长：%2天%3小时%4分钟%5秒</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="201"/>
+        <source>StartSvc(&amp;S)</source>
+        <translation type="unfinished">启动服务（&amp;S）</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="203"/>
+        <source>:/video_display.png</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="203"/>
+        <source>StopSvc(&amp;R)</source>
+        <translation type="unfinished">停止服务（&amp;R）</translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="205"/>
+        <source>:/stock_exit.png</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="205"/>
+        <source>Exit(&amp;E)</source>
+        <translation type="unfinished">退出(&amp;E)</translation>
+    </message>
 </context>
 <context>
     <name>QClientStatePage</name>
@@ -136,60 +227,70 @@
         <translation type="obsolete">加载本地配置文件失败！</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="53"/>
+        <location filename="qsvcstatepage.cpp" line="58"/>
         <source>LocalServer:</source>
         <translation type="unfinished">本地服务：</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="57"/>
-        <location filename="qsvcstatepage.cpp" line="67"/>
+        <location filename="qsvcstatepage.cpp" line="62"/>
+        <location filename="qsvcstatepage.cpp" line="72"/>
         <source>Stopped</source>
         <translation type="unfinished">已停止</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="63"/>
+        <location filename="qsvcstatepage.cpp" line="68"/>
         <source>UploadServer:</source>
         <translation type="unfinished">上传服务：</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="72"/>
+        <location filename="qsvcstatepage.cpp" line="77"/>
         <source>Database:</source>
         <translation type="unfinished">数 据 库：</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="76"/>
+        <location filename="qsvcstatepage.cpp" line="81"/>
         <source>Disconnect</source>
         <translation type="unfinished">已断开</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="84"/>
+        <location filename="qsvcstatepage.cpp" line="89"/>
         <source>AutoAjustTime:</source>
         <translation type="unfinished">自动校时：</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="91"/>
+        <location filename="qsvcstatepage.cpp" line="96"/>
         <source>Weekly</source>
         <translation type="unfinished">按星期</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="102"/>
+        <location filename="qsvcstatepage.cpp" line="107"/>
         <source>Daily</source>
         <translation type="unfinished">按天</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="104"/>
+        <location filename="qsvcstatepage.cpp" line="109"/>
         <source>Monthly</source>
         <translation type="unfinished">按月</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="64"/>
+        <location filename="main.cpp" line="78"/>
         <source>error</source>
         <translation type="unfinished">错误</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="64"/>
+        <location filename="main.cpp" line="78"/>
         <source>Load local config file error!</source>
         <translation type="unfinished">载入本地文件错误！</translation>
+    </message>
+    <message>
+        <location filename="main.cpp" line="86"/>
+        <source>Systray</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="main.cpp" line="87"/>
+        <source>I couldn&apos;t detect any system tray on this system.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Failed to load the local configuration file !</source>
@@ -199,7 +300,7 @@
 <context>
     <name>QSvcStatePage</name>
     <message>
-        <location filename="qsvcstatepage.cpp" line="34"/>
+        <location filename="qsvcstatepage.cpp" line="36"/>
         <source>font: 18pt; color:#45c9d5;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -212,8 +313,8 @@
         <translation type="obsolete">已停止</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="59"/>
-        <location filename="qsvcstatepage.cpp" line="69"/>
+        <location filename="qsvcstatepage.cpp" line="64"/>
+        <location filename="qsvcstatepage.cpp" line="74"/>
         <source>font: 18pt; color:rgb(117,250,0);</source>
         <translation type="unfinished"></translation>
     </message>
@@ -230,7 +331,7 @@
         <translation type="obsolete">断开</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="78"/>
+        <location filename="qsvcstatepage.cpp" line="83"/>
         <source>font: 18pt; color:red;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -239,13 +340,13 @@
         <translation type="obsolete">自动校时：</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="87"/>
+        <location filename="qsvcstatepage.cpp" line="92"/>
         <source>00:00:00</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="88"/>
-        <location filename="qsvcstatepage.cpp" line="92"/>
+        <location filename="qsvcstatepage.cpp" line="93"/>
+        <location filename="qsvcstatepage.cpp" line="97"/>
         <source>font: 16pt; color:rgb(117,250,0);</source>
         <translation type="unfinished"></translation>
     </message>
@@ -254,8 +355,8 @@
         <translation type="obsolete">按星期</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="97"/>
-        <location filename="qsvcstatepage.cpp" line="98"/>
+        <location filename="qsvcstatepage.cpp" line="102"/>
+        <location filename="qsvcstatepage.cpp" line="103"/>
         <source>font: 16pt; color:gray;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -268,26 +369,31 @@
         <translation type="obsolete">按月</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="153"/>
-        <location filename="qsvcstatepage.cpp" line="187"/>
+        <location filename="qsvcstatepage.cpp" line="38"/>
+        <source>font: 14pt; color:#45c9d5;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="qsvcstatepage.cpp" line="158"/>
+        <location filename="qsvcstatepage.cpp" line="202"/>
         <source>connect ok</source>
         <translation type="unfinished">连接正常</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="168"/>
-        <location filename="qsvcstatepage.cpp" line="169"/>
+        <location filename="qsvcstatepage.cpp" line="183"/>
+        <location filename="qsvcstatepage.cpp" line="184"/>
         <source>running</source>
         <translation type="unfinished">正在运行</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="191"/>
-        <source>disconnect</source>
-        <translation type="unfinished">已断开</translation>
+        <location filename="qsvcstatepage.cpp" line="192"/>
+        <source>stopped</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="215"/>
-        <source>./ntpclient -s -t -i 1 -h %1 &amp;</source>
-        <translation type="unfinished"></translation>
+        <location filename="qsvcstatepage.cpp" line="206"/>
+        <source>disconnect</source>
+        <translation type="unfinished">已断开</translation>
     </message>
 </context>
 <context>
@@ -297,99 +403,98 @@
         <translation type="obsolete">错误</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="34"/>
+        <location filename="qsysteminfopage.cpp" line="36"/>
         <source>Station Config</source>
         <translation type="unfinished">台站属性</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="38"/>
+        <location filename="qsysteminfopage.cpp" line="40"/>
         <source>StationId:</source>
         <translation type="unfinished">台站Id：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="48"/>
+        <location filename="qsysteminfopage.cpp" line="50"/>
         <source>StationName:</source>
         <translation type="unfinished">台站名称：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="58"/>
+        <location filename="qsysteminfopage.cpp" line="60"/>
         <source>DevIdentify:</source>
         <translation type="unfinished">设备标识：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="65"/>
+        <location filename="qsysteminfopage.cpp" line="67"/>
         <source>StationIdentify:</source>
         <translation type="unfinished">台站标识：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="74"/>
+        <location filename="qsysteminfopage.cpp" line="76"/>
         <source>Platform Attribute</source>
         <translation type="unfinished">平台属性</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="79"/>
+        <location filename="qsysteminfopage.cpp" line="81"/>
         <source>Platform server:</source>
         <translation type="unfinished">平台服务：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="88"/>
+        <location filename="qsysteminfopage.cpp" line="90"/>
         <source>AjustTimeServer:</source>
         <translation type="unfinished">校时服务：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="104"/>
+        <location filename="qsysteminfopage.cpp" line="106"/>
         <source>using</source>
         <translation type="unfinished">启用</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="113"/>
+        <location filename="qsysteminfopage.cpp" line="115"/>
         <source>Local network</source>
         <translation type="unfinished">本地网络</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="116"/>
+        <location filename="qsysteminfopage.cpp" line="118"/>
         <source>Card1:</source>
         <translation type="unfinished">网卡1：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="126"/>
+        <location filename="qsysteminfopage.cpp" line="130"/>
         <source>Card2:</source>
         <translation type="unfinished">网卡2：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="137"/>
-        <source>without</source>
-        <translation type="unfinished">无</translation>
+        <location filename="qsysteminfopage.cpp" line="272"/>
+        <source>note</source>
+        <translation type="unfinished">注意</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="149"/>
+        <location filename="qsysteminfopage.cpp" line="272"/>
+        <source>Failed to save the local configuration parameters, please check!</source>
+        <translation type="unfinished">保存本地配置文件失败，请重新检查！</translation>
+    </message>
+    <message>
+        <source>without</source>
+        <translation type="obsolete">无</translation>
+    </message>
+    <message>
+        <location filename="qsysteminfopage.cpp" line="170"/>
         <source>Copyright Â© 2006-2016 Anhui Huixin Electronics Co. Ltd.</source>
         <oldsource>CopyrightÂ©2006-2016 Anhui Huixin Electronics Co. Ltd.</oldsource>
         <translation type="unfinished">版权所有©2006-2016 安徽汇鑫电子有限公司</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="150"/>
+        <location filename="qsysteminfopage.cpp" line="171"/>
         <source>font: 9pt; color:#45c9d5;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="152"/>
+        <location filename="qsysteminfopage.cpp" line="173"/>
         <source>Tel:0551-65319365 , 65314565</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="153"/>
+        <location filename="qsysteminfopage.cpp" line="174"/>
         <source>font: 10pt; color:#45c9d5;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="qsysteminfopage.cpp" line="251"/>
-        <source>æ³¨æ</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="qsysteminfopage.cpp" line="251"/>
-        <source>ä¿å­æ¬å°éç½®åæ°å¤±è´¥ï¼è¯·æ£æ¥ï¼</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

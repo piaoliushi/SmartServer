@@ -7,14 +7,23 @@
 #include <QtPlugin>
 #include <QMessageBox>
 #include <QTranslator>
+#include <QSystemTrayIcon>
 #include <QDebug>
 #include "LocalConfig.h"
 #include "./net/config.h"
 #include "./database/ConnectionPool.h"
 #include "./snmp_pp/snmp_pp.h"
+#include "./signalApp/qtsingleapplication.h"
+
 int main(int argc, char *argv[])
 {
+#ifdef Q_OS_WIN
+    QtSingleApplication a(argc, argv);
+    if(a.sendMessage(QString("show app")))
+        return 0;
+#else
     QApplication a(argc, argv);
+#endif
     QString AppDir = QCoreApplication::applicationDirPath();
     QTranslator qtTranslator;
     if(qtTranslator.load(AppDir + "/SmartServer_CN.qm")==true)
@@ -24,10 +33,11 @@ int main(int argc, char *argv[])
     sys_translator.load("qt_zh_CN.qm");
     a.installTranslator(&sys_translator);
 
-#ifdef ARM_LINUX_DEF
+#ifndef Q_OS_WIN
     QWSServer::setCursorVisible(false);
     Q_IMPORT_PLUGIN(qsqlpsql)
 #endif
+
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
@@ -57,10 +67,10 @@ int main(int argc, char *argv[])
 
     QApplication::setPalette(pal);
     QFont font  = a.font();
-#ifdef ARM_LINUX_DEF
-    font.setPointSize(16);
-#else
+#ifdef Q_OS_WIN
     font.setPointSize(12);
+#else
+    font.setPointSize(16);
 #endif
     a.setFont(font);
     AppDir.append("/ServerLocalConfig.xml");
@@ -71,13 +81,24 @@ int main(int argc, char *argv[])
 
     DefaultLog::log()->set_filter(DEBUG_LOG, 0);
     DefaultLog::log()->set_filter(INFO_LOG, 0);
+#ifdef Q_OS_WIN
+    if (!QSystemTrayIcon::isSystemTrayAvailable()) {
+        QMessageBox::critical(0, QObject::tr("Systray"),
+            QObject::tr("I couldn't detect any system tray "
+            "on this system."));
+        return 1;
+    }
+    QApplication::setQuitOnLastWindowClosed(false);
+#endif
 
     MainWindow w;
 
-#ifdef ARM_LINUX_DEF
-    w.showMaximized();
-#else
+#ifdef Q_OS_WIN
     w.show();
+    a.setActivationWindow(&w);
+    QObject::connect(&a,SIGNAL(messageReceived(const QString&)),&w,SLOT(signalAppSlot(const QString &)));
+#else
+    w.showMaximized();
 #endif
     int nyet = a.exec();
     ConnectionPool::release();

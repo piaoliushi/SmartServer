@@ -15,5 +15,10 @@
         <file>clock.png</file>
         <file alias="checked.png">checked.png</file>
         <file alias="unchecked.png">unchecked.png</file>
+        <file alias="player_play.png">player_play.png</file>
+        <file alias="player_stop.png">player_stop.png</file>
+        <file alias="server.png">server.png</file>
+        <file alias="stock_exit.png">stock_exit.png</file>
+        <file alias="video_display.png">video_display.png</file>
     </qresource>
 </RCC>
