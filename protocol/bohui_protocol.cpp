@@ -292,7 +292,7 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                  xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
                   if(nDevType>DEVICE_GPS_TIME){
                       //暂时链路设备通道未做划分----待修改
-                      xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("QulitySrc","0"));
+                      xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("QualitySrc","0"));
                       xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("SrcIndex","0"));
                   }
 

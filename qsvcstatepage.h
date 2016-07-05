@@ -34,18 +34,18 @@ private:
     QLabel   *d_pSvcStateValueLabel;
     QLabel   *d_pHttpServerStateValueLabel;
     QLabel   *d_pDatabaseStateValueLabel;
-
-    QLabel    *d_pAdjustTimeModLabel;
-    QLabel    *d_pABaseTimeLabel;
-
+    QLabel   *d_pAdjustTimeModLabel;
+    QLabel   *d_pABaseTimeLabel;
     QLabel   *d_plbDateTime;
 
-    bool     d_bUseNtp;
-    int       d_nModNtp;
-    int       d_nValueNtp;
-    string   d_sTimeNtp;
+    QPushButton *d_pStartBt;
 
-    int   d_fd;
+    bool     d_bUseNtp;
+    int      d_nModNtp;
+    int      d_nValueNtp;
+    string   d_sTimeNtp;
+    int      d_fd;
+
 };
 
 #endif // QSVCSTATEPAGE_H

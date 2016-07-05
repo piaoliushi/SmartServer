@@ -15,7 +15,7 @@ public:
     //提交httpTask
     void putHttpMessage(std::string sUrl,std::string &sData);
     //打开url
-    void openUrl();//bool asyncFlag=falsestd::string sUrl,std::string &sData,std::string sRqstType="POST"
+    void openUrl();
     //上报http消息到上级平台(数据)
     void send_http_data_messge_to_platform(string sDevid,int nDevType,DevMonitorDataPtr &curData,
                                            map<int,DeviceMonitorItem> &mapMonitorItem);
@@ -28,14 +28,18 @@ public:
     //查询dtmb节目配置
     void query_dtmb_program_config();
 protected:
+    bool isExit();
+    void setExit();
     //void  read_handler(const boost::system::error_code& ec, std::size_t length);
     void  open_handler(const boost::system::error_code& ec);
 private:
-    boost::recursive_mutex         http_stream_mutex_;//http上报对象互斥量
+    //boost::recursive_mutex         http_stream_mutex_;//http上报对象互斥量
     boost::asio::io_service    &http_io_service_;
-   // boost::array<char, 512> data_;
     boost::shared_ptr<TaskQueue<pair<string,string> > > _taskqueueptr;//任务队列
+
+    boost::recursive_mutex         deal_thread_mutex_;//http上报对象互斥量
     boost::shared_ptr<boost::thread> deal_thread_;//网络监听线程
+    bool d_bExit_;
     bool asycFlag_;
 };
 

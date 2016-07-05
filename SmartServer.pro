@@ -205,13 +205,13 @@ else:win32:CONFIG(debug, debug|release): {
 LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib/ -llibprotobufD -llibprotocD -llibprotobuf-liteD
 LIBS += -LD:/ThirdSdk/snmp++/lib/ -lsnmplib
 LIBS += -LD:/ThirdSdk/boost_1_48_0/stage/lib -llibboost_system-vc100-mt-gd-1_48 -llibboost_date_time-vc100-mt-gd-1_48 -llibboost_thread-vc100-mt-gd-1_48
-
+#LIBS += -LD:/ThirdSdk/Visual Leak Detector/lib/Win32/ -lvld
 }
 INCLUDEPATH += 'D:/ThirdSdk/boost_1_48_0'
 INCLUDEPATH += 'D:/ThirdSdk/protobuf-2.6.1/protobuf-2.6.1/src'
 INCLUDEPATH += 'D:/ThirdSdk/boost_1_48_0/boost/urdl-0.1/include'
 INCLUDEPATH += 'D:/ThirdSdk/snmp++/include'
-
+#INCLUDEPATH += 'D:/ThirdSdk/Visual Leak Detector/include'
 }
 
 

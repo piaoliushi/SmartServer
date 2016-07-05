@@ -43,7 +43,7 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     pAdjustTimeBt->setIcon(QIcon(":/new/images/clock.png"));
     pAdjustTimeBt->setFlat(true);
     connect(pAdjustTimeBt,SIGNAL(clicked()),this,SLOT(onMunualAdjustTime()));
-     pTopLyt->addWidget(pAdjustTimeBt);
+    pTopLyt->addWidget(pAdjustTimeBt);
     pTopLyt->addWidget(d_plbDateTime);
 
     pVMainLyt->addLayout(pTopLyt);
@@ -187,7 +187,6 @@ void QSvcStatePage::StartSvc()
     else
     {
         GetInst(hx_net::SvcMgr).Stop();
-        //GetInst(DataBaseOperation).CloseDb();//清理数据库
         m_IsRunning=false;
         d_pSvcStateValueLabel->setText(tr("stopped"));
         emit updateDevList(false);

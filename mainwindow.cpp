@@ -107,6 +107,7 @@ void MainWindow::OnUpdateDevList(bool bLoad)
         d_pDevStatePage->clearDevList();
 }
 
+
 #ifdef Q_OS_WIN
 
 void MainWindow::showMessage(QString &sHeader,QString &sContent)
@@ -118,7 +119,7 @@ void MainWindow::showMessage(QString &sHeader,QString &sContent)
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 
-    if (trayIcon->isVisible()) //程序将在托盘区继续运行,想要退出程序请在快捷菜单中选择\"退出程序\"
+    if (trayIcon->isVisible())
     {
         showMessage(tr("remind"),tr("Program will continue to run in the area of the tray, you want to quit the program, please select the shortcut menu in the \"exit\""));
         hide();
@@ -146,7 +147,7 @@ void MainWindow::OnUpdateMenu()
     else
     {
         startupAction->setText(tr("StartSvc"));
-        startupAction->setIcon(QIcon(tr(":/new/images/player_play.png")));
+        startupAction->setIcon(QIcon(":/new/images/player_play.png"));
         trayIcon->setToolTip(QString(tr("Server is stopped!")));
     }
 }
@@ -160,15 +161,16 @@ void MainWindow::timeUpdate()
     double ninterval = difftime(QDateTime::currentDateTime().toTime_t(),tSvcStartTime.toTime_t());
     QString printStr = QDateTime::fromTime_t(ninterval).toString("yyyy-MM-dd hh:mm:ss");
     int secondsPerDay = 3600*24;
-    int ndays = (int)ninterval/secondsPerDay;//dataCur.day()-tSvcStartTime.date().day();
+    int nDays = (int)ninterval/secondsPerDay;
     int hourSpan = (int)ninterval%secondsPerDay;
     int nHours = hourSpan/3600;
     int minuteSpan = hourSpan%3600;
     int nMinutes = minuteSpan/60;
     int nSeconds = minuteSpan%60;
 
-    trayIcon->setToolTip(QString(tr("Server is running...\n%1\n Run length：%2day%3hour%4minute%5second")).arg(tSvcStartTime.toString(tr("yyyy-MM-dd hh:mm:ss dddd")))\
-                         .arg(ndays).arg(nHours).arg(nMinutes).arg(nSeconds));
+  //  trayIcon->setToolTip(QString(tr("Server is running...\n%1\n Run length：%2day%3hour%4minute%5second"))\
+  //                       .arg(tSvcStartTime.toString(tr("yyyy-MM-dd hh:mm:ss dddd")))\
+  //                       .arg(nDays).arg(nHours).arg(nMinutes).arg(nSeconds));
 
 }
 

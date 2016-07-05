@@ -5,27 +5,49 @@
 namespace hx_net {
 
 http_request_session::http_request_session(boost::asio::io_service& io_service,bool bAsycFlag)
-   // :http_stream_(io_service)
     :http_io_service_(io_service)
-   ,asycFlag_(bAsycFlag)
-    ,_taskqueueptr(new TaskQueue< pair<string,string> >)//创建一个任务队列
+    ,asycFlag_(bAsycFlag)
+    ,_taskqueueptr(new TaskQueue< pair<string,string> >)
+    ,d_bExit_(false)
 {
        deal_thread_.reset(new boost::thread(boost::bind(&http_request_session::openUrl,this)));
 }
 
  http_request_session::~http_request_session(void)
  {
-
+     setExit();
+     if(deal_thread_!=NULL)
+     {
+         if(deal_thread_->joinable())
+         {
+             deal_thread_->interrupt();
+             deal_thread_->join();
+         }
+     }
 
  }
 
  //提交httpTask
  void http_request_session::putHttpMessage(std::string sUrl,std::string &sData)
  {
-     _taskqueueptr->SubmitTask(pair<string,string>(sUrl,sData));//sUrl
+     if(!isExit())
+        _taskqueueptr->SubmitTask(pair<string,string>(sUrl,sData));
  }
+
+ bool http_request_session::isExit()
+ {
+     boost::recursive_mutex::scoped_lock lock(deal_thread_mutex_);
+     return d_bExit_;
+ }
+
+ void http_request_session::setExit()
+ {
+     boost::recursive_mutex::scoped_lock lock(deal_thread_mutex_);
+     d_bExit_ = true;
+ }
+
   //开始连接
- void http_request_session::openUrl()//bool asyncFlagstd::string sUrl,std::string &sData,std::string sRqstType
+ void http_request_session::openUrl()
  {
      do
      {
@@ -39,13 +61,13 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
           http_stream_.set_option(urdl::http::request_method("POST"));
           http_stream_.set_option(urdl::http::request_content_type("text/plain"));
           http_stream_.set_option(urdl::http::request_content(task_.second));
-
           http_stream_.set_options(common_options);
+          http_stream_.set_ignore_return_content(true);
           if(!task_.first.empty()){
 
               try
               {
-                 // cout<<task_.second<<endl;
+                  //cout<<task_.second<<endl;
                   if(asycFlag_==true){
                         http_stream_.async_open(task_.first,boost::bind(&http_request_session::open_handler,
                                                                          this,boost::asio::placeholders::error));
@@ -64,7 +86,7 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
               }
 
           }
-     } while (true);
+     } while (!isExit());
  }
 
  void http_request_session::open_handler(const boost::system::error_code& ec)

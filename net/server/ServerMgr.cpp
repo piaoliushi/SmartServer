@@ -22,6 +22,7 @@ namespace hx_net
 		: _taskqueueptr(new TaskQueue<msgPointer>)//创建一个任务队列
 		, _workerptr(new server_work((*_taskqueueptr.get())))//创建一个用户任务
         , _serverptr(new LocalServer(port, (*_taskqueueptr.get())))//创建一个服务
+        ,_httpserverptr(NULL)
     {
 
         _listenthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunNetListen, this)));

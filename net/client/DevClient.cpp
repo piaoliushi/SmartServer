@@ -187,6 +187,7 @@ e_ErrorCode DevClient::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo
     }
    return EC_OBJECT_NULL;
 }
+
 int DevClient::get_modle_online_count()
 {
     boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
@@ -206,8 +207,7 @@ int DevClient::get_modle_online_count()
 //上报http消息
 e_ErrorCode   DevClient::response_http_msg(string sUrl,string &sContent,string sRqstType)
 {
-   //http_request_session_ptr response_session_ptr(new http_request_session(io_service_pool_.get_io_service()));
-    //http_request_session_ptr_->openUrl(sUrl,sContent,sRqstType);
+
     http_request_session_ptr_->putHttpMessage(sUrl,sContent);
     return EC_OK;
 }

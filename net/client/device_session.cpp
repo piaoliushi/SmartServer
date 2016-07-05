@@ -619,9 +619,9 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId)
     if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
         if(iter->second.size()>childId){
             start_write(iter->second[childId].commandId,iter->second[childId].commandLen);
-            string outputStr;
-            CharStr2HexStr(iter->second[childId].commandId,outputStr,iter->second[childId].commandLen);
-            cout<<"query cmd :"<<outputStr<<endl;
+            //string outputStr;
+            //CharStr2HexStr(iter->second[childId].commandId,outputStr,iter->second[childId].commandLen);
+            //cout<<"query cmd :"<<outputStr<<endl;
         }
     }
 }
@@ -1010,8 +1010,8 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     //如果在监测时间段则保存当前记录
     if(bIsMonitorTime)
         save_monitor_record(sDevId,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
-    else
-        cout<<"deviceId="<<sDevId<<"----bIsMonitorTime   is  false "<<endl;
+    //else
+    //    cout<<"deviceId="<<sDevId<<"----bIsMonitorTime   is  false "<<endl;
     //任务数递减
     task_count_decrease();
     return;
