@@ -38,8 +38,10 @@ int main(int argc, char *argv[])
     a.installTranslator(&sys_translator);
 
 #ifndef Q_OS_WIN
+#ifdef ARM_LINUX_DEF
     QWSServer::setCursorVisible(false);
     Q_IMPORT_PLUGIN(qsqlpsql)
+#endif
 #endif
 
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
