@@ -288,8 +288,9 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                      xml_Quality_Index = xml_reportMsg.allocate_node(node_element,"Quality");
                  else
                      xml_Quality_Index = xml_reportMsg.allocate_node(node_element,mapTypeToStr[cell_iter->second.iTargetId].second.c_str());
-
-                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
+                 //烟感，水浸，配电设备，温湿度，没有Type属性
+                 if(nDevType < DEVICE_ELEC || nDevType >= DEVICE_GPS)
+                    xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
                   if(nDevType>DEVICE_GPS_TIME){
                       //暂时链路设备通道未做划分----待修改
                       xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("QualitySrc","0"));
@@ -303,7 +304,11 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                      xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(curData->mValues[cell_iter->first].sValue.c_str())));
                  else
                      xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(sValue.c_str())));
-                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
+                if(nDevType==DEVICE_ELEC || nDevType==DEVICE_TEMP)
+                    xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Unit",xml_reportMsg.allocate_string(cell_iter->second.sUnit.c_str())));
+
+                if(nDevType!=DEVICE_SMOKE && nDevType!=DEVICE_WATER)
+                    xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
 
 
                 xml_dev_node ->append_node(xml_Quality_Index);

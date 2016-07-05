@@ -11,7 +11,7 @@ enum DEVType
 {
     DEVICE_TRANSMITTER = 0,//发射机
     DEVICE_ELEC              = 1,  //电力仪
-    DEVICE_TEMP             = 2,   //温度计
+    DEVICE_TEMP             = 2,   //温湿度计
     DEVICE_SMOKE          = 3,   //烟雾
     DEVICE_WATER           = 4, //水禁
     DEVICE_AIR                = 5,//空调
