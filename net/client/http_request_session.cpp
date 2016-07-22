@@ -6,9 +6,10 @@ namespace hx_net {
 
 http_request_session::http_request_session(boost::asio::io_service& io_service,bool bAsycFlag)
     :http_io_service_(io_service)
-    ,asycFlag_(bAsycFlag)
+    ,asycFlag_(bAsycFlag)//
     ,_taskqueueptr(new TaskQueue< pair<string,string> >)
     ,d_bExit_(false)
+    ,http_stream_(http_io_service_)
 {
        deal_thread_.reset(new boost::thread(boost::bind(&http_request_session::openUrl,this)));
 }
@@ -53,18 +54,16 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
      {
          //从队列中取任务进行处理
          pair<string,string> task_ = _taskqueueptr->GetTask();
-
-         urdl::read_stream http_stream_(http_io_service_);
-         //调用子类work，处理具体任务
-          urdl::option_set common_options;
-          common_options.set_option(urdl::http::max_redirects(0));
-          http_stream_.set_option(urdl::http::request_method("POST"));
-          http_stream_.set_option(urdl::http::request_content_type("text/plain"));
-          http_stream_.set_option(urdl::http::request_content(task_.second));
-          http_stream_.set_options(common_options);
-          http_stream_.set_ignore_return_content(true);
-          if(!task_.first.empty()){
-
+         if(!task_.first.empty()){
+              urdl::read_stream http_stream_(http_io_service_);
+              //调用子类work，处理具体任务
+               urdl::option_set common_options;
+               common_options.set_option(urdl::http::max_redirects(0));
+               http_stream_.set_option(urdl::http::request_method("POST"));
+               http_stream_.set_option(urdl::http::request_content_type("text/plain"));
+               http_stream_.set_option(urdl::http::request_content(task_.second));
+               http_stream_.set_options(common_options);
+               http_stream_.set_ignore_return_content(true);
               try
               {
                   //cout<<task_.second<<endl;
@@ -73,8 +72,8 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
                                                                          this,boost::asio::placeholders::error));
                   }else{
                       boost::system::error_code ec;
+                      cout<<"http_stream_.open----------start!!!"<<endl;
                       http_stream_.open(task_.first, ec);
-
                       cout<<"task size:------"<<_taskqueueptr->get_Task_Size()<<"-------"<<ec.message()<<endl;
                       http_stream_.close();
                   }
@@ -96,7 +95,7 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
    {
 
        std::cerr << "open URL ok !!!: ";
-        //http_stream_.close();
+        http_stream_.close();
        //http_stream_.async_read_some(boost::asio::buffer(data_),boost::bind(&http_request_session::read_handler, this,
        //                                                                                         boost::asio::placeholders::error,
         //                                                                                        boost::asio::placeholders::bytes_transferred));
@@ -105,7 +104,7 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
    }else {
 
      //std::cerr << "Unable to open URL: ";
-     //http_stream_.close();
+     http_stream_.close();
      std::cerr << ec.message() << std::endl;
    }
 

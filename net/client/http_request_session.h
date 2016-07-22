@@ -41,6 +41,7 @@ private:
     boost::shared_ptr<boost::thread> deal_thread_;//网络监听线程
     bool d_bExit_;
     bool asycFlag_;
+    urdl::read_stream http_stream_;
 };
 
 }
