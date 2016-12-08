@@ -61,6 +61,7 @@ class TurnOffDevMsg;
 class CommandParam;
 class DeviceCommandMsg;
 class DeviceCommandResultNotify;
+class WebSocketMessage;
 
 enum DevNetStatus_e_NetStatus {
   DevNetStatus_e_NetStatus_ONLINE = 0,
@@ -3721,6 +3722,210 @@ class DeviceCommandResultNotify : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static DeviceCommandResultNotify* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class WebSocketMessage : public ::google::protobuf::Message {
+ public:
+  WebSocketMessage();
+  virtual ~WebSocketMessage();
+
+  WebSocketMessage(const WebSocketMessage& from);
+
+  inline WebSocketMessage& operator=(const WebSocketMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const WebSocketMessage& default_instance();
+
+  void Swap(WebSocketMessage* other);
+
+  // implements Message ----------------------------------------------
+
+  WebSocketMessage* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const WebSocketMessage& from);
+  void MergeFrom(const WebSocketMessage& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required string sMsgType = 1;
+  inline bool has_smsgtype() const;
+  inline void clear_smsgtype();
+  static const int kSMsgTypeFieldNumber = 1;
+  inline const ::std::string& smsgtype() const;
+  inline void set_smsgtype(const ::std::string& value);
+  inline void set_smsgtype(const char* value);
+  inline void set_smsgtype(const char* value, size_t size);
+  inline ::std::string* mutable_smsgtype();
+  inline ::std::string* release_smsgtype();
+  inline void set_allocated_smsgtype(::std::string* smsgtype);
+
+  // optional .LoginReq msgLoginReq = 2;
+  inline bool has_msgloginreq() const;
+  inline void clear_msgloginreq();
+  static const int kMsgLoginReqFieldNumber = 2;
+  inline const ::LoginReq& msgloginreq() const;
+  inline ::LoginReq* mutable_msgloginreq();
+  inline ::LoginReq* release_msgloginreq();
+  inline void set_allocated_msgloginreq(::LoginReq* msgloginreq);
+
+  // optional .LoginAck msgLoginAck = 3;
+  inline bool has_msgloginack() const;
+  inline void clear_msgloginack();
+  static const int kMsgLoginAckFieldNumber = 3;
+  inline const ::LoginAck& msgloginack() const;
+  inline ::LoginAck* mutable_msgloginack();
+  inline ::LoginAck* release_msgloginack();
+  inline void set_allocated_msgloginack(::LoginAck* msgloginack);
+
+  // optional .DevDataNotify monitorDataNty = 4;
+  inline bool has_monitordatanty() const;
+  inline void clear_monitordatanty();
+  static const int kMonitorDataNtyFieldNumber = 4;
+  inline const ::DevDataNotify& monitordatanty() const;
+  inline ::DevDataNotify* mutable_monitordatanty();
+  inline ::DevDataNotify* release_monitordatanty();
+  inline void set_allocated_monitordatanty(::DevDataNotify* monitordatanty);
+
+  // optional .DevNetStatusNotify devNetStatusNty = 5;
+  inline bool has_devnetstatusnty() const;
+  inline void clear_devnetstatusnty();
+  static const int kDevNetStatusNtyFieldNumber = 5;
+  inline const ::DevNetStatusNotify& devnetstatusnty() const;
+  inline ::DevNetStatusNotify* mutable_devnetstatusnty();
+  inline ::DevNetStatusNotify* release_devnetstatusnty();
+  inline void set_allocated_devnetstatusnty(::DevNetStatusNotify* devnetstatusnty);
+
+  // optional .DevWorkStatusNotify devWorkStatusNty = 6;
+  inline bool has_devworkstatusnty() const;
+  inline void clear_devworkstatusnty();
+  static const int kDevWorkStatusNtyFieldNumber = 6;
+  inline const ::DevWorkStatusNotify& devworkstatusnty() const;
+  inline ::DevWorkStatusNotify* mutable_devworkstatusnty();
+  inline ::DevWorkStatusNotify* release_devworkstatusnty();
+  inline void set_allocated_devworkstatusnty(::DevWorkStatusNotify* devworkstatusnty);
+
+  // optional .DevAlarmStatusNotify devAlarmStatusNty = 7;
+  inline bool has_devalarmstatusnty() const;
+  inline void clear_devalarmstatusnty();
+  static const int kDevAlarmStatusNtyFieldNumber = 7;
+  inline const ::DevAlarmStatusNotify& devalarmstatusnty() const;
+  inline ::DevAlarmStatusNotify* mutable_devalarmstatusnty();
+  inline ::DevAlarmStatusNotify* release_devalarmstatusnty();
+  inline void set_allocated_devalarmstatusnty(::DevAlarmStatusNotify* devalarmstatusnty);
+
+  // optional .DeviceCommandResultNotify commandResultNty = 8;
+  inline bool has_commandresultnty() const;
+  inline void clear_commandresultnty();
+  static const int kCommandResultNtyFieldNumber = 8;
+  inline const ::DeviceCommandResultNotify& commandresultnty() const;
+  inline ::DeviceCommandResultNotify* mutable_commandresultnty();
+  inline ::DeviceCommandResultNotify* release_commandresultnty();
+  inline void set_allocated_commandresultnty(::DeviceCommandResultNotify* commandresultnty);
+
+  // optional .TurnOnDevMsg msgTurnOnReq = 9;
+  inline bool has_msgturnonreq() const;
+  inline void clear_msgturnonreq();
+  static const int kMsgTurnOnReqFieldNumber = 9;
+  inline const ::TurnOnDevMsg& msgturnonreq() const;
+  inline ::TurnOnDevMsg* mutable_msgturnonreq();
+  inline ::TurnOnDevMsg* release_msgturnonreq();
+  inline void set_allocated_msgturnonreq(::TurnOnDevMsg* msgturnonreq);
+
+  // optional .TurnOffDevMsg msgTurnOffNty = 10;
+  inline bool has_msgturnoffnty() const;
+  inline void clear_msgturnoffnty();
+  static const int kMsgTurnOffNtyFieldNumber = 10;
+  inline const ::TurnOffDevMsg& msgturnoffnty() const;
+  inline ::TurnOffDevMsg* mutable_msgturnoffnty();
+  inline ::TurnOffDevMsg* release_msgturnoffnty();
+  inline void set_allocated_msgturnoffnty(::TurnOffDevMsg* msgturnoffnty);
+
+  // optional .DeviceCommandMsg msgCommandReq = 11;
+  inline bool has_msgcommandreq() const;
+  inline void clear_msgcommandreq();
+  static const int kMsgCommandReqFieldNumber = 11;
+  inline const ::DeviceCommandMsg& msgcommandreq() const;
+  inline ::DeviceCommandMsg* mutable_msgcommandreq();
+  inline ::DeviceCommandMsg* release_msgcommandreq();
+  inline void set_allocated_msgcommandreq(::DeviceCommandMsg* msgcommandreq);
+
+  // @@protoc_insertion_point(class_scope:WebSocketMessage)
+ private:
+  inline void set_has_smsgtype();
+  inline void clear_has_smsgtype();
+  inline void set_has_msgloginreq();
+  inline void clear_has_msgloginreq();
+  inline void set_has_msgloginack();
+  inline void clear_has_msgloginack();
+  inline void set_has_monitordatanty();
+  inline void clear_has_monitordatanty();
+  inline void set_has_devnetstatusnty();
+  inline void clear_has_devnetstatusnty();
+  inline void set_has_devworkstatusnty();
+  inline void clear_has_devworkstatusnty();
+  inline void set_has_devalarmstatusnty();
+  inline void clear_has_devalarmstatusnty();
+  inline void set_has_commandresultnty();
+  inline void clear_has_commandresultnty();
+  inline void set_has_msgturnonreq();
+  inline void clear_has_msgturnonreq();
+  inline void set_has_msgturnoffnty();
+  inline void clear_has_msgturnoffnty();
+  inline void set_has_msgcommandreq();
+  inline void clear_has_msgcommandreq();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::std::string* smsgtype_;
+  ::LoginReq* msgloginreq_;
+  ::LoginAck* msgloginack_;
+  ::DevDataNotify* monitordatanty_;
+  ::DevNetStatusNotify* devnetstatusnty_;
+  ::DevWorkStatusNotify* devworkstatusnty_;
+  ::DevAlarmStatusNotify* devalarmstatusnty_;
+  ::DeviceCommandResultNotify* commandresultnty_;
+  ::TurnOnDevMsg* msgturnonreq_;
+  ::TurnOffDevMsg* msgturnoffnty_;
+  ::DeviceCommandMsg* msgcommandreq_;
+  friend void  protobuf_AddDesc_protocol_2eproto();
+  friend void protobuf_AssignDesc_protocol_2eproto();
+  friend void protobuf_ShutdownFile_protocol_2eproto();
+
+  void InitAsDefaultInstance();
+  static WebSocketMessage* default_instance_;
 };
 // ===================================================================
 
@@ -9963,6 +10168,496 @@ inline ::google::protobuf::RepeatedPtrField< ::CommandParam >*
 DeviceCommandResultNotify::mutable_cparams() {
   // @@protoc_insertion_point(field_mutable_list:DeviceCommandResultNotify.cParams)
   return &cparams_;
+}
+
+// -------------------------------------------------------------------
+
+// WebSocketMessage
+
+// required string sMsgType = 1;
+inline bool WebSocketMessage::has_smsgtype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void WebSocketMessage::set_has_smsgtype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void WebSocketMessage::clear_has_smsgtype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void WebSocketMessage::clear_smsgtype() {
+  if (smsgtype_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    smsgtype_->clear();
+  }
+  clear_has_smsgtype();
+}
+inline const ::std::string& WebSocketMessage::smsgtype() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.sMsgType)
+  return *smsgtype_;
+}
+inline void WebSocketMessage::set_smsgtype(const ::std::string& value) {
+  set_has_smsgtype();
+  if (smsgtype_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    smsgtype_ = new ::std::string;
+  }
+  smsgtype_->assign(value);
+  // @@protoc_insertion_point(field_set:WebSocketMessage.sMsgType)
+}
+inline void WebSocketMessage::set_smsgtype(const char* value) {
+  set_has_smsgtype();
+  if (smsgtype_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    smsgtype_ = new ::std::string;
+  }
+  smsgtype_->assign(value);
+  // @@protoc_insertion_point(field_set_char:WebSocketMessage.sMsgType)
+}
+inline void WebSocketMessage::set_smsgtype(const char* value, size_t size) {
+  set_has_smsgtype();
+  if (smsgtype_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    smsgtype_ = new ::std::string;
+  }
+  smsgtype_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:WebSocketMessage.sMsgType)
+}
+inline ::std::string* WebSocketMessage::mutable_smsgtype() {
+  set_has_smsgtype();
+  if (smsgtype_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    smsgtype_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.sMsgType)
+  return smsgtype_;
+}
+inline ::std::string* WebSocketMessage::release_smsgtype() {
+  clear_has_smsgtype();
+  if (smsgtype_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = smsgtype_;
+    smsgtype_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void WebSocketMessage::set_allocated_smsgtype(::std::string* smsgtype) {
+  if (smsgtype_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete smsgtype_;
+  }
+  if (smsgtype) {
+    set_has_smsgtype();
+    smsgtype_ = smsgtype;
+  } else {
+    clear_has_smsgtype();
+    smsgtype_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.sMsgType)
+}
+
+// optional .LoginReq msgLoginReq = 2;
+inline bool WebSocketMessage::has_msgloginreq() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void WebSocketMessage::set_has_msgloginreq() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void WebSocketMessage::clear_has_msgloginreq() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void WebSocketMessage::clear_msgloginreq() {
+  if (msgloginreq_ != NULL) msgloginreq_->::LoginReq::Clear();
+  clear_has_msgloginreq();
+}
+inline const ::LoginReq& WebSocketMessage::msgloginreq() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.msgLoginReq)
+  return msgloginreq_ != NULL ? *msgloginreq_ : *default_instance_->msgloginreq_;
+}
+inline ::LoginReq* WebSocketMessage::mutable_msgloginreq() {
+  set_has_msgloginreq();
+  if (msgloginreq_ == NULL) msgloginreq_ = new ::LoginReq;
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.msgLoginReq)
+  return msgloginreq_;
+}
+inline ::LoginReq* WebSocketMessage::release_msgloginreq() {
+  clear_has_msgloginreq();
+  ::LoginReq* temp = msgloginreq_;
+  msgloginreq_ = NULL;
+  return temp;
+}
+inline void WebSocketMessage::set_allocated_msgloginreq(::LoginReq* msgloginreq) {
+  delete msgloginreq_;
+  msgloginreq_ = msgloginreq;
+  if (msgloginreq) {
+    set_has_msgloginreq();
+  } else {
+    clear_has_msgloginreq();
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.msgLoginReq)
+}
+
+// optional .LoginAck msgLoginAck = 3;
+inline bool WebSocketMessage::has_msgloginack() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void WebSocketMessage::set_has_msgloginack() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void WebSocketMessage::clear_has_msgloginack() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void WebSocketMessage::clear_msgloginack() {
+  if (msgloginack_ != NULL) msgloginack_->::LoginAck::Clear();
+  clear_has_msgloginack();
+}
+inline const ::LoginAck& WebSocketMessage::msgloginack() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.msgLoginAck)
+  return msgloginack_ != NULL ? *msgloginack_ : *default_instance_->msgloginack_;
+}
+inline ::LoginAck* WebSocketMessage::mutable_msgloginack() {
+  set_has_msgloginack();
+  if (msgloginack_ == NULL) msgloginack_ = new ::LoginAck;
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.msgLoginAck)
+  return msgloginack_;
+}
+inline ::LoginAck* WebSocketMessage::release_msgloginack() {
+  clear_has_msgloginack();
+  ::LoginAck* temp = msgloginack_;
+  msgloginack_ = NULL;
+  return temp;
+}
+inline void WebSocketMessage::set_allocated_msgloginack(::LoginAck* msgloginack) {
+  delete msgloginack_;
+  msgloginack_ = msgloginack;
+  if (msgloginack) {
+    set_has_msgloginack();
+  } else {
+    clear_has_msgloginack();
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.msgLoginAck)
+}
+
+// optional .DevDataNotify monitorDataNty = 4;
+inline bool WebSocketMessage::has_monitordatanty() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void WebSocketMessage::set_has_monitordatanty() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void WebSocketMessage::clear_has_monitordatanty() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void WebSocketMessage::clear_monitordatanty() {
+  if (monitordatanty_ != NULL) monitordatanty_->::DevDataNotify::Clear();
+  clear_has_monitordatanty();
+}
+inline const ::DevDataNotify& WebSocketMessage::monitordatanty() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.monitorDataNty)
+  return monitordatanty_ != NULL ? *monitordatanty_ : *default_instance_->monitordatanty_;
+}
+inline ::DevDataNotify* WebSocketMessage::mutable_monitordatanty() {
+  set_has_monitordatanty();
+  if (monitordatanty_ == NULL) monitordatanty_ = new ::DevDataNotify;
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.monitorDataNty)
+  return monitordatanty_;
+}
+inline ::DevDataNotify* WebSocketMessage::release_monitordatanty() {
+  clear_has_monitordatanty();
+  ::DevDataNotify* temp = monitordatanty_;
+  monitordatanty_ = NULL;
+  return temp;
+}
+inline void WebSocketMessage::set_allocated_monitordatanty(::DevDataNotify* monitordatanty) {
+  delete monitordatanty_;
+  monitordatanty_ = monitordatanty;
+  if (monitordatanty) {
+    set_has_monitordatanty();
+  } else {
+    clear_has_monitordatanty();
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.monitorDataNty)
+}
+
+// optional .DevNetStatusNotify devNetStatusNty = 5;
+inline bool WebSocketMessage::has_devnetstatusnty() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void WebSocketMessage::set_has_devnetstatusnty() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void WebSocketMessage::clear_has_devnetstatusnty() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void WebSocketMessage::clear_devnetstatusnty() {
+  if (devnetstatusnty_ != NULL) devnetstatusnty_->::DevNetStatusNotify::Clear();
+  clear_has_devnetstatusnty();
+}
+inline const ::DevNetStatusNotify& WebSocketMessage::devnetstatusnty() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.devNetStatusNty)
+  return devnetstatusnty_ != NULL ? *devnetstatusnty_ : *default_instance_->devnetstatusnty_;
+}
+inline ::DevNetStatusNotify* WebSocketMessage::mutable_devnetstatusnty() {
+  set_has_devnetstatusnty();
+  if (devnetstatusnty_ == NULL) devnetstatusnty_ = new ::DevNetStatusNotify;
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.devNetStatusNty)
+  return devnetstatusnty_;
+}
+inline ::DevNetStatusNotify* WebSocketMessage::release_devnetstatusnty() {
+  clear_has_devnetstatusnty();
+  ::DevNetStatusNotify* temp = devnetstatusnty_;
+  devnetstatusnty_ = NULL;
+  return temp;
+}
+inline void WebSocketMessage::set_allocated_devnetstatusnty(::DevNetStatusNotify* devnetstatusnty) {
+  delete devnetstatusnty_;
+  devnetstatusnty_ = devnetstatusnty;
+  if (devnetstatusnty) {
+    set_has_devnetstatusnty();
+  } else {
+    clear_has_devnetstatusnty();
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.devNetStatusNty)
+}
+
+// optional .DevWorkStatusNotify devWorkStatusNty = 6;
+inline bool WebSocketMessage::has_devworkstatusnty() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void WebSocketMessage::set_has_devworkstatusnty() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void WebSocketMessage::clear_has_devworkstatusnty() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void WebSocketMessage::clear_devworkstatusnty() {
+  if (devworkstatusnty_ != NULL) devworkstatusnty_->::DevWorkStatusNotify::Clear();
+  clear_has_devworkstatusnty();
+}
+inline const ::DevWorkStatusNotify& WebSocketMessage::devworkstatusnty() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.devWorkStatusNty)
+  return devworkstatusnty_ != NULL ? *devworkstatusnty_ : *default_instance_->devworkstatusnty_;
+}
+inline ::DevWorkStatusNotify* WebSocketMessage::mutable_devworkstatusnty() {
+  set_has_devworkstatusnty();
+  if (devworkstatusnty_ == NULL) devworkstatusnty_ = new ::DevWorkStatusNotify;
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.devWorkStatusNty)
+  return devworkstatusnty_;
+}
+inline ::DevWorkStatusNotify* WebSocketMessage::release_devworkstatusnty() {
+  clear_has_devworkstatusnty();
+  ::DevWorkStatusNotify* temp = devworkstatusnty_;
+  devworkstatusnty_ = NULL;
+  return temp;
+}
+inline void WebSocketMessage::set_allocated_devworkstatusnty(::DevWorkStatusNotify* devworkstatusnty) {
+  delete devworkstatusnty_;
+  devworkstatusnty_ = devworkstatusnty;
+  if (devworkstatusnty) {
+    set_has_devworkstatusnty();
+  } else {
+    clear_has_devworkstatusnty();
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.devWorkStatusNty)
+}
+
+// optional .DevAlarmStatusNotify devAlarmStatusNty = 7;
+inline bool WebSocketMessage::has_devalarmstatusnty() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void WebSocketMessage::set_has_devalarmstatusnty() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void WebSocketMessage::clear_has_devalarmstatusnty() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void WebSocketMessage::clear_devalarmstatusnty() {
+  if (devalarmstatusnty_ != NULL) devalarmstatusnty_->::DevAlarmStatusNotify::Clear();
+  clear_has_devalarmstatusnty();
+}
+inline const ::DevAlarmStatusNotify& WebSocketMessage::devalarmstatusnty() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.devAlarmStatusNty)
+  return devalarmstatusnty_ != NULL ? *devalarmstatusnty_ : *default_instance_->devalarmstatusnty_;
+}
+inline ::DevAlarmStatusNotify* WebSocketMessage::mutable_devalarmstatusnty() {
+  set_has_devalarmstatusnty();
+  if (devalarmstatusnty_ == NULL) devalarmstatusnty_ = new ::DevAlarmStatusNotify;
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.devAlarmStatusNty)
+  return devalarmstatusnty_;
+}
+inline ::DevAlarmStatusNotify* WebSocketMessage::release_devalarmstatusnty() {
+  clear_has_devalarmstatusnty();
+  ::DevAlarmStatusNotify* temp = devalarmstatusnty_;
+  devalarmstatusnty_ = NULL;
+  return temp;
+}
+inline void WebSocketMessage::set_allocated_devalarmstatusnty(::DevAlarmStatusNotify* devalarmstatusnty) {
+  delete devalarmstatusnty_;
+  devalarmstatusnty_ = devalarmstatusnty;
+  if (devalarmstatusnty) {
+    set_has_devalarmstatusnty();
+  } else {
+    clear_has_devalarmstatusnty();
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.devAlarmStatusNty)
+}
+
+// optional .DeviceCommandResultNotify commandResultNty = 8;
+inline bool WebSocketMessage::has_commandresultnty() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void WebSocketMessage::set_has_commandresultnty() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void WebSocketMessage::clear_has_commandresultnty() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void WebSocketMessage::clear_commandresultnty() {
+  if (commandresultnty_ != NULL) commandresultnty_->::DeviceCommandResultNotify::Clear();
+  clear_has_commandresultnty();
+}
+inline const ::DeviceCommandResultNotify& WebSocketMessage::commandresultnty() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.commandResultNty)
+  return commandresultnty_ != NULL ? *commandresultnty_ : *default_instance_->commandresultnty_;
+}
+inline ::DeviceCommandResultNotify* WebSocketMessage::mutable_commandresultnty() {
+  set_has_commandresultnty();
+  if (commandresultnty_ == NULL) commandresultnty_ = new ::DeviceCommandResultNotify;
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.commandResultNty)
+  return commandresultnty_;
+}
+inline ::DeviceCommandResultNotify* WebSocketMessage::release_commandresultnty() {
+  clear_has_commandresultnty();
+  ::DeviceCommandResultNotify* temp = commandresultnty_;
+  commandresultnty_ = NULL;
+  return temp;
+}
+inline void WebSocketMessage::set_allocated_commandresultnty(::DeviceCommandResultNotify* commandresultnty) {
+  delete commandresultnty_;
+  commandresultnty_ = commandresultnty;
+  if (commandresultnty) {
+    set_has_commandresultnty();
+  } else {
+    clear_has_commandresultnty();
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.commandResultNty)
+}
+
+// optional .TurnOnDevMsg msgTurnOnReq = 9;
+inline bool WebSocketMessage::has_msgturnonreq() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void WebSocketMessage::set_has_msgturnonreq() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void WebSocketMessage::clear_has_msgturnonreq() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void WebSocketMessage::clear_msgturnonreq() {
+  if (msgturnonreq_ != NULL) msgturnonreq_->::TurnOnDevMsg::Clear();
+  clear_has_msgturnonreq();
+}
+inline const ::TurnOnDevMsg& WebSocketMessage::msgturnonreq() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.msgTurnOnReq)
+  return msgturnonreq_ != NULL ? *msgturnonreq_ : *default_instance_->msgturnonreq_;
+}
+inline ::TurnOnDevMsg* WebSocketMessage::mutable_msgturnonreq() {
+  set_has_msgturnonreq();
+  if (msgturnonreq_ == NULL) msgturnonreq_ = new ::TurnOnDevMsg;
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.msgTurnOnReq)
+  return msgturnonreq_;
+}
+inline ::TurnOnDevMsg* WebSocketMessage::release_msgturnonreq() {
+  clear_has_msgturnonreq();
+  ::TurnOnDevMsg* temp = msgturnonreq_;
+  msgturnonreq_ = NULL;
+  return temp;
+}
+inline void WebSocketMessage::set_allocated_msgturnonreq(::TurnOnDevMsg* msgturnonreq) {
+  delete msgturnonreq_;
+  msgturnonreq_ = msgturnonreq;
+  if (msgturnonreq) {
+    set_has_msgturnonreq();
+  } else {
+    clear_has_msgturnonreq();
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.msgTurnOnReq)
+}
+
+// optional .TurnOffDevMsg msgTurnOffNty = 10;
+inline bool WebSocketMessage::has_msgturnoffnty() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void WebSocketMessage::set_has_msgturnoffnty() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void WebSocketMessage::clear_has_msgturnoffnty() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void WebSocketMessage::clear_msgturnoffnty() {
+  if (msgturnoffnty_ != NULL) msgturnoffnty_->::TurnOffDevMsg::Clear();
+  clear_has_msgturnoffnty();
+}
+inline const ::TurnOffDevMsg& WebSocketMessage::msgturnoffnty() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.msgTurnOffNty)
+  return msgturnoffnty_ != NULL ? *msgturnoffnty_ : *default_instance_->msgturnoffnty_;
+}
+inline ::TurnOffDevMsg* WebSocketMessage::mutable_msgturnoffnty() {
+  set_has_msgturnoffnty();
+  if (msgturnoffnty_ == NULL) msgturnoffnty_ = new ::TurnOffDevMsg;
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.msgTurnOffNty)
+  return msgturnoffnty_;
+}
+inline ::TurnOffDevMsg* WebSocketMessage::release_msgturnoffnty() {
+  clear_has_msgturnoffnty();
+  ::TurnOffDevMsg* temp = msgturnoffnty_;
+  msgturnoffnty_ = NULL;
+  return temp;
+}
+inline void WebSocketMessage::set_allocated_msgturnoffnty(::TurnOffDevMsg* msgturnoffnty) {
+  delete msgturnoffnty_;
+  msgturnoffnty_ = msgturnoffnty;
+  if (msgturnoffnty) {
+    set_has_msgturnoffnty();
+  } else {
+    clear_has_msgturnoffnty();
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.msgTurnOffNty)
+}
+
+// optional .DeviceCommandMsg msgCommandReq = 11;
+inline bool WebSocketMessage::has_msgcommandreq() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void WebSocketMessage::set_has_msgcommandreq() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void WebSocketMessage::clear_has_msgcommandreq() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void WebSocketMessage::clear_msgcommandreq() {
+  if (msgcommandreq_ != NULL) msgcommandreq_->::DeviceCommandMsg::Clear();
+  clear_has_msgcommandreq();
+}
+inline const ::DeviceCommandMsg& WebSocketMessage::msgcommandreq() const {
+  // @@protoc_insertion_point(field_get:WebSocketMessage.msgCommandReq)
+  return msgcommandreq_ != NULL ? *msgcommandreq_ : *default_instance_->msgcommandreq_;
+}
+inline ::DeviceCommandMsg* WebSocketMessage::mutable_msgcommandreq() {
+  set_has_msgcommandreq();
+  if (msgcommandreq_ == NULL) msgcommandreq_ = new ::DeviceCommandMsg;
+  // @@protoc_insertion_point(field_mutable:WebSocketMessage.msgCommandReq)
+  return msgcommandreq_;
+}
+inline ::DeviceCommandMsg* WebSocketMessage::release_msgcommandreq() {
+  clear_has_msgcommandreq();
+  ::DeviceCommandMsg* temp = msgcommandreq_;
+  msgcommandreq_ = NULL;
+  return temp;
+}
+inline void WebSocketMessage::set_allocated_msgcommandreq(::DeviceCommandMsg* msgcommandreq) {
+  delete msgcommandreq_;
+  msgcommandreq_ = msgcommandreq;
+  if (msgcommandreq) {
+    set_has_msgcommandreq();
+  } else {
+    clear_has_msgcommandreq();
+  }
+  // @@protoc_insertion_point(field_set_allocated:WebSocketMessage.msgCommandReq)
 }
 
 

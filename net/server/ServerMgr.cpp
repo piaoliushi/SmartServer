@@ -105,6 +105,8 @@ namespace hx_net
 	{
 		if(_serverptr)
 			return _serverptr->send_dev_data(sStationid,sDevid,dataPtr);
+        if(_ws_serverptr)
+            return _ws_serverptr->send_message(dataPtr);
 		return;
 	}
 

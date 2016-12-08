@@ -19,15 +19,27 @@ websocket_server::websocket_server()
 
 
 void websocket_server::on_open(connection_hdl hdl) {
-    m_connections.insert(hdl);
+
+    boost::recursive_mutex::scoped_lock conlock(m_connection_lock);
+    m_connections.push_back(hdl);
 }
 
 void websocket_server::on_close(connection_hdl hdl) {
-    m_connections.erase(hdl);
+
+   boost::recursive_mutex::scoped_lock conlock(m_connection_lock);
+   std::vector<connection_hdl>::iterator iter = m_connections.begin();
+   for(;iter!=m_connections.end();++iter){
+       if((*iter).lock() == hdl.lock()){
+           m_connections.erase(iter);
+           return;
+       }
+   }
+
 }
 
 void websocket_server::on_message(connection_hdl hdl, ws_server::message_ptr msg) {
 
+    boost::recursive_mutex::scoped_lock conlock(m_connection_lock);
     con_list::iterator it = m_connections.begin();
     //ws_server::message_ptr msg(new ws_server:(s,websocketpp::frame::opcode::TEXT,500));
 //    LoginReq rlogin;
@@ -50,8 +62,17 @@ void websocket_server::on_message(connection_hdl hdl, ws_server::message_ptr msg
     }
 }
 
+void websocket_server::send_message(googleMsgPtr sMsg)
+{
+    boost::recursive_mutex::scoped_lock conlock(m_connection_lock);
+    con_list::iterator it = m_connections.begin();
+    for (;it!=m_connections.end();++it) {
+        m_server.send(*it,sMsg->SerializeAsString(),websocketpp::frame::opcode::binary);
+    }
+}
+
 void websocket_server::run(uint16_t port) {
-    m_server.listen(port);
+    m_server.listen(boost::asio::ip::tcp::v4(),port);
     m_server.start_accept();
     m_server.run();
 }
