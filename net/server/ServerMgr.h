@@ -5,7 +5,7 @@
 #include "./http/CommonPrecomp.h"
 #include "../io_service_pool.h"
 #include "local_server.h"
-
+#include "websocket_server.h"
 class server_work;
 namespace hx_net
 {
@@ -19,6 +19,7 @@ namespace hx_net
 		void RunNetListen();
 		void RunTasks();
         void RunHttpServer();
+        void RunWsServer();
 		//用户登录
 		void Login(session_ptr ch_ptr,string usr,string psw,LoginAck &loginAck);
 		//用户注销
@@ -59,6 +60,11 @@ namespace hx_net
         boost::shared_ptr<boost::thread> _httpthreadptr;//工作线程
         hx_http_server   *_httpserverptr;//http服务对象hx_http_server_ptr
         web_handler           * _web_handler;
+
+       boost::shared_ptr<boost::thread> _ws_threadptr;//websockt启动线程
+       boost::shared_ptr<websocket_server> _ws_serverptr;//websocket服务对象
+
+
 	};
 }
 

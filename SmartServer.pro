@@ -71,7 +71,8 @@ SOURCES += main.cpp\
     signalApp/qtlockedfile.cpp \
     signalApp/qtlockedfile_unix.cpp \
     signalApp/qtlockedfile_win.cpp \
-    signalApp/qtsingleapplication.cpp
+    signalApp/qtsingleapplication.cpp \
+    net/server/websocket_server.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -141,7 +142,8 @@ HEADERS  += \
     net/client/dev_message/transmmiter/AhhxTransmmit.h \
     signalApp/qtlocalpeer.h \
     signalApp/qtlockedfile.h \
-    signalApp/qtsingleapplication.h
+    signalApp/qtsingleapplication.h \
+    net/server/websocket_server.h
 
 FORMS    += mainwindow.ui
 
@@ -208,6 +210,7 @@ LIBS += -LD:/ThirdSdk/boost_1_48_0/stage/lib -llibboost_system-vc100-mt-gd-1_48 
 #LIBS += -LD:/ThirdSdk/Visual Leak Detector/lib/Win32/ -lvld
 }
 INCLUDEPATH += 'D:/ThirdSdk/boost_1_48_0'
+INCLUDEPATH += 'D:/ThirdSdk/boost_1_48_0/boost'
 INCLUDEPATH += 'D:/ThirdSdk/protobuf-2.6.1/protobuf-2.6.1/src'
 INCLUDEPATH += 'D:/ThirdSdk/boost_1_48_0/boost/urdl-0.1/include'
 INCLUDEPATH += 'D:/ThirdSdk/snmp++/include'

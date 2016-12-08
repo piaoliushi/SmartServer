@@ -44,6 +44,8 @@
 #include <boost/network/protocol/http/server/sync_server.hpp>
 #include <boost/network/protocol/http/server/async_server.hpp>
 #include <boost/network/utils/thread_pool.hpp>
+#include <boost/websocketpp/config/asio_no_tls.hpp>
+#include <boost/websocketpp/server.hpp>
 #include "./net/config.h"
 using namespace boost::asio;
 #endif

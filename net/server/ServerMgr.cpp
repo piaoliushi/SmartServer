@@ -5,9 +5,7 @@
 #include "./http/RequestHandlerFactory.h"
 #include "server_work.h"
 struct web_handler {
-    /* when there are many request at the same time, can put the request into a queue, then let another thread process it.
-     * or maybe need to call http::client to connect to other server, and get response.
-     */
+
     void operator()(const hx_http_server::request &request, hx_http_server::connection_ptr connection)
     {
         //request_handler_ptr request_handler_ = request_handler_factory::get_mutable_instance().create();
@@ -23,6 +21,7 @@ namespace hx_net
 		, _workerptr(new server_work((*_taskqueueptr.get())))//创建一个用户任务
         , _serverptr(new LocalServer(port, (*_taskqueueptr.get())))//创建一个服务
         ,_httpserverptr(NULL)
+        ,_ws_serverptr(new websocket_server)
     {
 
         _listenthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunNetListen, this)));
@@ -41,10 +40,15 @@ namespace hx_net
 
         }
 
+        _ws_threadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunWsServer, this)));
     }
 
 	ServerMgr::~ServerMgr() 
 	{
+        if(_ws_serverptr){
+            _ws_serverptr->stop();
+            _ws_threadptr->join();
+        }
         if(_httpserverptr){
             _httpserverptr->stop();
             _httpthreadptr->join();
@@ -73,6 +77,11 @@ namespace hx_net
     {
         if(_httpserverptr)
             _httpserverptr->run();
+    }
+
+    void ServerMgr::RunWsServer(){
+        if(_ws_serverptr)
+            _ws_serverptr->run(9002);
     }
 
 	//用户登录
