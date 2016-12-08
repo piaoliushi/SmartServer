@@ -172,6 +172,7 @@ INCLUDEPATH += /usr/local/protobuf-2.6.1/ubuntu_build/include
 INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
 INCLUDEPATH += /home/piaoliu/Project/snmplib
 INCLUDEPATH += /usr/local/boost_1_48_0
+INCLUDEPATH += /usr/local/boost_1_48_0/boost
 }
 else: !win32{
 DEFINES+=ARM_LINUX_DEF
@@ -194,6 +195,7 @@ INCLUDEPATH += /usr/local/protobuf-2.6.1/arm_build/include
 INCLUDEPATH += /usr/local/boost_1_48_0/urdl-0.1/include
 INCLUDEPATH += /home/piaoliu/Project/snmplib
 INCLUDEPATH += /usr/local/boost_1_48_0
+INCLUDEPATH += /usr/local/boost_1_48_0/boost
 }
 else:{
 
