@@ -642,7 +642,8 @@ void protobuf_AssignDesc_protocol_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceCommandResultNotify));
   WebSocketMessage_descriptor_ = file->message_type(27);
-  static const int WebSocketMessage_offsets_[11] = {
+  static const int WebSocketMessage_offsets_[12] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WebSocketMessage, nmsgtype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WebSocketMessage, smsgtype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WebSocketMessage, msgloginreq_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WebSocketMessage, msgloginack_),
@@ -895,35 +896,35 @@ void protobuf_AddDesc_protocol_2eproto() {
     "\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010"
     "eDevType\030\003 \001(\005\022\020\n\010sDevName\030\004 \001(\t\022\036\n\010eErr"
     "orId\030\005 \001(\0162\014.e_ErrorCode\022\021\n\tsOperUser\030\006 "
-    "\001(\t\022\036\n\007cParams\030\007 \003(\0132\r.CommandParam\"\310\003\n\020"
-    "WebSocketMessage\022\020\n\010sMsgType\030\001 \002(\t\022\036\n\013ms"
-    "gLoginReq\030\002 \001(\0132\t.LoginReq\022\036\n\013msgLoginAc"
-    "k\030\003 \001(\0132\t.LoginAck\022&\n\016monitorDataNty\030\004 \001"
-    "(\0132\016.DevDataNotify\022,\n\017devNetStatusNty\030\005 "
-    "\001(\0132\023.DevNetStatusNotify\022.\n\020devWorkStatu"
-    "sNty\030\006 \001(\0132\024.DevWorkStatusNotify\0220\n\021devA"
-    "larmStatusNty\030\007 \001(\0132\025.DevAlarmStatusNoti"
-    "fy\0224\n\020commandResultNty\030\010 \001(\0132\032.DeviceCom"
-    "mandResultNotify\022#\n\014msgTurnOnReq\030\t \001(\0132\r"
-    ".TurnOnDevMsg\022%\n\rmsgTurnOffNty\030\n \001(\0132\016.T"
-    "urnOffDevMsg\022(\n\rmsgCommandReq\030\013 \001(\0132\021.De"
-    "viceCommandMsg*\315\003\n\013e_ErrorCode\022\t\n\005EC_OK\020"
-    "\000\022\r\n\tEC_FAILED\020\001\022\024\n\020EC_USR_NOT_FOUND\020\002\022\031"
-    "\n\025EC_USR_NOT_PERMISSION\020\003\022\024\n\020EC_USR_PSW_"
-    "ERROR\020\004\022\027\n\023EC_USR_REPEAT_LOGIN\020\005\022\020\n\014EC_N"
-    "ET_ERROR\020\006\022\024\n\020EC_LOGOUT_FAILED\020\007\022\027\n\023EC_C"
-    "ONFIGREQ_FAILED\020\010\022\024\n\020EC_TURNON_FAILED\020\t\022"
-    "\025\n\021EC_TURNOFF_FAILED\020\n\022\032\n\026EC_ANTENNA_HTO"
-    "B_FAILED\020\013\022\032\n\026EC_ANTENNA_BTOH_FAILED\020\014\022\027"
-    "\n\023EC_DEVICE_NOT_FOUND\020\r\022\022\n\016EC_OBJECT_NUL"
-    "L\020\016\022\023\n\017EC_OPR_ON_GOING\020\017\022\032\n\026EC_SEND_SMS_"
-    "MSG_FAILED\020\020\022\027\n\023EC_DEV_DISCONNECTED\020\021\022\027\n"
-    "\023EC_CMD_SEND_SUCCEED\020\022\022\016\n\nEC_UNKNOWN\020\023*%"
-    "\n\ne_CellType\022\013\n\007DIGITAL\020\000\022\n\n\006ANALOG\020\001*b\n"
-    "\re_AlarmStatus\022\t\n\005UPPER\020\000\022\t\n\005LOWER\020\001\022\n\n\006"
-    "UPUPER\020\002\022\014\n\010LOWLOWER\020\003\022\t\n\005STATE\020\004\022\n\n\006DEV"
-    "ICE\020\005\022\n\n\006RESUME\020\006*)\n\ne_AlarmMod\022\014\n\010MOD_C"
-    "ELL\020\000\022\r\n\tMOD_OTHER\020\001", 4300);
+    "\001(\t\022\036\n\007cParams\030\007 \003(\0132\r.CommandParam\"\332\003\n\020"
+    "WebSocketMessage\022\020\n\010nMsgType\030\001 \002(\005\022\020\n\010sM"
+    "sgType\030\002 \002(\t\022\036\n\013msgLoginReq\030\003 \001(\0132\t.Logi"
+    "nReq\022\036\n\013msgLoginAck\030\004 \001(\0132\t.LoginAck\022&\n\016"
+    "monitorDataNty\030\005 \001(\0132\016.DevDataNotify\022,\n\017"
+    "devNetStatusNty\030\006 \001(\0132\023.DevNetStatusNoti"
+    "fy\022.\n\020devWorkStatusNty\030\007 \001(\0132\024.DevWorkSt"
+    "atusNotify\0220\n\021devAlarmStatusNty\030\010 \001(\0132\025."
+    "DevAlarmStatusNotify\0224\n\020commandResultNty"
+    "\030\t \001(\0132\032.DeviceCommandResultNotify\022#\n\014ms"
+    "gTurnOnReq\030\n \001(\0132\r.TurnOnDevMsg\022%\n\rmsgTu"
+    "rnOffNty\030\013 \001(\0132\016.TurnOffDevMsg\022(\n\rmsgCom"
+    "mandReq\030\014 \001(\0132\021.DeviceCommandMsg*\315\003\n\013e_E"
+    "rrorCode\022\t\n\005EC_OK\020\000\022\r\n\tEC_FAILED\020\001\022\024\n\020EC"
+    "_USR_NOT_FOUND\020\002\022\031\n\025EC_USR_NOT_PERMISSIO"
+    "N\020\003\022\024\n\020EC_USR_PSW_ERROR\020\004\022\027\n\023EC_USR_REPE"
+    "AT_LOGIN\020\005\022\020\n\014EC_NET_ERROR\020\006\022\024\n\020EC_LOGOU"
+    "T_FAILED\020\007\022\027\n\023EC_CONFIGREQ_FAILED\020\010\022\024\n\020E"
+    "C_TURNON_FAILED\020\t\022\025\n\021EC_TURNOFF_FAILED\020\n"
+    "\022\032\n\026EC_ANTENNA_HTOB_FAILED\020\013\022\032\n\026EC_ANTEN"
+    "NA_BTOH_FAILED\020\014\022\027\n\023EC_DEVICE_NOT_FOUND\020"
+    "\r\022\022\n\016EC_OBJECT_NULL\020\016\022\023\n\017EC_OPR_ON_GOING"
+    "\020\017\022\032\n\026EC_SEND_SMS_MSG_FAILED\020\020\022\027\n\023EC_DEV"
+    "_DISCONNECTED\020\021\022\027\n\023EC_CMD_SEND_SUCCEED\020\022"
+    "\022\016\n\nEC_UNKNOWN\020\023*%\n\ne_CellType\022\013\n\007DIGITA"
+    "L\020\000\022\n\n\006ANALOG\020\001*b\n\re_AlarmStatus\022\t\n\005UPPE"
+    "R\020\000\022\t\n\005LOWER\020\001\022\n\n\006UPUPER\020\002\022\014\n\010LOWLOWER\020\003"
+    "\022\t\n\005STATE\020\004\022\n\n\006DEVICE\020\005\022\n\n\006RESUME\020\006*)\n\ne"
+    "_AlarmMod\022\014\n\010MOD_CELL\020\000\022\r\n\tMOD_OTHER\020\001", 4318);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
   DevDataNotify::default_instance_ = new DevDataNotify();
@@ -12226,6 +12227,7 @@ void DeviceCommandResultNotify::Swap(DeviceCommandResultNotify* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int WebSocketMessage::kNMsgTypeFieldNumber;
 const int WebSocketMessage::kSMsgTypeFieldNumber;
 const int WebSocketMessage::kMsgLoginReqFieldNumber;
 const int WebSocketMessage::kMsgLoginAckFieldNumber;
@@ -12268,6 +12270,7 @@ WebSocketMessage::WebSocketMessage(const WebSocketMessage& from)
 void WebSocketMessage::SharedCtor() {
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
+  nmsgtype_ = 0;
   smsgtype_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   msgloginreq_ = NULL;
   msgloginack_ = NULL;
@@ -12328,6 +12331,7 @@ WebSocketMessage* WebSocketMessage::New() const {
 
 void WebSocketMessage::Clear() {
   if (_has_bits_[0 / 32] & 255) {
+    nmsgtype_ = 0;
     if (has_smsgtype()) {
       if (smsgtype_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         smsgtype_->clear();
@@ -12351,11 +12355,11 @@ void WebSocketMessage::Clear() {
     if (has_devalarmstatusnty()) {
       if (devalarmstatusnty_ != NULL) devalarmstatusnty_->::DevAlarmStatusNotify::Clear();
     }
+  }
+  if (_has_bits_[8 / 32] & 3840) {
     if (has_commandresultnty()) {
       if (commandresultnty_ != NULL) commandresultnty_->::DeviceCommandResultNotify::Clear();
     }
-  }
-  if (_has_bits_[8 / 32] & 1792) {
     if (has_msgturnonreq()) {
       if (msgturnonreq_ != NULL) msgturnonreq_->::TurnOnDevMsg::Clear();
     }
@@ -12380,9 +12384,24 @@ bool WebSocketMessage::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required string sMsgType = 1;
+      // required int32 nMsgType = 1;
       case 1: {
-        if (tag == 10) {
+        if (tag == 8) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &nmsgtype_)));
+          set_has_nmsgtype();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(18)) goto parse_sMsgType;
+        break;
+      }
+
+      // required string sMsgType = 2;
+      case 2: {
+        if (tag == 18) {
+         parse_sMsgType:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_smsgtype()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -12392,130 +12411,130 @@ bool WebSocketMessage::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_msgLoginReq;
+        if (input->ExpectTag(26)) goto parse_msgLoginReq;
         break;
       }
 
-      // optional .LoginReq msgLoginReq = 2;
-      case 2: {
-        if (tag == 18) {
+      // optional .LoginReq msgLoginReq = 3;
+      case 3: {
+        if (tag == 26) {
          parse_msgLoginReq:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_msgloginreq()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_msgLoginAck;
+        if (input->ExpectTag(34)) goto parse_msgLoginAck;
         break;
       }
 
-      // optional .LoginAck msgLoginAck = 3;
-      case 3: {
-        if (tag == 26) {
+      // optional .LoginAck msgLoginAck = 4;
+      case 4: {
+        if (tag == 34) {
          parse_msgLoginAck:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_msgloginack()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(34)) goto parse_monitorDataNty;
+        if (input->ExpectTag(42)) goto parse_monitorDataNty;
         break;
       }
 
-      // optional .DevDataNotify monitorDataNty = 4;
-      case 4: {
-        if (tag == 34) {
+      // optional .DevDataNotify monitorDataNty = 5;
+      case 5: {
+        if (tag == 42) {
          parse_monitorDataNty:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_monitordatanty()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(42)) goto parse_devNetStatusNty;
+        if (input->ExpectTag(50)) goto parse_devNetStatusNty;
         break;
       }
 
-      // optional .DevNetStatusNotify devNetStatusNty = 5;
-      case 5: {
-        if (tag == 42) {
+      // optional .DevNetStatusNotify devNetStatusNty = 6;
+      case 6: {
+        if (tag == 50) {
          parse_devNetStatusNty:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_devnetstatusnty()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(50)) goto parse_devWorkStatusNty;
+        if (input->ExpectTag(58)) goto parse_devWorkStatusNty;
         break;
       }
 
-      // optional .DevWorkStatusNotify devWorkStatusNty = 6;
-      case 6: {
-        if (tag == 50) {
+      // optional .DevWorkStatusNotify devWorkStatusNty = 7;
+      case 7: {
+        if (tag == 58) {
          parse_devWorkStatusNty:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_devworkstatusnty()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(58)) goto parse_devAlarmStatusNty;
+        if (input->ExpectTag(66)) goto parse_devAlarmStatusNty;
         break;
       }
 
-      // optional .DevAlarmStatusNotify devAlarmStatusNty = 7;
-      case 7: {
-        if (tag == 58) {
+      // optional .DevAlarmStatusNotify devAlarmStatusNty = 8;
+      case 8: {
+        if (tag == 66) {
          parse_devAlarmStatusNty:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_devalarmstatusnty()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(66)) goto parse_commandResultNty;
+        if (input->ExpectTag(74)) goto parse_commandResultNty;
         break;
       }
 
-      // optional .DeviceCommandResultNotify commandResultNty = 8;
-      case 8: {
-        if (tag == 66) {
+      // optional .DeviceCommandResultNotify commandResultNty = 9;
+      case 9: {
+        if (tag == 74) {
          parse_commandResultNty:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_commandresultnty()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(74)) goto parse_msgTurnOnReq;
+        if (input->ExpectTag(82)) goto parse_msgTurnOnReq;
         break;
       }
 
-      // optional .TurnOnDevMsg msgTurnOnReq = 9;
-      case 9: {
-        if (tag == 74) {
+      // optional .TurnOnDevMsg msgTurnOnReq = 10;
+      case 10: {
+        if (tag == 82) {
          parse_msgTurnOnReq:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_msgturnonreq()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(82)) goto parse_msgTurnOffNty;
+        if (input->ExpectTag(90)) goto parse_msgTurnOffNty;
         break;
       }
 
-      // optional .TurnOffDevMsg msgTurnOffNty = 10;
-      case 10: {
-        if (tag == 82) {
+      // optional .TurnOffDevMsg msgTurnOffNty = 11;
+      case 11: {
+        if (tag == 90) {
          parse_msgTurnOffNty:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_msgturnoffnty()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(90)) goto parse_msgCommandReq;
+        if (input->ExpectTag(98)) goto parse_msgCommandReq;
         break;
       }
 
-      // optional .DeviceCommandMsg msgCommandReq = 11;
-      case 11: {
-        if (tag == 90) {
+      // optional .DeviceCommandMsg msgCommandReq = 12;
+      case 12: {
+        if (tag == 98) {
          parse_msgCommandReq:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_msgcommandreq()));
@@ -12551,74 +12570,79 @@ failure:
 void WebSocketMessage::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:WebSocketMessage)
-  // required string sMsgType = 1;
+  // required int32 nMsgType = 1;
+  if (has_nmsgtype()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->nmsgtype(), output);
+  }
+
+  // required string sMsgType = 2;
   if (has_smsgtype()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->smsgtype().data(), this->smsgtype().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE,
       "smsgtype");
     ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      1, this->smsgtype(), output);
+      2, this->smsgtype(), output);
   }
 
-  // optional .LoginReq msgLoginReq = 2;
+  // optional .LoginReq msgLoginReq = 3;
   if (has_msgloginreq()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      2, this->msgloginreq(), output);
+      3, this->msgloginreq(), output);
   }
 
-  // optional .LoginAck msgLoginAck = 3;
+  // optional .LoginAck msgLoginAck = 4;
   if (has_msgloginack()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      3, this->msgloginack(), output);
+      4, this->msgloginack(), output);
   }
 
-  // optional .DevDataNotify monitorDataNty = 4;
+  // optional .DevDataNotify monitorDataNty = 5;
   if (has_monitordatanty()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      4, this->monitordatanty(), output);
+      5, this->monitordatanty(), output);
   }
 
-  // optional .DevNetStatusNotify devNetStatusNty = 5;
+  // optional .DevNetStatusNotify devNetStatusNty = 6;
   if (has_devnetstatusnty()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      5, this->devnetstatusnty(), output);
+      6, this->devnetstatusnty(), output);
   }
 
-  // optional .DevWorkStatusNotify devWorkStatusNty = 6;
+  // optional .DevWorkStatusNotify devWorkStatusNty = 7;
   if (has_devworkstatusnty()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      6, this->devworkstatusnty(), output);
+      7, this->devworkstatusnty(), output);
   }
 
-  // optional .DevAlarmStatusNotify devAlarmStatusNty = 7;
+  // optional .DevAlarmStatusNotify devAlarmStatusNty = 8;
   if (has_devalarmstatusnty()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      7, this->devalarmstatusnty(), output);
+      8, this->devalarmstatusnty(), output);
   }
 
-  // optional .DeviceCommandResultNotify commandResultNty = 8;
+  // optional .DeviceCommandResultNotify commandResultNty = 9;
   if (has_commandresultnty()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      8, this->commandresultnty(), output);
+      9, this->commandresultnty(), output);
   }
 
-  // optional .TurnOnDevMsg msgTurnOnReq = 9;
+  // optional .TurnOnDevMsg msgTurnOnReq = 10;
   if (has_msgturnonreq()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      9, this->msgturnonreq(), output);
+      10, this->msgturnonreq(), output);
   }
 
-  // optional .TurnOffDevMsg msgTurnOffNty = 10;
+  // optional .TurnOffDevMsg msgTurnOffNty = 11;
   if (has_msgturnoffnty()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      10, this->msgturnoffnty(), output);
+      11, this->msgturnoffnty(), output);
   }
 
-  // optional .DeviceCommandMsg msgCommandReq = 11;
+  // optional .DeviceCommandMsg msgCommandReq = 12;
   if (has_msgcommandreq()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      11, this->msgcommandreq(), output);
+      12, this->msgcommandreq(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -12631,7 +12655,12 @@ void WebSocketMessage::SerializeWithCachedSizes(
 ::google::protobuf::uint8* WebSocketMessage::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:WebSocketMessage)
-  // required string sMsgType = 1;
+  // required int32 nMsgType = 1;
+  if (has_nmsgtype()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->nmsgtype(), target);
+  }
+
+  // required string sMsgType = 2;
   if (has_smsgtype()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
       this->smsgtype().data(), this->smsgtype().length(),
@@ -12639,77 +12668,77 @@ void WebSocketMessage::SerializeWithCachedSizes(
       "smsgtype");
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        1, this->smsgtype(), target);
+        2, this->smsgtype(), target);
   }
 
-  // optional .LoginReq msgLoginReq = 2;
+  // optional .LoginReq msgLoginReq = 3;
   if (has_msgloginreq()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        2, this->msgloginreq(), target);
+        3, this->msgloginreq(), target);
   }
 
-  // optional .LoginAck msgLoginAck = 3;
+  // optional .LoginAck msgLoginAck = 4;
   if (has_msgloginack()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        3, this->msgloginack(), target);
+        4, this->msgloginack(), target);
   }
 
-  // optional .DevDataNotify monitorDataNty = 4;
+  // optional .DevDataNotify monitorDataNty = 5;
   if (has_monitordatanty()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        4, this->monitordatanty(), target);
+        5, this->monitordatanty(), target);
   }
 
-  // optional .DevNetStatusNotify devNetStatusNty = 5;
+  // optional .DevNetStatusNotify devNetStatusNty = 6;
   if (has_devnetstatusnty()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        5, this->devnetstatusnty(), target);
+        6, this->devnetstatusnty(), target);
   }
 
-  // optional .DevWorkStatusNotify devWorkStatusNty = 6;
+  // optional .DevWorkStatusNotify devWorkStatusNty = 7;
   if (has_devworkstatusnty()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        6, this->devworkstatusnty(), target);
+        7, this->devworkstatusnty(), target);
   }
 
-  // optional .DevAlarmStatusNotify devAlarmStatusNty = 7;
+  // optional .DevAlarmStatusNotify devAlarmStatusNty = 8;
   if (has_devalarmstatusnty()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        7, this->devalarmstatusnty(), target);
+        8, this->devalarmstatusnty(), target);
   }
 
-  // optional .DeviceCommandResultNotify commandResultNty = 8;
+  // optional .DeviceCommandResultNotify commandResultNty = 9;
   if (has_commandresultnty()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        8, this->commandresultnty(), target);
+        9, this->commandresultnty(), target);
   }
 
-  // optional .TurnOnDevMsg msgTurnOnReq = 9;
+  // optional .TurnOnDevMsg msgTurnOnReq = 10;
   if (has_msgturnonreq()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        9, this->msgturnonreq(), target);
+        10, this->msgturnonreq(), target);
   }
 
-  // optional .TurnOffDevMsg msgTurnOffNty = 10;
+  // optional .TurnOffDevMsg msgTurnOffNty = 11;
   if (has_msgturnoffnty()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        10, this->msgturnoffnty(), target);
+        11, this->msgturnoffnty(), target);
   }
 
-  // optional .DeviceCommandMsg msgCommandReq = 11;
+  // optional .DeviceCommandMsg msgCommandReq = 12;
   if (has_msgcommandreq()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        11, this->msgcommandreq(), target);
+        12, this->msgcommandreq(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -12724,79 +12753,86 @@ int WebSocketMessage::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required string sMsgType = 1;
+    // required int32 nMsgType = 1;
+    if (has_nmsgtype()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->nmsgtype());
+    }
+
+    // required string sMsgType = 2;
     if (has_smsgtype()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->smsgtype());
     }
 
-    // optional .LoginReq msgLoginReq = 2;
+    // optional .LoginReq msgLoginReq = 3;
     if (has_msgloginreq()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->msgloginreq());
     }
 
-    // optional .LoginAck msgLoginAck = 3;
+    // optional .LoginAck msgLoginAck = 4;
     if (has_msgloginack()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->msgloginack());
     }
 
-    // optional .DevDataNotify monitorDataNty = 4;
+    // optional .DevDataNotify monitorDataNty = 5;
     if (has_monitordatanty()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->monitordatanty());
     }
 
-    // optional .DevNetStatusNotify devNetStatusNty = 5;
+    // optional .DevNetStatusNotify devNetStatusNty = 6;
     if (has_devnetstatusnty()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->devnetstatusnty());
     }
 
-    // optional .DevWorkStatusNotify devWorkStatusNty = 6;
+    // optional .DevWorkStatusNotify devWorkStatusNty = 7;
     if (has_devworkstatusnty()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->devworkstatusnty());
     }
 
-    // optional .DevAlarmStatusNotify devAlarmStatusNty = 7;
+    // optional .DevAlarmStatusNotify devAlarmStatusNty = 8;
     if (has_devalarmstatusnty()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->devalarmstatusnty());
     }
 
-    // optional .DeviceCommandResultNotify commandResultNty = 8;
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional .DeviceCommandResultNotify commandResultNty = 9;
     if (has_commandresultnty()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->commandresultnty());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
-    // optional .TurnOnDevMsg msgTurnOnReq = 9;
+    // optional .TurnOnDevMsg msgTurnOnReq = 10;
     if (has_msgturnonreq()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->msgturnonreq());
     }
 
-    // optional .TurnOffDevMsg msgTurnOffNty = 10;
+    // optional .TurnOffDevMsg msgTurnOffNty = 11;
     if (has_msgturnoffnty()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->msgturnoffnty());
     }
 
-    // optional .DeviceCommandMsg msgCommandReq = 11;
+    // optional .DeviceCommandMsg msgCommandReq = 12;
     if (has_msgcommandreq()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
@@ -12830,6 +12866,9 @@ void WebSocketMessage::MergeFrom(const ::google::protobuf::Message& from) {
 void WebSocketMessage::MergeFrom(const WebSocketMessage& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_nmsgtype()) {
+      set_nmsgtype(from.nmsgtype());
+    }
     if (from.has_smsgtype()) {
       set_smsgtype(from.smsgtype());
     }
@@ -12851,11 +12890,11 @@ void WebSocketMessage::MergeFrom(const WebSocketMessage& from) {
     if (from.has_devalarmstatusnty()) {
       mutable_devalarmstatusnty()->::DevAlarmStatusNotify::MergeFrom(from.devalarmstatusnty());
     }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_commandresultnty()) {
       mutable_commandresultnty()->::DeviceCommandResultNotify::MergeFrom(from.commandresultnty());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_msgturnonreq()) {
       mutable_msgturnonreq()->::TurnOnDevMsg::MergeFrom(from.msgturnonreq());
     }
@@ -12882,7 +12921,7 @@ void WebSocketMessage::CopyFrom(const WebSocketMessage& from) {
 }
 
 bool WebSocketMessage::IsInitialized() const {
-  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
+  if ((_has_bits_[0] & 0x00000003) != 0x00000003) return false;
 
   if (has_msgloginack()) {
     if (!this->msgloginack().IsInitialized()) return false;
@@ -12916,6 +12955,7 @@ bool WebSocketMessage::IsInitialized() const {
 
 void WebSocketMessage::Swap(WebSocketMessage* other) {
   if (other != this) {
+    std::swap(nmsgtype_, other->nmsgtype_);
     std::swap(smsgtype_, other->smsgtype_);
     std::swap(msgloginreq_, other->msgloginreq_);
     std::swap(msgloginack_, other->msgloginack_);

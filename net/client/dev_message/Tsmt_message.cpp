@@ -170,8 +170,8 @@ namespace hx_net
 
     bool Tsmt_message::IsStandardCommand()
 	{
-
-        return m_ptransmmit->IsStandardCommand();
+         if(m_ptransmmit!=NULL)
+            return m_ptransmmit->IsStandardCommand();
 	}
 	
     void Tsmt_message::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)

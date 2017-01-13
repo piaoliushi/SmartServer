@@ -10,6 +10,7 @@
 typedef websocketpp::server<websocketpp::config::asio> ws_server;
 
 using websocketpp::connection_hdl;
+using boost::asio::ip::tcp;
 using namespace  hx_net;
 
 class websocket_server
@@ -29,12 +30,19 @@ public:
     void stop();
 
     void send_message(googleMsgPtr sMsg);
+
+protected:
+    bool _user_login(string sUser,string sPassword,LoginAck &loginAck);
+    bool _register_user(string sUser,connection_hdl hdl);
+    bool _is_register_user(string sUser);
+    void _unregister_user(connection_hdl hdl);
 private:
     //typedef std::set<connection_hdl,std::owner_less<connection_hdl> > con_list;
-    typedef std::vector<connection_hdl> con_list;
+    //typedef std::vector<connection_hdl> con_list;
+    typedef std::map<string,connection_hdl> con_list;//用户登陆列表
     ws_server m_server;
     con_list m_connections;
-    boost::recursive_mutex  m_connection_lock;
+    boost::recursive_mutex  m_connection_lock;//recursive_mutex
 };
 
 #endif // WEBSOCKET_SERVER_H

@@ -175,6 +175,7 @@ namespace hx_net
                 continue;
             DevDataNotify_eCellMsg *cell = dev_cur_data_ptr->add_ccelldata();
             cell->set_ecelltype((e_CellType)(*cell_iter).second.iItemType);
+            //int  xxx = (e_CellType)(*cell_iter).second.iItemType;
             cell->set_scellid((*cell_iter).second.iItemIndex);
             cell->set_scellname((*cell_iter).second.sItemName);
             string  sValue = str(boost::format("%.2f")%curData->mValues[iter->first].fValue);
@@ -185,6 +186,8 @@ namespace hx_net
                 sValue = (curData->mValues[iter->first].fValue>0)?"1":"0";
             cell->set_scellvalue(sValue);
         }
+
+
         /*map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
         for(;cell_iter!=mapMonitorItem.end();++cell_iter){
 			int cellId = (*cell_iter).first;			

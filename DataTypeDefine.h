@@ -321,7 +321,7 @@ enum _tagAssType
     DEV_TO_MOUDLE  = 2,//设备关联模块
     ATTENA_TO_TSMT = 3,//天线关联发射机
     CHNNEL_TO_DEV  = 4,//通道关联设备
-    MOUDLE_TO_DEV = 5,//模块关联设备
+    MOUDLE_TO_DEV  = 5,//模块关联设备
 };
 
 #endif

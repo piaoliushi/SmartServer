@@ -88,7 +88,7 @@ namespace hx_net
 	void ServerMgr::Login(session_ptr ch_ptr,string usr,string psw,LoginAck &loginAck)
 	{
 		if(_serverptr)
-			return _serverptr->user_login(ch_ptr,usr,psw,loginAck);
+            _serverptr->user_login(ch_ptr,usr,psw,loginAck);
 		return;
 	}
 
@@ -104,9 +104,14 @@ namespace hx_net
 	void ServerMgr::SendMonitorData(string sStationid,string sDevid,devDataNfyMsgPtr &dataPtr)
 	{
 		if(_serverptr)
-			return _serverptr->send_dev_data(sStationid,sDevid,dataPtr);
-        if(_ws_serverptr)
-            return _ws_serverptr->send_message(dataPtr);
+            _serverptr->send_dev_data(sStationid,sDevid,dataPtr);
+        if(_ws_serverptr){//websocket设备实时数据推送
+            webSocketMsgPtr curWebPtr(new WebSocketMessage);
+            curWebPtr->set_smsgtype("realtime_data");
+            curWebPtr->set_nmsgtype(MSG_DEV_REALTIME_DATA_NOTIFY);
+            curWebPtr->mutable_monitordatanty()->CopyFrom(*dataPtr);
+            _ws_serverptr->send_message(curWebPtr);
+        }
 		return;
 	}
 
@@ -114,28 +119,56 @@ namespace hx_net
 	void ServerMgr::SendDevNetStateData(string sStationid,string sDevid,devNetNfyMsgPtr &netPtr)
 	{
 		if(_serverptr)
-			return _serverptr->send_dev_net_state_data(sStationid,sDevid,netPtr);
+            _serverptr->send_dev_net_state_data(sStationid,sDevid,netPtr);
+        if(_ws_serverptr){//websocket设备网络状态推送
+            webSocketMsgPtr curWebPtr(new WebSocketMessage);
+            curWebPtr->set_smsgtype("netstate_notify");
+            curWebPtr->set_nmsgtype(MSG_DEV_NET_STATE_NOTIFY);
+            curWebPtr->mutable_devnetstatusnty()->CopyFrom(*netPtr);
+            _ws_serverptr->send_message(curWebPtr);
+        }
 	}
 
 	//发送设备运行状态通知
 	void ServerMgr::SendDevWorkStateData(string sStationid,string sDevid,devWorkNfyMsgPtr &workPtr)
 	{
 		if(_serverptr)
-			return _serverptr->send_dev_work_state_data(sStationid,sDevid,workPtr);
+            _serverptr->send_dev_work_state_data(sStationid,sDevid,workPtr);
+        if(_ws_serverptr){//websocket设备运行状态推送
+            webSocketMsgPtr curWebPtr(new WebSocketMessage);
+            curWebPtr->set_smsgtype("workstate_notify");
+            curWebPtr->set_nmsgtype(MSG_DEV_WORK_STATE_NOTIFY);
+            curWebPtr->mutable_devworkstatusnty()->CopyFrom(*workPtr);
+            _ws_serverptr->send_message(curWebPtr);
+        }
 	}
 
 	//发送设备报警状态通知
 	void ServerMgr::SendDevAlarmStateData(string sStationid,string sDevid,devAlarmNfyMsgPtr &alarmPtr)
 	{
 		if(_serverptr)
-			return _serverptr->send_dev_alarm_state_data(sStationid,sDevid,alarmPtr);
+            _serverptr->send_dev_alarm_state_data(sStationid,sDevid,alarmPtr);
+        if(_ws_serverptr){//websocket设备告警状态推送
+            webSocketMsgPtr curWebPtr(new WebSocketMessage);
+            curWebPtr->set_smsgtype("alarmstate_notify");
+            curWebPtr->set_nmsgtype(MSG_DEV_ALARM_STATE_NOTIFY);
+            curWebPtr->mutable_devalarmstatusnty()->CopyFrom(*alarmPtr);
+            _ws_serverptr->send_message(curWebPtr);
+        }
 	}
 
 	//发送控制执行结果通知
 	void ServerMgr::SendCommandExecuteResult(string sStationid,string sDevid,e_MsgType nMsgType,devCommdRsltPtr &commdRsltPtr)
 	{
 		if(_serverptr)
-			return _serverptr->send_command_execute_result(sStationid,sDevid,nMsgType,commdRsltPtr);
+            _serverptr->send_command_execute_result(sStationid,sDevid,nMsgType,commdRsltPtr);
+        if(_ws_serverptr){//websocket控制命令执行状态推送
+            webSocketMsgPtr curWebPtr(new WebSocketMessage);
+            curWebPtr->set_smsgtype("commandresult_notify");
+            curWebPtr->set_nmsgtype(nMsgType);
+            curWebPtr->mutable_devalarmstatusnty()->CopyFrom(*commdRsltPtr);
+            _ws_serverptr->send_message(curWebPtr);
+        }
 	}
 
 	//停止服务

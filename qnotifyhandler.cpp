@@ -2,7 +2,7 @@
 #include "MsgDefine.h"
 
 QNotifyHandler::QNotifyHandler(QObject *parent)
-	: QObject(parent)
+    : QObject(parent)
 {
 
 }
@@ -21,8 +21,8 @@ void QNotifyHandler::OnDevStatus(string sDevId,int nResult)
 void QNotifyHandler::OnClientOnline(string sIp,short port)
 {
     boost::recursive_mutex::scoped_lock lock(mutex_);
-    //QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);sEndpoint
-    emit S_OnClientOnline(QString::fromStdString(sIp));
+    QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);
+    emit S_OnClientOnline(sEndpoint);//QString::fromStdString()
 }
 
 //数据库状态
@@ -35,20 +35,20 @@ void QNotifyHandler::OnDatabase(bool bOk)
 void QNotifyHandler::OnClientOffline(string sIp,short port)
 {
     boost::recursive_mutex::scoped_lock lock(mutex_);
-    //QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);
-    emit S_OnClientOffline(QString::fromStdString(sIp));
+    QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);
+    emit S_OnClientOffline(sEndpoint);//QString::fromStdString(sIp)
 }
 
 void QNotifyHandler::OnClientLogin(string sIp,short port,string sName,string sID)
 {
-     boost::recursive_mutex::scoped_lock lock(mutex_);
-    //QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);
-    emit S_OnClientLogin(QString::fromStdString(sIp),sName.c_str(),sID.c_str());
+    boost::recursive_mutex::scoped_lock lock(mutex_);
+    QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);
+    emit S_OnClientLogin(sEndpoint,sName.c_str(),sID.c_str());//QString::fromStdString(sIp)
 }
 
 void QNotifyHandler::OnClientLogout(string sIp,short port)
 {
     boost::recursive_mutex::scoped_lock lock(mutex_);
-    //QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);
-    emit S_OnClientLogout(QString::fromStdString(sIp));
+    QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);
+    emit S_OnClientLogout(sEndpoint);//QString::fromStdString(sIp)
 }

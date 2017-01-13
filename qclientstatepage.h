@@ -14,7 +14,7 @@ public:
 public slots:
 	void OnClientOnline(QString sAddr);
 	void OnClientOffline(QString sAddr);
-	void OnClientLogin(QString sAddr,QString sName,QString sID);
+    void OnClientLogin(QString sAddr,QString sName,QString sID="xxxxxxxx");
 	void OnClientLogout(QString sAddr);
 private:
 	QNotifyHandler &m_Notify;

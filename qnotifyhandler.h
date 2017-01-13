@@ -21,7 +21,7 @@ public:
 	//客户端离线
 	void OnClientOffline(string sIp,short port);
 	//用户登录
-	void OnClientLogin(string sIp,short port,string sName,string sID);
+    void OnClientLogin(string sIp,short port,string sName,string sID="xxxxxxxx");
 	//用户退出
 	void OnClientLogout(string sIp,short port);
     //数据库状态
@@ -30,7 +30,7 @@ signals:
     void S_OnDevStatus(QString sDevId,int nResult);
 	void S_OnClientOnline(QString sIp);//
 	void S_OnClientOffline(QString sIp);//客户端下线
-	void S_OnClientLogin(QString sAddr,QString sName,QString sID);
+    void S_OnClientLogin(QString sAddr,QString sName,QString sID);
 	void S_OnClientLogout(QString sAddr);
     void S_OnDatabase(bool bOk);
 private:

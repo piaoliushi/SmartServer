@@ -60,7 +60,8 @@ namespace hx_net
 	typedef boost::shared_ptr<CommandParam>             commandParamPtr;
 	typedef boost::weak_ptr<CommandParam>               commandParamWeakPtr;
 
-
+    typedef boost::shared_ptr<WebSocketMessage>         webSocketMsgPtr;
+    typedef boost::weak_ptr<WebSocketMessage>           webSocketMsgWeakPtr;
 
 }
 #endif
