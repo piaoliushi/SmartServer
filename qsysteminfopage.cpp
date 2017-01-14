@@ -121,11 +121,15 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     QLabel *ethIp0 = new QLabel(this);
     ethIp0->setStyleSheet("color:#5fff53");
     pHlyt->addWidget(ethIp0);
-
-    QNetworkInterface   interface0 = QNetworkInterface::interfaceFromIndex(0);//"eth0"
+    QNetworkInterface   interface0 = QNetworkInterface::interfaceFromName("eth0");
     QList<QNetworkAddressEntry>  netlist0 = interface0.addressEntries();
     if(!netlist0.isEmpty())
         ethIp0->setText(netlist0.at(0).ip().toString());
+
+    //QNetworkInterface   interface0 = QNetworkInterface::interfaceFromIndex(0);//"eth0"
+    //QList<QNetworkAddressEntry>  netlist0 = interface0.addressEntries();
+    //if(!netlist0.isEmpty())
+    //    ethIp0->setText(netlist0.at(0).ip().toString());
 
     staticLabel = new QLabel(tr("Card2:"));
     staticLabel->setFixedWidth(65);
@@ -134,7 +138,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     ethIp1->setStyleSheet("color:#5fff53");
     pHlyt->addWidget(ethIp1);
 
-    QList<QNetworkInterface> networkInterface = QNetworkInterface::allInterfaces();
+ /*   QList<QNetworkInterface> networkInterface = QNetworkInterface::allInterfaces();
     QList<QNetworkInterface>::const_iterator i = networkInterface.begin();
     for (; i != networkInterface.end(); ++i) {
         if((*i).isValid()==false || (*i).flags()==QNetworkInterface::IsLoopBack)
@@ -149,13 +153,14 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
                 ethIp1->setText(entry.ip().toString());
         }
 
-    }
-   /* QNetworkInterface   interface1 = QNetworkInterface::interfaceFromIndex(1);//"eth1"
+    }*/
+    //QNetworkInterface   interface1 = QNetworkInterface::interfaceFromIndex(1);//"eth1"
+    QNetworkInterface   interface1 = QNetworkInterface::interfaceFromName("eth1");
     QList<QNetworkAddressEntry>  netlist1 = interface1.addressEntries();
     if(!netlist1.isEmpty())
         ethIp1->setText(netlist1.at(0).ip().toString());
     else
-        ethIp1->setText(tr("without"));*/
+        ethIp1->setText(tr("without"));
 
     pHMainLyt->addLayout(pHlyt);
 
