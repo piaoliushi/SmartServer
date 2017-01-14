@@ -31,6 +31,9 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
  //提交httpTask
  void http_request_session::putHttpMessage(std::string sUrl,std::string &sData)
  {
+     //如果没有开启http服务则不进行数据上传
+     if(GetInst(LocalConfig).http_svc_use()==false)
+         return;
      if(!isExit())
         _taskqueueptr->SubmitTask(pair<string,string>(sUrl,sData));
  }
