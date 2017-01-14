@@ -7,6 +7,9 @@
 #include "./transmmiter/GmeTransmmit.h"
 #include "./transmmiter/ShTransmmit.h"
 #include "./transmmiter/AhhxTransmmit.h"
+#include "./transmmiter/GlsqTransmmit.h"
+#include "./transmmiter/dexintransmmit.h"
+#include "./transmmiter/gsbrtransmmit.h"
 namespace hx_net
 {
 
@@ -94,7 +97,27 @@ namespace hx_net
                 m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
         }
         return idecresult;
-	}
+    }
+
+    int Tsmt_message::decode_msg_body(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)
+    {
+        int irunstate=dev_unknown;
+        if(data_ptr!=NULL)
+            d_curData_ptr = data_ptr;
+        int idecresult = m_ptransmmit->decode_msg_body(snmp,d_curData_ptr,target,irunstate);
+        if(idecresult == 0 ) {
+            GetResultData(d_curData_ptr);
+            if(irunstate==dev_unknown)
+                detect_run_state(d_curData_ptr);
+            else {
+                //设置运行状态
+                set_run_state(irunstate);
+            }
+            if(m_ptransmmit->isMultiQueryCmd())
+                m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+        }
+        return idecresult;
+    }
     //获得运行状态
     int Tsmt_message::get_run_state()
     {
@@ -170,8 +193,8 @@ namespace hx_net
 
     bool Tsmt_message::IsStandardCommand()
 	{
-         if(m_ptransmmit!=NULL)
-            return m_ptransmmit->IsStandardCommand();
+
+        return m_ptransmmit->IsStandardCommand();
 	}
 	
     void Tsmt_message::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)
@@ -276,6 +299,16 @@ namespace hx_net
         case HARRIS:
             break;
         case DE_XIN:
+            m_ptransmmit = new DeXinTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+            break;
+        case GLSQ:{
+            m_ptransmmit = new GlsqTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+        }
+            break;
+        case GSBR:
+        {
+            m_ptransmmit = new GsbrTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+        }
             break;
         }
     }

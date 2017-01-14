@@ -72,7 +72,10 @@ SOURCES += main.cpp\
     signalApp/qtlockedfile_unix.cpp \
     signalApp/qtlockedfile_win.cpp \
     signalApp/qtsingleapplication.cpp \
-    net/server/websocket_server.cpp
+    net/server/websocket_server.cpp \
+    net/client/dev_message/transmmiter/dexintransmmit.cpp \
+    net/client/dev_message/transmmiter/gsbrtransmmit.cpp \
+    net/client/dev_message/transmmiter/GlsqTransmmit.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -143,7 +146,10 @@ HEADERS  += \
     signalApp/qtlocalpeer.h \
     signalApp/qtlockedfile.h \
     signalApp/qtsingleapplication.h \
-    net/server/websocket_server.h
+    net/server/websocket_server.h \
+    net/client/dev_message/transmmiter/dexintransmmit.h \
+    net/client/dev_message/transmmiter/gsbrtransmmit.h \
+    net/client/dev_message/transmmiter/GlsqTransmmit.h
 
 FORMS    += mainwindow.ui
 

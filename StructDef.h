@@ -94,8 +94,9 @@ typedef enum PROTOCOL
     TSC_TMIEDEV                  = 21, //校时设备
     LINK_DEVICE                   = 22,  //链路设备
     SHANGHAI_ALL_BAND      = 23,   //上海功放机器
-    MEDIA_DEVICE                 = 24   //媒体设备
-
+    MEDIA_DEVICE                 = 24,   //媒体设备
+    GLSQ                  =26, //桂林思奇
+    GSBR                  =27  //高斯贝尔
 }Protocol,*pProtocol;
 
 typedef enum ANTENAPROTOCOL
@@ -245,7 +246,8 @@ typedef enum HarPROTOCOL
 
 typedef enum DxPROTOCOL
 {
-	DX_DUT_8413 = 0
+    DX_DUT_8413 = 0,
+    DX_DIG_TV   = 1
 }DxSubProtocol;
 
 
@@ -284,5 +286,12 @@ typedef enum  MEDIASUBPROTOCL_TAG
 {
     MEDIA_DTMB = 0,
 }MediaSubProtocol;
-
+typedef enum GLSQ_TAG
+{
+    GLSQ_T = 0,//思奇T型发射机
+}GlsqSubProtocol;
+typedef enum GSBR_TAG
+{
+    GSBR_SNMP = 0,
+}GsbrSubProtocol;
 #endif
