@@ -14,20 +14,21 @@
 #ifdef Q_OS_WIN
 #include <QSystemTrayIcon>
 #include <QDebug>
-#include "./signalApp/qtsingleapplication.h"
+
 #endif
+#include "./signalApp/qtsingleapplication.h"
 #ifdef Q_OS_WIN
 //#include "vld.h"
 #endif
 int main(int argc, char *argv[])
 {
-#ifdef Q_OS_WIN
+//#ifdef Q_OS_WIN
     QtSingleApplication a(argc, argv);
     if(a.sendMessage(QString("show app")))
         return 0;
-#else
-    QApplication a(argc, argv);
-#endif
+//#else
+//    QApplication a(argc, argv);
+//#endif
     QString AppDir = QCoreApplication::applicationDirPath();
     QTranslator qtTranslator;
     if(qtTranslator.load(AppDir + "/SmartServer_CN.qm")==true)
