@@ -249,7 +249,13 @@ void QSystemInfoPage::loadConfigData()
     string sNtpIp = GetInst(LocalConfig).ntp_svc_ip();
 
     d_stationNumber->setText(stationId.c_str());
-    d_stationName->setText(QString::fromUtf8(stationName.c_str()));
+
+    #ifdef Q_OS_WIN
+        d_stationName->setText(QString::fromUtf8(stationName.c_str()));
+    #else
+        d_stationName->setText(stationName.c_str());
+    #endif
+
     d_deviceId->setText(sSrcCode.c_str());
     d_platformId->setText(sDstCode.c_str());
     d_RptUrl->setText(sRpturl.c_str());

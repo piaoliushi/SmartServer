@@ -38,15 +38,17 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-    //QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-    //QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-    //QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
 
-
+#ifdef Q_OS_WIN
     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
     QTextCodec::setCodecForTr(codec);
     QTextCodec::setCodecForLocale(QTextCodec::codecForLocale());
     QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+#else
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+#endif
 
 
     QApplication::setStyle(QStyleFactory::create("plastique"));
