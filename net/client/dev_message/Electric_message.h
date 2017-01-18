@@ -35,6 +35,7 @@ protected:
     void test_time_event(const boost::system::error_code& error);
 	int decode_Eda9033A(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
     int decode_SPM33(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
+    int decode_EM400(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
 private:
     int              m_Subprotocol;//设备子协议号
     int                          m_mainprotocol;//主协议编号

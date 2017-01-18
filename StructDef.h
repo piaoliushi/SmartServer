@@ -216,6 +216,7 @@ typedef enum EDAPROTOCOL
  	STATIC_SWITCH        = 4,//静态转换开关
 	ZXJY_BACK            = 5,//中心继远
     PAINUO_SPM33         = 6,//珠海派诺SPM33电表
+    YINGJIA_EM400        = 7,//广州盈嘉EM400电表
 }EdaSubProtocol;
 typedef enum WSPROTOCOL
 {

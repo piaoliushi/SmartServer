@@ -95,6 +95,7 @@ namespace hx_net
 				}
             }
         case PAINUO_SPM33:
+        case YINGJIA_EM400:
             {
                 if(nDataLen<3)
                     return -1;
@@ -135,6 +136,8 @@ namespace hx_net
 				return decode_Eda9033A(data,data_ptr,nDataLen);
             case PAINUO_SPM33:
                 return decode_SPM33(data,data_ptr,nDataLen);
+            case YINGJIA_EM400:
+                return decode_EM400(data,data_ptr,nDataLen);
 			}
             break;
         case ELECTRIC:{
@@ -162,6 +165,7 @@ namespace hx_net
 			case Eda9033_A:
 				return false;
             case PAINUO_SPM33:
+            case YINGJIA_EM400:
                 return true;
             }
             return false;
@@ -456,22 +460,23 @@ namespace hx_net
 					}
 					break;
                 case PAINUO_SPM33:
-                {
-                    CommandUnit tmUnit;
-                    tmUnit.ackLen = 3;
-                    tmUnit.commandLen = 8;
-                    tmUnit.commandLen = 7;
-                    tmUnit.commandId[0] = d_devInfo.iAddressCode;
-                    tmUnit.commandId[1] = 0x03;
-                    tmUnit.commandId[2] = 0x00;
-                    tmUnit.commandId[3] = 0x0;
-                    tmUnit.commandId[4] = 0x00;
-                    tmUnit.commandId[5] = 0x33;
-                    unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
-                    tmUnit.commandId[6] = (uscrc&0x00FF);
-                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
-                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
-                }
+                case YINGJIA_EM400:
+                    {
+                        CommandUnit tmUnit;
+                        tmUnit.ackLen = 3;
+                        tmUnit.commandLen = 8;
+                        tmUnit.commandLen = 7;
+                        tmUnit.commandId[0] = d_devInfo.iAddressCode;
+                        tmUnit.commandId[1] = 0x03;
+                        tmUnit.commandId[2] = 0x00;
+                        tmUnit.commandId[3] = 0x00;
+                        tmUnit.commandId[4] = 0x00;
+                        tmUnit.commandId[5] = 0x33;
+                        unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+                        tmUnit.commandId[6] = (uscrc&0x00FF);
+                        tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                        cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                    }
                     break;
 				}
 			}
@@ -660,6 +665,31 @@ namespace hx_net
             data_ptr->mValues[indexpos++] = dainfo;
         }
         dainfo.fValue = ((((((data[102]<<8)|data[101])<<8)|data[100])<<8)|data[99])*0.01;
+        data_ptr->mValues[indexpos++] = dainfo;
+        return RE_SUCCESS;
+    }
+
+    int Electric_message::decode_EM400(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen)
+    {
+        int indexpos =0;
+        DataInfo dainfo;
+        dainfo.bType = false;
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[3+i*2]<<8)|data[4+i*2])*0.1;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[11+i*2]<<8)|data[12+i*2])*0.1;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[19+i*2]<<8)|data[20+i*2])*0.01;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        dainfo.fValue = ((data[29]<<8)|data[30])*0.01;
         data_ptr->mValues[indexpos++] = dainfo;
         return RE_SUCCESS;
     }
