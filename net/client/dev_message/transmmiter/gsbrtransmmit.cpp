@@ -10,22 +10,22 @@ namespace hx_net{
               if(subprotocol==GSBR_SNMP)
               {
                   Vb vbl[16];
-                  vbl[0].set_oid(Oid("17409.100.3.2.1.1"));
-                  vbl[1].set_oid(Oid("17409.100.3.2.1.2"));
-                  vbl[2].set_oid(Oid("17409.100.3.2.1.3"));
-                  vbl[3].set_oid(Oid("17409.100.3.2.1.4"));
-                  vbl[4].set_oid(Oid("17409.100.3.2.1.5"));
-                  vbl[5].set_oid(Oid("17409.100.3.2.1.6"));
-                  vbl[6].set_oid(Oid("17409.100.3.2.1.7"));
-                  vbl[7].set_oid(Oid("17409.100.3.2.1.8"));
-                  vbl[8].set_oid(Oid("17409.100.3.2.1.9"));
-                  vbl[9].set_oid(Oid("17409.100.3.2.1.10"));
-                  vbl[10].set_oid(Oid("17409.100.3.2.1.11"));
-                  vbl[11].set_oid(Oid("17409.100.3.2.1.12"));
-                  vbl[12].set_oid(Oid("17409.100.3.2.1.13"));
-                  vbl[13].set_oid(Oid("17409.100.3.2.1.14"));
-                  vbl[14].set_oid(Oid("17409.100.3.2.1.15"));
-                  vbl[15].set_oid(Oid("17409.100.3.2.1.16"));
+                  vbl[0].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.1.0"));
+                  vbl[1].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.2.0"));
+                  vbl[2].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.3.0"));
+                  vbl[3].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.4.0"));
+                  vbl[4].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.5.0"));
+                  vbl[5].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.6.0"));
+                  vbl[6].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.7.0"));
+                  vbl[7].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.8.0"));
+                  vbl[8].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.9.0"));
+                  vbl[9].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.10.0"));
+                  vbl[10].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.11.0"));
+                  vbl[11].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.12.0"));
+                  vbl[12].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.13.0"));
+                  vbl[13].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.14.0"));
+                  vbl[14].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.15.0"));
+                  vbl[15].set_oid(Oid(".1.3.6.1.4.1.17409.100.3.2.1.16.0"));
                   for (int i=0; i<16;i++)
                       snmp_pdu += vbl[i];
               }
@@ -110,68 +110,84 @@ namespace hx_net{
                       string cur_value =nextVb.get_printable_value();
                       dainfo.bType = false;
                       dainfo.fValue = atof(cur_value.c_str());
-                      if(cur_oid=="17409.100.3.2.1.1")
+                      if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.1.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[0] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.2")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.2.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[1] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.3")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.3.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[2] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.4")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.4.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[3] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.5")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.5.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[4] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.6")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.6.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[5] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.7")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.7.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[6] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.8")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.8.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[7] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.9")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.9.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[8] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.10")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.10.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[9] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.11")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.11.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[10] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.12")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.12.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[11] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.13")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.13.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[12] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.14")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.14.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[13] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.15")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.15.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[14] = dainfo;
                       }
-                      else if(cur_oid=="17409.100.3.2.1.16")
+                      else if(cur_oid==".1.3.6.1.4.1.17409.100.3.2.1.16.0")
                       {
+                          dainfo.fValue = dainfo.fValue*0.01;
                           data_ptr->mValues[15] = dainfo;
                       }
                   }

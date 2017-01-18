@@ -94,6 +94,15 @@ namespace hx_net
 					}
 				}
             }
+        case PAINUO_SPM33:
+            {
+                if(nDataLen<3)
+                    return -1;
+                if(data[0]==d_devInfo.iAddressCode && data[1]==0x03)
+                    return data[2]+2;
+                else
+                    return -1;
+            }
         }
             break;
         case ELECTRIC:{
@@ -120,13 +129,17 @@ namespace hx_net
 	{
         switch(d_devInfo.nDevProtocol){
         case EDA9033:
-            switch (d_devInfo.nSubProtocol){
+			switch (d_devInfo.nSubProtocol)
+			{
 			case Eda9033_A:
 				return decode_Eda9033A(data,data_ptr,nDataLen);
+            case PAINUO_SPM33:
+                return decode_SPM33(data,data_ptr,nDataLen);
 			}
             break;
         case ELECTRIC:{
-               switch (d_devInfo.nSubProtocol){
+               switch (d_devInfo.nSubProtocol)
+                {
                  case ELECTRIC_104:
                          return parse_104_data(data,data_ptr,nDataLen);
                 }
@@ -148,6 +161,8 @@ namespace hx_net
                 return true;
 			case Eda9033_A:
 				return false;
+            case PAINUO_SPM33:
+                return true;
             }
             return false;
         }
@@ -264,6 +279,7 @@ namespace hx_net
 			int n;
 			unsigned short caddr;
 			size_t nDataLen = buf->length-IEC_APDU_MIN;
+			//unsigned char *data = 
 			int ret = iecasdu_parse(obj, &t, &caddr, &n, &cause, &test, &pn, 
 				IOA_ADDRLEN, COM_ADDRLEN, buf->data-IEC_APCI_LEN, nDataLen);
 
@@ -439,6 +455,24 @@ namespace hx_net
                         cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
 					}
 					break;
+                case PAINUO_SPM33:
+                {
+                    CommandUnit tmUnit;
+                    tmUnit.ackLen = 3;
+                    tmUnit.commandLen = 8;
+                    tmUnit.commandLen = 7;
+                    tmUnit.commandId[0] = d_devInfo.iAddressCode;
+                    tmUnit.commandId[1] = 0x03;
+                    tmUnit.commandId[2] = 0x00;
+                    tmUnit.commandId[3] = 0x0;
+                    tmUnit.commandId[4] = 0x00;
+                    tmUnit.commandId[5] = 0x33;
+                    unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                }
+                    break;
 				}
 			}
 			break;
@@ -539,6 +573,94 @@ namespace hx_net
 		//CA
 		dainfo.fValue = (float)sqrt(data_ptr->mValues[0].fValue*data_ptr->mValues[0].fValue+data_ptr->mValues[4].fValue*data_ptr->mValues[4].fValue+data_ptr->mValues[0].fValue*data_ptr->mValues[4].fValue);
 		data_ptr->mValues[indexpos++] = dainfo;
-		return RE_SUCCESS;
-	}
+        return RE_SUCCESS;
+    }
+
+    int Electric_message::decode_SPM33(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen)
+    {
+        int indexpos =0;
+        DataInfo dainfo;
+        dainfo.bType = false;
+        for(int i=0;i<6;++i)//6个电压
+        {
+            dainfo.fValue = ((data[3+i*2]<<8)|data[4+i*2])*0.01;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)//3个电流
+        {
+            dainfo.fValue = ((data[15+i*2]<<8)|data[16+i*2])*0.001;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        dainfo.fValue = ((data[21]<<8)|data[22]);//零序电流
+        data_ptr->mValues[indexpos++] = dainfo;
+        int signedBit = 0;
+        for(int j=0;j<2;++j)//2个总功率
+        {
+            signedBit = Getbit(data[26+j*4],7);
+            dainfo.fValue = (((((((data[26+j*4]&0x7F)<<8)|data[25+4*j])<<8)|data[24+4*j])<<8)|data[23+4*j])*0.1;
+            if(signedBit==1)
+                dainfo.fValue = dainfo.fValue*(-1);
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        //功率因数
+        signedBit = Getbit(data[31],7);
+        dainfo.fValue = (((data[31]&0x7F)<<8)|data[32])*0.001;
+        if(signedBit==1)
+            dainfo.fValue = dainfo.fValue*(-1);
+        data_ptr->mValues[indexpos++] = dainfo;
+        for(int i=0;i<6;++i)//6个三相功率
+        {
+           signedBit = Getbit(data[33+2*i],7);
+           dainfo.fValue = (((data[33+2*i]&0x7F)<<8)|data[34+2*i])*0.1;
+           if(signedBit==1)
+               dainfo.fValue = dainfo.fValue*(-1);
+           data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)//3个三相功率因数
+        {
+           signedBit = Getbit(data[45+2*i],7);
+           dainfo.fValue = (((data[45+2*i]&0x7F)<<8)|data[46+2*i])*0.001;
+           if(signedBit==1)
+               dainfo.fValue = dainfo.fValue*(-1);
+           data_ptr->mValues[indexpos++] = dainfo;
+        }
+        //频率
+        dainfo.fValue = (((data[49])<<8)|data[50])*0.01;
+        data_ptr->mValues[indexpos++] = dainfo;
+        for(int i=0;i<6;++i)
+        {
+            dainfo.fValue = (((((((data[54+4*i])<<8)|data[53+4*i])<<8)|data[52+4*i])<<8)|data[51+4*i])*0.1;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        //4字节无效
+        short sstate = ((data[79]<<8)|data[80]);
+        dainfo.bType = true;
+        for(int i=1;i<10;++i)
+        {
+            dainfo.fValue = Getbit(sstate,i);
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        dainfo.bType = false;
+        dainfo.fValue = ((data[81]<<8)|data[82]);
+        data_ptr->mValues[indexpos++] = dainfo;
+        //2字节保留
+        //2个平均电压
+        for(int i=0;i<2;++i)
+        {
+            dainfo.fValue = ((data[85+i*2]<<8)|data[86+i*2])*0.01;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        dainfo.fValue = ((data[89]<<8)|data[90])*0.001;
+        data_ptr->mValues[indexpos++] = dainfo;
+        dainfo.fValue = ((data[91]<<8)|data[92])*0.001;
+        data_ptr->mValues[indexpos++] = dainfo;
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[93+i*2]<<8)|data[94+i*2])*0.01;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        dainfo.fValue = ((((((data[102]<<8)|data[101])<<8)|data[100])<<8)|data[99])*0.01;
+        data_ptr->mValues[indexpos++] = dainfo;
+        return RE_SUCCESS;
+    }
 }

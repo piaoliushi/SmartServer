@@ -215,6 +215,7 @@ typedef enum EDAPROTOCOL
 	C2000_MH08           = 3,//康耐德电路电压检测
  	STATIC_SWITCH        = 4,//静态转换开关
 	ZXJY_BACK            = 5,//中心继远
+    PAINUO_SPM33         = 6,//珠海派诺SPM33电表
 }EdaSubProtocol;
 typedef enum WSPROTOCOL
 {
