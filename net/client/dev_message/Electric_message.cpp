@@ -460,7 +460,6 @@ namespace hx_net
 					}
 					break;
                 case PAINUO_SPM33:
-                case YINGJIA_EM400:
                     {
                         CommandUnit tmUnit;
                         tmUnit.ackLen = 3;
@@ -472,6 +471,24 @@ namespace hx_net
                         tmUnit.commandId[3] = 0x00;
                         tmUnit.commandId[4] = 0x00;
                         tmUnit.commandId[5] = 0x33;
+                        unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+                        tmUnit.commandId[6] = (uscrc&0x00FF);
+                        tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                        cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                    }
+                    break;
+                case YINGJIA_EM400:
+                    {
+                        CommandUnit tmUnit;
+                        tmUnit.ackLen = 3;
+                        tmUnit.commandLen = 8;
+                        tmUnit.commandLen = 7;
+                        tmUnit.commandId[0] = d_devInfo.iAddressCode;
+                        tmUnit.commandId[1] = 0x03;
+                        tmUnit.commandId[2] = 0x00;
+                        tmUnit.commandId[3] = 0x64;
+                        tmUnit.commandId[4] = 0x00;
+                        tmUnit.commandId[5] = 0x0E;
                         unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
                         tmUnit.commandId[6] = (uscrc&0x00FF);
                         tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
