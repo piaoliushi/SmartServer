@@ -33,21 +33,21 @@
 #define  RESET   0x69
 
 #define  STARTDTACT     0x07//启动数据传输请求
-#define  STARTDTCON    0x0B//启动数据传输应答
-#define  STOPDTACT       0x13//停止数据传输请求
+#define  STARTDTCON     0x0B//启动数据传输应答
+#define  STOPDTACT      0x13//停止数据传输请求
 #define  STOPDTCON      0x23//停止数据传输应答
-#define  TESTFRACT        0x43//测试请求
-#define  TESTFRCON       0x83//测试应答
-#define  INTERROGATION   0x64//总召唤
+#define  TESTFRACT      0x43//测试请求
+#define  TESTFRCON      0x83//测试应答
+#define  INTERROGATION  0x64//总召唤
 
-#define CYCLIC                    1 //周期循环
-#define BGSCAN                 2  //背景扫描
+#define CYCLIC         1  //周期循环
+#define BGSCAN         2  //背景扫描
 #define SPONTANEOUS    3  //突发spont
-#define REQUEST                5  //请求或被请求
-#define ACTIVATION          6  //激活
-#define ACTCONFIRM        7  //激活确认
-#define DEACTIVATION     8   //停止激活
-#define ACTTERM              10  //激活结束
+#define REQUEST        5  //请求或被请求
+#define ACTIVATION     6  //激活
+#define ACTCONFIRM     7  //激活确认
+#define DEACTIVATION   8  //停止激活
+#define ACTTERM        10 //激活结束
 
 
 #define COM_ADDRLEN	  2 //公共字节长度
@@ -59,11 +59,11 @@ struct iec_object {
 	unsigned short		ioa;	/* information object address */
 	union {
 		struct iec_type1   	type1;
-		struct iec_type7	    type7;
-		struct iec_type9	    type9;
-		struct iec_type11	    type11;
+        struct iec_type7	type7;
+        struct iec_type9	type9;
+        struct iec_type11	type11;
 		struct iec_type13 	type13;
-		struct iec_type30	    type30;
+        struct iec_type30	type30;
 		struct iec_type33 	type33;
 		struct iec_type34 	type34;
 		struct iec_type35 	type35;

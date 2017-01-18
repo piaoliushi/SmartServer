@@ -29,23 +29,24 @@
         <translation type="unfinished">系统信息</translation>
     </message>
     <message>
+        <location filename="mainwindow.cpp" line="55"/>
         <location filename="mainwindow.cpp" line="58"/>
-        <location filename="mainwindow.cpp" line="61"/>
-        <source>:/server.png</source>
+        <source>:/new/images/server.png</source>
+        <oldsource>:/server.png</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="63"/>
+        <location filename="mainwindow.cpp" line="60"/>
         <source>Device monitor server(Ver:2.0.0.1)</source>
         <translation type="unfinished">设备监测服务器（版本：2.0.0.1）</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="117"/>
+        <location filename="mainwindow.cpp" line="124"/>
         <source>remind</source>
         <translation type="unfinished">提醒</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="117"/>
+        <location filename="mainwindow.cpp" line="124"/>
         <source>Program will continue to run in the area of the tray, you want to quit the program, please select the shortcut menu in the &quot;exit&quot;</source>
         <translation type="unfinished">程序将在托盘区继续运行，想要退出程序请在快捷菜单中选择“退出程序”</translation>
     </message>
@@ -56,7 +57,8 @@
     </message>
     <message>
         <location filename="mainwindow.cpp" line="141"/>
-        <source>:/player_stop.png</source>
+        <source>:/new/images/player_stop.png</source>
+        <oldsource>:/player_stop.png</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -67,7 +69,6 @@
     </message>
     <message>
         <location filename="mainwindow.cpp" line="144"/>
-        <location filename="mainwindow.cpp" line="182"/>
         <source>yyyy-MM-dd hh:mm:ss dddd</source>
         <translation type="unfinished"></translation>
     </message>
@@ -77,9 +78,18 @@
         <translation type="unfinished">启动服务</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="150"/>
-        <location filename="mainwindow.cpp" line="201"/>
-        <source>:/player_play.png</source>
+        <location filename="mainwindow.cpp" line="191"/>
+        <source>:/new/images/player_play.png</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="193"/>
+        <source>:/new/images/video_display.png</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="mainwindow.cpp" line="195"/>
+        <source>:/new/images/stock_exit.png</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -88,34 +98,23 @@
         <translation type="unfinished">服务已停止！</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="182"/>
         <source>Server is running...
 %1
  Run length?%2day%3hour%4minute%5second</source>
-        <translation type="unfinished">服务正在运行...%1运行时长：%2天%3小时%4分钟%5秒</translation>
+        <translation type="obsolete">服务正在运行...%1运行时长：%2天%3小时%4分钟%5秒</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="201"/>
+        <location filename="mainwindow.cpp" line="191"/>
         <source>StartSvc(&amp;S)</source>
         <translation type="unfinished">启动服务（&amp;S）</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="203"/>
-        <source>:/video_display.png</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="203"/>
+        <location filename="mainwindow.cpp" line="193"/>
         <source>StopSvc(&amp;R)</source>
         <translation type="unfinished">停止服务（&amp;R）</translation>
     </message>
     <message>
-        <location filename="mainwindow.cpp" line="205"/>
-        <source>:/stock_exit.png</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="mainwindow.cpp" line="205"/>
+        <location filename="mainwindow.cpp" line="195"/>
         <source>Exit(&amp;E)</source>
         <translation type="unfinished">退出(&amp;E)</translation>
     </message>
@@ -217,6 +216,17 @@
     </message>
 </context>
 <context>
+    <name>QNotifyHandler</name>
+    <message>
+        <location filename="qnotifyhandler.cpp" line="24"/>
+        <location filename="qnotifyhandler.cpp" line="38"/>
+        <location filename="qnotifyhandler.cpp" line="45"/>
+        <location filename="qnotifyhandler.cpp" line="52"/>
+        <source>%1:%2</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
         <source>??</source>
@@ -273,22 +283,22 @@
         <translation type="unfinished">按月</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="78"/>
+        <location filename="main.cpp" line="85"/>
         <source>error</source>
         <translation type="unfinished">错误</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="78"/>
+        <location filename="main.cpp" line="85"/>
         <source>Load local config file error!</source>
         <translation type="unfinished">载入本地文件错误！</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="86"/>
+        <location filename="main.cpp" line="93"/>
         <source>Systray</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="87"/>
+        <location filename="main.cpp" line="94"/>
         <source>I couldn&apos;t detect any system tray on this system.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -375,7 +385,7 @@
     </message>
     <message>
         <location filename="qsvcstatepage.cpp" line="158"/>
-        <location filename="qsvcstatepage.cpp" line="202"/>
+        <location filename="qsvcstatepage.cpp" line="201"/>
         <source>connect ok</source>
         <translation type="unfinished">连接正常</translation>
     </message>
@@ -386,12 +396,12 @@
         <translation type="unfinished">正在运行</translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="192"/>
+        <location filename="qsvcstatepage.cpp" line="191"/>
         <source>stopped</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qsvcstatepage.cpp" line="206"/>
+        <location filename="qsvcstatepage.cpp" line="205"/>
         <source>disconnect</source>
         <translation type="unfinished">已断开</translation>
     </message>
@@ -458,42 +468,45 @@
         <translation type="unfinished">网卡1：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="130"/>
+        <location filename="qsysteminfopage.cpp" line="131"/>
         <source>Card2:</source>
         <translation type="unfinished">网卡2：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="272"/>
+        <location filename="qsysteminfopage.cpp" line="287"/>
         <source>note</source>
         <translation type="unfinished">注意</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="272"/>
+        <location filename="qsysteminfopage.cpp" line="287"/>
         <source>Failed to save the local configuration parameters, please check!</source>
         <translation type="unfinished">保存本地配置文件失败，请重新检查！</translation>
     </message>
     <message>
+        <location filename="qsysteminfopage.cpp" line="121"/>
+        <location filename="qsysteminfopage.cpp" line="153"/>
+        <location filename="qsysteminfopage.cpp" line="170"/>
         <source>without</source>
-        <translation type="obsolete">无</translation>
+        <translation type="unfinished">无</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="170"/>
+        <location filename="qsysteminfopage.cpp" line="185"/>
         <source>Copyright Â© 2006-2016 Anhui Huixin Electronics Co. Ltd.</source>
         <oldsource>CopyrightÂ©2006-2016 Anhui Huixin Electronics Co. Ltd.</oldsource>
         <translation type="unfinished">版权所有©2006-2016 安徽汇鑫电子有限公司</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="171"/>
+        <location filename="qsysteminfopage.cpp" line="186"/>
         <source>font: 9pt; color:#45c9d5;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="173"/>
+        <location filename="qsysteminfopage.cpp" line="188"/>
         <source>Tel:0551-65319365 , 65314565</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="174"/>
+        <location filename="qsysteminfopage.cpp" line="189"/>
         <source>font: 10pt; color:#45c9d5;</source>
         <translation type="unfinished"></translation>
     </message>

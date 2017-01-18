@@ -120,15 +120,13 @@ namespace hx_net
 	{
         switch(d_devInfo.nDevProtocol){
         case EDA9033:
-			switch (d_devInfo.nSubProtocol)
-			{
+            switch (d_devInfo.nSubProtocol){
 			case Eda9033_A:
 				return decode_Eda9033A(data,data_ptr,nDataLen);
 			}
             break;
         case ELECTRIC:{
-               switch (d_devInfo.nSubProtocol)
-                {
+               switch (d_devInfo.nSubProtocol){
                  case ELECTRIC_104:
                          return parse_104_data(data,data_ptr,nDataLen);
                 }
@@ -266,7 +264,6 @@ namespace hx_net
 			int n;
 			unsigned short caddr;
 			size_t nDataLen = buf->length-IEC_APDU_MIN;
-			//unsigned char *data = 
 			int ret = iecasdu_parse(obj, &t, &caddr, &n, &cause, &test, &pn, 
 				IOA_ADDRLEN, COM_ADDRLEN, buf->data-IEC_APCI_LEN, nDataLen);
 

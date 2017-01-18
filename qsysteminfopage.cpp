@@ -121,10 +121,7 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     QLabel *ethIp0 = new QLabel(this);
     ethIp0->setStyleSheet("color:#5fff53");
     pHlyt->addWidget(ethIp0);
-    QNetworkInterface   interface0 = QNetworkInterface::interfaceFromName("eth0");
-    QList<QNetworkAddressEntry>  netlist0 = interface0.addressEntries();
-    if(!netlist0.isEmpty())
-        ethIp0->setText(netlist0.at(0).ip().toString());
+
 
     //QNetworkInterface   interface0 = QNetworkInterface::interfaceFromIndex(0);//"eth0"
     //QList<QNetworkAddressEntry>  netlist0 = interface0.addressEntries();
@@ -134,26 +131,48 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     staticLabel = new QLabel(tr("Card2:"));
     staticLabel->setFixedWidth(65);
     pHlyt->addWidget(staticLabel);
-    QLabel *ethIp1 = new QLabel(this);
+    QLabel *ethIp1 = new QLabel(tr("without"),this);
     ethIp1->setStyleSheet("color:#5fff53");
     pHlyt->addWidget(ethIp1);
-
- /*   QList<QNetworkInterface> networkInterface = QNetworkInterface::allInterfaces();
+#ifdef Q_OS_WIN
+   /* QList<QNetworkInterface> networkInterface = QNetworkInterface::allInterfaces();
     QList<QNetworkInterface>::const_iterator i = networkInterface.begin();
     for (; i != networkInterface.end(); ++i) {
         if((*i).isValid()==false || (*i).flags()==QNetworkInterface::IsLoopBack)
             continue;
         QList<QNetworkAddressEntry>entryList=(*i).addressEntries();
         foreach(QNetworkAddressEntry entry,entryList){
-            if(entry.ip().protocol()!=QAbstractSocket::IPv4Protocol)
+            if(entry.ip().protocol()!=QAbstractSocket::IPv4Protocol || ipItem==QHostAddress::LocalHost&&ipItem.toString().left(3)=="192")
                 continue;
             if(ethIp0->text().isEmpty())
                 ethIp0->setText(entry.ip().toString());
-            else
+            else {
                 ethIp1->setText(entry.ip().toString());
-        }
+            }
 
+        }
     }*/
+
+    QList<QHostAddress> ipList = QNetworkInterface::allAddresses();
+    foreach(QHostAddress ipItem, ipList)
+    {
+        //只显示以192开头的IP地址
+        if(ipItem.protocol()==QAbstractSocket::IPv4Protocol&&ipItem!=QHostAddress::Null
+                &&ipItem!=QHostAddress::LocalHost&&ipItem.toString().left(3)=="192")
+        {
+            if(ethIp0->text().isEmpty())
+                ethIp0->setText(ipItem.toString());
+            else {
+                ethIp1->setText(ipItem.toString());
+            }
+        }
+    }
+#else
+    QNetworkInterface   interface0 = QNetworkInterface::interfaceFromName("eth0");
+    QList<QNetworkAddressEntry>  netlist0 = interface0.addressEntries();
+    if(!netlist0.isEmpty())
+        ethIp0->setText(netlist0.at(0).ip().toString());
+
     //QNetworkInterface   interface1 = QNetworkInterface::interfaceFromIndex(1);//"eth1"
     QNetworkInterface   interface1 = QNetworkInterface::interfaceFromName("eth1");
     QList<QNetworkAddressEntry>  netlist1 = interface1.addressEntries();
@@ -161,9 +180,12 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
         ethIp1->setText(netlist1.at(0).ip().toString());
     else
         ethIp1->setText(tr("without"));
+#endif
+
+
+
 
     pHMainLyt->addLayout(pHlyt);
-
 
     QSpacerItem *pBottomSpace = new QSpacerItem(20, 20, QSizePolicy::Maximum, QSizePolicy::Expanding);
     pHMainLyt->addSpacerItem(pBottomSpace);
@@ -227,7 +249,7 @@ void QSystemInfoPage::loadConfigData()
     string sNtpIp = GetInst(LocalConfig).ntp_svc_ip();
 
     d_stationNumber->setText(stationId.c_str());
-    d_stationName->setText(stationName.c_str());
+    d_stationName->setText(QString::fromUtf8(stationName.c_str()));
     d_deviceId->setText(sSrcCode.c_str());
     d_platformId->setText(sDstCode.c_str());
     d_RptUrl->setText(sRpturl.c_str());

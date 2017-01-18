@@ -12,10 +12,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SmartServer
 TEMPLATE = app
 TRANSLATIONS = SmartServer_CN.ts
-
+RC_FILE = SmartServer.rc
 CONFIG+=precompile_header
+
 PRECOMPILED_HEADER=stable.h
-CONFIG += console
 SOURCES += main.cpp\
         mainwindow.cpp \
     net/SvcMgr.cpp \
@@ -207,11 +207,13 @@ else:{
 
 QMAKE_CXXFLAGS +=-Zm300
 win32:CONFIG(release, debug|release): {
+
 LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib -llibprotobuf -llibprotoc -llibprotobuf-lite
 LIBS += -LD:/ThirdSdk/snmp++/lib -lsnmplib
 LIBS += -LD:/ThirdSdk/boost_1_48_0/stage/lib -llibboost_system-vc100-mt-1_48 -llibboost_date_time-vc100-mt-1_48 -llibboost_thread-vc100-mt-1_48 -llibboost_chrono-vc100-mt-1_48
 }
 else:win32:CONFIG(debug, debug|release): {
+CONFIG += console
 LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib/ -llibprotobufD -llibprotocD -llibprotobuf-liteD
 LIBS += -LD:/ThirdSdk/snmp++/lib/ -lsnmplib
 LIBS += -LD:/ThirdSdk/boost_1_48_0/stage/lib -llibboost_system-vc100-mt-gd-1_48 -llibboost_date_time-vc100-mt-gd-1_48 -llibboost_thread-vc100-mt-gd-1_48

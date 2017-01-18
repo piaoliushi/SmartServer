@@ -29,14 +29,7 @@ int main(int argc, char *argv[])
 //#else
 //    QApplication a(argc, argv);
 //#endif
-    QString AppDir = QCoreApplication::applicationDirPath();
-    QTranslator qtTranslator;
-    if(qtTranslator.load(AppDir + "/SmartServer_CN.qm")==true)
-        a.installTranslator(&qtTranslator);
 
-    QTranslator sys_translator;
-    sys_translator.load("qt_zh_CN.qm");
-    a.installTranslator(&sys_translator);
 
 #ifndef Q_OS_WIN
 #ifdef ARM_LINUX_DEF
@@ -45,9 +38,17 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
-    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+    //QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+    //QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    //QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+
+
+    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+    QTextCodec::setCodecForTr(codec);
+    QTextCodec::setCodecForLocale(QTextCodec::codecForLocale());
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
+
+
     QApplication::setStyle(QStyleFactory::create("plastique"));
     QPalette pal = QApplication::palette();
     pal.setBrush(QPalette::Window,QColor(15,15,45));
@@ -72,6 +73,16 @@ int main(int argc, char *argv[])
     //pal.setBrush(QPalette::LinkVisited, QColor(170,100,240));
 
 
+    QString AppDir = QCoreApplication::applicationDirPath();
+
+    QTranslator qtTranslator;
+    if(qtTranslator.load(AppDir + "/SmartServer_CN.qm")==true)
+        a.installTranslator(&qtTranslator);
+
+    QTranslator sys_translator;
+    sys_translator.load("qt_zh_CN.qm");
+    a.installTranslator(&sys_translator);
+
     QApplication::setPalette(pal);
     QFont font  = a.font();
 #ifdef Q_OS_WIN
@@ -81,7 +92,7 @@ int main(int argc, char *argv[])
 #endif
     a.setFont(font);
     AppDir.append("/ServerLocalConfig.xml");
-    if(!GetInst(LocalConfig).load_local_config(AppDir.toLatin1().constData())){
+    if(!GetInst(LocalConfig).load_local_config(AppDir.toLocal8Bit().constData())){
         QMessageBox::information(NULL,QObject::tr("error"),QObject::tr("Load local config file error!"));
         return -1;
     }
