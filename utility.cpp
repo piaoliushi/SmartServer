@@ -177,3 +177,4 @@ void string_replace(string&s1,const string&s2,const string&s3)
         pos+=b;
     }
 }
+

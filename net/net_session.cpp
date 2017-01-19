@@ -175,7 +175,6 @@ namespace hx_net
                 continue;
             DevDataNotify_eCellMsg *cell = dev_cur_data_ptr->add_ccelldata();
             cell->set_ecelltype((e_CellType)(*cell_iter).second.iItemType);
-            //int  xxx = (e_CellType)(*cell_iter).second.iItemType;
             cell->set_scellid((*cell_iter).second.iItemIndex);
             cell->set_scellname((*cell_iter).second.sItemName);
             string  sValue = str(boost::format("%.2f")%curData->mValues[iter->first].fValue);

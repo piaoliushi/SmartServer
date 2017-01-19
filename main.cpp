@@ -20,6 +20,31 @@
 #ifdef Q_OS_WIN
 //#include "vld.h"
 #endif
+
+
+void utf8ToGb2312(std::string& strUtf8)
+{
+    QTextCodec* utf8Codec= QTextCodec::codecForName("utf-8");
+    QTextCodec* gb2312Codec = QTextCodec::codecForName("gb2312");
+
+    QString strUnicode= utf8Codec->toUnicode(strUtf8.c_str());
+    QByteArray ByteGb2312= gb2312Codec->fromUnicode(strUnicode);
+
+    strUtf8= ByteGb2312.data();
+}
+void gb2312ToUtf8(std::string& strGb2312)
+{
+
+    QTextCodec* utf8Codec= QTextCodec::codecForName("utf-8");
+    QTextCodec* gb2312Codec = QTextCodec::codecForName("gb2312");
+
+    QString strUnicode= gb2312Codec->toUnicode(strGb2312.c_str());
+    QByteArray ByteUtf8= utf8Codec->fromUnicode(strUnicode);
+
+    strGb2312= ByteUtf8.data();
+}
+
+
 int main(int argc, char *argv[])
 {
 //#ifdef Q_OS_WIN
@@ -39,16 +64,17 @@ int main(int argc, char *argv[])
 #endif
 
 
-#ifdef Q_OS_WIN
-    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
+//#ifdef Q_OS_WIN
+    /*QTextCodec *codec = QTextCodec::codecForName("UTF-8");
     QTextCodec::setCodecForTr(codec);
     QTextCodec::setCodecForLocale(QTextCodec::codecForLocale());
-    QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());
-#else
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForLocale());*/
+//#else
+//#endif
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
-#endif
+
 
 
     QApplication::setStyle(QStyleFactory::create("plastique"));
@@ -76,9 +102,12 @@ int main(int argc, char *argv[])
 
 
     QString AppDir = QCoreApplication::applicationDirPath();
+    std::string sAppDir = AppDir.toStdString();
+    utf8ToGb2312(sAppDir);
 
     QTranslator qtTranslator;
-    if(qtTranslator.load(AppDir + "/SmartServer_CN.qm")==true)
+    QString sTranspath = AppDir + "/SmartServer_CN.qm";
+    if(qtTranslator.load(sTranspath)==true)
         a.installTranslator(&qtTranslator);
 
     QTranslator sys_translator;
@@ -93,8 +122,9 @@ int main(int argc, char *argv[])
     font.setPointSize(16);
 #endif
     a.setFont(font);
-    AppDir.append("/ServerLocalConfig.xml");
-    if(!GetInst(LocalConfig).load_local_config(AppDir.toLocal8Bit().constData())){
+    //AppDir.append("/ServerLocalConfig.xml");
+    std::string sConfigPath = sAppDir+"/ServerLocalConfig.xml";
+    if(!GetInst(LocalConfig).load_local_config(sConfigPath.c_str())){//{AppDir.toLocal8Bit().constData())
         QMessageBox::information(NULL,QObject::tr("error"),QObject::tr("Load local config file error!"));
         return -1;
     }
