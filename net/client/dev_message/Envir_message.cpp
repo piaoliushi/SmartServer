@@ -302,8 +302,12 @@ namespace hx_net
 						cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
 					}
 					break;
+                case AC_103_CTR:{
+                     d_curData_ptr.reset(new Data);
+                }break;
 				case FRT_X06A:
 					{
+                        d_curData_ptr.reset(new Data);
 						CommandUnit tmUnit;
 						tmUnit.commandId[0] = 0x01;
 						tmUnit.commandId[1] = (d_devInfo.iAddressCode&0xFF00)>>8;

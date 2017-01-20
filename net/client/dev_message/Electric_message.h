@@ -54,5 +54,7 @@ private:
 
 	int m_Uo,m_Io;
 	float m_Ubb,m_Ibb;
+
+    DevMonitorDataPtr d_curData_ptr;
 };
 }

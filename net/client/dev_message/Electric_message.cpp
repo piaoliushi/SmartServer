@@ -128,23 +128,29 @@ namespace hx_net
 
 	int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
 	{
+        if(data_ptr!=NULL)
+            d_curData_ptr = data_ptr;
         switch(d_devInfo.nDevProtocol){
         case EDA9033:
 			switch (d_devInfo.nSubProtocol)
 			{
 			case Eda9033_A:
-				return decode_Eda9033A(data,data_ptr,nDataLen);
-            case PAINUO_SPM33:
-                return decode_SPM33(data,data_ptr,nDataLen);
+                return decode_Eda9033A(data,d_curData_ptr,nDataLen);
+            case PAINUO_SPM33:{
+                  int  idecresult =  decode_SPM33(data,d_curData_ptr,nDataLen);
+                if(idecresult == 0 ) {
+                       m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+                }
+                return idecresult;
+            }
             case YINGJIA_EM400:
-                return decode_EM400(data,data_ptr,nDataLen);
+                return decode_EM400(data,d_curData_ptr,nDataLen);
 			}
             break;
         case ELECTRIC:{
-               switch (d_devInfo.nSubProtocol)
-                {
+               switch (d_devInfo.nSubProtocol) {
                  case ELECTRIC_104:
-                         return parse_104_data(data,data_ptr,nDataLen);
+                         return parse_104_data(data,d_curData_ptr,nDataLen);
                 }
              }
             break;
@@ -461,10 +467,10 @@ namespace hx_net
 					break;
                 case PAINUO_SPM33:
                     {
+                        d_curData_ptr.reset(new Data);
                         CommandUnit tmUnit;
                         tmUnit.ackLen = 3;
                         tmUnit.commandLen = 8;
-                        tmUnit.commandLen = 7;
                         tmUnit.commandId[0] = d_devInfo.iAddressCode;
                         tmUnit.commandId[1] = 0x03;
                         tmUnit.commandId[2] = 0x00;
@@ -479,10 +485,10 @@ namespace hx_net
                     break;
                 case YINGJIA_EM400:
                     {
+                        d_curData_ptr.reset(new Data);
                         CommandUnit tmUnit;
                         tmUnit.ackLen = 3;
                         tmUnit.commandLen = 8;
-                        tmUnit.commandLen = 7;
                         tmUnit.commandId[0] = d_devInfo.iAddressCode;
                         tmUnit.commandId[1] = 0x03;
                         tmUnit.commandId[2] = 0x00;
@@ -514,7 +520,7 @@ namespace hx_net
      bool Electric_message::is_auto_run()
      {
          switch(d_devInfo.nDevProtocol){
-         case ELECTRIC:
+         case ELECTRIC://104,101
              return true;
          }
 

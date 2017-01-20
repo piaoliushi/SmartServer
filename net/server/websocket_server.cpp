@@ -39,29 +39,6 @@ void websocket_server::on_close(connection_hdl hdl) {
 
 void websocket_server::on_message(connection_hdl hdl, ws_server::message_ptr msg) {
 
-
-    //boost::recursive_mutex::scoped_lock conlock(m_connection_lock);
-    //con_list::iterator it = m_connections.begin();
-    //ws_server::message_ptr msg(new ws_server:(s,websocketpp::frame::opcode::TEXT,500));
-    //    LoginReq rlogin;
-    //    rlogin.ParseFromArray(msg->get_payload().c_str(),msg->get_payload().size());
-    //    std::string sUsr = rlogin.susrname();
-    //    std::string sPsw = rlogin.susrpsw();
-
-
-    //sloginAck->set_eresult(EC_OK);
-    //sloginAck->set_usrname("test1");
-    //unsigned msg_size = sloginAck->ByteSize();
-
-    //xxx.resize(msg_size);
-    //sloginAck->SerializeToArray(&xxx[0],msg_size);
-    //DeviceCommandMsg commandmsg;
-    //commandmsg.ParseFromArray(msg->get_payload().c_str(),msg->get_payload().size());
-    //std::string sUsr = commandmsg.cparams(1).sparamname();
-    //    for (;it!=m_connections.end();++it) {
-    //        m_server.send(*it,sloginAck->SerializeAsString(),websocketpp::frame::opcode::binary);
-    //    }
-    //boost::lock_guard<boost::mutex> guard(m_connection_lock);
     webSocketMsgPtr curWebPtr(new WebSocketMessage);
     curWebPtr->ParseFromArray(msg->get_payload().c_str(),msg->get_payload().size());
     int msgType = curWebPtr->nmsgtype();
@@ -83,8 +60,8 @@ void websocket_server::on_message(connection_hdl hdl, ws_server::message_ptr msg
         ws_server::connection_ptr connection = m_server.get_con_from_hdl(hdl);
         if(bLoginRlt == true){
             tcp::endpoint client_endpoint = connection->get_raw_socket().remote_endpoint();
-            GetInst(SvcMgr).get_notify()->OnClientOnline(client_endpoint.address().to_string(),
-                                                         client_endpoint.port());
+            GetInst(SvcMgr).get_notify()->OnClientOnline(client_endpoint.address().to_string(),client_endpoint.port());
+            m_list_endpoint[connection] = client_endpoint;
             if(_register_user(sUsr,hdl) == true)
                 GetInst(SvcMgr).get_notify()->OnClientLogin(client_endpoint.address().to_string(),
                                                             client_endpoint.port(),sUsr);
@@ -159,9 +136,16 @@ void websocket_server::_unregister_user(connection_hdl hdl)
     for(;iter!=m_connections.end();++iter){
         if((*iter).second.lock() == hdl.lock()){
             ws_server::connection_ptr connection = m_server.get_con_from_hdl(hdl);
-            tcp::endpoint client_endpoint = connection->get_raw_socket().remote_endpoint();
-            GetInst(SvcMgr).get_notify()->OnClientOffline(client_endpoint.address().to_string(),
-                                                          client_endpoint.port());
+           // tcp::endpoint client_endpoint = connection->get_raw_socket().remote_endpoint();
+            con_list_endpoint::iterator iterCon = m_list_endpoint.find(connection);
+            if(iterCon!=m_list_endpoint.end()){
+                tcp::endpoint client_endpoint = iterCon->second;
+                GetInst(SvcMgr).get_notify()->OnClientOffline(client_endpoint.address().to_string(),
+                                                              client_endpoint.port());
+            }
+             // = client_endpoint;
+            //GetInst(SvcMgr).get_notify()->OnClientOffline(client_endpoint.address().to_string(),
+            //                                              client_endpoint.port());
             m_connections.erase(iter);
             return;
         }

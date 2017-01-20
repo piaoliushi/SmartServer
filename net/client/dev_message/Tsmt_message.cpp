@@ -92,8 +92,9 @@ namespace hx_net
                 detect_run_state(d_curData_ptr);
             else {
                 //设置运行状态
+                set_run_state(irunstate);
             }
-            if(m_ptransmmit->isMultiQueryCmd())
+            if(IsStandardCommand())//isMultiQueryCmd()
                 m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
         }
         return idecresult;
@@ -192,9 +193,11 @@ namespace hx_net
     }
 
     bool Tsmt_message::IsStandardCommand()
-	{
+    {
+        if(m_ptransmmit !=NULL)
+             return m_ptransmmit->IsStandardCommand();
 
-        return m_ptransmmit->IsStandardCommand();
+        return false;
 	}
 	
     void Tsmt_message::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)
@@ -298,10 +301,13 @@ namespace hx_net
             break;
         case HARRIS:
             break;
-        case DE_XIN:
+        case DE_XIN:{
+            d_curData_ptr.reset(new Data);
             m_ptransmmit = new DeXinTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+        }
             break;
         case GLSQ:{
+             d_curData_ptr.reset(new Data);
             m_ptransmmit = new GlsqTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
         }
             break;

@@ -40,8 +40,10 @@ private:
     //typedef std::set<connection_hdl,std::owner_less<connection_hdl> > con_list;
     //typedef std::vector<connection_hdl> con_list;
     typedef std::map<string,connection_hdl> con_list;//用户登陆列表
+    typedef std::map<ws_server::connection_ptr,tcp::endpoint> con_list_endpoint;//连接标识列表
     ws_server m_server;
     con_list m_connections;
+    con_list_endpoint m_list_endpoint;
     boost::recursive_mutex  m_connection_lock;//recursive_mutex
 };
 
