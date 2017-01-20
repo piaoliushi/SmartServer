@@ -1393,7 +1393,6 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                     tmp_alarm_info.nModuleType = ItemInfo.iModTypeId;
                     tmp_alarm_info.nTargetId = ItemInfo.iTargetId;
                     tmp_alarm_info.bNotifyed = false;
-                    boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
                     mapItemAlarm[devId][ItemInfo.iItemIndex][iLimittype] = tmp_alarm_info;
                 }
             }else {
@@ -1407,7 +1406,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                     tmp_alarm_info.bNotifyed = false;
                     map<int,CurItemAlarmInfo>  tmTypeAlarm;
                     tmTypeAlarm[iLimittype] = tmp_alarm_info;
-                    boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
+                   // boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
                     mapItemAlarm[devId][ItemInfo.iItemIndex] = tmTypeAlarm;
             }
         }else {

@@ -75,9 +75,9 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
                                                                          this,boost::asio::placeholders::error));
                   }else{
                       boost::system::error_code ec;
-                      cout<<"http_stream_.open----------start!!!"<<endl;
+                      //cout<<"http_stream_.open----------start!!!"<<endl;
                       http_stream_.open(task_.first, ec);
-                      cout<<"task size:------"<<_taskqueueptr->get_Task_Size()<<"-------"<<ec.message()<<endl;
+                      //cout<<"task size:------"<<_taskqueueptr->get_Task_Size()<<"-------"<<ec.message()<<endl;
                       http_stream_.close();
                   }
               }

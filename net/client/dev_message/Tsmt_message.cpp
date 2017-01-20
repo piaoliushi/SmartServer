@@ -114,8 +114,8 @@ namespace hx_net
                 //设置运行状态
                 set_run_state(irunstate);
             }
-            if(m_ptransmmit->isMultiQueryCmd())
-                m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+            //if(m_ptransmmit->isMultiQueryCmd())
+            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
         }
         return idecresult;
     }

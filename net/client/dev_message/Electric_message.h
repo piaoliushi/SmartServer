@@ -25,6 +25,7 @@ public:
 	void GetAllCmd(CommandAttribute &cmdAll);
 protected:
     void test104data();
+    void  GetResultData(DevMonitorDataPtr data_ptr);
     int parse_104_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
     int iecsock_iframe_recv(struct iec_buf *buf,DevMonitorDataPtr data_ptr);
     int iecsock_sframe_recv(struct iechdr *h);
