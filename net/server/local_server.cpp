@@ -167,7 +167,6 @@ namespace hx_net
                                         if(iter_a->second.bNotifyed==false)
                                             continue;
                                         DevAlarmStatus_eCellAlarmMsg *pCellAlarm = dev_alarm_s->add_ccellalarm();
-                                        //std::string scellid = str(boost::format("%1%")%iter->first);
                                         pCellAlarm->set_scellid(iter->first);
                                         pCellAlarm->set_sdesp(iter_a->second.sReason);
                                         char str_time[64];

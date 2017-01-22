@@ -166,19 +166,20 @@ namespace hx_net
         boost::recursive_mutex          alarm_state_mutex;
         //devid<itemid<iLimittype,info> > >
         map<string ,map<int,map<int,CurItemAlarmInfo> > > mapItemAlarm;//设备监控量告警信息
+
         CurItemAlarmInfo  netAlarm;//通讯异常告警
         map<string,time_t>                               tmLastSaveTime;
         map<string,time_t>                               tmLastSendHttpTime;
         map<string,pair<CommandAttrPtr,HMsgHandlePtr> >   dev_agent_and_com;//add by lk 2013-11-26
         string                                           cur_dev_id_;//当前查询设备id
 
-        ModleInfo                            &modleInfos_;
+        ModleInfo                           &modleInfos_;
         boost::mutex                        task_mutex_;
-        int										   task_count_;
+        int									task_count_;
         boost::condition                    task_end_conditon_;
 
-        map<string,pDevicePropertyExPtr>       run_config_ptr;//moxa下设备配置
-        pMoxaPropertyExPtr              moxa_config_ptr;//moxa配置
+        map<string,pDevicePropertyExPtr>    run_config_ptr;//moxa下设备配置
+        pMoxaPropertyExPtr                  moxa_config_ptr;//moxa配置
 
 #ifdef USE_STRAND
         io_service::strand              strand_;   //消息头与消息体同步

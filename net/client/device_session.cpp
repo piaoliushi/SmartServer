@@ -1373,7 +1373,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                 if(alarm_type_findIter != mapItemAlarm[devId][ItemInfo.iItemIndex].end()){
                     //判断该告警是否已经通知
                     if(alarm_type_findIter->second.bNotifyed == true)
-                        return;
+                        continue;
                     //计算持续时间,判断进行告警
                     time_t curTime = time(0);
                     double  dtime_during = difftime( curTime, alarm_type_findIter->second.startTime );
@@ -1421,6 +1421,13 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                         findTypeIter->second.startTime = time(0);//记录时间
                         findTypeIter->second.nLimitId = ALARM_RESUME;
                     }else{
+                        //如果该告警项没有在延迟范围内通知，且已经恢复，则清除告警项，不通知用户
+                        if(findTypeIter->second.bNotifyed != true){
+                            findIter->second.erase(findTypeIter);//移除该告警类型告警
+                            if( findIter->second.size()<=0)
+                                mapItemAlarm[devId].erase(findIter);//如果监控项告警为空,则移除该监控量告警
+                            continue;
+                        }
                         time_t curTime = time(0);
                         double  dtime_during = difftime( curTime, findTypeIter->second.startTime );
                         if(dtime_during>=ItemInfo.vItemAlarm[nIndex].iResumetime){
@@ -1433,6 +1440,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                     }
                 }
             }
+
         }
     }
 }
