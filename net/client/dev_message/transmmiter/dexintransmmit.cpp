@@ -165,8 +165,11 @@ namespace hx_net{
                  int nmodNum=0;
                  while(lastCount>5)
                  {
+
                      int nParam = (data[1]<<8)|data[0];
                      int nPaLen = (data[3]<<8)|data[2];
+                     if(lastCount < (nPaLen+4) || nPaLen<0)
+                         break;
                      //调用单元解析
                      UnitData(data,data_ptr,nParam,nPaLen,nmodNum,runstate);
                      data+=(nPaLen+4);

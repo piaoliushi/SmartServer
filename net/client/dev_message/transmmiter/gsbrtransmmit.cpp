@@ -91,109 +91,222 @@ namespace hx_net{
                   break;
               }
           }
+          void gsbr_aysnc_callback(int reason, Snmp *session,
+                      Pdu &pdu, SnmpTarget &target, void *cd)
+          {
+              if (cd)
+                ((GsbrTransmmit*)cd)->gsbr_Callback(reason, session, pdu, target);
+          }
+          void GsbrTransmmit::gsbr_Callback(int reason, Snmp *session, Pdu &pdu, SnmpTarget &target)
+          {
+              int pdu_error = pdu.get_error_status();
+              if (pdu_error)
+                  return;
+              if (pdu.get_vb_count() == 0)
+                  return;
+              int vbcount = pdu.get_vb_count();
+              boost::recursive_mutex::scoped_lock lock(data_mutex);
+              for (int i=0; i<vbcount; i++)
+              {
+                  DataInfo dainfo;
+                  Vb nextVb;
+                  pdu.get_vb(nextVb, i);
+                  string cur_oid = nextVb.get_printable_oid();
+                  string cur_value =nextVb.get_printable_value();
+                  dainfo.bType = false;
+                  dainfo.fValue = atof(cur_value.c_str());
+                  if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.1.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      dainfo.fValue = pow(10,dainfo.fValue/10.00-6.00);
+                      curdata_ptr->mValues[0] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.2.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[1] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.3.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[2] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.4.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[3] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.5.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[4] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.6.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[5] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.7.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[6] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.8.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[7] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.9.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[8] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.10.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[9] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.11.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[10] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.12.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[11] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.13.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[12] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.14.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[13] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.15.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[14] = dainfo;
+                  }
+                  else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.16.0")
+                  {
+                      dainfo.fValue = dainfo.fValue*0.01;
+                      curdata_ptr->mValues[15] = dainfo;
+                  }
+              }
+          }
 
           int GsbrTransmmit::get_snmp(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)
           {
-              int status = snmp->get(snmp_pdu,*target);
+             {
+                  boost::recursive_mutex::scoped_lock lock(data_mutex);
+                  if(data_ptr)
+                     curdata_ptr = data_ptr;
+              }
+            //  int status = snmp->get(snmp_pdu,*target);//gsbr_Callback
+              int status = snmp->get(snmp_pdu,*target,gsbr_aysnc_callback,this);
               if(status)
                   return -1;
               else
               {
-                  int vbcount = snmp_pdu.get_vb_count();
+//                  int vbcount = snmp_pdu.get_vb_count();
 
-                  for (int i=0; i<vbcount; i++)
-                  {
-                      DataInfo dainfo;
-                      Vb nextVb;
-                      snmp_pdu.get_vb(nextVb, i);
-                      string cur_oid = nextVb.get_printable_oid();
-                      string cur_value =nextVb.get_printable_value();
-                      dainfo.bType = false;
-                      dainfo.fValue = atof(cur_value.c_str());
-                      if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.1.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          dainfo.fValue = pow(10.00f,(dainfo.fValue/10.00f-6));
-                          data_ptr->mValues[0] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.2.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[1] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.3.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[2] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.4.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[3] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.5.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[4] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.6.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[5] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.7.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[6] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.8.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[7] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.9.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[8] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.10.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[9] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.11.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[10] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.12.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[11] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.13.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[12] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.14.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[13] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.15.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[14] = dainfo;
-                      }
-                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.16.0")
-                      {
-                          dainfo.fValue = dainfo.fValue*0.01;
-                          data_ptr->mValues[15] = dainfo;
-                      }
-                  }
-                  return 0;
+//                  for (int i=0; i<vbcount; i++)
+//                  {
+//                      DataInfo dainfo;
+//                      Vb nextVb;
+//                      snmp_pdu.get_vb(nextVb, i);
+//                      string cur_oid = nextVb.get_printable_oid();
+//                      string cur_value =nextVb.get_printable_value();
+//                      dainfo.bType = false;
+//                      dainfo.fValue = atof(cur_value.c_str());
+//                      if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.1.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          dainfo.fValue = pow(10,dainfo.fValue/10.00-6.00);
+//                          data_ptr->mValues[0] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.2.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[1] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.3.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[2] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.4.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[3] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.5.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[4] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.6.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[5] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.7.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[6] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.8.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[7] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.9.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[8] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.10.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[9] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.11.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[10] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.12.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[11] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.13.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[12] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.14.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[13] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.15.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[14] = dainfo;
+//                      }
+//                      else if(cur_oid=="1.3.6.1.4.1.17409.100.3.2.1.16.0")
+//                      {
+//                          dainfo.fValue = dainfo.fValue*0.01;
+//                          data_ptr->mValues[15] = dainfo;
+//                      }
+//                  }
+//                  return 0;
               }
-              return -1;
+              return 0;
           }
 }

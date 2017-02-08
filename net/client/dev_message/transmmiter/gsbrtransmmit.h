@@ -2,7 +2,7 @@
 #define GSBRTRANSMMIT_H
 #pragma once
 #include "Transmmiter.h"
-
+//#include <boost/thread/recursive_mutex.hpp>
 //class Pdu;
 //class SnmpTarget;
 namespace hx_net{
@@ -17,12 +17,15 @@ namespace hx_net{
                bool IsStandardCommand();
                void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
                void GetAllCmd(CommandAttribute &cmdAll);
+               void gsbr_Callback(int reason, Snmp *session,Pdu &pdu, SnmpTarget &target);
            private:
                int get_snmp(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
            private:
                int m_subprotocol;
                int m_addresscode;
+               DevMonitorDataPtr curdata_ptr;
                Pdu snmp_pdu;
+               boost::recursive_mutex data_mutex;
          };
 }
 #endif // GSBRTRANSMMIT_H
