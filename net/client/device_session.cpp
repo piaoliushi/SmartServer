@@ -102,7 +102,7 @@ void device_session::init_session_config()
         //创建和分析关联设备信息
         parse_ass_dev_ptr  ass_dev_ptr(new Parse_Ass_Device(iter->second));
         map_dev_ass_parse_ptr_[iter->first] = ass_dev_ptr;
-
+        map_addcode_devid_[iter->second.iAddressCode]=iter->first;
     }
     cur_dev_id_ = dev_agent_and_com.begin()->first;
     netAlarm.nAlarmId = -1;//默认值
@@ -137,6 +137,14 @@ string device_session::next_dev_id()
     if(iter==dev_agent_and_com.end())
         iter = dev_agent_and_com.begin();
     return iter->first;
+}
+
+string device_session::get_devid_by_addcode(int iaddcode)
+{
+     map<int,string>::iterator iter = map_addcode_devid_.find(iaddcode);
+     if(iter!=map_addcode_devid_.end())
+         return iter->second;
+     return "-1";
 }
 
 //获得连接状态
@@ -989,6 +997,12 @@ void device_session::start_handler_data(string sDevId,DevMonitorDataPtr curDataP
     handler_data(sDevId,curDataPtr);
 }
 
+void device_session::start_handler_data(int iaddcode, DevMonitorDataPtr curDataPtr, bool bCheckAlarm)
+{
+    string sdevid = get_devid_by_addcode(iaddcode);
+    handler_data(sdevid,curDataPtr);
+}
+
 //2016-3-31------处理设备数据----完成
 void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 {
@@ -1102,12 +1116,14 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
         if(nResult == 0)
         {
             DevMonitorDataPtr curData_ptr(new Data);
-            int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred);
+            int iaddcode=-1;
+            int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
             if(nResult==0)//查询数据解析正确
             {
                 query_timeout_count_ = 0;
+                string sdevid = get_devid_by_addcode(iaddcode);
                 if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
-                        .schedule(boost::bind(&device_session::handler_data,this,cur_dev_id_,curData_ptr)))
+                        .schedule(boost::bind(&device_session::handler_data,this,sdevid,curData_ptr)))
                 {
                     task_count_increase();
                 }
@@ -1190,8 +1206,9 @@ void device_session::handle_read_body(const boost::system::error_code& error, si
 
         DevMonitorDataPtr curData_ptr;//(new Data);
         //curData_ptr.reset();
+        int iaddcode=-1;
         int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,
-                                                        bytes_transferred);
+                                                        bytes_transferred,iaddcode);
         if(nResult==0)//查询数据解析正确
         {
             query_timeout_count_ = 0;
@@ -1248,11 +1265,13 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
             else   {
                 cur_msg_q_id_=0;
                 DevMonitorDataPtr curData_ptr(new Data);
-                nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,0);
+                int iaddcode=-1;
+                int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
                 if(nResult == 0)
                 {
+                    string sdevid = get_devid_by_addcode(iaddcode);
                     if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
-                            .schedule(boost::bind(&device_session::handler_data,this,cur_dev_id_,curData_ptr)))
+                            .schedule(boost::bind(&device_session::handler_data,this,sdevid,curData_ptr)))
                     {
                         task_count_increase();
                     }

@@ -2,10 +2,11 @@
 //#include "./snmp_pp/snmp_pp.h"
 //#define rflevel	"1.3.6.1.4.1.8201.5.7.1.1.4.0"
 namespace hx_net{
-          GsbrTransmmit::GsbrTransmmit(int subprotocol,int addresscode)
+          GsbrTransmmit::GsbrTransmmit(Tsmt_message_ptr ptsmessage,int subprotocol,int addresscode)
                         :Transmmiter()
                         ,m_subprotocol(subprotocol)
                         ,m_addresscode(addresscode)
+                        ,m_pmessage(ptsmessage)
           {
               if(subprotocol==GSBR_SNMP)
               {
@@ -197,6 +198,7 @@ namespace hx_net{
                       curdata_ptr->mValues[15] = dainfo;
                   }
               }
+              m_pmessage->aysnc_data(curdata_ptr);
           }
 
           int GsbrTransmmit::get_snmp(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)

@@ -94,6 +94,7 @@ namespace hx_net
 		void sendSmsAndCallPhone(int nAlarmLevel,string sContent);
 		//开始处理监测数据
         virtual void start_handler_data(string sDevId,DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true){}
+        virtual void start_handler_data(int iaddcode,DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true){}
 		//开始处理mp3数据
         virtual void start_handler_mp3_data(boost::uint8_t nChannel,unchar_ptr curData){}
 		//开始处理mp3数据扩展

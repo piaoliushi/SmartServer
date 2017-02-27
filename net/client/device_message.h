@@ -34,7 +34,7 @@ namespace hx_net
 
 		int check_normal_msg_header(HMsgHandlePtr agentPtr,int msgLen,CmdType cmdType,int number);
 
-		int decode_msg_body(HMsgHandlePtr agentPtr,DevMonitorDataPtr data_ptr,int msgLen);
+        int decode_msg_body(HMsgHandlePtr agentPtr,DevMonitorDataPtr data_ptr,int msgLen,int &iaddcode);
 
         //bool decode_msg(HDevAgentPtr agentPtr,DevMonitorDataPtr data_ptr_);
 

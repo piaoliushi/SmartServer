@@ -9,6 +9,7 @@
 #include "../../../../StationConfig.h"
 #include <QString>
 #include "./snmp_pp/snmp_pp.h"
+#include "../../device_session.h"
 const char LDPCQAM[][16]={"0.8&4QAMNR","0.4&4QAM","0.6&4QAM",
                           "0.8&4QAM","0.4&16QAM","0.6&16QAM",
                           "0.8&16QAM","0.8&32QAM","0.4&64QAM",

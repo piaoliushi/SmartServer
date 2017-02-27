@@ -31,7 +31,7 @@ namespace hx_net
 		return RE_UNKNOWDEV;
 	}
 
-    int Media_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
+    int Media_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
 	{
 		return RE_UNKNOWDEV;
 	}

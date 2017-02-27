@@ -101,11 +101,11 @@ namespace hx_net
 			return -1;
         return m_pbaseMsg->check_msg_header(data,nDataLen,cmdType,number);
 	}
-	int  MsgHandleAgentImpl::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
+    int  MsgHandleAgentImpl::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
 	{
 		if(m_pbaseMsg==NULL)
 			return -1;
-		return m_pbaseMsg->decode_msg_body(data,data_ptr,nDataLen);
+        return m_pbaseMsg->decode_msg_body(data,data_ptr,nDataLen,iaddcode);
 	}
 
     int  MsgHandleAgentImpl::decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)

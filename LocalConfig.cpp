@@ -32,6 +32,7 @@ LocalConfig::~LocalConfig(void)
 {
 }
 
+
 bool LocalConfig::load_local_config(const char* sFileName)
 {
     file<>   fdoc(sFileName);
@@ -386,6 +387,7 @@ map<string,pDevicePropertyExPtr>& LocalConfig::device_property_ex()
 {
     return device_property_Ex_;
 }
+
 pDevicePropertyExPtr  LocalConfig::device_property_ex(string sTransmitterId)
 {
     map<string,pDevicePropertyExPtr>::iterator iter = device_property_Ex_.find(sTransmitterId);

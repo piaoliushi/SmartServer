@@ -32,11 +32,11 @@ namespace hx_net
 		return nResult;
 	}
 
-	int othdev_message::decode_msg_body(HMsgHandlePtr agentPtr,DevMonitorDataPtr data_ptr,int msgLen)
+    int othdev_message::decode_msg_body(HMsgHandlePtr agentPtr,DevMonitorDataPtr data_ptr,int msgLen,int &iaddcode)
 	{
         if(msgLen>0)
             move_w_ptr(msgLen);
-		int nResult = agentPtr->decode_msg_body(r_ptr(),data_ptr,valid_msg_len());
+        int nResult = agentPtr->decode_msg_body(r_ptr(),data_ptr,valid_msg_len(),iaddcode);
 		
 		reset();
 		return nResult;

@@ -78,6 +78,8 @@ namespace hx_net
 
         //开始处理监测数据
         void start_handler_data(string sDevId,DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true);
+        //多个串口设备返回数据处理
+        void start_handler_data(int iaddcode,DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true);
     protected:
         void start_read_head(int msgLen);//开始接收头
         void start_read_body(int msgLen);//开始接收体
@@ -104,7 +106,7 @@ namespace hx_net
         bool is_need_report_data(string sDevId);
 
         string next_dev_id();
-
+        string get_devid_by_addcode(int iaddcode);
         //提交任务
         void task_count_increase();
         //任务递减
@@ -202,6 +204,7 @@ namespace hx_net
         bool all_dev_is_use_;
 
         map<string,parse_ass_dev_ptr>   map_dev_ass_parse_ptr_;//
+        map<int,string> map_addcode_devid_;
     };
     typedef boost::shared_ptr<hx_net::device_session> dev_session_ptr;
     typedef boost::weak_ptr<hx_net::device_session>    dev_session_weak_ptr;

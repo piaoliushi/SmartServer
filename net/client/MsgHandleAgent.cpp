@@ -63,11 +63,11 @@ namespace hx_net
 			return -1;
         return m_msgImpl->check_msg_header(data,nDataLen,cmdType,number);
 	}
-	int  MsgHandleAgent::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
+    int  MsgHandleAgent::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
 	{
 		if(m_msgImpl==NULL)
 			return -1;
-		return m_msgImpl->decode_msg_body(data,data_ptr,nDataLen);
+        return m_msgImpl->decode_msg_body(data,data_ptr,nDataLen,iaddcode);
 	}
 
     int  MsgHandleAgent::decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)

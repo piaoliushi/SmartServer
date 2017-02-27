@@ -38,12 +38,12 @@ namespace hx_net
 		return -1;
 	}
 
-	int Timer_message::decode_msg_body( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen )
+    int Timer_message::decode_msg_body( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 	{
 		switch(d_devInfo.nSubProtocol)
 		{
 		case TFS_001:
-			return TFS_001Data(data,data_ptr,nDataLen);
+            return TFS_001Data(data,data_ptr,nDataLen,iaddcode);
 			break;
 		}
 		return -1;
@@ -79,8 +79,9 @@ namespace hx_net
 		}
 	}
 
-	int Timer_message::TFS_001Data( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen )
+    int Timer_message::TFS_001Data( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 	{
+        iaddcode = d_devInfo.iAddressCode;
 		int classid = data[2];
 		int index = 0,loopnum=6;
 		if(classid==0x01)

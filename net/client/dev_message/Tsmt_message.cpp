@@ -32,8 +32,7 @@ namespace hx_net
     {
         m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
         CreateObject();
-
-
+        d_curData_ptr = DevMonitorDataPtr(new Data);
         map<int,vector<AssDevChan> >::iterator find_iter = d_devInfo.map_AssDevChan.find(0);
         if(find_iter!=d_devInfo.map_AssDevChan.end()){
             vector<AssDevChan>::iterator dev_iter = find_iter->second.begin();
@@ -80,9 +79,10 @@ namespace hx_net
         return m_ptransmmit->check_msg_header(data,nDataLen,cmdType,number);
 	}
 
-    int Tsmt_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
+    int Tsmt_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
 	{
         int irunstate=dev_unknown;
+        iaddcode = d_devInfo.iAddressCode;
         if(data_ptr!=NULL)
             d_curData_ptr = data_ptr;
         int idecresult = m_ptransmmit->decode_msg_body(data,d_curData_ptr,nDataLen,irunstate);
@@ -94,7 +94,7 @@ namespace hx_net
                 //设置运行状态
                 set_run_state(irunstate);
             }
-            if(IsStandardCommand())//isMultiQueryCmd()
+            if(m_ptransmmit->IsStandardCommand())//isMultiQueryCmd()
                 m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
         }
         return idecresult;
@@ -106,7 +106,7 @@ namespace hx_net
         if(data_ptr!=NULL)
             d_curData_ptr = data_ptr;
         int idecresult = m_ptransmmit->decode_msg_body(snmp,d_curData_ptr,target,irunstate);
-        if(idecresult == 0 ) {
+      /*  if(idecresult == 0 ) {
             GetResultData(d_curData_ptr);
             if(irunstate==dev_unknown)
                 detect_run_state(d_curData_ptr);
@@ -114,9 +114,8 @@ namespace hx_net
                 //设置运行状态
                 set_run_state(irunstate);
             }
-            //if(m_ptransmmit->isMultiQueryCmd())
-            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
-        }
+                m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+        }*/
         return idecresult;
     }
     //获得运行状态
@@ -161,6 +160,13 @@ namespace hx_net
            set_run_state(dev_unknown);
        }
 
+       void Tsmt_message::aysnc_data(DevMonitorDataPtr curDataPtr)
+       {
+           GetResultData(d_curData_ptr);
+           detect_run_state(d_curData_ptr);
+           m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+       }
+
        void  Tsmt_message::check_device_alarm(int nAlarmType)
        {
 
@@ -193,11 +199,9 @@ namespace hx_net
     }
 
     bool Tsmt_message::IsStandardCommand()
-    {
-        if(m_ptransmmit !=NULL)
-             return m_ptransmmit->IsStandardCommand();
+	{
 
-        return false;
+        return m_ptransmmit->IsStandardCommand();
 	}
 	
     void Tsmt_message::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)
@@ -301,19 +305,17 @@ namespace hx_net
             break;
         case HARRIS:
             break;
-        case DE_XIN:{
-            d_curData_ptr.reset(new Data);
+        case DE_XIN:
             m_ptransmmit = new DeXinTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
-        }
             break;
         case GLSQ:{
-             d_curData_ptr.reset(new Data);
             m_ptransmmit = new GlsqTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
         }
             break;
         case GSBR:
         {
-            m_ptransmmit = new GsbrTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+            m_ptransmmit = new GsbrTransmmit(boost::shared_ptr<hx_net::Tsmt_message>(this),d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+           // m_ptransmmit = new GsbrTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
         }
             break;
         }

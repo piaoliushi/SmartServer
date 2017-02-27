@@ -139,7 +139,7 @@ namespace hx_net
 		
 		return RE_UNKNOWDEV;
 	}
-	int Envir_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
+    int Envir_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
 	{
 		switch(d_devInfo.nDevProtocol)
 		{
@@ -149,15 +149,15 @@ namespace hx_net
 				{
 				case WS2032_A:
 					{
-					return EnvironWS302(data,data_ptr,nDataLen);	
+                    return EnvironWS302(data,data_ptr,nDataLen,iaddcode);
 					}
 					break;
 				case THB11RS:
-					return EnvironTHB11RS(data,data_ptr,nDataLen);
+                    return EnvironTHB11RS(data,data_ptr,nDataLen,iaddcode);
 				case KD40_IO:
-					return KD40RData(data,data_ptr,nDataLen);
+                    return KD40RData(data,data_ptr,nDataLen,iaddcode);
 				case C2000_M21A:
-					return C2000_M21A_Data(data,data_ptr,nDataLen);
+                    return C2000_M21A_Data(data,data_ptr,nDataLen,iaddcode);
 				case AC_103_CTR:
 					{
 						
@@ -165,7 +165,9 @@ namespace hx_net
 					break;
 				case FRT_X06A:
 					{
-						return FRT_X06A_Data(data,data_ptr,nDataLen);
+                        int iresult = FRT_X06A_Data(data,data_ptr,nDataLen,iaddcode);
+                        m_pSession->start_handler_data(iaddcode,data_ptr);
+                        return iresult;
 					}
 					break;
 				default:
@@ -178,7 +180,7 @@ namespace hx_net
 				switch (d_devInfo.nSubProtocol)
 				{
 				case HUIXIN_992:
-					return On992Data(data,data_ptr,nDataLen);
+                    return On992Data(data,data_ptr,nDataLen,iaddcode);
 					break;
 				default:
 					return RE_NOPROTOCOL;
@@ -189,8 +191,9 @@ namespace hx_net
 		return RE_UNKNOWDEV;
 	}
 
-	int  Envir_message::parse_AC103CTR_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen)
+    int  Envir_message::parse_AC103CTR_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
 	{
+        iaddcode = d_devInfo.iAddressCode;
 		if(nDataLen<6)
 			return -1;
 		switch(data[1])
@@ -302,12 +305,8 @@ namespace hx_net
 						cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
 					}
 					break;
-                case AC_103_CTR:{
-                     d_curData_ptr.reset(new Data);
-                }break;
 				case FRT_X06A:
 					{
-                        d_curData_ptr.reset(new Data);
 						CommandUnit tmUnit;
 						tmUnit.commandId[0] = 0x01;
 						tmUnit.commandId[1] = (d_devInfo.iAddressCode&0xFF00)>>8;
@@ -352,7 +351,7 @@ namespace hx_net
 		}
 	}
 
-	int Envir_message::EnvironWS302( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen )
+    int Envir_message::EnvironWS302( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 	{
 		DataInfo dainfo;
 		dainfo.bType = false;
@@ -360,10 +359,11 @@ namespace hx_net
 		data_ptr->mValues[0] = dainfo;
 		dainfo.fValue = float(((data[7]<<8)|data[8])/10.0);
 		data_ptr->mValues[1] = dainfo;
+        iaddcode = data[1];
 		return RE_SUCCESS;
 	}
 
-	int Envir_message::EnvironTHB11RS( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen )
+    int Envir_message::EnvironTHB11RS( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 	{
 		DataInfo dainfo;
 		dainfo.bType = false;
@@ -371,10 +371,11 @@ namespace hx_net
 		data_ptr->mValues[0] = dainfo;
 		dainfo.fValue = float(((data[5]<<8)|data[6])/10.0);
 		data_ptr->mValues[1] = dainfo;
+        iaddcode = data[0];
 		return RE_SUCCESS;
 	}
 
-	int Envir_message::KD40RData( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen )
+    int Envir_message::KD40RData( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 	{
 		int index = 0;
 		for (int i=0;i<4;++i)
@@ -390,10 +391,11 @@ namespace hx_net
 
             index++;
 		}
+        iaddcode = data[0];
 		return RE_SUCCESS;
 	}
 
-	int Envir_message::C2000_M21A_Data( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen )
+    int Envir_message::C2000_M21A_Data( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 	{
 		int index = 0;
 		unsigned char bdata1,bdata2,bdata3,bdata4;
@@ -415,14 +417,16 @@ namespace hx_net
 			dainfo.fValue = (float)((fdat*1000-4)*6.25);
 			data_ptr->mValues[index++] = dainfo;
 		}
+        iaddcode = d_devInfo.iAddressCode;
 		return RE_SUCCESS;
 	}
 
-	int Envir_message::FRT_X06A_Data( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen )
+    int Envir_message::FRT_X06A_Data( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 	{
 		int count = data[0];//监测个数
 		int data_index = 1; //解析位置
 		DataInfo dainfo;
+        iaddcode = d_devInfo.iAddressCode;
 		for(int i=0;i<count;i++)
 		{
 			int channum = (data[data_index]<<8)|data[data_index+1];
@@ -551,13 +555,14 @@ namespace hx_net
 		return RE_SUCCESS;
 	}
 
-	int Envir_message::On992Data( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen )
+    int Envir_message::On992Data( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 	{
 		unsigned char bdata1,bdata2,bdata3,bdata4;
 		float fdat;
 		int indexpos=0;
 		DataInfo dainfo;
 		dainfo.bType = false;
+        iaddcode = d_devInfo.iAddressCode;
 		for(int i=0;i<9;i++)//取温度
 		{
 			bdata1 = data[3 + 4*i];//通道号码必须从9开始

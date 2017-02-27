@@ -13,7 +13,7 @@ public:
 public:
     void SetProtocol(int mainprotocol,int subprotocol);
     int    check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number);
-    int    decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
+    int    decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     bool IsStandardCommand();
     bool isRegister();
     bool is_auto_run();
@@ -26,7 +26,7 @@ public:
 protected:
     void test104data();
     void  GetResultData(DevMonitorDataPtr data_ptr);
-    int parse_104_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
+    int parse_104_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int iecsock_iframe_recv(struct iec_buf *buf,DevMonitorDataPtr data_ptr);
     int iecsock_sframe_recv(struct iechdr *h);
     int iecsock_uframe_recv(struct iechdr *h);
@@ -34,9 +34,9 @@ protected:
     void iecsock_sframe_send();
     void iecsock_iframe_send();
     void test_time_event(const boost::system::error_code& error);
-	int decode_Eda9033A(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
-    int decode_SPM33(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
-    int decode_EM400(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen);
+    int decode_Eda9033A(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
+    int decode_SPM33(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
+    int decode_EM400(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
 private:
     int              m_Subprotocol;//设备子协议号
     int                          m_mainprotocol;//主协议编号
@@ -55,7 +55,5 @@ private:
 
 	int m_Uo,m_Io;
 	float m_Ubb,m_Ibb;
-
-    DevMonitorDataPtr d_curData_ptr;
 };
 }

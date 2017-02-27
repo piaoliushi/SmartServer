@@ -14,7 +14,7 @@ namespace hx_net
 	public:
         virtual void SetProtocol(int mainprotocol,int subprotocol){}
         virtual int check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number){return -1;}
-        virtual int decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen){return -1;}
+        virtual int decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode){return -1;}
         virtual int decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target){return -1;}
         virtual int PreHandleMsg(){return -1;}
         virtual void input_params(const vector<string> &vParam){}
