@@ -270,8 +270,8 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
             info.comMode.idata_bit = comquery.value(2).toInt();
             info.comMode.istop_bit = comquery.value(3).toInt();
             info.comMode.iparity_bit = comquery.value(4).toInt();
-
             QString qtrNum = comquery.value(5).toString();
+            info.sModleNumber = qtrNum.toStdString();
             QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
             QSqlQuery net1query(db);
             if(net1query.exec(strQdev)) {
