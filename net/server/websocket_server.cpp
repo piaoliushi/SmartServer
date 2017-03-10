@@ -143,9 +143,6 @@ void websocket_server::_unregister_user(connection_hdl hdl)
                 GetInst(SvcMgr).get_notify()->OnClientOffline(client_endpoint.address().to_string(),
                                                               client_endpoint.port());
             }
-             // = client_endpoint;
-            //GetInst(SvcMgr).get_notify()->OnClientOffline(client_endpoint.address().to_string(),
-            //                                              client_endpoint.port());
             m_connections.erase(iter);
             return;
         }

@@ -58,6 +58,7 @@ bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody,string
 
                 createResponseMsg(nMsgId,nRsltValue,cmdType.c_str(),responseBody);
             }else {
+                //dtmb 专用 ，暂时为使用...
                 xml_node<> *returnNode = rootNode->first_node("ReturnInfo");
                 if(returnNode!=NULL){
                     return _parseSignalReportMsg(sIp,returnNode);

@@ -1006,10 +1006,12 @@ void device_session::start_handler_data(int iaddcode, DevMonitorDataPtr curDataP
 //2016-3-31------处理设备数据----完成
 void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 {
+    cout<<"handler_data start mutex"<<endl;
     boost::recursive_mutex::scoped_lock lock(data_deal_mutex);
     //是否在运行图时间
     bool bIsMonitorTime = is_monitor_time(sDevId);
     //打包发送客户端
+    cout<<"start send_monitor_data_message to client ************"+sDevId<<endl;
     send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
                               ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
@@ -1122,11 +1124,13 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
             {
                 query_timeout_count_ = 0;
                 string sdevid = get_devid_by_addcode(iaddcode);
-                if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
-                        .schedule(boost::bind(&device_session::handler_data,this,sdevid,curData_ptr)))
-                {
-                    task_count_increase();
-                }
+//                if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
+//                        .schedule(boost::bind(&device_session::handler_data,this,sdevid,curData_ptr)))
+//                {
+//                    task_count_increase();
+//                }
+
+                handler_data(sdevid,curData_ptr);
             }
         }
         start_read_head(bytes_transferred);
@@ -1269,12 +1273,19 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
                 int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
                 if(nResult == 0)
                 {
+
                     string sdevid = get_devid_by_addcode(iaddcode);
-                    if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
-                            .schedule(boost::bind(&device_session::handler_data,this,sdevid,curData_ptr)))
-                    {
-                        task_count_increase();
-                    }
+                    cout<<"handler_data--------"+sdevid<<endl;
+//                    if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
+//                            .schedule(boost::bind(&device_session::handler_data,this,sdevid,curData_ptr)))
+//                    {
+//                        cout<<"put threadpool success!!"<<endl;
+//                        task_count_increase();
+//                    }else{
+//                        cout<<"thread pool schedule error!"<<endl;
+                        handler_data(sdevid,curData_ptr);
+                    //}
+
                     cur_dev_id_ = next_dev_id();//切换到下一个设备
                 }
                 else{

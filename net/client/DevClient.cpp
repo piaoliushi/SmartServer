@@ -49,12 +49,13 @@ void DevClient::connect_all()
 
 void DevClient::disconnect_all()
 {
-    {
-        boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
-        std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
-        for(;iter!=device_pool_.end();iter++)
-            (*iter).second->disconnect();
-    }
+
+    boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
+    std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
+    for(;iter!=device_pool_.end();iter++)
+        (*iter).second->disconnect();
+    boost::detail::thread::singleton<boost::threadpool::pool>::instance().wait();
+
 }
 
 void DevClient::run()
