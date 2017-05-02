@@ -8,7 +8,7 @@
 //#include "../rapidxml/rapidxml.hpp"
 #include "../qnotifyhandler.h"
 #include <boost/thread.hpp>
-//using namespace rapidxml;
+#include "./protocol/protocol.pb.h"
 namespace db {
 class DataBaseOperation
 {
@@ -93,6 +93,24 @@ public:
     //节目信号告警/恢复
     bool AddProgramSignalAlarmRecord(string strDevNum, string strFrqName,time_t startTime,int nlimitType,
                                       int nalarmTypeId,unsigned long long& irecordid );
+    //获得短信猫配置
+    bool GetGSMInfo(bool &bhave, ComCommunicationMode &mdInfo);
+
+    //获得所有用户信息
+    bool GetAllUserInfoByStation(const string sStationNumber,LoginAck &users);
+
+    //值班日志
+    bool AddDutyLog(const string sUserNumber,const string sContent,int nType);
+
+    //交班记录
+    bool AddHandove(const string sHandoveNumber,const string sSuccessorNumber,const string &sLogContents,const time_t ttime);
+
+    //用户签到
+    bool AddSignin(const string sSignerNumber,const time_t ttime,int nSigntype=0);
+
+    //用户签退
+    bool AddSignout(const string sSignerNumber,const time_t tintime,const time_t touttime);
+
 
 protected:
     void StartReOpen();
@@ -103,10 +121,12 @@ protected:
     bool GetDevProperty(QSqlDatabase &db,string strDevnum,map<string,DevProperty>& map_property);
     bool GetNetProperty(QSqlDatabase &db,string strConTypeNumber,NetCommunicationMode& nmode);
     bool GetComProperty(QSqlDatabase &db,string strConTypeNumber,ComCommunicationMode& cmode);
-    bool GetLinkActionParam(QSqlDatabase &db,string strParamnum,map<int,ActionParam>& map_Params);
+    //bool GetLinkActionParam(QSqlDatabase &db,string strParamnum,map<int,ActionParam>& map_Params);
+    bool GetLinkActionParam(QSqlDatabase &db, string strParamnum,map<int,vector<ActionParam> >& map_Params);
     bool GetLinkAction(QSqlDatabase &db,string strLinkRolenum,vector<LinkAction>& vLinkAction);
     bool GetAlarmConfig(QSqlDatabase &db,string strDevnum,map<int,Alarm_config>& map_Alarmconfig);
-    bool GetItemAlarmConfig(QSqlDatabase &db,string strDevnum,int iIndex,vector<Alarm_config>& vAlarmconfig);
+    //bool GetItemAlarmConfig(QSqlDatabase &db,string strDevnum,int iIndex,vector<Alarm_config>& vAlarmconfig);
+    bool GetItemAlarmConfig(QSqlDatabase &db, string strDevnum,int iIndex,int iThid,vector<Alarm_config>& vAlarmconfig);
     bool GetDevInfo(QSqlDatabase &db,string strDevnum,DeviceInfo& device);
     bool GetAssDevChan(QSqlDatabase &db, QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev );
 private:

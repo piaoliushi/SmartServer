@@ -70,6 +70,10 @@ public:
 	 bool get_media_dev_info(int ndevAddr,MediaDeviceParamInfo& mediaDevInfo);
      //获得数据字典值
      string get_dictionary_value(string sType,int nCode);
+
+     bool IsHaveGsm(){return bHave_GSM_model;}
+     ComCommunicationMode getGsmInfo(){return Gsm_model_info;}
+
 private:
 	vector<TransmitterInformation>mapTransmitterInfo;//台站id为索引
     vector<AntennaInformation> mapAntennaInfo;//台站id为索引
@@ -86,5 +90,8 @@ private:
 	string cur_devSvc_id; //当前服务id
 
     map<string,map<int,string> > mapDeviceDicry;
+
+    bool                 bHave_GSM_model;
+    ComCommunicationMode Gsm_model_info;
 };
 #endif

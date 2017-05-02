@@ -117,5 +117,14 @@ namespace hx_net
           return _devclientptr->response_http_msg(sUrl,sContent,sRqstType);
       return EC_OBJECT_NULL;
   }
+
+  //发送短信
+  e_ErrorCode DevClientMgr::SendSMSContent(vector<string> &PhoneNumber, string AlarmContent)
+   {
+       if(_devclientptr)
+           return _devclientptr->SendSMSContent(PhoneNumber,AlarmContent);
+        return EC_OBJECT_NULL;
+   }
+
 }
 

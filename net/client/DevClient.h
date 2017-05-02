@@ -6,6 +6,7 @@
 #include "../io_service_pool.h"
 #include "../../qnotifyhandler.h"
 #include "http_request_session.h"
+#include "../../sms/gsms.h"
 using boost::asio::ip::tcp;
 
 namespace hx_net
@@ -76,6 +77,9 @@ namespace hx_net
 
         //上报http消息
         e_ErrorCode   response_http_msg(string sUrl,string &sContent,string sRqstType="POST");
+
+        //发送短信
+        e_ErrorCode  SendSMSContent(vector<string> &PhoneNumber, string AlarmContent);
 	private:
 		boost::recursive_mutex         device_pool_mutex_;
 		std::map<DevKey,session_ptr>   device_pool_;
@@ -83,6 +87,8 @@ namespace hx_net
 
         http_request_session_ptr      http_request_session_ptr_;
         http_request_session_ptr      http_report_session_ptr_;
+
+        boost::shared_ptr<Gsms>    m_pGsm_ptr_;
 	};
 }
 

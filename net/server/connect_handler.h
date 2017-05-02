@@ -38,6 +38,13 @@ namespace hx_net
 
 		void logout_user_ack(string sUser,string sPassword,msgPointer &pMsg);
 
+        void handover_ack(string soldUser,string sNewUser,string sNewPassword,msgPointer &pMsg);
+
+        void user_sign_in_out_ack(int bIn,string sUser,string sPassword);
+
+        void user_duty_log(string sUserId,const string &sContent,int nType);
+
+
 		void handle_timeout(const boost::system::error_code& e);
 
 		int  putq(msgPointer msgPtr);

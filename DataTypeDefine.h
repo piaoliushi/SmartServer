@@ -128,13 +128,22 @@ typedef struct
     int    iParamType;
 }ActionParam;
 
+//typedef struct
+//{
+//    string strActionNum;
+//    string strActionNam;
+//    int    iActionType;
+//    int    iIshaveParam;
+//    map<int,ActionParam> map_Params;
+//}LinkAction;
+
 typedef struct
 {
     string strActionNum;
     string strActionNam;
     int    iActionType;
     int    iIshaveParam;
-    map<int,ActionParam> map_Params;
+    map<int,vector<ActionParam> > map_Params;
 }LinkAction;
 
 #define    ALARM_UPPER            0
@@ -270,11 +279,11 @@ typedef struct
 {
     unsigned long long  nAlarmId;   //告警id
     int           nType;      //告警类型
-    time_t     startTime; //开始时间
-    int           nTargetId; //指标id
-    int           nModuleId;//模块id
-    int           nModuleType;//模块type
-    int           nLimitId;//跃限类型,跃上限...
+    time_t      startTime; //开始时间
+    int         nTargetId; //指标id
+    int         nModuleId;//模块id
+    int         nModuleType;//模块type
+    int         nLimitId;//跃限类型,跃上限...
     string      sReason;//告警描述
     bool        bNotifyed;//已通知标志
 }CurItemAlarmInfo;
@@ -316,12 +325,11 @@ typedef struct
 
 enum _tagAssType
 {
-    TSMT_TO_ATTENA = 0,//发射机关联天线
-    DEV_TO_CHANNEL = 1,//设备关联通道
-    DEV_TO_MOUDLE  = 2,//设备关联模块
-    ATTENA_TO_TSMT = 3,//天线关联发射机
-    CHNNEL_TO_DEV  = 4,//通道关联设备
-    MOUDLE_TO_DEV  = 5,//模块关联设备
+    DEV_TO_DEV     = 0,//设备关联设备
+    TSMT_TO_ATTENA = 1,//发射机关联天线
+    ATTENA_TO_TSMT = 2,//天线关联发射机
+    DEV_TO_MOUDLE  = 3,//设备关联模块
+    MOUDLE_TO_DEV  = 4,//模块关联设备
 };
 
 #endif

@@ -230,6 +230,7 @@ void device_session::get_alarm_state(string sDevId,map<int,map<int,CurItemAlarmI
         cellAlarm = mapItemAlarm[sDevId];
 }
 
+//返回连接模式
 int  device_session::con_mod()
 {
     if(modleInfos_.iCommunicationMode==CON_MOD_NET) {
@@ -350,7 +351,8 @@ void device_session::agent_connect(std::string hostname,unsigned short port)
     int status;
     if(snmp_ptr_==NULL){
         snmp_ptr_ = new Snmp(status);
-        snmp_ptr_->start_poll_thread(10);
+        if(!snmp_ptr_->start_poll_thread(1000))
+            cout<<"start_poll_thread-----error!";
     }
     if(target_ptr_==NULL){
         target_ptr_ = new CTarget(ipAddr);
@@ -771,7 +773,8 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                 }
                 //按星期控制
                 if((*cmd_iter).iDateType == RUN_TIME_WEEK){
-                    if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0) continue;//超过运行图终止时间且终止时间不为0,则跳过
+                    if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0)
+                        continue;//超过运行图终止时间且终止时间不为0,则跳过
                     if((pCurTime->tm_wday)== (*cmd_iter).iWeek){
                         tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
                         unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
@@ -788,7 +791,8 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
 
                 //按月控制
                 if((*cmd_iter).iDateType == RUN_TIME_WEEK){
-                    if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0) continue;//超过运行图终止时间且终止时间不为0,则跳过
+                    if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0)
+                        continue;//超过运行图终止时间且终止时间不为0,则跳过
                     if((pCurTime->tm_mon+1)== (*cmd_iter).iMonitorMonth ||  (*cmd_iter).iMonitorMonth==0){
                         tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
                         unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
@@ -1346,11 +1350,12 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
             //提交监控量告警到上级平台
             string sDesDevId = devId;
             map_dev_ass_parse_ptr_[devId]->get_parent_device_id(sDesDevId);
-            http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
+            http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm.sReason);
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
                                      ,modleInfos_.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
-            // 联动.....
+
+
         }
     }else{//1:告警恢复
         time_t curTime = time(0);
@@ -1410,6 +1415,9 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                     if(dtime_during>=ItemInfo.vItemAlarm[nIndex].iDelaytime){
                         //存储告警,通知告警,联动告警
                         record_alarm_and_notify(devId,fValue, ItemInfo.vItemAlarm[nIndex].fLimitvalue,0,ItemInfo,alarm_type_findIter->second);
+                        //分析告警联动
+                        paser_action(ItemInfo.vItemAlarm[nIndex].vLinkAction,devId,ItemInfo,alarm_type_findIter->second);
+
                         alarm_type_findIter->second.bNotifyed = true;
                         //标志当前有新的告警发生
                         bAlarmNow = true;
@@ -1642,6 +1650,67 @@ void device_session::clear_dev_item_alarm(string sDevId,int nitemId)
         record_alarm_and_notify(sDevId,0, 0,1,modleInfos_.mapDevInfo[sDevId].map_MonitorItem[iter->first],typeIter->second);
     }
     iter->second.clear();
+}
+
+void device_session::doAction(LinkAction &action, string sStationid, string sDevid, string sDevName, int devType, DeviceMonitorItem &ItemInfo, string sStartTime, string sReason)
+{
+    switch(action.iActionType)
+    {
+    case ACTP_SENDMSG://发短信
+    {
+        string smscontent;
+        string strDevtype = GetInst(StationConfig).get_dictionary_value("DeviceType",devType);
+        smscontent = str(boost::format("%1%:%2%(%3%)---%4%")%strDevtype%sDevName%sDevid%sReason);
+        Action_sendsms(action,smscontent);
+    }
+        break;
+    case ACTP_TELE://打电话
+        break;
+    case ACTP_SEND_CLIENT://通知客户端
+        break;
+    case ACTP_OPEN_DEVICE://开设备
+        break;
+    case ACTP_CLOSE_DEVICE://关设备
+        break;
+    case ACTP_SWITCH_ANTTEN://天线切换
+        break;
+    }
+}
+
+void device_session::Action_sendsms(LinkAction &action, string sendcontent)
+{
+    if(action.map_Params.size()<1)
+        return;
+    vector<string> phonelist;
+    map<int,vector<ActionParam> >::iterator iter = action.map_Params.begin();
+    for(;iter!=action.map_Params.end();++iter)
+    {
+        vector<ActionParam>::iterator viter = (*iter).second.begin();
+        for(;viter!=(*iter).second.end();++viter)
+        {
+            if((*viter).iParamType==0)
+            {
+                UserInformation tmpUser;
+                if(GetInst(DataBaseOperation).GetUserInfo((*viter).strParamValue,tmpUser))
+                    phonelist.push_back(tmpUser.sTelephone);
+            }
+        }
+    }
+    GetInst(SvcMgr).SendSMSContent(phonelist,sendcontent);
+}
+
+void device_session::paser_action(vector<LinkAction> &vaction,string &devId,DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm)
+{
+    static  char str_time[64];
+    tm *local_time = localtime(&curAlarm.startTime);
+    strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+    vector<LinkAction>::iterator vaciter = vaction.begin();
+    for(;vaciter!=vaction.end();++vaciter)
+    {
+        doAction((*vaciter),GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,modleInfos_.mapDevInfo[devId].iDevType,
+                                         ItemInfo,str_time,curAlarm.sReason);
+    }
+
 }
 
 }

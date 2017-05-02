@@ -80,6 +80,8 @@ namespace hx_net
         void start_handler_data(string sDevId,DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true);
         //多个串口设备返回数据处理
         void start_handler_data(int iaddcode,DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true);
+
+
     protected:
         void start_read_head(int msgLen);//开始接收头
         void start_read_body(int msgLen);//开始接收体
@@ -132,8 +134,18 @@ namespace hx_net
 
         //打开串口
         void   open_com();
-
+        //返回连接模式
         int  con_mod();
+
+        //分析联动配置
+        void doAction(LinkAction &action,string sStationid,string sDevid,string sDevName,int devType,
+                              DeviceMonitorItem &ItemInfo,string sStartTime,string sReason);
+        //联动发短信
+        void Action_sendsms(LinkAction &action,string sendcontent);
+
+        //分析联动
+        void paser_action(vector<LinkAction> &vaction,string &devId,DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm);
+
     protected:
         void handle_connected(const boost::system::error_code& error);
         void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);//通用消息头（分消息head，body）

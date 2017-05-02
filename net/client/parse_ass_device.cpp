@@ -17,6 +17,7 @@ void Parse_Ass_Device::_parse_dev_associate_info()
 
 bool Parse_Ass_Device::get_parent_device_id(string &parentId)
 {
+    //不适用多通道设备
     if(d_dev_info_.bMulChannel)
         return false;
    map<int,vector<AssDevChan> >::iterator iter =  d_dev_info_.map_AssDevChan.find(0);

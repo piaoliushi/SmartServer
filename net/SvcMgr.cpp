@@ -189,4 +189,11 @@ namespace hx_net
           return m_pDevMgrPtr->response_http_msg(sUrl,sContent,sRqstType);
       return EC_OBJECT_NULL;
   }
+
+  //发送短信
+  e_ErrorCode    SvcMgr::SendSMSContent(vector<string> &PhoneNumber,string AlarmContent){
+      if(m_pDevMgrPtr)
+          m_pDevMgrPtr->SendSMSContent(PhoneNumber,AlarmContent);
+      return EC_OBJECT_NULL;
+  }
 }

@@ -47,6 +47,8 @@ void gb2312ToUtf8(std::string& strGb2312)
 
 int main(int argc, char *argv[])
 {
+
+
 //#ifdef Q_OS_WIN
     QtSingleApplication a(argc, argv);
     if(a.sendMessage(QString("show app")))

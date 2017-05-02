@@ -43,12 +43,12 @@ void QNotifyHandler::OnClientLogin(string sIp,short port,string sName,string sID
 {
     boost::recursive_mutex::scoped_lock lock(mutex_);
     QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);
-    emit S_OnClientLogin(sEndpoint,sName.c_str(),sID.c_str());//QString::fromStdString(sIp)
+    emit S_OnClientLogin(sEndpoint,sName.c_str(),sID.c_str());
 }
 
 void QNotifyHandler::OnClientLogout(string sIp,short port)
 {
     boost::recursive_mutex::scoped_lock lock(mutex_);
     QString sEndpoint = QString(tr("%1:%2")).arg(sIp.c_str()).arg(port);
-    emit S_OnClientLogout(sEndpoint);//QString::fromStdString(sIp)
+    emit S_OnClientLogout(sEndpoint);
 }

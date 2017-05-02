@@ -38,6 +38,7 @@ QDevStatePage::QDevStatePage(QNotifyHandler &Notify,QWidget *parent)
 	 setLayout(pHMainLyt);
 	 pDevList->horizontalHeader()->setStretchLastSection(true);
      connect(&m_Notify,SIGNAL(S_OnDevStatus(QString,int)),this,SLOT(OnDevStatus(QString,int)));
+     connect(&m_Notify,SIGNAL(S_gsm_state(int,bool)),this,SLOT(OnGsmStatus(int,bool)));
 }
 
 QDevStatePage::~QDevStatePage()
@@ -92,6 +93,22 @@ void QDevStatePage::LoadDevToList()
     //int nDevNum = pDevList->rowCount();
     //pDevSize->setText(QString(tr("设备数：%1")).arg(nDevNum));
 
+    if(GetInst(StationConfig).IsHaveGsm()){
+        ComCommunicationMode cominfo = GetInst(StationConfig).getGsmInfo();
+        QIcon sIcon;
+        sIcon.addFile(QString::fromUtf8(":/new/images/device.png"));
+        QString sEndpoint;
+        sEndpoint = QString(tr("COM%1")).arg(cominfo.icomport);
+        int nrow = pDevList->rowCount();
+        pDevList->insertRow(nrow);
+        pDevList->setItem(nrow,0,new QTableWidgetItem(sIcon,"GSM设备"));
+        pDevList->setItem(nrow,1,new QTableWidgetItem(sEndpoint));
+        QTableWidgetItem *netItem = new QTableWidgetItem(tr("disconnect"));
+        netItem->setTextColor(QColor(150,150,150));
+        pDevList->setItem(nrow,2,netItem);
+    }
+
+
 	pDevList->resizeColumnsToContents();
 }
 
@@ -128,5 +145,60 @@ void QDevStatePage::OnDevStatus(QString sDevId,int nResult)
         pDevList->item(m_mapListItems[sDevId],2)->setTextColor(QColor(0,255,0));
         break;
 	}
-	
+
 }
+
+void QDevStatePage::OnGsmStatus(int stype, bool bresult)
+{
+    int nrow = pDevList->rowCount()-1;
+    if(nrow<0)
+        return;
+    switch(stype)
+    {
+    case 0:
+    {
+        if(bresult)
+        {
+            pDevList->item(nrow,2)->setText(tr("find device"));
+            pDevList->item(nrow,2)->setTextColor(QColor(0,255,0));
+        }
+        else
+        {
+            pDevList->item(nrow,2)->setText(tr("no device"));
+            pDevList->item(nrow,2)->setTextColor(QColor(150,150,150));
+        }
+    }
+        break;
+    case 1:
+    {
+        if(bresult)
+        {
+            pDevList->item(nrow,2)->setText(tr("init successed"));
+            pDevList->item(nrow,2)->setTextColor(QColor(0,255,0));
+        }
+        else
+        {
+            pDevList->item(nrow,2)->setText(tr("init fialed"));
+            pDevList->item(nrow,2)->setTextColor(QColor(150,150,150));
+        }
+     }
+        break;
+    case 2:
+    {
+        if(bresult)
+        {
+            pDevList->item(nrow,2)->setText(tr("run"));
+            pDevList->item(nrow,2)->setTextColor(QColor(0,255,0));
+        }
+        else
+        {
+            pDevList->item(nrow,2)->setText(tr("no card"));
+            pDevList->item(nrow,2)->setTextColor(QColor(150,150,150));
+        }
+    }
+        break;
+    default:
+        break;
+    }
+}
+

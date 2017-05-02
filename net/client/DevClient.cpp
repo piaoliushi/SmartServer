@@ -2,6 +2,7 @@
 #include "StationConfig.h"
 #include "device_session.h"
 #include "./dev_message/104/iec104_types.h"
+#include "../SvcMgr.h"
 #include "LocalConfig.h"
 //#include <glog/logging.h>
 //--------------------remark--------------------------------------//
@@ -45,6 +46,21 @@ void DevClient::connect_all()
             new_session->connect();
         }
     }
+
+    if(GetInst(StationConfig).IsHaveGsm())
+    {
+        ComCommunicationMode cominfo = GetInst(StationConfig).getGsmInfo();
+        if(!m_pGsm_ptr_)
+        {
+            m_pGsm_ptr_=boost::shared_ptr<Gsms>(new Gsms());
+        }
+        if(m_pGsm_ptr_->OpenCom(cominfo.icomport,cominfo.irate))
+        {
+            QObject::connect(m_pGsm_ptr_.get(),SIGNAL(S_state(int,bool)),GetInst(SvcMgr).get_notify(),SIGNAL(S_gsm_state(int,bool)));
+            m_pGsm_ptr_->gsmInit();
+        }
+    }
+
 }
 
 void DevClient::disconnect_all()
@@ -211,6 +227,19 @@ e_ErrorCode   DevClient::response_http_msg(string sUrl,string &sContent,string s
 
     http_request_session_ptr_->putHttpMessage(sUrl,sContent);
     return EC_OK;
+}
+
+e_ErrorCode DevClient::SendSMSContent(vector<string> &PhoneNumber, string AlarmContent)
+{
+    if(m_pGsm_ptr_&&m_pGsm_ptr_->IsRun())
+    {
+        vector<string>::iterator iter = PhoneNumber.begin();
+        for(;iter!=PhoneNumber.end();++iter)
+            m_pGsm_ptr_->SendSMSContent("13800551500",(*iter),AlarmContent);
+        return EC_OK;
+    }
+
+    return EC_OBJECT_NULL;
 }
 
 }

@@ -1,5 +1,8 @@
 #include "connect_handler.h"
 #include "../../LocalConfig.h"
+#include "../../database/DataBaseOperation.h"
+
+using namespace db;
 namespace hx_net
 {
 	connect_handler::connect_handler(boost::asio::io_service& io_service, 
@@ -109,6 +112,37 @@ namespace hx_net
 		srv_.user_logout(shared_from_this(),sUser,sPassword,*slogOutAck);
 		sendMessage(MSG_LOGOUT_ACK,slogOutAck);
 	}
+
+    //交接班(ack消息共用，类型区分)
+    void connect_handler::handover_ack(string soldUser,string sNewUser,string sNewPassword,msgPointer &pMsg)
+    {
+        loginAckMsgPtr sloginAck(new LoginAck);
+        HandOverReq rhandover;
+        rhandover.ParseFromArray(pMsg->body(),pMsg->bodySize());
+        string sContents = rhandover.scontents().c_str();
+        srv_.user_handover(shared_from_this(),soldUser,sNewUser,sNewPassword,sContents,*sloginAck);
+        sendMessage(MSG_HANDOVER_ACK,sloginAck);
+    }
+
+    //签到,签退(ack)
+    void connect_handler::user_sign_in_out_ack(int bIn,string sUser,string sPassword)
+    {
+        signInOutAckMsgPtr signinAck(new SignInOutAck);
+        srv_.user_signin_out(shared_from_this(),sUser,sPassword,signinAck,bIn);
+        sendMessage(MSG_SIGN_IN_OUT_ACK,signinAck);
+    }
+    //值班日志
+    void  connect_handler::user_duty_log(string sUserId,const string &sContent,int nType)
+    {
+        dutyLogAckMsgPtr dutyAck(new DutyLogAck);
+        std::string sstationid = GetInst(LocalConfig).local_station_id();
+        if(!GetInst(DataBaseOperation).AddDutyLog(sUserId,sContent,nType))
+            dutyAck->set_eresult(EC_FAILED);
+        else
+            dutyAck->set_eresult(EC_OK);
+        sendMessage(MSG_DUTY_LOG_ACK,dutyAck);
+    }
+
 
 	//开始接收消息头
 	void connect_handler::start_read_head()

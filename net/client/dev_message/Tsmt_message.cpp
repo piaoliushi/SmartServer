@@ -32,7 +32,8 @@ namespace hx_net
     {
         m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
         CreateObject();
-        d_curData_ptr = DevMonitorDataPtr(new Data);
+         if(m_ptransmmit!=NULL && m_ptransmmit->IsStandardCommand())
+            d_curData_ptr = DevMonitorDataPtr(new Data);
         map<int,vector<AssDevChan> >::iterator find_iter = d_devInfo.map_AssDevChan.find(0);
         if(find_iter!=d_devInfo.map_AssDevChan.end()){
             vector<AssDevChan>::iterator dev_iter = find_iter->second.begin();
@@ -48,7 +49,7 @@ namespace hx_net
         }
         map<string,DevProperty>::iterator iter = d_devInfo.map_DevProperty.find("Standby");
         if(iter!=d_devInfo.map_DevProperty.end())
-            d_Host_= (iter->second.property_value == "1")?1:0;//1->主机，０->备机
+            d_Host_= (iter->second.property_value == "1")?1:0;//1->主机，0->备机
 
         if(d_relate_tsmt_ptr_!=NULL){
         iter = d_relate_tsmt_ptr_->map_DevProperty.find("Agent");
@@ -94,12 +95,13 @@ namespace hx_net
                 //设置运行状态
                 set_run_state(irunstate);
             }
-            if(m_ptransmmit->IsStandardCommand())//isMultiQueryCmd()
+            if(m_ptransmmit->IsStandardCommand())
                 m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
         }
         return idecresult;
     }
 
+    //snmp设备
     int Tsmt_message::decode_msg_body(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)
     {
         int irunstate=dev_unknown;
@@ -274,7 +276,7 @@ namespace hx_net
         case SHANGUANG:
             break;
         case SHANGHAI_ALL_BAND:{
-            d_curData_ptr.reset(new Data);
+            //d_curData_ptr.reset(new Data);
             m_ptransmmit = new ShTransmmit(m_pSession,d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
 
         }

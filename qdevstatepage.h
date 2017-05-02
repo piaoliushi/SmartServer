@@ -18,6 +18,7 @@ public:
 	void clearDevList();
 public slots:
         void OnDevStatus(QString sDevId,int nResult);
+        void OnGsmStatus(int stype, bool bresult);
 private:
 	QNotifyHandler &m_Notify;
 	QTableWidget *pDevList;//QTreeWidget

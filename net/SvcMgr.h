@@ -78,6 +78,10 @@ namespace hx_net
 
       //上报http消息
       e_ErrorCode   response_http_msg(string sUrl,string &sContent,string sRqstType="POST");
+
+      //发送短信
+      e_ErrorCode    SendSMSContent(vector<string> &PhoneNumber,string AlarmContent);
+
 	private:
 		svc_state svc_state_;
 		boost::shared_ptr<DevClientMgr> m_pDevMgrPtr;//设备(被动连接)管理对象

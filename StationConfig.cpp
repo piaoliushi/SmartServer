@@ -24,6 +24,10 @@ bool StationConfig::load_station_config()
         return false;
     if(!GetInst(DataBaseOperation).GetDeviceDataDictionary(mapDeviceDicry))
         return false;
+
+    if(!GetInst(DataBaseOperation).GetGSMInfo(bHave_GSM_model,Gsm_model_info))
+        return false;
+
     return true;
 }
 

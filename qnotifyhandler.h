@@ -33,6 +33,8 @@ signals:
     void S_OnClientLogin(QString sAddr,QString sName,QString sID);
 	void S_OnClientLogout(QString sAddr);
     void S_OnDatabase(bool bOk);
+    void S_gsm_state(int stype,bool bresult);
+
 private:
     boost::recursive_mutex   mutex_;
 };

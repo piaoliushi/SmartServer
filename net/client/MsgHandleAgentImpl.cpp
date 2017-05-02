@@ -6,6 +6,7 @@
 #include "./dev_message/Timer_message.h"
 #include "./dev_message/Link_message.h"
 #include "./dev_message/Media_message.h"
+#include "./dev_message/antenna_message.h"
 
 namespace hx_net
 {
@@ -50,7 +51,7 @@ namespace hx_net
             } break;
 
         case DEVICE_ANTENNA:{
-
+                m_pbaseMsg = new Antenna_message(m_pSessionPtr,m_devInfo);
         } break;
 		default:
 			return false;

@@ -4,6 +4,7 @@
 #pragma once
 #include "../io_service_pool.h"
 #include "../share_ptr_object_define.h"
+
 using boost::asio::ip::tcp;
 
 namespace hx_net
@@ -14,6 +15,17 @@ struct HandlerKey
     string         usr_;     //登陆用户
     string         psw_;     //登陆密码
     string         usr_number_;//用户编号
+};
+
+struct UserSignInInfo
+{
+    UserSignInInfo::UserSignInInfo()
+    {
+        SignInTime = time(0);
+    }
+    UserInformation UsrInfo;//用户名
+    time_t SignInTime;//签到时间
+
 };
     class LocalServer
 	{
@@ -54,6 +66,22 @@ struct HandlerKey
 		//收集本平台所有设备状态信息
 		void  get_local_station_dev_status(loginAckMsgPtr &statusMsgPtr);
 
+
+        //用户交接班
+        void user_handover(session_ptr ch_ptr,string sCurUsr,string sNewUser,
+                           string sNewPassword,const string &sContents,LoginAck &loginAck);
+        //用户签到
+        void user_signin_out(session_ptr ch_ptr,string sSignInUsr,string sSignInPsw,signInOutAckMsgPtr signinPtr,int bIn);
+
+        //收集当前签到人信息
+        void addSignInUsersToLoginAck(session_ptr ch_ptr,const UserInformation &sUser,LoginAck &loginAck);
+        //签到签退操作
+        void handSignInAndOut(session_ptr ch_ptr,bool bIsIn,time_t &curTm,const UserInformation &sUser
+                              ,e_ErrorCode &eError);
+        //通知客户端签到结果
+        void notify_other_client_signin_result(session_ptr ch_ptr,int bIn,const UserSignInInfo &sUser);
+
+
 	private:	
 		
 		TaskQueue<msgPointer>& taskwork_;//引用一个任务队列
@@ -64,6 +92,9 @@ struct HandlerKey
 		std::map<session_ptr,HandlerKey> session_pool_;//用户连接handler
 
         std::map<string,vector<session_ptr> > devToUser_;//通过Dev获得对应的连接
+
+        boost::recursive_mutex sign_mutex_;
+        std::vector<UserSignInInfo> sign_in_users_;//当前签到用户
 		
 	};
 }

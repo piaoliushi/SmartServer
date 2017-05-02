@@ -43,9 +43,11 @@ namespace hx_net
        e_ErrorCode update_monitor_time(string sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                                  vector<Command_Scheduler> &cmmdScheduler);
        //更新告警配置
-      e_ErrorCode update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
+       e_ErrorCode update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
       //上报http消息
       e_ErrorCode   response_http_msg(string sUrl,string &sContent,string sRqstType);
+      //发送短信
+       e_ErrorCode  SendSMSContent(vector<string> &PhoneNumber, string AlarmContent);
 	private:
 		boost::shared_ptr<boost::thread> _listenthreadptr;//网络监听线程
         boost::shared_ptr<boost::thread> _workthreadptr;//工作线程

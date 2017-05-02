@@ -488,5 +488,14 @@ typedef struct
 //const char CONST_STR_ALARM_CONTENT[][32] = {"超过上限","低于下限","报警","恢复正常"};
 const char CONST_STR_ITEM_UNIT[][8] = {"W","Kw","Mw"};
 
+enum ActionType
+{
+    ACTP_SENDMSG = 0,//发送短信
+    ACTP_TELE       ,//打电话
+    ACTP_SEND_CLIENT,//通知客户端
+    ACTP_OPEN_DEVICE,//开设备
+    ACTP_CLOSE_DEVICE,//关设备
+    ACTP_SWITCH_ANTTEN,//天线切换
+};
 
 #endif
