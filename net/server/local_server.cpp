@@ -11,6 +11,14 @@
 using namespace db;
 namespace hx_net
 {
+
+    UserSignInInfo::UserSignInInfo() {
+        SignInTime = time(0);
+    }
+    UserSignInInfo::~UserSignInInfo() {
+
+    }
+
     LocalServer::LocalServer(short port,TaskQueue<msgPointer>& taskwork,size_t io_service_pool_size/*=4*/)
 		:io_service_pool_(io_service_pool_size)//设置io pool尺寸
 		,taskwork_(taskwork)//引用任务队列 
@@ -198,20 +206,20 @@ namespace hx_net
 		return ;
 	}
 
-    int API_TimeToStringEX(string &strDateStr,const time_t &timeData)
-    {
-        char chTmp[100];
-        memset(chTmp,0,sizeof(chTmp));
-        struct tm *p;
-        p = localtime(&timeData);
-        p->tm_year = p->tm_year + 1900;
-        p->tm_mon = p->tm_mon + 1;
+//    int API_TimeToStringEX(string &strDateStr,const time_t &timeData)
+//    {
+//        char chTmp[100];
+//        memset(chTmp,0,sizeof(chTmp));
+//        struct tm *p;
+//        p = localtime(&timeData);
+//        p->tm_year = p->tm_year + 1900;
+//        p->tm_mon = p->tm_mon + 1;
 
-        _snprintf(chTmp,sizeof(chTmp),"%04d-%02d-%02d %02d:%02d:%02d",
-            p->tm_year, p->tm_mon, p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
-        strDateStr = chTmp;
-        return 0;
-    }
+//        _snprintf(chTmp,sizeof(chTmp),"%04d-%02d-%02d %02d:%02d:%02d",
+//            p->tm_year, p->tm_mon, p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
+//        strDateStr = chTmp;
+//        return 0;
+//    }
 
     //收集当前签到人信息,打包进入登陆回复消息
     void LocalServer::addSignInUsersToLoginAck(session_ptr ch_ptr,const UserInformation &sUser,LoginAck &loginAck)
@@ -242,9 +250,9 @@ namespace hx_net
             newSignUser->set_usrpsw(sign_in_users_[i].UsrInfo.sPassword.c_str());
             newSignUser->set_usrjobnumber(sign_in_users_[i].UsrInfo.sJobNumber);
             newSignUser->set_usrheadship(sign_in_users_[i].UsrInfo.sHeadship.c_str());
-            string sSignTime;
-            API_TimeToStringEX(sSignTime,sign_in_users_[i].SignInTime);
-            newSignUser->set_signintime(sSignTime.c_str());
+            string sSignTime = QDateTime::fromTime_t(sign_in_users_[i].SignInTime).toString().toStdString();
+            //API_TimeToStringEX(sSignTime,sign_in_users_[i].SignInTime);
+            newSignUser->set_signintime(sSignTime);
         }
     }
 
@@ -333,8 +341,9 @@ namespace hx_net
                 signInOutAckMsgPtr signinAck(new SignInOutAck);
                 signinAck->set_eresult(EC_OK);
                 signinAck->set_issignin(bIn);
-                string sSignTime;
-                API_TimeToStringEX(sSignTime,sSignUser.SignInTime);
+                string sSignTime = QDateTime::fromTime_t(sSignUser.SignInTime).toString().toStdString();
+                //API_TimeToStringEX(sSignTime,sSignUser.SignInTime);
+                 //newSignUser->set_signintime(QDateTime::fromTime_t(sign_in_users_[i].SignInTime).toString().toStdString().c_str());
                 signinAck->mutable_cusersinfo()->set_signintime(sSignTime);
                 signinAck->mutable_cusersinfo()->set_eusrlevel(sSignUser.UsrInfo.nControlLevel);
                 signinAck->mutable_cusersinfo()->set_usrnumber(sSignUser.UsrInfo.sNumber);
@@ -365,7 +374,7 @@ namespace hx_net
                 std::string oldUsrPsw = (*iter).second.psw_;//记录当前登陆用户id
 
                 //清除所有设备和连接对应map
-                std::map<string,vector<session_ptr>>::iterator itersession = devToUser_.begin();
+                std::map<string,vector<session_ptr> >::iterator itersession = devToUser_.begin();
                 for(;itersession!=devToUser_.end();++itersession)
                 {
                     vector<session_ptr>::iterator itervect= (*itersession).second.begin();
@@ -416,8 +425,9 @@ namespace hx_net
                 signinPtr->set_eresult(eErrorCode);
                 if(eErrorCode==EC_OK)
                 {
-                    string sSignTime;
-                    API_TimeToStringEX(sSignTime,curTm);
+                    //string sSignTime;
+                    //API_TimeToStringEX(sSignTime,curTm);
+                     string sSignTime = QDateTime::fromTime_t(curTm).toString().toStdString();
                     signinPtr->set_eresult(EC_OK);
                     signinPtr->mutable_cusersinfo()->set_signintime(sSignTime);
                     signinPtr->mutable_cusersinfo()->set_eusrlevel(tmpUser.nControlLevel);

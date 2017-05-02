@@ -19,13 +19,12 @@ struct HandlerKey
 
 struct UserSignInInfo
 {
-    UserSignInInfo::UserSignInInfo()
-    {
-        SignInTime = time(0);
-    }
+public:
+    UserSignInInfo();
+    ~UserSignInInfo();
+public:
     UserInformation UsrInfo;//用户名
     time_t SignInTime;//签到时间
-
 };
     class LocalServer
 	{

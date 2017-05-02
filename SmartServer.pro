@@ -4,8 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql network serialport
-
+QT += core gui sql network
+CONFIG += serialport
 
 QTPLUGIN+=qsqlpsql
 
