@@ -23,6 +23,19 @@ namespace hx_net{
 					return -1;
 				return (((data[3]<<8)|data[4])+2);
 			}
+        case CHENGDU_KT_DIG:
+        {
+            if(data[0]==0xAA && data[1]==0xFF && data[2]==m_addresscode)
+                return 0;
+            else
+            {
+                unsigned char cDes[3]={0};
+                cDes[0]=0xAA;
+                cDes[1]=0xFF;
+                cDes[2]=m_addresscode;
+                return kmp(data,nDataLen,cDes,3);
+            }
+        }
 		default:
 			return -1;
 		}
@@ -55,6 +68,7 @@ namespace hx_net{
 		case CHENGDU_CHENGGUANG:
 			break;
 		case CHENGDU_KT_DIG:
+            return OnKT_digData(data,data_ptr,nDataLen,runstate);
 			break;
 		case CHENGDU_KAITENG_TV10KW:
 			break;
@@ -78,7 +92,40 @@ namespace hx_net{
 			break;
 		case CHENGDU_CHENGGUANG:
 			break;
-		case CHENGDU_KT_DIG:
+        case CHENGDU_KT_DIG:{
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 719;
+            tmUnit.commandLen=10;
+            tmUnit.commandId[0] = 0xAA;
+            tmUnit.commandId[1] = 0xFF;
+            tmUnit.commandId[2] = m_addresscode;
+            tmUnit.commandId[3] = 0xFF;
+            tmUnit.commandId[4] = 0x0A;
+            tmUnit.commandId[5] = 0x00;
+            tmUnit.commandId[6] = 0x52;
+            unsigned short crcret = CalcCRC16_KT(tmUnit.commandId,7);
+            tmUnit.commandId[7] = (crcret&0x00FF);
+            tmUnit.commandId[8] = ((crcret & 0xFF00)>>8);
+            tmUnit.commandId[9] = 0x55;
+            vector<CommandUnit> vtUnit;
+            vtUnit.push_back(tmUnit);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY] = vtUnit;
+            tmUnit.ackLen = 0;
+            tmUnit.commandId[6] = 0x60;
+            crcret = CalcCRC16_KT(tmUnit.commandId,7);
+            tmUnit.commandId[7] = (crcret&0x00FF);
+            tmUnit.commandId[8] = ((crcret & 0xFF00)>>8);
+            vector<CommandUnit> vtTurnOnUnit;
+            vtTurnOnUnit.push_back(tmUnit);
+            cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR] = vtTurnOnUnit;
+            tmUnit.commandId[6] = 0x51;
+            crcret = CalcCRC16_KT(tmUnit.commandId,7);
+            tmUnit.commandId[7] = (crcret&0x00FF);
+            tmUnit.commandId[8] = ((crcret & 0xFF00)>>8);
+            vector<CommandUnit> vtTurnOffUnit;
+            vtTurnOffUnit.push_back(tmUnit);
+            cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR] = vtTurnOffUnit;
+        }
 			break;
 		case CHENGDU_KAITENG_TV10KW:
 			break;
@@ -411,6 +458,111 @@ namespace hx_net{
 			zbb.fValue = ((*iterPW).second.fValue*1000+(*iterRF).second.fValue)/((*iterPW).second.fValue*1000-(*iterRF).second.fValue);
 		}
 		data_ptr->mValues[2] = zbb;
-		return 0;
-	}
+        return 0;
+    }
+
+    int CDtransmmiter::OnKT_digData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+    {
+        unsigned char dataType;
+        int  dataLen;
+        int indexpos;
+        bool bhavedata=true;
+        do{
+            dataType = data[3];
+            dataLen = (data[5]<<8)|data[4];
+            DataInfo dainfo;
+            switch(dataType){
+              case 0x01:
+              {
+                indexpos = 0;
+                dainfo.bType = false;
+                for(int i=0;i<15;i++){
+                    dainfo.fValue = (float)((data[34+i*4]<<8)|data[33+i*4]);
+                    data_ptr->mValues[indexpos++] = dainfo;
+                    if(i==1){
+                        if(data_ptr.get()->mValues[0].fValue!=data_ptr.get()->mValues[1].fValue){
+                            dainfo.fValue = (data_ptr.get()->mValues[0].fValue+data_ptr.get()->mValues[1].fValue)/(data_ptr.get()->mValues[0].fValue-data_ptr.get()->mValues[1].fValue);
+                        }
+                        else{
+                            dainfo.fValue = 1.0;
+                        }
+                        data_ptr->mValues[1] = dainfo;
+                    }
+                }
+
+                for(int i=0;i<3;++i)
+                {
+                    dainfo.fValue = 0;
+                    data_ptr->mValues[indexpos++] = dainfo;
+                }
+                dainfo.bType = true;
+                for(int i=0;i<8;++i){
+                    dainfo.fValue = data[9+i*3]==0 ? 1:0;
+                    data_ptr->mValues[indexpos++] = dainfo;
+                }
+                data_ptr.get()->mValues[0].fValue = data_ptr.get()->mValues[0].fValue*0.001;
+               }
+                break;
+              case 0x04:{
+                indexpos = 27;
+                dainfo.bType = true;
+                for(int i=0;i<8;++i){
+                    dainfo.fValue = data[9+i*3]==0 ? 1:0;
+                    data_ptr->mValues[indexpos++] = dainfo;
+                }
+                dainfo.bType = false;
+                for(int i=0;i<16;++i){
+                    dainfo.fValue = ((data[34+i*4]<<8)|data[33+i*4])*0.1;
+                    data_ptr->mValues[indexpos++] = dainfo;
+                }
+              }
+                break;
+              case 0x02:{
+                indexpos=51;
+                dainfo.bType = true;
+                dainfo.fValue = data[33]==0? 1:0;
+                data_ptr->mValues[indexpos++] = dainfo;
+                dainfo.fValue = data[39]==0? 1:0;
+                data_ptr->mValues[indexpos++] = dainfo;
+                dainfo.fValue = data[42]==0? 1:0;
+                data_ptr->mValues[indexpos++] = dainfo;
+                dainfo.fValue = data[45]==0? 1:0;
+                data_ptr->mValues[indexpos++] = dainfo;
+                dainfo.fValue = data[48]==0? 1:0;
+                data_ptr->mValues[indexpos++] = dainfo;
+                dainfo.bType = false;
+                dainfo.fValue = data[51];
+                data_ptr->mValues[indexpos++] = dainfo;
+                dainfo.fValue = 0;
+                data_ptr->mValues[indexpos++] = dainfo;
+                dainfo.fValue = ((data[85]<<8)|data[84])*0.1;
+                data_ptr->mValues[indexpos++] = dainfo;
+                dainfo.fValue = ((data[113]<<8)|data[112])*0.1;
+                data_ptr->mValues[indexpos++] = dainfo;
+                for(int i=0;i<3;++i){
+                    dainfo.fValue = ((data[125+i*4]<<8)|data[124+i*4])*0.1;
+                    data_ptr->mValues[indexpos++] = dainfo;
+                }
+              }
+                break;
+              case 0x05:{
+                indexpos=63;
+                dainfo.bType = true;
+                dainfo.fValue = data[9]==0? 1:0;
+                data_ptr->mValues[indexpos++] = dainfo;
+                dainfo.fValue = data[12]==0? 1:0;
+                data_ptr->mValues[indexpos++] = dainfo;
+                dainfo.bType = false;
+                for(int i=0;i<13;++i){
+                    dainfo.fValue = ((data[16+i*4]<<8)|data[15+i*4]);
+                    data_ptr->mValues[indexpos++] = dainfo;
+                }
+              }
+            }
+            data=data+dataLen;
+            if(data[0]!=0xAA && data[1]!=0xFF)
+                bhavedata=FALSE;
+        }while (bhavedata);
+        return 0;
+    }
 }

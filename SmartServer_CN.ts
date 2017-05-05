@@ -175,44 +175,81 @@
         <translation type="unfinished">当前状态</translation>
     </message>
     <message>
-        <location filename="qdevstatepage.cpp" line="79"/>
+        <location filename="qdevstatepage.cpp" line="83"/>
         <source>%1:%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qdevstatepage.cpp" line="83"/>
+        <location filename="qdevstatepage.cpp" line="85"/>
+        <location filename="qdevstatepage.cpp" line="104"/>
+        <source>COM%1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="qdevstatepage.cpp" line="90"/>
+        <location filename="qdevstatepage.cpp" line="109"/>
         <source>disconnect</source>
         <translation type="unfinished">中断</translation>
     </message>
     <message>
-        <location filename="qdevstatepage.cpp" line="107"/>
+        <location filename="qdevstatepage.cpp" line="127"/>
         <source>Disconnect</source>
         <translation type="unfinished">中断</translation>
     </message>
     <message>
-        <location filename="qdevstatepage.cpp" line="111"/>
+        <location filename="qdevstatepage.cpp" line="131"/>
         <source>connect</source>
         <translation type="unfinished">连接</translation>
     </message>
     <message>
-        <location filename="qdevstatepage.cpp" line="115"/>
+        <location filename="qdevstatepage.cpp" line="135"/>
         <source>trunon</source>
         <translation type="unfinished">开机</translation>
     </message>
     <message>
-        <location filename="qdevstatepage.cpp" line="119"/>
+        <location filename="qdevstatepage.cpp" line="139"/>
         <source>trunoff</source>
         <translation type="unfinished">关机</translation>
     </message>
     <message>
-        <location filename="qdevstatepage.cpp" line="123"/>
+        <location filename="qdevstatepage.cpp" line="143"/>
         <source>attenna-&gt;host</source>
         <translation type="unfinished">天线-&gt;主机</translation>
     </message>
     <message>
-        <location filename="qdevstatepage.cpp" line="127"/>
+        <location filename="qdevstatepage.cpp" line="147"/>
         <source>attenna-&gt;backup</source>
         <translation type="unfinished">天线-&gt;备机</translation>
+    </message>
+    <message>
+        <location filename="qdevstatepage.cpp" line="165"/>
+        <source>find device</source>
+        <translation type="unfinished">发现设备</translation>
+    </message>
+    <message>
+        <location filename="qdevstatepage.cpp" line="170"/>
+        <source>no device</source>
+        <translation type="unfinished">没有设备</translation>
+    </message>
+    <message>
+        <location filename="qdevstatepage.cpp" line="179"/>
+        <source>init successed</source>
+        <translation type="unfinished">设备已就绪</translation>
+    </message>
+    <message>
+        <location filename="qdevstatepage.cpp" line="184"/>
+        <source>init fialed</source>
+        <translation type="unfinished">无效设备</translation>
+    </message>
+    <message>
+        <location filename="qdevstatepage.cpp" line="193"/>
+        <source>run</source>
+        <translation type="unfinished">运行正常</translation>
+    </message>
+    <message>
+        <location filename="qdevstatepage.cpp" line="198"/>
+        <source>no card</source>
+        <translation type="unfinished">未检测到SIM卡</translation>
     </message>
 </context>
 <context>
@@ -283,22 +320,22 @@
         <translation type="unfinished">按月</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="85"/>
+        <location filename="main.cpp" line="130"/>
         <source>error</source>
         <translation type="unfinished">错误</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="85"/>
+        <location filename="main.cpp" line="130"/>
         <source>Load local config file error!</source>
         <translation type="unfinished">载入本地文件错误！</translation>
     </message>
     <message>
-        <location filename="main.cpp" line="93"/>
+        <location filename="main.cpp" line="138"/>
         <source>Systray</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="main.cpp" line="94"/>
+        <location filename="main.cpp" line="139"/>
         <source>I couldn&apos;t detect any system tray on this system.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -473,40 +510,39 @@
         <translation type="unfinished">网卡2：</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="287"/>
+        <location filename="qsysteminfopage.cpp" line="305"/>
         <source>note</source>
         <translation type="unfinished">注意</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="287"/>
+        <location filename="qsysteminfopage.cpp" line="305"/>
         <source>Failed to save the local configuration parameters, please check!</source>
         <translation type="unfinished">保存本地配置文件失败，请重新检查！</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="121"/>
-        <location filename="qsysteminfopage.cpp" line="153"/>
-        <location filename="qsysteminfopage.cpp" line="170"/>
+        <location filename="qsysteminfopage.cpp" line="134"/>
+        <location filename="qsysteminfopage.cpp" line="182"/>
         <source>without</source>
         <translation type="unfinished">无</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="185"/>
+        <location filename="qsysteminfopage.cpp" line="197"/>
         <source>Copyright Â© 2006-2016 Anhui Huixin Electronics Co. Ltd.</source>
         <oldsource>CopyrightÂ©2006-2016 Anhui Huixin Electronics Co. Ltd.</oldsource>
         <translation type="unfinished">版权所有©2006-2016 安徽汇鑫电子有限公司</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="186"/>
+        <location filename="qsysteminfopage.cpp" line="198"/>
         <source>font: 9pt; color:#45c9d5;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="188"/>
+        <location filename="qsysteminfopage.cpp" line="200"/>
         <source>Tel:0551-65319365 , 65314565</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">电话：0551-65319365,65314565</translation>
     </message>
     <message>
-        <location filename="qsysteminfopage.cpp" line="189"/>
+        <location filename="qsysteminfopage.cpp" line="201"/>
         <source>font: 10pt; color:#45c9d5;</source>
         <translation type="unfinished"></translation>
     </message>

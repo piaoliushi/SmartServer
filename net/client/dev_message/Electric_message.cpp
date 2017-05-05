@@ -29,6 +29,10 @@ namespace hx_net
 			m_Ubb = atof(d_devInfo.map_DevProperty[""].property_value.c_str());
         if(d_devInfo.map_DevProperty.find("ARATIO")!=d_devInfo.map_DevProperty.end())
 			m_Ibb = atof(d_devInfo.map_DevProperty[""].property_value.c_str());
+        if(IsStandardCommand())
+        {
+            d_curData_ptr.reset(new Data);
+        }
 	}
 
 	Electric_message::~Electric_message(void)
@@ -94,6 +98,15 @@ namespace hx_net
 						return kmp(data,nDataLen,cDes,2);
 					}
 				}
+
+        case KSTAR_UPS:
+            {
+                if(nDataLen<3)
+                    return -1;
+                if(data[0]==d_devInfo.iAddressCode && data[1]==0x04)
+                    return data[2]+2;
+                else
+                    return -1;
             }
         case PAINUO_SPM33:
         case YINGJIA_EM400:
@@ -105,6 +118,7 @@ namespace hx_net
                 else
                     return -1;
             }
+         }
         }
             break;
         case ELECTRIC:{
@@ -129,35 +143,46 @@ namespace hx_net
 
     int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
 	{
+        if(data_ptr!=NULL)
+            d_curData_ptr = data_ptr;
         switch(d_devInfo.nDevProtocol){
         case EDA9033:
 			switch (d_devInfo.nSubProtocol)
 			{
 			case Eda9033_A:
-                return decode_Eda9033A(data,data_ptr,nDataLen,iaddcode);
+                return decode_Eda9033A(data,d_curData_ptr,nDataLen,iaddcode);
             case PAINUO_SPM33:
             {
-                int iresult = decode_SPM33(data,data_ptr,nDataLen,iaddcode);
-                GetResultData(data_ptr);
-                m_pSession->start_handler_data(iaddcode,data_ptr);
+                int iresult = decode_SPM33(data,d_curData_ptr,nDataLen,iaddcode);
+                GetResultData(d_curData_ptr);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                 return iresult;
             }
             case YINGJIA_EM400:
+            {
                // return decode_EM400(data,data_ptr,nDataLen,iaddcode);
-                int iresult = decode_EM400(data,data_ptr,nDataLen,iaddcode);
+                int iresult = decode_EM400(data,d_curData_ptr,nDataLen,iaddcode);
               //  GetResultData(data_ptr);
-                m_pSession->start_handler_data(iaddcode,data_ptr);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                 return iresult;
 			}
-            break;
+            case KSTAR_UPS:
+            { 
+                int iresult = decode_KSTUPS(data,d_curData_ptr,nDataLen,iaddcode);
+                 GetResultData(d_curData_ptr);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            }
+                break;
         case ELECTRIC:{
                switch (d_devInfo.nSubProtocol)
                 {
                  case ELECTRIC_104:
                  {
                 //   return parse_104_data(data,data_ptr,nDataLen,iaddcode);
-                   int iresult = parse_104_data(data,data_ptr,nDataLen,iaddcode);
-                   m_pSession->start_handler_data(iaddcode,data_ptr);
+                   int iresult = parse_104_data(data,d_curData_ptr,nDataLen,iaddcode);
+                   m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                    return iresult;
                  }
                 }
@@ -179,6 +204,7 @@ namespace hx_net
                 return true;
 			case Eda9033_A:
 				return false;
+            case KSTAR_UPS:
             case PAINUO_SPM33:
             case YINGJIA_EM400:
                 return true;
@@ -480,7 +506,6 @@ namespace hx_net
                         CommandUnit tmUnit;
                         tmUnit.ackLen = 3;
                         tmUnit.commandLen = 8;
-                        tmUnit.commandLen = 7;
                         tmUnit.commandId[0] = d_devInfo.iAddressCode;
                         tmUnit.commandId[1] = 0x03;
                         tmUnit.commandId[2] = 0x00;
@@ -498,7 +523,6 @@ namespace hx_net
                         CommandUnit tmUnit;
                         tmUnit.ackLen = 3;
                         tmUnit.commandLen = 8;
-                        tmUnit.commandLen = 7;
                         tmUnit.commandId[0] = d_devInfo.iAddressCode;
                         tmUnit.commandId[1] = 0x03;
                         tmUnit.commandId[2] = 0x00;
@@ -511,6 +535,23 @@ namespace hx_net
                         cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
                     }
                     break;
+                case KSTAR_UPS:
+                {
+                    CommandUnit tmUnit;
+                    tmUnit.ackLen = 3;
+                    tmUnit.commandLen = 8;
+                    tmUnit.commandId[0] = d_devInfo.iAddressCode;
+                    tmUnit.commandId[1] = 0x04;
+                    tmUnit.commandId[2] = 0x75;
+                    tmUnit.commandId[3] = 0x30;
+                    tmUnit.commandId[4] = 0x00;
+                    tmUnit.commandId[5] = 0x29;
+                    unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                }
+                break;
 				}
 			}
 			break;
@@ -722,6 +763,59 @@ namespace hx_net
             data_ptr->mValues[indexpos++] = dainfo;
         }
         dainfo.fValue = ((((((data[104]<<8)|data[103])<<8)|data[102])<<8)|data[101])*0.01;
+        data_ptr->mValues[indexpos++] = dainfo;
+        return RE_SUCCESS;
+    }
+
+    int Electric_message::decode_KSTUPS(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        int indexpos =0;
+        iaddcode = data[0];
+        DataInfo dainfo;
+        dainfo.bType = false;
+        //7个电压和频率
+        for(int i=0;i<7;++i)
+        {
+            dainfo.fValue = ((data[3+i*2]<<8)|data[4+i*2])*0.1;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[17+i*2]<<8)|data[18+i*2])*0.01;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<10;++i)
+        {
+            dainfo.fValue = ((data[23+i*2]<<8)|data[24+i*2])*0.1;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[43+i*2]<<8)|data[44+i*2]);
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[49+i*2]<<8)|data[50+i*2])*0.01;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<10;++i)
+        {
+            dainfo.fValue = ((data[55+i*2]<<8)|data[56+i*2])*0.1;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<2;++i)
+        {
+            dainfo.fValue = ((data[75+i*2]<<8)|data[76+i*2]);
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<2;++i)
+        {
+            dainfo.fValue = ((data[79+i*2]<<8)|data[80+i*2])*0.1;
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        dainfo.fValue = ((data[83]<<8)|data[84]);
         data_ptr->mValues[indexpos++] = dainfo;
         return RE_SUCCESS;
     }

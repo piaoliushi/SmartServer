@@ -286,35 +286,38 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
           cout<<netquery.lastError().text().toStdString()<<"GetAllDevInfo---netquery---error!"<<endl;
     }
     QSqlQuery comquery(db);
-    strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode");
-    comquery.prepare(strSql);
-    if(comquery.exec()){
-        while(comquery.next()) {
-            ModleInfo info;
-            info.iCommunicationMode = 0;
-            info.comMode.icomport = comquery.value(0).toInt();
-            info.comMode.irate = comquery.value(1).toInt();
-            info.comMode.idata_bit = comquery.value(2).toInt();
-            info.comMode.istop_bit = comquery.value(3).toInt();
-            info.comMode.iparity_bit = comquery.value(4).toInt();
-            QString qtrNum = comquery.value(5).toString();
-            info.sModleNumber = qtrNum.toStdString();
-            QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
-            QSqlQuery net1query(db);
-            if(net1query.exec(strQdev)) {
-                while(net1query.next()){
-                    DeviceInfo dev;
-                    GetDevInfo(db,net1query.value(0).toString().toStdString(),dev);
-                    info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
-                }
-            }
+       strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode");
+       comquery.prepare(strSql);
+       if(comquery.exec()){
+           while(comquery.next()) {
+               ModleInfo info;
+               info.iCommunicationMode = 0;
+               info.comMode.icomport = comquery.value(0).toInt();
+               info.comMode.irate = comquery.value(1).toInt();
+               info.comMode.idata_bit = comquery.value(2).toInt();
+               info.comMode.istop_bit = comquery.value(3).toInt();
+               info.comMode.iparity_bit = comquery.value(4).toInt();
 
-            if(net1query.size()>0)
-                v_Linkinfo.push_back(info);
-        }
-    }else{
-          cout<<comquery.lastError().text().toStdString()<<"GetAllDevInfo---comquery---error!"<<endl;
-    }
+               QString qtrNum = comquery.value(5).toString();
+               info.sModleNumber = qtrNum.toStdString();
+               QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
+               QSqlQuery net1query(db);
+               if(net1query.exec(strQdev)) {
+                   while(net1query.next()){
+                       DeviceInfo dev;
+                       GetDevInfo(db,net1query.value(0).toString().toStdString(),dev);
+                       if(dev.sDevNum.length()>0)
+                           info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
+                   }
+               }
+
+               if(net1query.size()>0 && info.mapDevInfo.size()>0)
+                   v_Linkinfo.push_back(info);
+           }
+       }else{
+             cout<<comquery.lastError().text().toStdString()<<"GetAllDevInfo---comquery---error!"<<endl;
+       }
+
 
     ConnectionPool::closeConnection(db);
     return true;
@@ -1587,11 +1590,12 @@ bool DataBaseOperation::AddDutyLog(const string sUserNumber, const string sConte
      QString strSql;
      strSql = QString("insert into duty_log(usernumber,time,content,dutylogtype) values(:usernumber,:time,:content,:dutylogtype)");
      QDateTime qdt=QDateTime::currentDateTime();
+     insertquery.prepare(strSql);
      insertquery.bindValue(":usernumber",QString::fromStdString(sUserNumber));
      insertquery.bindValue(":time",qdt);
      insertquery.bindValue(":content",QString::fromStdString(sContent));
      insertquery.bindValue(":dutylogtype",nType);
-     if(!insertquery.exec(strSql)){
+     if(!insertquery.exec()){
          cout<<insertquery.lastError().text().toStdString()<<"AddDutyLog---inquery---error!"<<endl;
          ConnectionPool::closeConnection(db);
          return false;
@@ -1609,13 +1613,13 @@ bool DataBaseOperation::AddHandove(const string sHandoveNumber, const string sSu
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery insertquery(db);
-    QString strSql;
-    strSql = QString("insert into user_handove(handoveperson,successors,successiontime,handovelog) values(:handoveperson,:successors,:successiontime,:handovelog)");
+    QString strSql = QString("insert into user_handove(handoveperson,successors,successiontime,handovelog) values(:handoveperson,:successors,:successiontime,:handovelog)");
+    insertquery.prepare(strSql);
     insertquery.bindValue(":handoveperson",QString::fromStdString(sHandoveNumber));
     insertquery.bindValue(":successors",QString::fromStdString(sSuccessorNumber));
     insertquery.bindValue(":successiontime",QDateTime::fromTime_t(ttime));
     insertquery.bindValue(":handovelog",QString::fromStdString(sLogContents));
-    if(!insertquery.exec(strSql)){
+    if(!insertquery.exec()){
         cout<<insertquery.lastError().text().toStdString()<<"AddHandove---inquery---error!"<<endl;
         ConnectionPool::closeConnection(db);
         return false;
@@ -1634,12 +1638,14 @@ bool DataBaseOperation::AddSignin(const string sSignerNumber, const time_t ttime
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery insertquery(db);
     QString strSql;
-    strSql = QString("insert into signstatus(userid,signinstatus,signintime,signintype) values(:userid,:signinstatus,:signintype)");
+
+    strSql = QString("insert into signstatus(userid,signinstatus,signintime,signintype) values(:userid,:signinstatus,:signintime,:signintype)");
+    insertquery.prepare(strSql);
     insertquery.bindValue(":userid",QString::fromStdString(sSignerNumber));
     insertquery.bindValue(":signinstatus",1);
     insertquery.bindValue(":signintime",QDateTime::fromTime_t(ttime));
     insertquery.bindValue(":signintype",nSigntype);
-    if(!insertquery.exec(strSql)){
+    if(!insertquery.exec()){
         cout<<insertquery.lastError().text().toStdString()<<"AddSignin---inquery---error!"<<endl;
         ConnectionPool::closeConnection(db);
         return false;
@@ -1659,10 +1665,11 @@ bool DataBaseOperation::AddSignout(const string sSignerNumber, const time_t tint
     QSqlQuery updatequery(db);
     QString strSql;
     strSql = QString("update signstatus set sgnouttime=:sgnouttime where userid=:userid and signintime=:signintime");
+    updatequery.prepare(strSql);
     updatequery.bindValue(":sgnouttime",QDateTime::fromTime_t(touttime));
     updatequery.bindValue(":signintime",QDateTime::fromTime_t(tintime));
     updatequery.bindValue(":userid",QString::fromStdString(sSignerNumber));
-    if(!updatequery.exec(strSql))
+    if(!updatequery.exec())
     {
         cout<<updatequery.lastError().text().toStdString()<<"AddSignout---update---error!"<<endl;
         ConnectionPool::closeConnection(db);

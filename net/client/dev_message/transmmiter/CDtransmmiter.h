@@ -15,6 +15,7 @@ namespace hx_net{
 		void GetAllCmd(CommandAttribute &cmdAll);
 	private:
 		int OnXG_247Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+        int OnKT_digData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
 	private:
 		int m_subprotocol;
 		int m_addresscode;

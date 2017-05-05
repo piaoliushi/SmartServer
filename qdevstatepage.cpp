@@ -76,10 +76,16 @@ void QDevStatePage::LoadDevToList()
             QString sName = (*iter).second.sDevName.c_str();
             if(sName.length()>12)
                 sName = sName.mid(0,12);
-            pDevList->setItem(nrow,0,new QTableWidgetItem(sIcon,sName));//(*iter).second.sDevName.c_str()
-            QString sEndpoint = QString(tr("%1:%2")).arg((*Modleiter).netMode.strIp.c_str()).arg((*Modleiter).netMode.iremote_port);
-             //   .arg((*iter).second.iAddressCode);
-            //pDevList->setItem(nrow,1,new QTableWidgetItem((*iter).second.sDevNum.c_str()));:%2
+            pDevList->setItem(nrow,0,new QTableWidgetItem(sIcon,sName));
+            QString sEndpoint;
+
+            if((*Modleiter).iCommunicationMode!=0)
+                sEndpoint = QString(tr("%1:%2")).arg((*Modleiter).netMode.strIp.c_str()).arg((*Modleiter).netMode.iremote_port);
+            else
+                sEndpoint = QString(tr("COM%1")).arg((*Modleiter).comMode.icomport);
+
+
+
             pDevList->setItem(nrow,1,new QTableWidgetItem(sEndpoint));
             QTableWidgetItem *netItem = new QTableWidgetItem(tr("disconnect"));
             netItem->setTextColor(QColor(150,150,150));
@@ -89,9 +95,6 @@ void QDevStatePage::LoadDevToList()
             m_mapListItems[(*iter).first.c_str()]=nrow;
 		}
     }
-
-    //int nDevNum = pDevList->rowCount();
-    //pDevSize->setText(QString(tr("设备数：%1")).arg(nDevNum));
 
     if(GetInst(StationConfig).IsHaveGsm()){
         ComCommunicationMode cominfo = GetInst(StationConfig).getGsmInfo();

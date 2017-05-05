@@ -178,3 +178,26 @@ void string_replace(string&s1,const string&s2,const string&s3)
     }
 }
 
+unsigned short CalcCRC16_KT(unsigned char *pdest, int len)
+{
+    unsigned char tmp;
+    unsigned short ret = 0;
+    static const unsigned short crc_table [] = {
+            0x0000,0x1021,0x2042,0x3063,0x4084,0x50A5,0x60C6,0x70E7,
+            0x8108,0x9129,0xA14A,0xB16B,0xC18C,0xD1AD,0xE1CE,0xF1EF};
+    while (len-- > 0)
+    {
+      tmp   = ret >> 8;
+      tmp  ^= *pdest;
+      ret <<= 4;
+      ret  ^= crc_table[tmp >> 4];
+      tmp   = ret >> 8;
+      tmp >>= 4;
+      tmp  ^= *pdest;
+      ret <<= 4;
+      ret  ^= crc_table[tmp & 0x0F];
+      pdest++;
+     }
+    return (ret);
+}
+

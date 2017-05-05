@@ -115,6 +115,7 @@ namespace hx_net
 				else
 				{
                     //获取该台站所有用户信息
+                    GetInst(DataBaseOperation).GetAllUserInfoByStation(sstationid,loginAck);
 
 					loginAck.set_eresult(EC_OK);
 					loginAck.set_eusrlevel(tmpUser.nControlLevel);
@@ -250,14 +251,15 @@ namespace hx_net
             newSignUser->set_usrpsw(sign_in_users_[i].UsrInfo.sPassword.c_str());
             newSignUser->set_usrjobnumber(sign_in_users_[i].UsrInfo.sJobNumber);
             newSignUser->set_usrheadship(sign_in_users_[i].UsrInfo.sHeadship.c_str());
-            string sSignTime = QDateTime::fromTime_t(sign_in_users_[i].SignInTime).toString().toStdString();
+            string sSignTime = QDateTime::fromTime_t(sign_in_users_[i].SignInTime).toString(Qt::DefaultLocaleLongDate).toStdString();
             //API_TimeToStringEX(sSignTime,sign_in_users_[i].SignInTime);
             newSignUser->set_signintime(sSignTime);
         }
     }
 
     //签到签退操作
-    void LocalServer::handSignInAndOut(session_ptr ch_ptr,bool bIsIn,time_t &curTm,const UserInformation &sUser,e_ErrorCode &eError)
+    void LocalServer::handSignInAndOut(session_ptr ch_ptr,bool bIsIn,time_t &curTm,
+                                       const UserInformation &sUser,e_ErrorCode &eError)
     {
         boost::recursive_mutex::scoped_lock lock(sign_mutex_);
         bool bfind=false;
@@ -341,7 +343,7 @@ namespace hx_net
                 signInOutAckMsgPtr signinAck(new SignInOutAck);
                 signinAck->set_eresult(EC_OK);
                 signinAck->set_issignin(bIn);
-                string sSignTime = QDateTime::fromTime_t(sSignUser.SignInTime).toString().toStdString();
+                string sSignTime = QDateTime::fromTime_t(sSignUser.SignInTime).toString(Qt::DefaultLocaleLongDate).toStdString();
                 //API_TimeToStringEX(sSignTime,sSignUser.SignInTime);
                  //newSignUser->set_signintime(QDateTime::fromTime_t(sign_in_users_[i].SignInTime).toString().toStdString().c_str());
                 signinAck->mutable_cusersinfo()->set_signintime(sSignTime);
@@ -427,7 +429,7 @@ namespace hx_net
                 {
                     //string sSignTime;
                     //API_TimeToStringEX(sSignTime,curTm);
-                     string sSignTime = QDateTime::fromTime_t(curTm).toString().toStdString();
+                     string sSignTime = QDateTime::fromTime_t(curTm).toString(Qt::DefaultLocaleLongDate).toStdString();
                     signinPtr->set_eresult(EC_OK);
                     signinPtr->mutable_cusersinfo()->set_signintime(sSignTime);
                     signinPtr->mutable_cusersinfo()->set_eusrlevel(tmpUser.nControlLevel);

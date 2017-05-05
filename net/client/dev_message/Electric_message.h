@@ -36,6 +36,7 @@ protected:
     void test_time_event(const boost::system::error_code& error);
     int decode_Eda9033A(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int decode_SPM33(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
+    int decode_KSTUPS(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int decode_EM400(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
 private:
     int              m_Subprotocol;//设备子协议号
@@ -55,5 +56,6 @@ private:
 
 	int m_Uo,m_Io;
 	float m_Ubb,m_Ibb;
+    DevMonitorDataPtr d_curData_ptr;
 };
 }
