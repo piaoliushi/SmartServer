@@ -23,7 +23,6 @@ QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
     ,d_bUseNtp(false)
     ,d_nModNtp(1)
     ,d_nValueNtp(2)
-    ,d_fd(-1)
 {
     QHBoxLayout *pTopLyt =new QHBoxLayout();
     QHBoxLayout *pHLyt = new QHBoxLayout();
@@ -159,17 +158,6 @@ void QSvcStatePage::StartSvc()
             if(GetInst(StationConfig).load_station_config()==true){
                 emit updateDevList(true);
 
-              /* d_fd = open("/dev/ttyO2", O_RDWR | O_NOCTTY | O_NDELAY);
-               if(d_fd!=-1){
-                   struct termios options;
-                   tcgetattr(d_fd, &options);
-                   cfsetispeed(&options, B19200);
-                   cfsetospeed(&options, B19200);
-                   options.c_cflag |= (CLOCAL | CREAD);
-                   tcsetattr(d_fd, TCSANOW, &options);
-
-               }*/
-
             }
         }
         else  {
@@ -226,18 +214,13 @@ void QSvcStatePage::timeUpdate()
      QProcess::execute(sexecute);
  }
 
- unsigned char cmd_str[]= {0x55,0x02,0xF3,0xF3,0x00};
  void QSvcStatePage::checkAutoAdjustTime()
  {
-
-     //int n = ::write(d_fd, cmd_str, 5);
-     //if (n < 0)
-      //       cout<<"write() of 4 bytes failed!\n"<<endl;
-     return;
      QDateTime curTm = QDateTime::currentDateTime();
      QDateTime configTm = QDateTime::fromString(d_sTimeNtp.c_str(),"hh:mm:ss");
-     if(configTm.isValid()==false)
+     if(configTm.isValid()==false){
            return;
+     }
      //cout<<"date:"<<curTm.date().day()<<"week:"<<curTm.date().dayOfWeek()<<endl;
      //cout<<"curTime:"<<curTm.time().toString("hh:mm:ss").toStdString()<<"configTime:"<<configTm.time().toString("hh:mm:ss").toStdString()<<endl;
      if(  curTm.time().secsTo(configTm.time()) == 0){

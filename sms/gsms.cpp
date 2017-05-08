@@ -51,7 +51,7 @@ bool Gsms::OpenCom(int nPort, int nBaudRate)
 #ifdef Q_OS_WIN
     sComStr = QString("COM%1").arg(nPort);
 #else
-    sComStr = QString("/dev/ttyO%1").arg(nPort-1);
+    sComStr = QString("/dev/ttyO%1").arg(nPort);
    // sComStr = QString("/dev/ttyS0");
 #endif
     pQSerialport_ptr_->setPortName(sComStr);
