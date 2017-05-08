@@ -228,6 +228,7 @@ typedef enum WSPROTOCOL
 	KD40_IO             = 3,
 	C2000_M21A          = 4,
 	FRT_X06A            = 5,
+    C2000_A2_8020       = 6,
 }WsSubProtocol;
 typedef enum KANGTEPROTOCOL
 {

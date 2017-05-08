@@ -300,20 +300,20 @@ struct DevicePropertyEx
 		,i0_range_value(5)//默认电流量程(9033A)
 		,ubb_ratio_value(1)//默认电压调整系数（9033A）
 		,ibb_ratio_value(1)//默认电流调整系数(9033A)
-		,is_auto_switch_transmitter(false)
+        ,is_auto_switch_transmitter(false)//是否进行自动倒备
 		,switch_power_lower_limit_value(0.02)//20w作为倒机门限
 		,auto_switch_detect_max_times(2)//倒机条件检测次数
 		,auto_switch_timeout_max_times(5)//倒机命令执行最大次数
-		,associate_transmit_number("")
-		,associate_use(false)
-		,is_low_pressure_judge_(false)
-		,low_pressure_limit_value_(100.00f)
-		,is_high_pressure_judge_(false)
-		,high_pressure_limit_value_(200.00f)
-		,is_power_adjust_(false)
+        ,associate_transmit_number("")//关联发射机编号
+        ,associate_use(false)//是否存在关联
+        ,is_low_pressure_judge_(false)//是否进行低压判断
+        ,low_pressure_limit_value_(100.00f)//低压判断门限值
+        ,is_high_pressure_judge_(false)//是否进行高压判断
+        ,high_pressure_limit_value_(200.00f)//高压判断门限值
+        ,is_power_adjust_(false)//是否进行功率调整
 		,power_limit_value_(0.50f)//默认0.5kw作为开机运行判定功率
-		,is_digital_item_adjust_(false)
-		,digital_detect_during_time_(10)//十秒钟检测时间
+        ,is_digital_item_adjust_(false)//是否进行数字量判断
+        ,digital_detect_during_time_(10)//10秒钟检测时间
 	{
 		
 	}

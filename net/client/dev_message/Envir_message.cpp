@@ -104,8 +104,19 @@ namespace hx_net
 						return int(((data[6]<<8)|data[7])+4);
 					}
 					break;
-				default:
-					return RE_NOPROTOCOL;
+                case C2000_A2_8020:
+                    {
+                        if(data[0]!=d_devInfo.iAddressCode)
+                            return RE_HEADERROR;
+                        if(data[1]==0x0F)
+                            return 5;
+                        if(data[1]==0x02)
+                            return 3;
+                        return RE_HEADERROR;
+                    }
+                    break;
+                default:
+                    return RE_NOPROTOCOL;
 				}
 			}
 			break;
@@ -218,7 +229,9 @@ namespace hx_net
 			break;
 		case AC_103_CTR:
 		case FRT_X06A:
+        case C2000_A2_8020:
 			return true;
+
 		}
 		return false;
 	}
@@ -327,7 +340,25 @@ namespace hx_net
 						cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
 					}
 					break;
-				}
+                case C2000_A2_8020:
+                {
+                    CommandUnit tmUnit;
+                    tmUnit.ackLen = 3;
+                    tmUnit.commandLen = 8;
+                    tmUnit.commandId[0] = d_devInfo.iAddressCode;
+                    tmUnit.commandId[1] = 0x02;
+                    tmUnit.commandId[2] = 0x00;
+                    tmUnit.commandId[3] = 0xC8;
+                    tmUnit.commandId[4] = 0x00;
+                    tmUnit.commandId[5] = 0x08;
+                    unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                }
+                    break;
+                }
+
 			}
 			break;
 		case HUIXIN:
@@ -348,6 +379,7 @@ namespace hx_net
 				}
 			}
 			break;
+
 		}
 	}
 
@@ -591,5 +623,24 @@ namespace hx_net
 			data_ptr->mValues[indexpos++] = dainfo;
 		}
 		return RE_SUCCESS;
-	}
+    }
+
+    int Envir_message::C2000_A2_Data(unsigned char *data, DevMonitorDataPtr data_ptr,
+                                     int nDataLen, int &iaddcode)
+    {
+        if(data[1]==0x02)
+        {
+            unsigned char bdata1;
+            bdata1 = data[3];
+            DataInfo dainfo;
+            dainfo.bType = true;
+            for(int i=0;i<8;++i)
+            {
+                dainfo.fValue =  Getbit(bdata1,i);
+                data_ptr->mValues[i] = dainfo;
+            }
+        }
+        return RE_SUCCESS;
+    }
+
 }
