@@ -7,6 +7,8 @@ namespace hx_net
 		:m_pSession(pSession)
         ,d_devInfo(devInfo)
 	{
+        if(IsStandardCommand())
+            d_curData_ptr = DevMonitorDataPtr(new Data);
 	}
 
 	Envir_message::~Envir_message(void)
@@ -152,6 +154,8 @@ namespace hx_net
 	}
     int Envir_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
 	{
+        if(data_ptr!=NULL)
+            d_curData_ptr = data_ptr;
 		switch(d_devInfo.nDevProtocol)
 		{
 		case WS2032:
@@ -160,15 +164,15 @@ namespace hx_net
 				{
 				case WS2032_A:
 					{
-                    return EnvironWS302(data,data_ptr,nDataLen,iaddcode);
+                    return EnvironWS302(data,d_curData_ptr,nDataLen,iaddcode);
 					}
 					break;
 				case THB11RS:
-                    return EnvironTHB11RS(data,data_ptr,nDataLen,iaddcode);
+                    return EnvironTHB11RS(data,d_curData_ptr,nDataLen,iaddcode);
 				case KD40_IO:
-                    return KD40RData(data,data_ptr,nDataLen,iaddcode);
+                    return KD40RData(data,d_curData_ptr,nDataLen,iaddcode);
 				case C2000_M21A:
-                    return C2000_M21A_Data(data,data_ptr,nDataLen,iaddcode);
+                    return C2000_M21A_Data(data,d_curData_ptr,nDataLen,iaddcode);
 				case AC_103_CTR:
 					{
 						
@@ -176,11 +180,17 @@ namespace hx_net
 					break;
 				case FRT_X06A:
 					{
-                        int iresult = FRT_X06A_Data(data,data_ptr,nDataLen,iaddcode);
+                        int iresult = FRT_X06A_Data(data,d_curData_ptr,nDataLen,iaddcode);
                         m_pSession->start_handler_data(iaddcode,data_ptr);
                         return iresult;
 					}
 					break;
+                case C2000_A2_8020:
+                {
+                    int iresult=C2000_A2_Data(data,d_curData_ptr,nDataLen,iaddcode);
+                    m_pSession->start_handler_data(iaddcode,data_ptr);
+                    return iresult;
+                }
 				default:
 					return RE_NOPROTOCOL;
 				}
@@ -628,6 +638,7 @@ namespace hx_net
     int Envir_message::C2000_A2_Data(unsigned char *data, DevMonitorDataPtr data_ptr,
                                      int nDataLen, int &iaddcode)
     {
+        iaddcode = data[0];
         if(data[1]==0x02)
         {
             unsigned char bdata1;
