@@ -14,6 +14,7 @@ namespace hx_net
 	Envir_message::~Envir_message(void)
 	{
 	}
+
     int Envir_message::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
 	{
 		switch(d_devInfo.nDevProtocol)
@@ -181,14 +182,14 @@ namespace hx_net
 				case FRT_X06A:
 					{
                         int iresult = FRT_X06A_Data(data,d_curData_ptr,nDataLen,iaddcode);
-                        m_pSession->start_handler_data(iaddcode,data_ptr);
+                        m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                         return iresult;
 					}
 					break;
                 case C2000_A2_8020:
                 {
                     int iresult=C2000_A2_Data(data,d_curData_ptr,nDataLen,iaddcode);
-                    m_pSession->start_handler_data(iaddcode,data_ptr);
+                    m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                     return iresult;
                 }
 				default:
