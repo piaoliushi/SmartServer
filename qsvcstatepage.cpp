@@ -212,6 +212,8 @@ void QSvcStatePage::timeUpdate()
  {
      QString sexecute = QString("./ntpclient -s -t -i 1 -h %1 &").arg(GetInst(LocalConfig).ntp_svc_ip().c_str());
      QProcess::execute(sexecute);
+     sexecute = QString("hwclock -w");
+     QProcess::execute(sexecute);
  }
 
  void QSvcStatePage::checkAutoAdjustTime()
