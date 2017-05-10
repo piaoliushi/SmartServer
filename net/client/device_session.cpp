@@ -723,11 +723,14 @@ int device_session::task_count()
 }
 void device_session::close_all()
 {
-    // if(modleInfos_.iCommunicationMode != CON_MOD_COM)
     set_con_state(con_disconnected);
     connect_timer_.cancel();
     timeout_timer_.cancel();
-    close_i();   //关闭socket
+    if(modleInfos_.iCommunicationMode==CON_MOD_COM)
+        pSerialPort_ptr_->close();
+    else
+        close_i();   //关闭socket
+
     //等待任务结束，任务里面，必须放在运行状态检测之前
     //状态检测会
     //wait_task_end();
