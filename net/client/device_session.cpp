@@ -721,6 +721,7 @@ int device_session::task_count()
     boost::mutex::scoped_lock lock(task_mutex_);
     return task_count_;
 }
+
 void device_session::close_all()
 {
     set_con_state(con_disconnected);
