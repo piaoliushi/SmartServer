@@ -200,11 +200,12 @@ namespace hx_net
         return m_pbaseMsg->cur_dev_state();
     }
 
-    void MsgHandleAgentImpl::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode)
+    void MsgHandleAgentImpl::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
+                                           bool bSnmp,Snmp *snmp,CTarget *target)
     {
         if(m_pbaseMsg==NULL)
             return ;
-        return m_pbaseMsg->exec_task_now(icmdType,sUser,eErrCode);
+        return m_pbaseMsg->exec_task_now(icmdType,sUser,eErrCode,bSnmp,snmp,target);
     }
 
     void MsgHandleAgentImpl::start_task_timeout_timer()

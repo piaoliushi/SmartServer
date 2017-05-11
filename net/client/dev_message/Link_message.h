@@ -22,7 +22,8 @@ public:
 protected:
     int  parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
     void parse_Satellite_data_(Pdu &pdu, SnmpTarget &target);
-
+    int  parse_TestReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
+    void parse_Testllite_data_(Pdu &pdu, SnmpTarget &target);
 private:
     session_ptr m_pSession;//关联连接对象
     DeviceInfo           &d_devInfo;//设备信息

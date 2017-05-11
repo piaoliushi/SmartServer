@@ -44,6 +44,8 @@ namespace hx_net
                  {
                  case LINK_STATELITE_RECEVIE:
                      return parse_SatelliteReceive_data(snmp,data_ptr,target);
+                 case LINK_TEST_RECEVIE:
+                     return parse_TestReceive_data(snmp,data_ptr,target);
                  default:
                      return RE_NOPROTOCOL;
                  }
@@ -92,6 +94,8 @@ namespace hx_net
         {
         case LINK_STATELITE_RECEVIE:
             return parse_Satellite_data_(pdu,target);
+        case LINK_TEST_RECEVIE:
+            return parse_Testllite_data_(pdu,target);
         }
          cout<<"satellite_Callback  reason="<<d_devInfo.sDevNum<<endl;
     }
@@ -173,6 +177,66 @@ namespace hx_net
             m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
         }
 
+    }
+
+    int Link_message::parse_TestReceive_data(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)
+    {
+        if(d_task_queue_ptr->get_Task_Size()>10)
+            return -1;
+        d_task_queue_ptr->SubmitTask(data_ptr);
+        Pdu pdu;
+        Vb vbl[3];
+        vbl[0].set_oid(Oid("1.3.6.1.2.1.25.2.2.0"));
+        vbl[1].set_oid(Oid("1.3.6.1.2.1.25.1.6.0"));
+        vbl[2].set_oid(Oid("1.3.6.1.2.1.25.1.5.0"));
+        for (int i=0; i<NUM_SYS_VBS;i++)
+            pdu += vbl[i];
+        int status = snmp->get(pdu,*target, aysnc_callback,this);
+        if (status){
+            return -1;
+        }else{
+            return 0;
+        }
+        return -1;
+    }
+
+    void Link_message::parse_Testllite_data_(Pdu &pdu, SnmpTarget &target)
+    {
+        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
+        if(cur_data_ptr==NULL)
+            return;
+        int pdu_error = pdu.get_error_status();
+        if (pdu_error)
+            return;
+        if (pdu.get_vb_count() == 0)
+            return;
+        int vbcount = pdu.get_vb_count();
+        for(int i=0;i<vbcount;++i)
+        {
+            DataInfo dainfo;
+            Vb nextVb;
+            pdu.get_vb(nextVb, i);
+            string cur_oid = nextVb.get_printable_oid();
+            string cur_value =nextVb.get_printable_value();
+            dainfo.bType = false;
+            dainfo.fValue = atof(cur_value.c_str());
+            if(cur_oid=="1.3.6.1.2.1.25.2.2.0")
+            {
+                dainfo.fValue = dainfo.fValue/1048576.00;
+                cur_data_ptr->mValues[0] = dainfo;
+            }
+            else if(cur_oid=="1.3.6.1.2.1.25.1.6.0")
+            {
+                cur_data_ptr->mValues[1] = dainfo;
+            }
+            else if(cur_oid=="1.3.6.1.2.1.25.1.5.0")
+            {
+                cur_data_ptr->mValues[2] = dainfo;
+            }
+        }
+        if(cur_data_ptr->mValues.size()>0){
+            m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
+        }
     }
 
     int  Link_message::parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)

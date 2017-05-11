@@ -21,7 +21,8 @@ public:
     bool IsStandardCommand();
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     int   cur_dev_state();
-    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode);
+    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
+                       bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
     //启动定时控制
     void start_task_timeout_timer();
     //设备运行状态
@@ -68,6 +69,9 @@ private:
     time_t             d_OprStartTime;//提交控制命令开始时间
     Transmmiter   *m_ptransmmit;
     DevMonitorDataPtr d_curData_ptr;
+    Snmp              *d_cur_snmp;
+    bool               d_bUse_snmp;
+    CTarget           *d_cur_target;
 };
 typedef boost::shared_ptr<hx_net::Tsmt_message>  Tsmt_message_ptr;
 typedef boost::weak_ptr<hx_net::Tsmt_message>    Tsmt_message_weak_ptr;

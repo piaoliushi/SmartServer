@@ -48,6 +48,7 @@ namespace hx_net
         virtual int decode_msg_body(DevMonitorDataPtr data_ptr,int nDataLen){return -1;}
         virtual bool isLastQueryCmd(){return true;}
         virtual bool isMultiQueryCmd(){return false;}
+        virtual bool exec_cmd(Snmp *snmp,int cmdtype,CTarget *target){return false;}
 		
 	};
 }

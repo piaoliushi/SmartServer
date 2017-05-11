@@ -872,26 +872,33 @@ dev_opr_state  device_session::get_opr_state(string sdevId){
 //开始执行任务
 bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType)
 {
+
     if(!is_connected()){
-        opResult = EC_NET_ERROR;
-        return false;
-    }
-    if(get_opr_state(sDevId)==dev_no_opr)
-        set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
-    else{
-        opResult = EC_OPR_ON_GOING;//正在执行控制命令
-        return false;//已经有任务正在执行
-    }
+           opResult = EC_NET_ERROR;
+           return false;
+       }
+       if(get_opr_state(sDevId)==dev_no_opr)
+           set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
+       else{
+           opResult = EC_OPR_ON_GOING;//正在执行控制命令
+           return false;//已经有任务正在执行
+       }
 
-    //现在执行任务
-    dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult);
+       //现在执行任务
+       if(modleInfos_.netMode.inet_type == NET_MOD_SNMP){
+           dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,true,snmp_ptr_,target_ptr_);
+       }
+      else
+           dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult);
 
 
-    return true;
+       return true;
+
 }
 
 //判断是否保存当前记录
-void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtr,const map<int,DeviceMonitorItem> &mapMonitorItem)
+void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtr,
+                                         const map<int,DeviceMonitorItem> &mapMonitorItem)
 {
     time_t tmCurTime;
     time(&tmCurTime);

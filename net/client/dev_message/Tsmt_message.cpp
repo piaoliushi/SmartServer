@@ -29,6 +29,9 @@ namespace hx_net
         ,dev_run_state_(dev_unknown)
         ,d_shutdown_count_(0)
         ,d_run_count_(0)
+        ,d_bUse_snmp(false)
+        ,d_cur_snmp(NULL)
+        ,d_cur_target(NULL)
     {
         m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
         CreateObject();
@@ -323,7 +326,8 @@ namespace hx_net
         }
     }
 
-    void Tsmt_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode)
+    void Tsmt_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
+                                     bool bSnmp,Snmp *snmp,CTarget *target)
     {
 
         d_cur_task_ = icmdType;
@@ -332,6 +336,10 @@ namespace hx_net
             eErrCode = EC_OK;
             return;
         }
+
+        d_bUse_snmp = bSnmp;
+        d_cur_snmp = snmp;
+        d_cur_target = target;
 
         excute_task_cmd();
 
@@ -460,18 +468,30 @@ namespace hx_net
             }
         }
 
-        if(m_pSession!=NULL)
-            m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,nType);
+
+        if(!d_bUse_snmp)
+        {
+            if(m_pSession!=NULL)
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,nType);
+        }
+        else
+            m_ptransmmit->exec_cmd(d_cur_snmp,MSG_TRANSMITTER_TURNON_OPR,d_cur_target);
     }
     //关机
     void Tsmt_message::exec_trunoff_task_()
     {
         if(is_detecting())
             return;
-        if(m_pSession!=NULL){
-            m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0);
-            cout<<"关机指令已发送..."<<endl;
+
+
+        if(!d_bUse_snmp)
+        {
+            if(m_pSession!=NULL)
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0);
         }
+        else
+            m_ptransmmit->exec_cmd(d_cur_snmp,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_target);
+
         return;
     }
 }

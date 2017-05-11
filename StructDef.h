@@ -270,6 +270,8 @@ typedef enum TIMEROTOCOL
 typedef enum LINK_DEVICE
 {
     LINK_STATELITE_RECEVIE = 0,//卫星接收机
+
+    LINK_TEST_RECEVIE      = 3,//SNMP测试
 }LinkDeviceSubProtocol;
 
 typedef enum RESOLVE_TAG  //resolve

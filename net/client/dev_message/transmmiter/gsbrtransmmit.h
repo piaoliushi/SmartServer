@@ -22,6 +22,7 @@ typedef boost::weak_ptr<hx_net::Tsmt_message>    Tsmt_message_weak_ptr;
                void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
                void GetAllCmd(CommandAttribute &cmdAll);
                void gsbr_Callback(int reason, Snmp *session,Pdu &pdu, SnmpTarget &target);
+               bool exec_cmd(Snmp *snmp, int cmdtype, CTarget *target);
            private:
                int get_snmp(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
            private:
