@@ -189,7 +189,7 @@ namespace hx_net
         vbl[0].set_oid(Oid("1.3.6.1.2.1.25.2.2.0"));
         vbl[1].set_oid(Oid("1.3.6.1.2.1.25.1.6.0"));
         vbl[2].set_oid(Oid("1.3.6.1.2.1.25.1.5.0"));
-        for (int i=0; i<NUM_SYS_VBS;i++)
+        for (int i=0; i<NUM_SYS_VBS-3;i++)
             pdu += vbl[i];
         int status = snmp->get(pdu,*target, aysnc_callback,this);
         if (status){
