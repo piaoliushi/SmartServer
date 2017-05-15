@@ -1371,7 +1371,7 @@ bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& devi
 bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
 {
     QSqlDatabase db = ConnectionPool::openConnection();
-    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+    if(!db.isOpen() || !db.isValid()) {
         std::cout<<"GetUserInfo error  ------ the database is interrupt"<<std::endl;
         return false;
     }

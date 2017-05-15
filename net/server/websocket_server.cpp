@@ -43,40 +43,78 @@ void websocket_server::on_message(connection_hdl hdl, ws_server::message_ptr msg
     curWebPtr->ParseFromArray(msg->get_payload().c_str(),msg->get_payload().size());
     int msgType = curWebPtr->nmsgtype();
 
-
     switch(msgType)
     {
-    case MSG_LOGIN_REQ:{
-        loginAckMsgPtr sloginAck(new LoginAck);
-        string sUsr = curWebPtr->msgloginreq().susrname();
-        string sPsw = curWebPtr->msgloginreq().susrpsw();
-        bool bLoginRlt = _user_login(sUsr,sPsw,*sloginAck);
-        curWebPtr->Clear();
-        curWebPtr->set_smsgtype("login_ack");
-        curWebPtr->set_nmsgtype(MSG_LOGIN_ACK);
-        curWebPtr->mutable_msgloginack()->CopyFrom(*sloginAck);
-        boost::recursive_mutex::scoped_lock conlock(m_connection_lock);
-        m_server.send(hdl,curWebPtr->SerializeAsString(),websocketpp::frame::opcode::binary);
-        ws_server::connection_ptr connection = m_server.get_con_from_hdl(hdl);
-        if(bLoginRlt == true){
-            tcp::endpoint client_endpoint = connection->get_raw_socket().remote_endpoint();
-            GetInst(SvcMgr).get_notify()->OnClientOnline(client_endpoint.address().to_string(),client_endpoint.port());
-            m_list_endpoint[connection] = client_endpoint;
-            if(_register_user(sUsr,hdl) == true)
-                GetInst(SvcMgr).get_notify()->OnClientLogin(client_endpoint.address().to_string(),
-                                                            client_endpoint.port(),sUsr);
-        }else{
-            websocketpp::lib::error_code ec;
-            m_server.close(hdl, websocketpp::close::status::going_away, "", ec);
-            if (ec) {
-                std::cout << "> Error closing connection " << ": "
-                          << ec.message() << std::endl;
+        case MSG_LOGIN_REQ:{
+            loginAckMsgPtr sloginAck(new LoginAck);
+            string sUsr = curWebPtr->msgloginreq().susrname();
+            string sPsw = curWebPtr->msgloginreq().susrpsw();
+            bool bLoginRlt = _user_login(sUsr,sPsw,*sloginAck);
+            curWebPtr->Clear();
+            curWebPtr->set_smsgtype("login_ack");
+            curWebPtr->set_nmsgtype(MSG_LOGIN_ACK);
+            curWebPtr->mutable_msgloginack()->CopyFrom(*sloginAck);
+            boost::recursive_mutex::scoped_lock conlock(m_connection_lock);
+            m_server.send(hdl,curWebPtr->SerializeAsString(),websocketpp::frame::opcode::binary);
+            ws_server::connection_ptr connection = m_server.get_con_from_hdl(hdl);
+            if(bLoginRlt == true){
+                tcp::endpoint client_endpoint = connection->get_raw_socket().remote_endpoint();
+                GetInst(SvcMgr).get_notify()->OnClientOnline(client_endpoint.address().to_string(),client_endpoint.port());
+                m_list_endpoint[connection] = client_endpoint;
+                if(_register_user(sUsr,hdl) == true)
+                    GetInst(SvcMgr).get_notify()->OnClientLogin(client_endpoint.address().to_string(),
+                                                                client_endpoint.port(),sUsr);
+            }else{
+                websocketpp::lib::error_code ec;
+                m_server.close(hdl, websocketpp::close::status::going_away, "", ec);
+                if (ec) {
+                    std::cout << "> Error closing connection " << ": "
+                              << ec.message() << std::endl;
+                }
+
             }
 
         }
+            break;
+        case MSG_TRANSMITTER_TURNON_OPR://发射机开启(默认高功率开机)
+        case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR://中功率开机
+        case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR://低功率开机
+        case MSG_TRANSMITTER_TURNOFF_OPR://发射机关闭
+        case MSG_ANTENNA_HTOB_OPR:
+        case MSG_ANTENNA_BTOH_OPR:
+        case MSG_TRANSMITTER_RISE_POWER_OPR://发射机升功率
+        case MSG_TRANSMITTER_REDUCE_POWER_OPR://发射机降功率
+        case MSG_SET_FREQUENCY_OPR:
+        case MSG_SEARCH_FREQUENCY_OPR:
+        case MSG_0401_SWITCH_OPR:
+        case MSG_CONTROL_MOD_SWITCH_OPR:
+        case MSG_ADJUST_TIME_SET_OPR:
+        case MSG_GENERAL_COMMAND_OPR:
+        case MSG_SWITCH_AUDIO_CHANNEL_OPR://切换音频通道
+        case MSG_DEV_RESET_OPR:{
 
-    }
-        break;
+            string sUsr = curWebPtr->msgcommandreq().soperuser();
+            string sDevId = curWebPtr->msgcommandreq().sdevid();
+            e_ErrorCode nReult = GetInst(SvcMgr).start_exec_task(sDevId,sUsr,msgType);
+
+            devCommdRsltPtr ackMsg(new DeviceCommandResultNotify);
+            ackMsg->set_sstationid(curWebPtr->msgcommandreq().sstationid());
+            ackMsg->set_sdevid(curWebPtr->msgcommandreq().sdevid());
+            ackMsg->set_sdevname(curWebPtr->msgcommandreq().sdevname());
+            ackMsg->set_edevtype(curWebPtr->msgcommandreq().edevtype());
+            ackMsg->set_eerrorid(nReult);
+            ackMsg->set_soperuser(sUsr);
+
+            curWebPtr->Clear();
+            curWebPtr->set_smsgtype("command_reached_notify");
+            if(msgType>=MSG_TRANSMITTER_TURNON_OPR && msgType<=MSG_TRANSMITTER_LOW_POWER_TURNON_OPR)
+                curWebPtr->set_nmsgtype(MSG_TRANSMITTER_TURNON_ACK);
+            else
+                curWebPtr->set_nmsgtype(msgType+1);//ack紧随opr
+            curWebPtr->mutable_commandresultnty()->CopyFrom(*ackMsg);
+            boost::recursive_mutex::scoped_lock conlock(m_connection_lock);
+            m_server.send(hdl,curWebPtr->SerializeAsString(),websocketpp::frame::opcode::binary);
+        }
     }
 
 }

@@ -131,7 +131,12 @@ public:
             ackMsg->set_edevtype(commandmsg_->edevtype());
             ackMsg->set_eerrorid(nReult);
             ackMsg->set_soperuser(commandmsg_->soperuser());
-            psession->sendMessage((e_MsgType)MsgPtr->type,ackMsg);
+
+            if(MsgPtr->type>=MSG_TRANSMITTER_TURNON_OPR && MsgPtr->type<=MSG_TRANSMITTER_LOW_POWER_TURNON_OPR)
+                psession->sendMessage(MSG_TRANSMITTER_TURNON_ACK,ackMsg);
+            else
+                psession->sendMessage((e_MsgType)(MsgPtr->type+1),ackMsg);
+
         }
         break;
 		case MSG_DEV_REALTIME_DATA_NOTIFY://下级台站实时设备数据

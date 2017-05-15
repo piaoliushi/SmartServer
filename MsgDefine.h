@@ -51,7 +51,7 @@ enum e_MsgType
 	MSG_DEV_TURNON_OPR   = 13,//设备开启(只用于非发射机设备)
 	MSG_DEV_TURNOFF_OPR  = 14,//设备关闭(只用于非发射机设备)
 
-	MSG_TRANSMITTER_TURNON_OPR              = 15,//发射机开(默认高功率开)
+    MSG_TRANSMITTER_TURNON_OPR              = 15,//发射机开(默认高功率开)
 	MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR = 16,//发射机中功率开机
 	MSG_TRANSMITTER_LOW_POWER_TURNON_OPR    = 17,//发射机低功率开机
 	MSG_TRANSMITTER_TURNON_ACK       = 18,
@@ -96,6 +96,7 @@ enum e_MsgType
 	MSG_CHECK_WORKING_REQ = 53,//查岗请求
 	MSG_CHECK_WORKING_ACK = 54,//查岗回复
     MSG_DEV_RESET_OPR = 55,//复位指令
+    MSG_DEV_RESET_ACK = 56,//复位响应
 
 };
 
