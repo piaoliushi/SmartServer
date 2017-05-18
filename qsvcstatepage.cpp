@@ -149,7 +149,7 @@ void QSvcStatePage::StartSvc()
     {
         GetInst(DataBaseOperation).set_notify(&m_Notify);
         if(GetInst(DataBaseOperation).OpenDb(GetInst(LocalConfig).database_ip(),
-                                             "postgres",//hxplatformdatabase
+                                             "smartweb",//hxplatformdatabase
                                              GetInst(LocalConfig).database_user(),
                                              GetInst(LocalConfig).database_password()))
         {
