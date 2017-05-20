@@ -223,14 +223,17 @@ namespace hx_net
             if(cur_oid=="1.3.6.1.2.1.25.2.2.0")
             {
                 dainfo.fValue = dainfo.fValue/1048576.00;
+                dainfo.sValue = str(boost::format("%.2f G")%dainfo.fValue);
                 cur_data_ptr->mValues[0] = dainfo;
             }
             else if(cur_oid=="1.3.6.1.2.1.25.1.6.0")
             {
+                dainfo.sValue = cur_value;
                 cur_data_ptr->mValues[1] = dainfo;
             }
             else if(cur_oid=="1.3.6.1.2.1.25.1.5.0")
             {
+                dainfo.sValue = cur_value;
                 cur_data_ptr->mValues[2] = dainfo;
             }
         }

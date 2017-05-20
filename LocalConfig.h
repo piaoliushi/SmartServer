@@ -5,7 +5,7 @@
 #include <string>
 #include "DataType.h"
 using namespace std;
-class LocalConfig
+class   LocalConfig
 {
 public:
 	LocalConfig(void);
