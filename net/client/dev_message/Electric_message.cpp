@@ -22,13 +22,13 @@ namespace hx_net
         ,m_Ibb(20.0)//电流比
 	{
         if(d_devInfo.map_DevProperty.find("VRANG")!=d_devInfo.map_DevProperty.end())
-			m_Uo = atoi(d_devInfo.map_DevProperty[""].property_value.c_str());
+            m_Uo = atoi(d_devInfo.map_DevProperty["VRANG"].property_value.c_str());
         if(d_devInfo.map_DevProperty.find("ARANG")!=d_devInfo.map_DevProperty.end())
-			m_Io = atoi(d_devInfo.map_DevProperty[""].property_value.c_str());
+            m_Io = atoi(d_devInfo.map_DevProperty["ARANG"].property_value.c_str());
         if(d_devInfo.map_DevProperty.find("VRATIO")!=d_devInfo.map_DevProperty.end())
-			m_Ubb = atof(d_devInfo.map_DevProperty[""].property_value.c_str());
+            m_Ubb = atof(d_devInfo.map_DevProperty["VRATIO"].property_value.c_str());
         if(d_devInfo.map_DevProperty.find("ARATIO")!=d_devInfo.map_DevProperty.end())
-			m_Ibb = atof(d_devInfo.map_DevProperty[""].property_value.c_str());
+            m_Ibb = atof(d_devInfo.map_DevProperty["ARATIO"].property_value.c_str());
         if(IsStandardCommand())
         {
             d_curData_ptr.reset(new Data);

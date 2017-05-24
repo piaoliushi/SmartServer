@@ -1702,7 +1702,7 @@ void device_session::Action_sendsms(LinkAction &action, string sendcontent)
             if((*viter).iParamType==0)
             {
                 UserInformation tmpUser;
-                if(GetInst(DataBaseOperation).GetUserInfo((*viter).strParamValue,tmpUser))
+                if(GetInst(DataBaseOperation).GetUserInfoByNumber((*viter).strParamValue,tmpUser))
                     phonelist.push_back(tmpUser.sTelephone);
             }
         }

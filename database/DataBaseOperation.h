@@ -81,6 +81,9 @@ public:
     //获得用户信息
     bool GetUserInfo( const string sName,UserInformation &user );
 
+    //根据用户编号获取用户信息
+    bool GetUserInfoByNumber(const string sNumber,UserInformation &user);
+
     //获得用户授权设备
     bool GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice );
 

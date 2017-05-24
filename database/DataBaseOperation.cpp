@@ -1365,7 +1365,42 @@ bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& devi
             return true;
 }
 
+//根据用户编号获取用户信息
+bool DataBaseOperation::GetUserInfoByNumber(const string sNumber,UserInformation &user){
 
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {
+        std::cout<<"GetUserInfoByNumber error  ------ the database is interrupt"<<std::endl;
+        return false;
+    }
+
+    try
+    {
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    QSqlQuery userquery(db);
+    QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber,telephone from Users where Number='%1'").arg(QString::fromStdString(sNumber));
+    if(!userquery.exec(strSql)){
+        cout<<userquery.lastError().text().toStdString()<<"GetUserInfoByNumber---userquery---error!"<<endl;
+         ConnectionPool::closeConnection(db);
+        return false;
+    }
+    if(userquery.next()){
+        //user.sName = sName;
+        user.sNumber = userquery.value(0).toString().toStdString();
+        user.sPassword = userquery.value(1).toString().toStdString();
+        user.nControlLevel = userquery.value(2).toInt();
+        user.sHeadship = userquery.value(3).toString().toStdString();
+        user.sJobNumber = userquery.value(4).toString().toStdString();
+        user.sTelephone = userquery.value(5).toString().toStdString();
+    }
+    }catch(...){
+         ConnectionPool::closeConnection(db);
+        return false;
+    }
+     ConnectionPool::closeConnection(db);
+    return true;
+
+}
 
 //获取用户信息
 bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
