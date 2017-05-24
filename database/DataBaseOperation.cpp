@@ -1385,7 +1385,7 @@ bool DataBaseOperation::GetUserInfoByNumber(const string sNumber,UserInformation
         return false;
     }
     if(userquery.next()){
-        //user.sName = sName;
+
         user.sNumber = userquery.value(0).toString().toStdString();
         user.sPassword = userquery.value(1).toString().toStdString();
         user.nControlLevel = userquery.value(2).toInt();
