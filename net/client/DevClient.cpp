@@ -229,6 +229,7 @@ e_ErrorCode   DevClient::response_http_msg(string sUrl,string &sContent,string s
     return EC_OK;
 }
 
+//发送短信
 e_ErrorCode DevClient::SendSMSContent(vector<string> &PhoneNumber, string AlarmContent)
 {
     if(m_pGsm_ptr_&&m_pGsm_ptr_->IsRun())
@@ -239,6 +240,22 @@ e_ErrorCode DevClient::SendSMSContent(vector<string> &PhoneNumber, string AlarmC
         return EC_OK;
     }
 
+    return EC_OBJECT_NULL;
+}
+
+//发送联动命令
+e_ErrorCode  DevClient::SendActionCommand(const string &sDevId,string sUser,int actionType)
+{
+
+     e_ErrorCode opr_rlt = EC_DEVICE_NOT_FOUND;
+     boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
+     std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
+     for(;iter!=device_pool_.end();++iter){
+         if(iter->second->is_contain_dev(sDevId)){
+             iter->second->send_action_conmmand(sDevId,sUser,actionType,opr_rlt);
+             return opr_rlt;
+         }
+     }
     return EC_OBJECT_NULL;
 }
 

@@ -15,6 +15,12 @@ public:
     bool IsStandardCommand();
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
 	void GetAllCmd(CommandAttribute &cmdAll);
+
+    //执行任务
+    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
+                                     bool bSnmp,Snmp *snmp,CTarget *target);
+    //执行联动命令
+    void exec_action_task_now(int actionType,string sUser,e_ErrorCode &eErrCode);
 protected:
     int  parse_AC103CTR_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int EnvironWS302(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);

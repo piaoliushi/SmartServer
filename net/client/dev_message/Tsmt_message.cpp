@@ -396,6 +396,8 @@ namespace hx_net
              if(is_shut_down())
                  bCmdExcComplet = true;
              } break;
+         default:
+             return true;
          }
 
          return bCmdExcComplet;

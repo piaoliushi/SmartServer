@@ -42,18 +42,7 @@ typedef struct CMDUnit
 //控制命令属性
 typedef struct
 {
-    /*vector<CommandUnit> queryComm;     //查询命令(可能多条)
-	vector<CommandUnit> turnonComm;    //开机命令(可能多条)
-	vector<CommandUnit> turnoffComm;   //关机命令(可能多条)
-	vector<CommandUnit> uppowerComm;   //升功率命令(可能多条)
-	vector<CommandUnit> lowpowerComm;  //降功率命令(可能多条)
-	vector<CommandUnit> resetComm;     //复位命令(可能多条)
-	vector<CommandUnit> switchComm;    //切换激励器1命令(可能多条)
-    vector<CommandUnit> switch2Comm;   //切换激励器2率命令(可能多条)*/
-	//vector<CommandUnit> adjustDevTime; //调整设备时间
-
-	int ninterval;                     //命令之间发送时间间隔(ms)
-
+    int ninterval;                     //命令之间发送时间间隔(ms)
     map<int,vector<CommandUnit> > mapCommand;//命令
 }CommandAttribute;
 
@@ -272,6 +261,9 @@ typedef enum LINK_DEVICE
     LINK_STATELITE_RECEVIE = 0,//卫星接收机
 
     LINK_TEST_RECEVIE      = 3,//SNMP测试
+    LINK_SING_NET_ADAPTER = 4, //
+    LINK_DMP_SWITCH = 5, //
+    LINK_ASI_ADAPTER = 8,//
 }LinkDeviceSubProtocol;
 
 typedef enum RESOLVE_TAG  //resolve

@@ -23,6 +23,8 @@ public:
     void start_test_send_timer(unsigned long nSeconds=50);
     void stop_test_send_timer();
 	void GetAllCmd(CommandAttribute &cmdAll);
+    //执行联动命令
+    void exec_action_task_now(int actionType,string sUser,e_ErrorCode &eErrCode);
 protected:
     void test104data();
     void  GetResultData(DevMonitorDataPtr data_ptr);

@@ -126,5 +126,13 @@ namespace hx_net
         return EC_OBJECT_NULL;
    }
 
+  //发送联动命令
+  e_ErrorCode  DevClientMgr::SendActionCommand(const string &sDevId,string sUser,int actionType)
+  {
+      if(_devclientptr)
+          return _devclientptr->SendActionCommand(sDevId,sUser,actionType);
+       return EC_OBJECT_NULL;
+  }
+
 }
 

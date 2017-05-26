@@ -257,7 +257,7 @@ namespace hx_net{
     }
     int AhhxTransmmit::Md993Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
     {
-        float fdat=0;//
+        float fdat=0;
         float fAnalogData[25];
         for(int i=0;i<24;++i)
         {

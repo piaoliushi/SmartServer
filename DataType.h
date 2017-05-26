@@ -496,6 +496,7 @@ enum ActionType
     ACTP_OPEN_DEVICE,//开设备
     ACTP_CLOSE_DEVICE,//关设备
     ACTP_SWITCH_ANTTEN,//天线切换
+    ACTP_SOUND_LIGHT_ALARM,//声光告警
 };
 
 #endif

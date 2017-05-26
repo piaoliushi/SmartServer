@@ -81,6 +81,8 @@ namespace hx_net
 
       //发送短信
       e_ErrorCode    SendSMSContent(vector<string> &PhoneNumber,string AlarmContent);
+      //发送联动命令
+      e_ErrorCode  SendActionCommand(const string &sDevId,string sUser,int actionType);
 
 	private:
 		svc_state svc_state_;

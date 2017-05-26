@@ -33,6 +33,9 @@ namespace hx_net
         int  cur_dev_state();
         void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
                            bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
+        //执行联动命令
+        void exec_action_task_now(int actionType,string sUser,e_ErrorCode &eErrCode);
+
         void start_task_timeout_timer();
         //获得运行状态
         int  get_run_state();

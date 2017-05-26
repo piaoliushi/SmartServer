@@ -80,6 +80,10 @@ namespace hx_net
 
         //发送短信
         e_ErrorCode  SendSMSContent(vector<string> &PhoneNumber, string AlarmContent);
+
+        //发送联动命令
+        e_ErrorCode  SendActionCommand(const string &sDevId,string sUser,int actionType);
+
 	private:
 		boost::recursive_mutex         device_pool_mutex_;
 		std::map<DevKey,session_ptr>   device_pool_;

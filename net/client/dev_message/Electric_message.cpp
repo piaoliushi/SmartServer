@@ -339,22 +339,6 @@ namespace hx_net
 
 			iecsock_sframe_send();
 
-			//iecsock_run_ackw_queue(s, h->ic.nr);
-//		s->va = h->ic.nr;
-//		if (s->va == s->vs) {
-// 			t1_timer_stop(s);
-//		}
-	//	t2_timer_stop(s);
-		//t2_timer_start(s);
-
-// 		if (!check_ns(s, h->ic.ns))
-// 			return -1;
-// 
-// 		s->vr = (s->vr + 1) % 32767;
-// 		if ((s->vr - s->va_peer + 32767) % 32767 == s->w) {
-// 			iecsock_sframe_send(s);
-// 			s->va_peer = s->vr;
-// 		}
 
 		return 0;
 	}
@@ -844,5 +828,13 @@ namespace hx_net
         dainfo.fValue = ((data[29]<<8)|data[30])*0.01;
         data_ptr->mValues[indexpos++] = dainfo;
         return RE_SUCCESS;
+    }
+
+
+    //执行联动命令
+    void Electric_message::exec_action_task_now(int actionType,string sUser,e_ErrorCode &eErrCode)
+    {
+
+
     }
 }

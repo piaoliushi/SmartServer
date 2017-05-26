@@ -366,6 +366,28 @@ namespace hx_net
                     tmUnit.commandId[6] = (uscrc&0x00FF);
                     tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
                     cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+
+                    //01 0F 00 64 00 02 01 01 6E 9F
+                    tmUnit.commandId[1] = 0x0f;
+                    tmUnit.commandId[2] = 0x00;
+                    tmUnit.commandId[3] = 0x64;
+                    tmUnit.commandId[4] = 0x00;
+                    tmUnit.commandId[5] = 0x02;
+                    tmUnit.commandId[6] = 0x01;
+                    tmUnit.commandId[7] = 0x01;
+                    uscrc = CRC16_A001(tmUnit.commandId,8);
+                    tmUnit.commandId[8] = (uscrc&0x00FF);
+                    tmUnit.commandId[9] = ((uscrc & 0xFF00)>>8);
+                    tmUnit.commandLen = 10;
+                    cmdAll.mapCommand[MSG_DEV_TURNON_OPR].push_back(tmUnit);
+
+                    tmUnit.commandId[7] = 0x00;
+                    uscrc = CRC16_A001(tmUnit.commandId,8);
+                    tmUnit.commandId[8] = (uscrc&0x00FF);
+                    tmUnit.commandId[9] = ((uscrc & 0xFF00)>>8);
+                    tmUnit.commandLen = 10;
+                    cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
+
                 }
                     break;
                 }
@@ -653,6 +675,27 @@ namespace hx_net
             }
         }
         return RE_SUCCESS;
+    }
+
+    //执行任务
+    void Envir_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
+                                     bool bSnmp,Snmp *snmp,CTarget *target)
+    {
+        if(m_pSession!=NULL)
+            m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,icmdType,0);
+    }
+
+    //执行联动命令
+    void Envir_message::exec_action_task_now(int actionType,string sUser,e_ErrorCode &eErrCode)
+    {
+        switch(actionType){
+        case ACTP_SOUND_LIGHT_ALARM:{
+            //联动声光告警只做开设备动作（打开声光告警）
+            if(m_pSession!=NULL)
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNON_OPR,0);
+        }
+            break;
+        }
     }
 
 }

@@ -146,15 +146,14 @@ typedef struct
     map<int,vector<ActionParam> > map_Params;
 }LinkAction;
 
-#define    ALARM_UPPER            0
+#define    ALARM_UPPER           0
 #define    ALARM_LOWER           1
-#define    ALARM_UP_UPPER      2
-#define    ALARM_LOW_LOWER   3
+#define    ALARM_UP_UPPER        2
+#define    ALARM_LOW_LOWER       3
 #define    ALARM_SWITCH          4
-#define    ALARM_DEVICE           5
-#define    ALARM_RESUME         6
+#define    ALARM_DEVICE          5
+#define    ALARM_RESUME          6
 
-//const char CONST_STR_ALARM_CONTENT[][32]={"",""};// = {"跃上限","跃下限","跃上上限","跃下下限","报警","恢复正常"};
 typedef struct
 {
     int iAlarmid;         //告警类型id

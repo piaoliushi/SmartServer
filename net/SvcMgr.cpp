@@ -196,4 +196,10 @@ namespace hx_net
           m_pDevMgrPtr->SendSMSContent(PhoneNumber,AlarmContent);
       return EC_OBJECT_NULL;
   }
+
+  e_ErrorCode  SvcMgr::SendActionCommand(const string &sDevId,string sUser,int actionType){
+      if(m_pDevMgrPtr)
+          m_pDevMgrPtr->SendActionCommand(sDevId,sUser,actionType);
+      return EC_OBJECT_NULL;
+  }
 }

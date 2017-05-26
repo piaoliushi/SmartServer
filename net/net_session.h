@@ -126,6 +126,9 @@ namespace hx_net
                                  vector<Command_Scheduler> &cmmdScheduler){}
         //更新告警配置
        virtual void update_dev_alarm_config(string sDevId,DeviceInfo &devInfo){}
+
+        //发送联动命令
+        virtual void send_action_conmmand(const string &sDevId,string sUser,int actionType,e_ErrorCode &opResult){}
 	public:
 		virtual void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);
 		virtual void handle_read_body(const boost::system::error_code& error, size_t bytes_transferred);

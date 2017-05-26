@@ -174,7 +174,6 @@ void websocket_server::_unregister_user(connection_hdl hdl)
     for(;iter!=m_connections.end();++iter){
         if((*iter).second.lock() == hdl.lock()){
             ws_server::connection_ptr connection = m_server.get_con_from_hdl(hdl);
-           // tcp::endpoint client_endpoint = connection->get_raw_socket().remote_endpoint();
             con_list_endpoint::iterator iterCon = m_list_endpoint.find(connection);
             if(iterCon!=m_list_endpoint.end()){
                 tcp::endpoint client_endpoint = iterCon->second;

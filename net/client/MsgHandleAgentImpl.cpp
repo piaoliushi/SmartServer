@@ -208,6 +208,14 @@ namespace hx_net
         return m_pbaseMsg->exec_task_now(icmdType,sUser,eErrCode,bSnmp,snmp,target);
     }
 
+    //执行联动命令
+    void MsgHandleAgentImpl::exec_action_task_now(int actionType,string sUser,e_ErrorCode &eErrCode)
+    {
+        if(m_pbaseMsg==NULL)
+            return ;
+        return m_pbaseMsg->exec_action_task_now(actionType,sUser,eErrCode);
+    }
+
     void MsgHandleAgentImpl::start_task_timeout_timer()
     {
         if(m_pbaseMsg==NULL)

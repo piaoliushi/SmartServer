@@ -1,6 +1,6 @@
 #include "Link_message.h"
 #include"../../../utility.h"
-#include "./snmp_pp/snmp_pp.h"
+//#include "./snmp_pp/snmp_pp.h"
 
 #define NUM_SYS_VBS	6
 //信号电平
@@ -24,10 +24,145 @@ namespace hx_net
         ,d_devInfo(devInfo)
         ,d_task_queue_ptr(new TaskQueue< DevMonitorDataPtr >)
     {
+        initOid();
     }
 
     Link_message::~Link_message(void)
     {
+    }
+    void Link_message::initOid()
+    {
+        switch (d_devInfo.nSubProtocol) {
+        case LINK_SING_NET_ADAPTER:{
+            init_SingApt_Oid();
+        }
+            break;
+        case LINK_DMP_SWITCH:
+            init_Dmp_Oid();
+            break;
+        case LINK_ASI_ADAPTER:
+            init_AsiApt_Oid();
+            break;
+        default:
+            break;
+        }
+    }
+
+    void Link_message::init_SingApt_Oid()
+    {
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.1"] = 0;
+        Vb vbl;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.1.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.2"] = 1;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.2.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.3"] = 2;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.4"] = 3;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.4.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.5"] = 4;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.5.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.6"] = 5;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.6.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.7"] = 6;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.7.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.8"] = 7;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.8.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.9"] = 8;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.9.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.10"] = 9;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.10.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.11"] = 10;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.11.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.12"] = 11;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.12.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.13"] = 12;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.13.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.14"] = 13;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.14.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.15"] = 14;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.15.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.12.1.16"] = 15;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.12.1.16.0"));
+        query_pdu += vbl;
+    }
+
+    void Link_message::init_Dmp_Oid()
+    {
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.1.3"] = 0;
+        Vb vbl;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.1.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.1.4"] = 1;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.1.4.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.2.3"] = 2;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.2.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.2.4"] = 3;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.2.4.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.3.3"] = 4;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.3.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.3.4"] = 5;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.3.4.0"));
+        query_pdu += vbl;
+    }
+
+    void Link_message::init_AsiApt_Oid()
+    {
+        Vb vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.1.3"] = 0;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.1.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.1.4"] = 1;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.1.4.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.2.3"] = 2;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.2.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.2.4"] = 3;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.2.4.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.3.3"] = 4;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.3.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.3.4"] = 5;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.3.4.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.4.3"] = 6;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.4.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.4.4"] = 7;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.4.4.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.5.3"] = 8;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.5.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.5.4"] = 9;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.5.4.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.6.3"] = 10;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.6.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.6.4"] = 11;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.6.4.0"));
+        query_pdu += vbl;
     }
     int Link_message::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
     {
@@ -46,6 +181,10 @@ namespace hx_net
                      return parse_SatelliteReceive_data(snmp,data_ptr,target);
                  case LINK_TEST_RECEVIE:
                      return parse_TestReceive_data(snmp,data_ptr,target);
+                 case LINK_SING_NET_ADAPTER:          
+                 case LINK_DMP_SWITCH: 
+                 case LINK_ASI_ADAPTER:
+                     return parse_SingAptReceive_data(snmp,data_ptr,target);
                  default:
                      return RE_NOPROTOCOL;
                  }
@@ -96,6 +235,12 @@ namespace hx_net
             return parse_Satellite_data_(pdu,target);
         case LINK_TEST_RECEVIE:
             return parse_Testllite_data_(pdu,target);
+        case LINK_SING_NET_ADAPTER:
+            return parse_SingApt_data(pdu,target);
+        case LINK_DMP_SWITCH:
+            return parse_DmpSwitch_data(pdu,target);
+        case LINK_ASI_ADAPTER:
+            return parse_AsiApt_data(pdu,target);
         }
          cout<<"satellite_Callback  reason="<<d_devInfo.sDevNum<<endl;
     }
@@ -241,6 +386,117 @@ namespace hx_net
             m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
         }
     }
+
+    int Link_message::parse_SingAptReceive_data(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)
+    {
+        if(d_task_queue_ptr->get_Task_Size()>10)
+            return -1;
+         d_task_queue_ptr->SubmitTask(data_ptr);
+        int status = snmp->get(query_pdu,*target, aysnc_callback,this);
+        if (status){
+            return -1;
+        }else{
+            return 0;
+        }
+        return -1;
+    }
+
+    void Link_message::parse_SingApt_data(Pdu &pdu, SnmpTarget &target)
+    {
+        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
+        if(cur_data_ptr==NULL)
+            return;
+        int pdu_error = pdu.get_error_status();
+        if (pdu_error)
+            return;
+        if (pdu.get_vb_count() == 0)
+            return;
+        int vbcount = pdu.get_vb_count();
+        for(int i=0;i<vbcount;++i)
+        {
+            DataInfo dainfo;
+            Vb nextVb;
+            pdu.get_vb(nextVb, i);
+            string cur_oid = nextVb.get_printable_oid();
+            string cur_value =nextVb.get_printable_value();
+            dainfo.bType = false;
+            dainfo.fValue = atof(cur_value.c_str());
+            dainfo.sValue = str(boost::format("%.2f Kbps")%dainfo.fValue);
+            map<string,int>::iterator iter = map_Oid.find(cur_oid);
+            if(iter!=map_Oid.end())
+            {
+                cur_data_ptr->mValues[(*iter).second] = dainfo;
+            }
+        }
+        if(cur_data_ptr->mValues.size()>0){
+            m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
+        }
+    }
+
+    void Link_message::parse_DmpSwitch_data(Pdu &pdu, SnmpTarget &target)
+    {
+        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
+        if(cur_data_ptr==NULL)
+            return;
+        int pdu_error = pdu.get_error_status();
+        if (pdu_error)
+            return;
+        if (pdu.get_vb_count() == 0)
+            return;
+        int vbcount = pdu.get_vb_count();
+        for(int i=0;i<vbcount;++i)
+        {
+            DataInfo dainfo;
+            Vb nextVb;
+            pdu.get_vb(nextVb, i);
+            string cur_oid = nextVb.get_printable_oid();
+            string cur_value =nextVb.get_printable_value();
+            dainfo.bType = false;
+            dainfo.fValue = atof(cur_value.c_str());
+            dainfo.sValue = str(boost::format("%.2f Mbps")%dainfo.fValue);
+            map<string,int>::iterator iter = map_Oid.find(cur_oid);
+            if(iter!=map_Oid.end())
+            {
+                cur_data_ptr->mValues[(*iter).second] = dainfo;
+            }
+        }
+        if(cur_data_ptr->mValues.size()>0){
+            m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
+        }
+    }
+
+    void Link_message::parse_AsiApt_data(Pdu &pdu, SnmpTarget &target)
+    {
+        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
+        if(cur_data_ptr==NULL)
+            return;
+        int pdu_error = pdu.get_error_status();
+        if (pdu_error)
+            return;
+        if (pdu.get_vb_count() == 0)
+            return;
+        int vbcount = pdu.get_vb_count();
+        for(int i=0;i<vbcount;++i)
+        {
+            DataInfo dainfo;
+            Vb nextVb;
+            pdu.get_vb(nextVb, i);
+            string cur_oid = nextVb.get_printable_oid();
+            string cur_value =nextVb.get_printable_value();
+            dainfo.bType = false;
+            dainfo.fValue = atof(cur_value.c_str());
+            dainfo.sValue = str(boost::format("%.2f Mbps")%dainfo.fValue);
+            map<string,int>::iterator iter = map_Oid.find(cur_oid);
+            if(iter!=map_Oid.end())
+            {
+                cur_data_ptr->mValues[(*iter).second] = dainfo;
+            }
+        }
+        if(cur_data_ptr->mValues.size()>0){
+            m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
+        }
+    }
+
 
     int  Link_message::parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
     {

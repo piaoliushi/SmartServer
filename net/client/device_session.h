@@ -81,7 +81,9 @@ namespace hx_net
         //多个串口设备返回数据处理
         void start_handler_data(int iaddcode,DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true);
 
-
+        //发送联动命令
+        void send_action_conmmand(const string &sDevId,string sUser,int actionType,e_ErrorCode &opResult);
+       // void send_action_conmmand(const string &sDevId,string sUser,int actionType,e_ErrorCode eResult);
     protected:
         void start_read_head(int msgLen);//开始接收头
         void start_read_body(int msgLen);//开始接收体
@@ -110,13 +112,13 @@ namespace hx_net
         string next_dev_id();
         string get_devid_by_addcode(int iaddcode);
         //提交任务
-        void task_count_increase();
+        //void task_count_increase();
         //任务递减
-        void task_count_decrease();
+        //void task_count_decrease();
         //任务数
-        int  task_count();
+        //int  task_count();
         //等待任务结束
-        void wait_task_end();
+        //void wait_task_end();
         //是否在监测时间段
         bool is_monitor_time(string sDevId);
 
@@ -154,8 +156,13 @@ namespace hx_net
         void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
         void schedules_task_time_out(const boost::system::error_code& error);
         virtual void handle_write(const boost::system::error_code& error,size_t bytes_transferred);
-       //开始执行任务
+
+
+        //开始执行任务
         bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType);
+
+
+
         void notify_client_execute_result(string sDevId,string devName,string user,int cmdType, tm *pCurTime,bool bNtfFlash,int eResult);
         void set_opr_state(string sdevId,dev_opr_state curState);
         dev_opr_state get_opr_state(string sdevId);
@@ -188,9 +195,9 @@ namespace hx_net
         string                                           cur_dev_id_;//当前查询设备id
 
         ModleInfo                           &modleInfos_;
-        boost::mutex                        task_mutex_;
-        int									task_count_;
-        boost::condition                    task_end_conditon_;
+        //boost::mutex                        task_mutex_;
+        //int									task_count_;
+        //boost::condition                    task_end_conditon_;
 
         map<string,pDevicePropertyExPtr>    run_config_ptr;//moxa下设备配置
         pMoxaPropertyExPtr                  moxa_config_ptr;//moxa配置
