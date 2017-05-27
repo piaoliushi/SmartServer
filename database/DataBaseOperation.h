@@ -37,7 +37,7 @@ public:
     bool check_database();
 
     //获得所有设备信息
-    bool GetAllDevInfo(vector<ModleInfo>& v_Linkinfo);
+    bool GetAllDevInfo(vector<ModleInfo>& v_Linkinfo,string sStationId);
 
     //获得数据字典映射表(不包含设备类型字段)
     bool GetDataDictionary(map<int,pair<string,string> >& mapDicry);

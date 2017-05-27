@@ -18,7 +18,8 @@ StationConfig::~StationConfig(void)
 bool StationConfig::load_station_config()
 {
     mapModleInfo.clear();
-    if(!GetInst(DataBaseOperation).GetAllDevInfo(mapModleInfo))
+    string sLocalStationId = GetInst(LocalConfig).local_station_id();
+    if(!GetInst(DataBaseOperation).GetAllDevInfo(mapModleInfo,sLocalStationId))
         return false;
     if(!GetInst(DataBaseOperation).GetDataDictionary(Bohui_Protocol::mapTypeToStr))
         return false;

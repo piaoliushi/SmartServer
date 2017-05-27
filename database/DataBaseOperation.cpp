@@ -243,17 +243,18 @@ bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo
 }
 
 //获取所有设备信息
-bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
+bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sStationId)
 {
     QSqlDatabase db = ConnectionPool::openConnection();
-    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+    if(!db.isOpen() || !db.isValid()) {
         std::cout<<"GetAllDevInfo is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
 
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery netquery(db);
-    QString strSql=QString("select NetType,IpAddress,LocalPort,PeerPort,ConnectType,CommTypeNumber from Net_Communication_Mode");
+    QString strSql=QString("select NetType,IpAddress,LocalPort,PeerPort,ConnectType,CommTypeNumber from Net_Communication_Mode where CommTypeNumber in\
+         (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=5)").arg(QString::fromStdString(sStationId));
     netquery.prepare(strSql);
     if(netquery.exec()){
         while(netquery.next()){
@@ -286,7 +287,8 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo )
           cout<<netquery.lastError().text().toStdString()<<"GetAllDevInfo---netquery---error!"<<endl;
     }
     QSqlQuery comquery(db);
-       strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode");
+       strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode where CommTypeNumber in\
+                      (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=4)").arg(QString::fromStdString(sStationId));
        comquery.prepare(strSql);
        if(comquery.exec()){
            while(comquery.next()) {
