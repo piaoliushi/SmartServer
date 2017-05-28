@@ -262,8 +262,11 @@ typedef enum LINK_DEVICE
 
     LINK_TEST_RECEVIE      = 3,//SNMP测试
     LINK_SING_NET_ADAPTER = 4, //
-    LINK_DMP_SWITCH = 5, //
-    LINK_ASI_ADAPTER = 8,//
+    LINK_DMP_SWITCH = 5, //dmp切换器
+    LINK_ASI_ADAPTER = 8,//asi适配器
+    LINK_WEILE_AVSP_DECODER = 9,//伟乐avs+解码器
+
+
 }LinkDeviceSubProtocol;
 
 typedef enum RESOLVE_TAG  //resolve

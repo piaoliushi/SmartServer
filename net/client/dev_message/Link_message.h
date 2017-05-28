@@ -28,21 +28,20 @@ protected:
 
     int  parse_SingAptReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
     void parse_SingApt_data(Pdu &pdu, SnmpTarget &target);
-  //  int  parse_DmpSwitchReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
     void parse_DmpSwitch_data(Pdu &pdu, SnmpTarget &target);
-   // int  parse_AsiAptReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
     void parse_AsiApt_data(Pdu &pdu, SnmpTarget &target);
+    void parse_weile_avsp_decorder_data(Pdu &pdu, SnmpTarget &target);
 
     void initOid();
     void init_SingApt_Oid();
     void init_Dmp_Oid();
     void init_AsiApt_Oid();
+    void init_weile_avsp_decoder_Oid();
 private:
      Pdu query_pdu;
     session_ptr m_pSession;//关联连接对象
     DeviceInfo           &d_devInfo;//设备信息
     boost::recursive_mutex          data_mutex;
-    //DevMonitorDataPtr       d_data_ptr;
     map<string,int> map_Oid;
     boost::shared_ptr<TaskQueue<DevMonitorDataPtr > > d_task_queue_ptr;//任务队列
 

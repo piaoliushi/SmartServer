@@ -43,6 +43,8 @@ namespace hx_net
         case LINK_ASI_ADAPTER:
             init_AsiApt_Oid();
             break;
+        case LINK_WEILE_AVSP_DECODER:
+            init_weile_avsp_decoder_Oid();
         default:
             break;
         }
@@ -164,6 +166,63 @@ namespace hx_net
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.6.4.0"));
         query_pdu += vbl;
     }
+
+    void Link_message::init_weile_avsp_decoder_Oid(){
+        Vb vbl;
+        //输入1总码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.4"] = 0;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.4.0"));
+        query_pdu += vbl;
+        //输入1有效码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.5"] = 1;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.5.0"));
+        query_pdu += vbl;
+        //解码总码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.27"] = 2;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.27.0"));
+        query_pdu += vbl;
+        //解码有效码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.28"] = 3;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.28.0"));
+        query_pdu += vbl;
+//        //解码节目编号
+//        map_Oid["1.3.6.1.4.1.8201.5.7.1.29"] = 4;
+//        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.29.0"));
+//        query_pdu += vbl;
+        //ASI1输出总码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.36"] = 4;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.36.0"));
+        query_pdu += vbl;
+        //ASI1输出有效码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.37"] = 5;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.37.0"));
+        query_pdu += vbl;
+        //ASI2输出总码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.38"] = 6;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.38.0"));
+        query_pdu += vbl;
+        //ASI2输出有效码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.39"] = 7;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.39.0"));
+        query_pdu += vbl;
+        //IP1输出总码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.40"] = 8;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.40.0"));
+        query_pdu += vbl;
+        //IP1输出有效码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.41"] = 9;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.41.0"));
+        query_pdu += vbl;
+        //IP2输出总码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.42"] = 10;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.42.0"));
+        query_pdu += vbl;
+        //IP2输出有效码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.43"] = 11;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.43.0"));
+        query_pdu += vbl;
+    }
+
     int Link_message::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
     {
         return RE_UNKNOWDEV;
@@ -184,6 +243,7 @@ namespace hx_net
                  case LINK_SING_NET_ADAPTER:          
                  case LINK_DMP_SWITCH: 
                  case LINK_ASI_ADAPTER:
+                 case LINK_WEILE_AVSP_DECODER:
                      return parse_SingAptReceive_data(snmp,data_ptr,target);
                  default:
                      return RE_NOPROTOCOL;
@@ -241,8 +301,9 @@ namespace hx_net
             return parse_DmpSwitch_data(pdu,target);
         case LINK_ASI_ADAPTER:
             return parse_AsiApt_data(pdu,target);
+        case LINK_WEILE_AVSP_DECODER:
+            return parse_weile_avsp_decorder_data(pdu,target);
         }
-         cout<<"satellite_Callback  reason="<<d_devInfo.sDevNum<<endl;
     }
 
     void Link_message::parse_Satellite_data_(Pdu &pdu, SnmpTarget &target)
@@ -467,7 +528,8 @@ namespace hx_net
 
     void Link_message::parse_AsiApt_data(Pdu &pdu, SnmpTarget &target)
     {
-        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
+        parse_DmpSwitch_data(pdu,target);
+        /*DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
         if(cur_data_ptr==NULL)
             return;
         int pdu_error = pdu.get_error_status();
@@ -494,8 +556,14 @@ namespace hx_net
         }
         if(cur_data_ptr->mValues.size()>0){
             m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
-        }
+        }*/
     }
+
+     void Link_message::parse_weile_avsp_decorder_data(Pdu &pdu, SnmpTarget &target)
+     {
+          parse_DmpSwitch_data(pdu,target);
+     }
+
 
 
     int  Link_message::parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
