@@ -31,14 +31,18 @@ namespace hx_net
 		virtual bool isBelongChannel(int nChnnel,int monitorItemId){return false;}
 		virtual bool isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr){return true;}
 		virtual bool ItemValueIsAlarm(DevMonitorDataPtr curDataPtr,int monitorItemId,dev_alarm_state &curState){return false;}
-        //HDevAgentPtr Agent(){return dev_agent_;}
-        //unsigned long CRC16_A001( unsigned char * ptr, int len );
 
         virtual int cur_dev_state(){return -1;}
+
+        //执行命令
         virtual void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
                                    bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL){}
+        //执行通用命令
+        virtual void exec_general_task(int icmdType,string sUser,devCommdMsgPtr lpParam,
+                                       e_ErrorCode &eErrCode){}
         //执行联动命令
-        virtual void exec_action_task_now(int actionType,string sUser,e_ErrorCode &eErrCode){}
+        virtual void exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,
+                                          string sUser,e_ErrorCode &eErrCode){}
 
         virtual void start_task_timeout_timer(){}
         //获得运行状态

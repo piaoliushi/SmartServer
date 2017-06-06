@@ -44,10 +44,10 @@ namespace hx_net
 
 
 	//通用命令执行
-	e_ErrorCode DevClientMgr::excute_command(int cmdType,devCommdMsgPtr lpParam)
+    e_ErrorCode DevClientMgr::excute_command(string sDevId,int cmdType,string sUser,devCommdMsgPtr lpParam)
 	{
 		if (_devclientptr)
-			return _devclientptr->excute_command(cmdType,lpParam);
+            return _devclientptr->excute_command(sDevId,cmdType,sUser,lpParam);
 		return EC_OBJECT_NULL;
 	}
 
@@ -127,10 +127,10 @@ namespace hx_net
    }
 
   //发送联动命令
-  e_ErrorCode  DevClientMgr::SendActionCommand(const string &sDevId,string sUser,int actionType)
+  e_ErrorCode  DevClientMgr::SendActionCommand(map<int,vector<ActionParam> > &param,string sUser,int actionType)
   {
       if(_devclientptr)
-          return _devclientptr->SendActionCommand(sDevId,sUser,actionType);
+          return _devclientptr->SendActionCommand(param,sUser,actionType);
        return EC_OBJECT_NULL;
   }
 

@@ -8,9 +8,7 @@
 #include "../net_session.h"
 #include "../../protocol/protocol.pb.h"
 #include "../config.h"
-//#include "../../database/dbmanager.h"
 #include "../SvcMgr.h"
-//#include "connect_handler.h"
 #include <QString>
 using namespace hx_net;
 class server_work:public Worker<msgPointer>
@@ -19,7 +17,7 @@ public:
 	server_work(TaskQueue<msgPointer>& _taskqueue,std::size_t _maxthreads = 4) :
 	  Worker<msgPointer>(_taskqueue, _maxthreads){}
 
-	~server_work(void){};
+    ~server_work(void){}
 public:
 	bool work(msgPointer& task)
 	{

@@ -144,11 +144,11 @@ namespace hx_net
 	}
 
 	//执行通用指令
-	e_ErrorCode SvcMgr::excute_command(int cmdType,devCommdMsgPtr lpParam)
+    e_ErrorCode SvcMgr::excute_command(string sDevId,int cmdType,string sUser,devCommdMsgPtr lpParam)
 	{
 		if(m_pDevMgrPtr)
 		{
-			e_ErrorCode eResult = m_pDevMgrPtr->excute_command(cmdType,lpParam);
+            e_ErrorCode eResult = m_pDevMgrPtr->excute_command(sDevId,cmdType,sUser,lpParam);
 // 			if(eResult==EC_DEVICE_NOT_FOUND||eResult==EC_OBJECT_NULL)
 // 			{
 // 				if (m_pClientMgrPtr)
@@ -174,6 +174,7 @@ namespace hx_net
            return m_pDevMgrPtr->update_monitor_time(sDevId,monitorScheduler,cmmdScheduler);
        return EC_OBJECT_NULL;
    }
+
    //更新告警配置
   e_ErrorCode SvcMgr::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo)
   {
@@ -197,9 +198,9 @@ namespace hx_net
       return EC_OBJECT_NULL;
   }
 
-  e_ErrorCode  SvcMgr::SendActionCommand(const string &sDevId,string sUser,int actionType){
+  e_ErrorCode  SvcMgr::SendActionCommand(map<int,vector<ActionParam> > &param,string sUser,int actionType){
       if(m_pDevMgrPtr)
-          m_pDevMgrPtr->SendActionCommand(sDevId,sUser,actionType);
+          m_pDevMgrPtr->SendActionCommand(param,sUser,actionType);
       return EC_OBJECT_NULL;
   }
 }

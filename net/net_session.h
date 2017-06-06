@@ -113,8 +113,8 @@ namespace hx_net
 		//--------
         virtual loginAckMsgPtr  get_child_station_dev_status(){return loginAckMsgPtr();}
 
-		//切换音频通道
-        virtual bool excute_command(int cmdType,devCommdMsgPtr lpParam,e_ErrorCode &opResult){return false;}
+        //执行通用指令
+        virtual bool excute_command(int cmdType,string sUser,devCommdMsgPtr lpParam,e_ErrorCode &opResult){return false;}
 
         //发送命令到设备
         virtual void send_cmd_to_dev(string sDevId,int cmdType,int childId){}
@@ -128,7 +128,8 @@ namespace hx_net
        virtual void update_dev_alarm_config(string sDevId,DeviceInfo &devInfo){}
 
         //发送联动命令
-        virtual void send_action_conmmand(const string &sDevId,string sUser,int actionType,e_ErrorCode &opResult){}
+        virtual void send_action_conmmand(map<int,vector<ActionParam> > &param,string sUser,
+                                          int actionType,e_ErrorCode &opResult){}
 	public:
 		virtual void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);
 		virtual void handle_read_body(const boost::system::error_code& error, size_t bytes_transferred);

@@ -59,7 +59,7 @@ namespace hx_net
 
         boost::shared_ptr<boost::thread> _httpthreadptr;//工作线程
         hx_http_server   *_httpserverptr;//http服务对象hx_http_server_ptr
-        web_handler           * _web_handler;
+        web_handler      *_web_handler;
 
        boost::shared_ptr<boost::thread> _ws_threadptr;//websockt启动线程
        boost::shared_ptr<websocket_server> _ws_serverptr;//websocket服务对象

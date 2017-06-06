@@ -23,7 +23,7 @@ namespace hx_net
 		void disconnect();
 
 		//通用命令执行
-		e_ErrorCode excute_command(int cmdType,devCommdMsgPtr lpParam);
+        e_ErrorCode excute_command(string sDevId,int cmdType,string sUser,devCommdMsgPtr lpParam);
         //下发控制指令
         e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType);
 
@@ -49,7 +49,7 @@ namespace hx_net
         //发送短信
         e_ErrorCode  SendSMSContent(vector<string> &PhoneNumber, string AlarmContent);
         //发送联动命令
-        e_ErrorCode  SendActionCommand(const string &sDevId,string sUser,int actionType);
+        e_ErrorCode  SendActionCommand(map<int,vector<ActionParam> > &param,string sUser,int actionType);
 	private:
 		boost::shared_ptr<boost::thread> _listenthreadptr;//网络监听线程
         boost::shared_ptr<boost::thread> _workthreadptr;//工作线程

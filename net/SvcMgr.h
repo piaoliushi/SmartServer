@@ -66,7 +66,7 @@ namespace hx_net
 		//获得子台站设备状态信息
 		loginAckMsgPtr  get_child_station_dev_status();
 		//执行通用指令
-		e_ErrorCode excute_command(int cmdType,devCommdMsgPtr lpParam);
+        e_ErrorCode excute_command(string sDevId,int cmdType,string sUser,devCommdMsgPtr lpParam);
 
         e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType);
 
@@ -82,7 +82,7 @@ namespace hx_net
       //发送短信
       e_ErrorCode    SendSMSContent(vector<string> &PhoneNumber,string AlarmContent);
       //发送联动命令
-      e_ErrorCode  SendActionCommand(const string &sDevId,string sUser,int actionType);
+      e_ErrorCode  SendActionCommand(map<int,vector<ActionParam> > &param,string sUser,int actionType);
 
 	private:
 		svc_state svc_state_;

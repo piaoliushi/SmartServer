@@ -57,7 +57,7 @@ namespace hx_net
         //获得报警状态
         void get_alarm_state(string sDevId,map<int,map<int,CurItemAlarmInfo> >& cellAlarm);
         //执行通用指令
-        bool excute_command(int cmdType,devCommdMsgPtr lpParam,e_ErrorCode &opResult);
+        bool excute_command(int cmdType,string sUser,devCommdMsgPtr lpParam,e_ErrorCode &opResult);
         //清除所有报警标志
         void clear_all_alarm();
         //清除单设备报警
@@ -82,8 +82,8 @@ namespace hx_net
         void start_handler_data(int iaddcode,DevMonitorDataPtr curDataPtr,bool bCheckAlarm=true);
 
         //发送联动命令
-        void send_action_conmmand(const string &sDevId,string sUser,int actionType,e_ErrorCode &opResult);
-       // void send_action_conmmand(const string &sDevId,string sUser,int actionType,e_ErrorCode eResult);
+        void send_action_conmmand(map<int,vector<ActionParam> > &param,string sUser,int actionType,e_ErrorCode &opResult);
+
     protected:
         void start_read_head(int msgLen);//开始接收头
         void start_read_body(int msgLen);//开始接收体
@@ -163,7 +163,8 @@ namespace hx_net
 
 
 
-        void notify_client_execute_result(string sDevId,string devName,string user,int cmdType, tm *pCurTime,bool bNtfFlash,int eResult);
+        void notify_client_execute_result(string sDevId,string devName,string user,int cmdType,
+                                          tm *pCurTime,bool bNtfFlash,int eResult);
         void set_opr_state(string sdevId,dev_opr_state curState);
         dev_opr_state get_opr_state(string sdevId);
     private:

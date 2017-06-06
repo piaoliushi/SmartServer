@@ -1,5 +1,6 @@
 #include "Envir_message.h"
 #include"../../../utility.h"
+#include "LocalConfig.h"
 namespace hx_net
 {
 
@@ -111,12 +112,20 @@ namespace hx_net
                     {
                         if(data[0]!=d_devInfo.iAddressCode)
                             return RE_HEADERROR;
-                        if(data[1]==0x0F)
+                        if(data[1]==0x0F || data[1]==0x05)
                             return 5;
-                        if(data[1]==0x02)
+                        if(data[1]==0x02 || data[1]==0x01 )
                             return 3;
+
                         return RE_HEADERROR;
                     }
+                    break;
+                case C2000_SDD8020_BB3:
+                {
+                    if(data[0]!=0x00 || data[1]!=0x01)
+                        return RE_HEADERROR;
+                    return data[5];
+                }
                     break;
                 default:
                     return RE_NOPROTOCOL;
@@ -192,6 +201,12 @@ namespace hx_net
                     m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                     return iresult;
                 }
+                case C2000_SDD8020_BB3:
+                {
+                    int iresult = C2000_BB3_Data(data,d_curData_ptr,nDataLen,iaddcode);
+                    m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                    return iresult;
+                }
 				default:
 					return RE_NOPROTOCOL;
 				}
@@ -241,6 +256,7 @@ namespace hx_net
 		case AC_103_CTR:
 		case FRT_X06A:
         case C2000_A2_8020:
+        case C2000_SDD8020_BB3:
 			return true;
 
 		}
@@ -367,25 +383,113 @@ namespace hx_net
                     tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
                     cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
 
-                    //01 0F 00 64 00 02 01 01 6E 9F
-                    tmUnit.commandId[1] = 0x0f;
+                    tmUnit.commandId[1] = 0x01;
+                    tmUnit.commandId[3] = 0x64;
+                    tmUnit.commandId[5] = 0x02;
+                    uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+
+
+//                    tmUnit.commandId[1] = 0x0f;
+//                    tmUnit.commandId[2] = 0x00;
+//                    tmUnit.commandId[3] = 0x64;
+//                    tmUnit.commandId[4] = 0x00;
+//                    tmUnit.commandId[5] = 0x02;
+//                    tmUnit.commandId[6] = 0x01;
+//                    tmUnit.commandId[7] = 0x01;
+//                    uscrc = CRC16_A001(tmUnit.commandId,8);
+//                    tmUnit.commandId[8] = (uscrc&0x00FF);
+//                    tmUnit.commandId[9] = ((uscrc & 0xFF00)>>8);
+//                    tmUnit.commandLen = 10;
+//                    cmdAll.mapCommand[MSG_DEV_TURNON_OPR].push_back(tmUnit);
+
+//                    tmUnit.commandId[7] = 0x02;
+//                    uscrc = CRC16_A001(tmUnit.commandId,8);
+//                    tmUnit.commandId[8] = (uscrc&0x00FF);
+//                    tmUnit.commandId[9] = ((uscrc & 0xFF00)>>8);
+//                    tmUnit.commandLen = 10;
+
+                    tmUnit.commandId[1] = 0x05;
                     tmUnit.commandId[2] = 0x00;
                     tmUnit.commandId[3] = 0x64;
-                    tmUnit.commandId[4] = 0x00;
-                    tmUnit.commandId[5] = 0x02;
-                    tmUnit.commandId[6] = 0x01;
-                    tmUnit.commandId[7] = 0x01;
-                    uscrc = CRC16_A001(tmUnit.commandId,8);
-                    tmUnit.commandId[8] = (uscrc&0x00FF);
-                    tmUnit.commandId[9] = ((uscrc & 0xFF00)>>8);
-                    tmUnit.commandLen = 10;
+                    tmUnit.commandId[4] = 0xFF;
+                    tmUnit.commandId[5] = 0x00;
+                    uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                    cmdAll.mapCommand[MSG_DEV_TURNON_OPR].push_back(tmUnit);
+                    tmUnit.commandId[3] = 0x65;
+                    uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
                     cmdAll.mapCommand[MSG_DEV_TURNON_OPR].push_back(tmUnit);
 
-                    tmUnit.commandId[7] = 0x00;
-                    uscrc = CRC16_A001(tmUnit.commandId,8);
-                    tmUnit.commandId[8] = (uscrc&0x00FF);
-                    tmUnit.commandId[9] = ((uscrc & 0xFF00)>>8);
-                    tmUnit.commandLen = 10;
+                    tmUnit.commandId[3] = 0x64;
+                    tmUnit.commandId[4] = 0x00;
+                    uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                    cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
+                    tmUnit.commandId[3] = 0x65;
+                    uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+
+
+                    cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
+
+                }
+                    break;
+                case C2000_SDD8020_BB3:
+                {
+                    //000100000006FF0200C80008
+                    CommandUnit tmUnit;
+                    tmUnit.commandId[0] = 0x00;
+                    tmUnit.commandId[1] = 0x01;
+                    tmUnit.commandId[2] = 0x00;
+                    tmUnit.commandId[3] = 0x00;
+                    tmUnit.commandId[4] = 0x00;
+                    tmUnit.commandId[5] = 0x06;
+                    tmUnit.commandId[6] = 0xFF;
+                    tmUnit.commandId[7] = 0x02;
+                    tmUnit.commandId[8] = 0x00;
+                    tmUnit.commandId[9] = 0xC8;
+                    tmUnit.commandId[10] = 0x00;
+                    tmUnit.commandId[11] = 0x08;
+                    tmUnit.ackLen = 6;
+                    tmUnit.commandLen = 12;
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                    //000100000006FF0100640002
+                    tmUnit.commandId[7] = 0x01;
+                    tmUnit.commandId[9] = 0x64;
+                    tmUnit.commandId[11] = 0x02;
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                    //000100000008FF0F006400020101
+                    /* tmUnit.commandId[5] = 0x08;
+                                tmUnit.commandId[7] = 0x0F;
+                                tmUnit.commandId[9] = 0x64;
+                                tmUnit.commandId[11] = 0x02;
+                                tmUnit.commandId[12] = 0x01;
+                                tmUnit.commandId[13] = 0x01;
+                                tmUnit.commandLen = 14;
+                                cmdAll.mapCommand[MSG_DEV_TURNON_OPR].push_back(tmUnit);
+
+                                tmUnit.commandId[13] = 0x02;
+                                cmdAll.turnoffComm.push_back(tmUnit);
+                                cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);*/
+                    tmUnit.commandId[7] = 0x05;
+                    tmUnit.commandId[9] = 0x64;
+                    tmUnit.commandId[10] = 0xFF;
+                    tmUnit.commandId[11] = 0x00;
+                    cmdAll.mapCommand[MSG_DEV_TURNON_OPR].push_back(tmUnit);
+                    tmUnit.commandId[9] = 0x65;
+                    cmdAll.mapCommand[MSG_DEV_TURNON_OPR].push_back(tmUnit);
+                    tmUnit.commandId[9] = 0x64;
+                    tmUnit.commandId[10] = 0x00;
+                    cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
+                    tmUnit.commandId[9] = 0x65;
                     cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
 
                 }
@@ -673,6 +777,47 @@ namespace hx_net
                 dainfo.fValue =  Getbit(bdata1,i);
                 data_ptr->mValues[i] = dainfo;
             }
+        }else if(data[1]==0x01)
+        {
+            unsigned char bdata1;
+            bdata1 = data[3];
+            DataInfo dainfo;
+            dainfo.bType = true;
+            for(int i=0;i<2;++i)
+            {
+                dainfo.fValue =  Getbit(bdata1,i);
+                data_ptr->mValues[i+8] = dainfo;
+            }
+        }
+        return RE_SUCCESS;
+    }
+
+    int Envir_message::C2000_BB3_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        iaddcode = d_devInfo.iAddressCode;
+        if(data[7]==0x02)
+        {
+            unsigned char bdata1;
+            bdata1 = data[9];
+            DataInfo dainfo;
+            dainfo.bType = true;
+            for(int i=0;i<8;++i)
+            {
+                dainfo.fValue =  Getbit(bdata1,i);
+                data_ptr->mValues[i] = dainfo;
+            }
+        }
+        else if(data[1]==0x01)
+        {
+            unsigned char bdata1;
+            bdata1 = data[9];
+            DataInfo dainfo;
+            dainfo.bType = true;
+            for(int i=0;i<2;++i)
+            {
+                dainfo.fValue =  Getbit(bdata1,i);
+                data_ptr->mValues[i+8] = dainfo;
+            }
         }
         return RE_SUCCESS;
     }
@@ -685,14 +830,37 @@ namespace hx_net
             m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,icmdType,0);
     }
 
+    //执行通用命令
+    void Envir_message::exec_general_task(int icmdType,string sUser,devCommdMsgPtr lpParam,e_ErrorCode &eErrCode)
+    {
+        switch (icmdType) {
+        case MSG_DEV_TURNOFF_OPR:{
+            if(m_pSession!=NULL){
+                eErrCode = EC_OK;
+                int param_2 = atoi(lpParam->cparams(0).sparamvalue().c_str());
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,param_2);
+            }
+        }
+            break;
+        default:
+            break;
+        }
+    }
+
     //执行联动命令
-    void Envir_message::exec_action_task_now(int actionType,string sUser,e_ErrorCode &eErrCode)
+    void Envir_message::exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,string sUser,e_ErrorCode &eErrCode)
     {
         switch(actionType){
         case ACTP_SOUND_LIGHT_ALARM:{
             //联动声光告警只做开设备动作（打开声光告警）
-            if(m_pSession!=NULL)
-                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNON_OPR,0);
+            if(m_pSession!=NULL){
+                eErrCode = EC_OK;
+
+                if(param.size()>=2){
+                    int param_2 = atoi(param[1][0].strParamValue.c_str());
+                    m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNON_OPR,param_2);
+                }
+            }
         }
             break;
         }

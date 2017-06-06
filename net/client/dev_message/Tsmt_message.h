@@ -49,29 +49,29 @@ protected:
     bool  cmd_excute_is_ok();
     void  check_device_alarm(int nAlarmType);
 private:
-    int      m_Subprotocol;//设备子协议号
-    int                 m_mainprotocol;//主协议编号
+    int                             m_Subprotocol;//设备子协议号
+    int                             m_mainprotocol;//主协议编号
     boost::asio::deadline_timer     task_timeout_timer_;//控制任务执行定时器
-    dev_session_ptr m_pSession;//关联连接对象
-    DeviceInfo     &d_devInfo;//设备信息
-    pDevicePropertyExPtr d_devProperty;
+    dev_session_ptr                 m_pSession;//关联连接对象
+    DeviceInfo                      &d_devInfo;//设备信息
+    pDevicePropertyExPtr            d_devProperty;
     boost::recursive_mutex          run_state_mutex_;//设备运行状态互斥量
     int                    dev_run_state_;//设备运行状态
     int                    d_run_count_;//运行状态计数
     int                    d_shutdown_count_;//关机状态计数
-    string               d_cur_user_;//当前用户
+    string                 d_cur_user_;//当前用户
     int                    d_cur_task_;//当前任务
-    DeviceInfo                *d_relate_tsmt_ptr_;//关联发射机
-    DeviceInfo                *d_relate_antenna_ptr_;//关联天线
-    int                   d_Host_;//主机标志(-1:未绑定主备属性)
-    bool                d_relate_Agent_;//主机代理标志
-    bool                d_antenna_Agent_;//天线代理标志
-    time_t             d_OprStartTime;//提交控制命令开始时间
-    Transmmiter   *m_ptransmmit;
-    DevMonitorDataPtr d_curData_ptr;
-    Snmp              *d_cur_snmp;
-    bool               d_bUse_snmp;
-    CTarget           *d_cur_target;
+    DeviceInfo            *d_relate_tsmt_ptr_;//关联发射机
+    DeviceInfo            *d_relate_antenna_ptr_;//关联天线
+    int                    d_Host_;//主机标志(-1:未绑定主备属性)
+    bool                   d_relate_Agent_;//主机代理标志
+    bool                   d_antenna_Agent_;//天线代理标志
+    time_t                 d_OprStartTime;//提交控制命令开始时间
+    Transmmiter           *m_ptransmmit;
+    DevMonitorDataPtr      d_curData_ptr;
+    Snmp                  *d_cur_snmp;
+    bool                   d_bUse_snmp;
+    CTarget               *d_cur_target;
 };
 typedef boost::shared_ptr<hx_net::Tsmt_message>  Tsmt_message_ptr;
 typedef boost::weak_ptr<hx_net::Tsmt_message>    Tsmt_message_weak_ptr;

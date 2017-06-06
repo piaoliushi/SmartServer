@@ -189,7 +189,6 @@ namespace hx_net
             ++d_run_count_;
             if(d_run_count_>d_devProperty->run_detect_max_count) {//已开机
                set_run_state(dev_running);
-               //check_device_alarm(nAlarmType);
             }
         } else {
             if(is_shut_down())
@@ -238,7 +237,7 @@ namespace hx_net
 
                 if((*iter).second.iItemType == 0){
                     data_ptr->mValues[(*iter).first].fValue *= (*iter).second.dRatio;
-                    if(data_ptr->mValues[(*iter).first].sValue.empty())//data_ptr->mValues[(*iter).first].fValue
+                    if(data_ptr->mValues[(*iter).first].sValue.empty())
                         data_ptr->mValues[(*iter).first].sValue = QString::number(data_ptr->mValues[(*iter).first].fValue,'g',2).toStdString();
                 }
                 else {
@@ -278,15 +277,11 @@ namespace hx_net
             break;
         case SHANGUANG:
             break;
-        case SHANGHAI_ALL_BAND:{
-            //d_curData_ptr.reset(new Data);
+        case SHANGHAI_ALL_BAND:
             m_ptransmmit = new ShTransmmit(m_pSession,d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
-
-        }
             break;
-        case HUIXIN:{
+        case HUIXIN:
              m_ptransmmit = new AhhxTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
-        }
             break;
         case HAGUANG:
             break;
@@ -313,15 +308,11 @@ namespace hx_net
         case DE_XIN:
             m_ptransmmit = new DeXinTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
-        case GLSQ:{
+        case GLSQ:
             m_ptransmmit = new GlsqTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
-        }
             break;
         case GSBR:
-        {
             m_ptransmmit = new GsbrTransmmit(boost::shared_ptr<hx_net::Tsmt_message>(this),d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
-           // m_ptransmmit = new GsbrTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
-        }
             break;
         }
     }

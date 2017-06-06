@@ -570,6 +570,8 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
     {
         if(query_timeout_count_<moxa_config_ptr->query_timeout_count)
         {
+
+
             ++query_timeout_count_;
             if(modleInfos_.iCommunicationMode == CON_MOD_NET){
                 if(modleInfos_.netMode.inet_type == NET_MOD_SNMP || modleInfos_.netMode.inet_type == NET_MOD_HTTP)
@@ -622,13 +624,13 @@ bool device_session::sendRawMessage(unsigned char * data_,int nDatalen)
 //发送命令到设备
 void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId)
 {
+    //同步等待
+    //boost::asio::deadline_timer delay_send_timer(io_service_, boost::posix_time::milliseconds(2));
+    //    delay_send_timer.wait();
+
     map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
     if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
         if(iter->second.size()>childId){
-            unsigned char *sss = iter->second[childId].commandId;
-            unsigned char   yyy[256];
-            memset(yyy,0,256);
-            memcpy(yyy,sss,iter->second[childId].commandLen);
             start_write(iter->second[childId].commandId,iter->second[childId].commandLen);
         }
     }
@@ -1267,7 +1269,6 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
         time_t curTm = time(0);
         tm *local_time = localtime(&curTm);
         strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
-        //cout<<"收到数据-----------"<<str_time<<endl;
 
         int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,
                                                                 bytes_transferred,CMD_QUERY,cur_msg_q_id_);
@@ -1289,7 +1290,6 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
                 {
 
                     string sdevid = get_devid_by_addcode(iaddcode);
-                    cout<<"handler_data--------"+sdevid<<endl;
 //                    if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
 //                            .schedule(boost::bind(&device_session::handler_data,this,sdevid,curData_ptr)))
 //                    {
@@ -1315,7 +1315,6 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
             start_read(nResult);
         }
         else if(nResult == -1){
-            cout<<"handle_read---nResult==-1-----close"<<endl;
             close_all();
             start_connect_timer();
             return;
@@ -1555,59 +1554,31 @@ bool device_session::excute_general_command(int cmdType,devCommdMsgPtr lpParam,e
 }
 
 //执行通用指令
-bool device_session::excute_command(int cmdType,devCommdMsgPtr lpParam,e_ErrorCode &opResult)
+bool device_session::excute_command(int cmdType,string sUser,devCommdMsgPtr lpParam,e_ErrorCode &opResult)
 {
-    if(get_con_state()!=con_connected)
+    if(!is_connected()){
+        opResult = EC_NET_ERROR;
         return false;
-    /*switch(cmdType)
-    {
-    case MSG_0401_SWITCH_OPR:
-    {
-        if(lpParam->cparams_size()!=1)
-            return false;
-        int nChannel = atoi(lpParam->cparams(0).sparamvalue().c_str());
-        if(dev_agent_and_com.find(lpParam->sdevid())!=dev_agent_and_com.end()){
-            if(dev_agent_and_com[lpParam->sdevid()].first->switchComm.size()>nChannel){
-                start_write(dev_agent_and_com[lpParam->sdevid()].first->switchComm[nChannel].commandId ,
-                        dev_agent_and_com[lpParam->sdevid()].first->switchComm[nChannel].commandLen );
-            }
-        }
     }
-        break;
-    case MSG_CONTROL_MOD_SWITCH_OPR:
-    {
-        if(lpParam->cparams_size()!=1)
-            return false;
-        int nMode = 0;//atoi(lpParam->cparams(0).sparamvalue().c_str());
-        if(dev_agent_and_com.find(lpParam->sdevid())!=dev_agent_and_com.end()){
-            if(dev_agent_and_com[lpParam->sdevid()].first->switch2Comm.size()>nMode){
-                start_write(dev_agent_and_com[lpParam->sdevid()].first->switch2Comm[nMode].commandId ,
-                        dev_agent_and_com[lpParam->sdevid()].first->switch2Comm[nMode].commandLen );
-            }
-        }
-    }
-        break;
-    case MSG_ADJUST_TIME_SET_OPR:
-    {
-        if(lpParam->cparams_size()!=0)
-            return false;
-        if(dev_agent_and_com.find(lpParam->sdevid())!=dev_agent_and_com.end()){
 
-            CommandUnit adjustTmCmd;
-            vector<string> params;
-            ////amend by lk 2013-11-26
-            //dev_agent_and_com[lpParam->sdevid()].second->DevAgent()->HxGetSignalCmd(CMD_ADJUST_TIME,params,adjustTmCmd);
-            //if(adjustTmCmd.commandLen>0)
-            //	start_write(adjustTmCmd.commandId ,adjustTmCmd.commandLen);
+    string sDevId = lpParam->sdevid();
+    if(modleInfos_.mapDevInfo[sDevId].iDevType == DEVICE_TRANSMITTER){
+        if(get_opr_state(sDevId)==dev_no_opr)
+            set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
+        else{
+            opResult = EC_OPR_ON_GOING;//正在执行控制命令
+            return false;//已经有任务正在执行
         }
     }
-        break;
-    case MSG_GENERAL_COMMAND_OPR:
-    {
-        excute_general_command(cmdType,lpParam,opResult);
-    }
-    }*/
 
+    //现在执行任务
+    if(modleInfos_.netMode.inet_type == NET_MOD_SNMP){
+        //dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,true,snmp_ptr_,target_ptr_);
+    }
+    else{
+
+        dev_agent_and_com[sDevId].second->exec_general_task(cmdType,sUser,lpParam,opResult);
+    }
     return true;
 }
 
@@ -1662,16 +1633,15 @@ void device_session::clear_dev_item_alarm(string sDevId,int nitemId)
     iter->second.clear();
 }
 
-void device_session::send_action_conmmand(const string &sDevId,string sUser,int actionType,e_ErrorCode &opResult){
+void device_session::send_action_conmmand(map<int,vector<ActionParam> > &param,string sUser,int actionType,e_ErrorCode &opResult){
 
-    if(sDevId.empty())
-        return;
     if(!is_connected()){
         opResult = EC_NET_ERROR;
         return;
     }
     //如果是发射机则启用循环发送
-    if(modleInfos_.mapDevInfo[sDevId].iDevType == 0){
+    string sDevId = param[0][0].strParamValue;
+    if(modleInfos_.mapDevInfo[sDevId].iDevType == DEVICE_TRANSMITTER){
         if(get_opr_state(sDevId)==dev_no_opr)
             set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
         else{
@@ -1681,7 +1651,7 @@ void device_session::send_action_conmmand(const string &sDevId,string sUser,int 
     }
 
 
-    dev_agent_and_com[sDevId].second->exec_action_task_now(actionType,sUser,opResult);
+    dev_agent_and_com[sDevId].second->exec_action_task_now(param,actionType,sUser,opResult);
 
 }
 
@@ -1710,7 +1680,7 @@ void device_session::doAction(LinkAction &action, string sStationid, string sDev
     case ACTP_SOUND_LIGHT_ALARM:{//声光告警
         if(action.iIshaveParam && action.map_Params.size()>0){
 
-            GetInst(SvcMgr).SendActionCommand(action.map_Params[0][0].strParamValue,"action",action.iActionType);
+            GetInst(SvcMgr).SendActionCommand(action.map_Params,"action",action.iActionType);
         }
     }
         break;

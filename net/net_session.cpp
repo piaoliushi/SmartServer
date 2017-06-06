@@ -82,6 +82,7 @@ namespace hx_net
 
     void net_session::handle_write(const boost::system::error_code& error,size_t bytes_transferred)
 	{
+
 	}
 	
 	//打包发送实时多媒体数据（汇鑫760音频）

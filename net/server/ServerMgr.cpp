@@ -166,7 +166,7 @@ namespace hx_net
             webSocketMsgPtr curWebPtr(new WebSocketMessage);
             curWebPtr->set_smsgtype("commandresult_notify");
             curWebPtr->set_nmsgtype(nMsgType);
-            curWebPtr->mutable_devalarmstatusnty()->CopyFrom(*commdRsltPtr);
+            curWebPtr->mutable_commandresultnty()->CopyFrom(*commdRsltPtr);
             _ws_serverptr->send_message(curWebPtr);
         }
 	}

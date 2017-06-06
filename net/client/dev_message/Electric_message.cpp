@@ -98,8 +98,7 @@ namespace hx_net
 						return kmp(data,nDataLen,cDes,2);
 					}
 				}
-
-        case KSTAR_UPS:
+            case KSTAR_UPS:
             {
                 if(nDataLen<3)
                     return -1;
@@ -108,8 +107,7 @@ namespace hx_net
                 else
                     return -1;
             }
-        case PAINUO_SPM33:
-        case YINGJIA_EM400:
+            case PAINUO_SPM33:
             {
                 if(nDataLen<3)
                     return -1;
@@ -118,7 +116,16 @@ namespace hx_net
                 else
                     return -1;
             }
-         }
+            case YINGJIA_EM400:
+            {
+                if(nDataLen<3)
+                    return -1;
+                if(data[0]==d_devInfo.iAddressCode && (data[1]==0x03 || data[1]==0x04 || data[1]==0x01 || data[1]==0x02))
+                    return data[2]+2;
+                else
+                    return -1;
+            }
+          }
         }
             break;
         case ELECTRIC:{
@@ -246,16 +253,11 @@ namespace hx_net
 
     int Electric_message::parse_104_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
 	{
-		//stop_test_send_timer();//停止发送测试帧
-		//start_test_send_timer();//重新启动发送测试帧
 
 		int ret = -1;
 		struct iec_buf *buf = (struct iec_buf *) &data[0];
 
         iaddcode = d_devInfo.iAddressCode;
-        //unsigned char xx[128];
-        //memset(xx,0,nDataLen);
-        //memcpy(xx,data,nDataLen);
 		switch (frame_type(&(buf->h))) 
 		{
 		case FRAME_TYPE_I:
@@ -457,69 +459,96 @@ namespace hx_net
 		buf.data[3]=0x14;
 		if(m_pSession!=NULL)
 		{
-			m_pSession->sendRawMessage((unsigned char*)(&buf),16);
-		}
+            m_pSession->sendRawMessage((unsigned char*)(&buf),16);
+        }
 
-		d_num_s = (d_num_s + 1) % 32767;
-	}
+        d_num_s = (d_num_s + 1) % 32767;
+    }
 
-	void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
-	{
-		switch(d_devInfo.nDevProtocol){
-		case EDA9033:
-			{
-				switch(d_devInfo.nSubProtocol)
-				{
-				case Eda9033_A:
-					{
-						CommandUnit tmUnit;
-						tmUnit.ackLen = 45;
-						tmUnit.commandLen = 7;
-						tmUnit.commandId[0] = 0x4C;
-						tmUnit.commandId[1] = 0x57;
-						tmUnit.commandId[2] = d_devInfo.iAddressCode;
-						tmUnit.commandId[3] = 0x30;
-						tmUnit.commandId[4] = 0x0E;
-						tmUnit.commandId[5] = tmUnit.commandId[2]+tmUnit.commandId[3]+tmUnit.commandId[4];
-						tmUnit.commandId[6] = 0x0D;
-                        cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
-					}
-					break;
-                case PAINUO_SPM33:
-                    {
-                        CommandUnit tmUnit;
-                        tmUnit.ackLen = 3;
-                        tmUnit.commandLen = 8;
-                        tmUnit.commandId[0] = d_devInfo.iAddressCode;
-                        tmUnit.commandId[1] = 0x03;
-                        tmUnit.commandId[2] = 0x00;
-                        tmUnit.commandId[3] = 0x00;
-                        tmUnit.commandId[4] = 0x00;
-                        tmUnit.commandId[5] = 0x33;
-                        unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
-                        tmUnit.commandId[6] = (uscrc&0x00FF);
-                        tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
-                        cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
-                    }
-                    break;
-                case YINGJIA_EM400:
-                    {
-                        CommandUnit tmUnit;
-                        tmUnit.ackLen = 3;
-                        tmUnit.commandLen = 8;
-                        tmUnit.commandId[0] = d_devInfo.iAddressCode;
-                        tmUnit.commandId[1] = 0x03;
-                        tmUnit.commandId[2] = 0x00;
-                        tmUnit.commandId[3] = 0x64;
-                        tmUnit.commandId[4] = 0x00;
-                        tmUnit.commandId[5] = 0x0E;
-                        unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
-                        tmUnit.commandId[6] = (uscrc&0x00FF);
-                        tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
-                        cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
-                    }
-                    break;
-                case KSTAR_UPS:
+    void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
+    {
+        switch(d_devInfo.nDevProtocol){
+        case EDA9033:
+        {
+            switch(d_devInfo.nSubProtocol)
+            {
+            case Eda9033_A:
+            {
+                CommandUnit tmUnit;
+                tmUnit.ackLen = 45;
+                tmUnit.commandLen = 7;
+                tmUnit.commandId[0] = 0x4C;
+                tmUnit.commandId[1] = 0x57;
+                tmUnit.commandId[2] = d_devInfo.iAddressCode;
+                tmUnit.commandId[3] = 0x30;
+                tmUnit.commandId[4] = 0x0E;
+                tmUnit.commandId[5] = tmUnit.commandId[2]+tmUnit.commandId[3]+tmUnit.commandId[4];
+                tmUnit.commandId[6] = 0x0D;
+                cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            }
+                break;
+            case PAINUO_SPM33:
+            {
+                CommandUnit tmUnit;
+                tmUnit.ackLen = 3;
+                tmUnit.commandLen = 8;
+                tmUnit.commandId[0] = d_devInfo.iAddressCode;
+                tmUnit.commandId[1] = 0x03;
+                tmUnit.commandId[2] = 0x00;
+                tmUnit.commandId[3] = 0x00;
+                tmUnit.commandId[4] = 0x00;
+                tmUnit.commandId[5] = 0x33;
+                unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+                tmUnit.commandId[6] = (uscrc&0x00FF);
+                tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            }
+                break;
+            case YINGJIA_EM400:
+            {
+                CommandUnit tmUnit;
+                tmUnit.ackLen = 3;
+                tmUnit.commandLen = 8;
+                tmUnit.commandId[0] = d_devInfo.iAddressCode;
+                tmUnit.commandId[1] = 0x03;
+                tmUnit.commandId[2] = 0x00;
+                tmUnit.commandId[3] = 0x64;
+                tmUnit.commandId[4] = 0x00;
+                tmUnit.commandId[5] = 0x0E;
+                unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+                tmUnit.commandId[6] = (uscrc&0x00FF);
+                tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                tmUnit.commandId[1] = 0x04;
+                tmUnit.commandId[2] = 0x00;
+                tmUnit.commandId[3] = 0x73;
+                tmUnit.commandId[4] = 0x00;
+                tmUnit.commandId[5] = 0x10;
+                uscrc = CRC16_A001(tmUnit.commandId,6);
+                tmUnit.commandId[6] = (uscrc&0x00FF);
+                tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                tmUnit.commandId[1] = 0x01;
+                tmUnit.commandId[2] = 0x00;
+                tmUnit.commandId[3] = 0x0A;
+                tmUnit.commandId[4] = 0x00;
+                tmUnit.commandId[5] = 0x02;
+                uscrc = CRC16_A001(tmUnit.commandId,6);
+                tmUnit.commandId[6] = (uscrc&0x00FF);
+                tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                tmUnit.commandId[1] = 0x02;
+                tmUnit.commandId[2] = 0x00;
+                tmUnit.commandId[3] = 0x64;
+                tmUnit.commandId[4] = 0x00;
+                tmUnit.commandId[5] = 0x04;
+                uscrc = CRC16_A001(tmUnit.commandId,6);
+                tmUnit.commandId[6] = (uscrc&0x00FF);
+                tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            }
+                break;
+            case KSTAR_UPS:
                 {
                     CommandUnit tmUnit;
                     tmUnit.ackLen = 3;
@@ -546,9 +575,13 @@ namespace hx_net
 				break;
 			case ELECTRIC_101:
 				return;
+
 			}
 					  }
-					  break;
+            break;
+
+
+
         }
     }
 
@@ -805,34 +838,76 @@ namespace hx_net
     }
 
     int Electric_message::decode_EM400(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen,int &iaddcode)
-    {
-        int indexpos =0;
-        iaddcode = data[0];
-        DataInfo dainfo;
-        dainfo.bType = false;
-        for(int i=0;i<3;++i)
         {
-            dainfo.fValue = ((data[3+i*2]<<8)|data[4+i*2])*0.1;
-            data_ptr->mValues[indexpos++] = dainfo;
+            int indexpos =0;
+            iaddcode = data[0];
+            DataInfo dainfo;
+            int cmdnum = data[1];
+            switch(cmdnum)
+            {
+            case 1:
+            {
+                indexpos = 26;
+                dainfo.bType = true;
+                for(int i=0;i<2;++i)
+                {
+                    dainfo.fValue = Getbit(data[3],i);
+                    data_ptr->mValues[indexpos+i] = dainfo;
+                }
+            }
+                break;
+            case 2:
+            {
+                indexpos = 28;
+                dainfo.bType = true;
+                for(int i=0;i<4;++i)
+                {
+                    dainfo.fValue = Getbit(data[3],i);
+                    data_ptr->mValues[indexpos+i] = dainfo;
+                }
+            }
+                break;
+            case 3:
+            {
+                dainfo.bType = false;
+                for(int i=0;i<3;++i)
+                {
+                    dainfo.fValue = ((data[3+i*2]<<8)|data[4+i*2])*0.1;
+                    data_ptr->mValues[indexpos++] = dainfo;
+                }
+                for(int i=0;i<3;++i)
+                {
+                    dainfo.fValue = ((data[11+i*2]<<8)|data[12+i*2])*0.1;
+                    data_ptr->mValues[indexpos++] = dainfo;
+                }
+                for(int i=0;i<3;++i)
+                {
+                    dainfo.fValue = ((data[19+i*2]<<8)|data[20+i*2])*0.01;
+                    data_ptr->mValues[indexpos++] = dainfo;
+                }
+                dainfo.fValue = ((data[29]<<8)|data[30])*0.01;
+                data_ptr->mValues[indexpos++] = dainfo;
+            }
+                break;
+            case 4:
+            {
+                indexpos = 10;
+                dainfo.bType = false;
+                for(int i=0;i<16;++i)
+                {
+                    dainfo.fValue = ((data[3+i*2]<<8)|data[4+i*2])*0.1;
+                    data_ptr->mValues[indexpos++] = dainfo;
+                }
+            }
+                break;
+            }
+
+            return RE_SUCCESS;
         }
-        for(int i=0;i<3;++i)
-        {
-            dainfo.fValue = ((data[11+i*2]<<8)|data[12+i*2])*0.1;
-            data_ptr->mValues[indexpos++] = dainfo;
-        }
-        for(int i=0;i<3;++i)
-        {
-            dainfo.fValue = ((data[19+i*2]<<8)|data[20+i*2])*0.01;
-            data_ptr->mValues[indexpos++] = dainfo;
-        }
-        dainfo.fValue = ((data[29]<<8)|data[30])*0.01;
-        data_ptr->mValues[indexpos++] = dainfo;
-        return RE_SUCCESS;
-    }
 
 
     //执行联动命令
-    void Electric_message::exec_action_task_now(int actionType,string sUser,e_ErrorCode &eErrCode)
+    void Electric_message::exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,string sUser,e_ErrorCode &eErrCode)
     {
 
 

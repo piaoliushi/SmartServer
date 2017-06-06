@@ -54,7 +54,7 @@ namespace hx_net
 		void disconnect_all();
 		
 		//通用命令执行
-		e_ErrorCode excute_command(int cmdType,devCommdMsgPtr lpParam);
+        e_ErrorCode excute_command(string sDevId,int cmdType,string sUser,devCommdMsgPtr lpParam);
 
         e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType);
 		//获取转换模块在线数
@@ -82,7 +82,7 @@ namespace hx_net
         e_ErrorCode  SendSMSContent(vector<string> &PhoneNumber, string AlarmContent);
 
         //发送联动命令
-        e_ErrorCode  SendActionCommand(const string &sDevId,string sUser,int actionType);
+        e_ErrorCode  SendActionCommand(map<int,vector<ActionParam> > &param,string sUser,int actionType);
 
 	private:
 		boost::recursive_mutex         device_pool_mutex_;

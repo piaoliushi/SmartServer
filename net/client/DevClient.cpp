@@ -161,14 +161,14 @@ e_ErrorCode DevClient::start_exec_task(string sDevId,string sUser,int cmdType)
     return opr_rlt;
 }
 //通用命令执行
-e_ErrorCode DevClient::excute_command(int cmdType,devCommdMsgPtr lpParam)
+e_ErrorCode DevClient::excute_command(string sDevId,int cmdType,string sUser,devCommdMsgPtr lpParam)
 {
     e_ErrorCode opr_rlt = EC_DEVICE_NOT_FOUND;
     boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
     std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
     for(;iter!=device_pool_.end();++iter){
-            if(iter->second->is_contain_dev(lpParam->sdevid())){
-                iter->second->excute_command(cmdType,lpParam,opr_rlt);
+            if(iter->second->is_contain_dev(sDevId)){
+                iter->second->excute_command(cmdType,sUser,lpParam,opr_rlt);
                 return opr_rlt;
             }
     }
@@ -244,15 +244,17 @@ e_ErrorCode DevClient::SendSMSContent(vector<string> &PhoneNumber, string AlarmC
 }
 
 //发送联动命令
-e_ErrorCode  DevClient::SendActionCommand(const string &sDevId,string sUser,int actionType)
+e_ErrorCode  DevClient::SendActionCommand(map<int,vector<ActionParam> > &param,string sUser,int actionType)
 {
 
      e_ErrorCode opr_rlt = EC_DEVICE_NOT_FOUND;
      boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
      std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
      for(;iter!=device_pool_.end();++iter){
+         //参数1必须为设备编号
+         string sDevId = param[0][0].strParamValue;
          if(iter->second->is_contain_dev(sDevId)){
-             iter->second->send_action_conmmand(sDevId,sUser,actionType,opr_rlt);
+             iter->second->send_action_conmmand(param,sUser,actionType,opr_rlt);
              return opr_rlt;
          }
      }

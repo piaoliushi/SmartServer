@@ -76,6 +76,21 @@ void websocket_server::on_message(connection_hdl hdl, ws_server::message_ptr msg
 
         }
             break;
+        case MSG_DEV_TURNON_OPR:
+        case MSG_DEV_TURNOFF_OPR:{
+                devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
+                commandmsg_->CopyFrom(curWebPtr->msgcommandreq());
+                string sUsr = commandmsg_->soperuser();
+                string sDevId = commandmsg_->sdevid();
+                //string sUsr = curWebPtr->msgcommandreq().soperuser();
+                //string sDevId = curWebPtr->msgcommandreq().sdevid();
+                //string sName  = curWebPtr->msgcommandreq().cparams(0).sparamname();
+                //string sValue  = curWebPtr->msgcommandreq().cparams(0).sparamvalue();
+
+                e_ErrorCode nReult = GetInst(SvcMgr).excute_command(sDevId,msgType,sUsr,commandmsg_);
+
+            }
+            break;
         case MSG_TRANSMITTER_TURNON_OPR://发射机开启(默认高功率开机)
         case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR://中功率开机
         case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR://低功率开机

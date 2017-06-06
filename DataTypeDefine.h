@@ -31,6 +31,8 @@ enum DEVType
     DEVICE_POWER          =116,//功放单设备
     DEVICE_MEDIA           =117,//媒体设备
 
+    DEVICE_SMSMODLE = 300,//短信猫
+    DEVICE_ALARM_SOUND = 301,//声光告警器
 };
 
 #define    ITEM_ANALOG   0  //模拟量
@@ -128,14 +130,6 @@ typedef struct
     int    iParamType;
 }ActionParam;
 
-//typedef struct
-//{
-//    string strActionNum;
-//    string strActionNam;
-//    int    iActionType;
-//    int    iIshaveParam;
-//    map<int,ActionParam> map_Params;
-//}LinkAction;
 
 typedef struct
 {
@@ -165,7 +159,6 @@ typedef struct
     int iResumetime;   //恢复延迟(秒)
     int iAlarmtype;       //0:监控量,1:设备
     string strLinkageRoleNumber;//联动角色
-    //bool  bIsAlarm;
     vector<LinkAction> vLinkAction;//联动动作
 }Alarm_config;
 
@@ -297,9 +290,7 @@ typedef struct DATA_INFO_TAG
 
 typedef struct _tagData
 {
-    //_tagData(Data &srcData){
-    //        mValues = srcData.mValues;
-    //}
+
      map<int,DataInfo> mValues;
 }Data,pData;
 typedef boost::shared_ptr<Data> DevMonitorDataPtr;
@@ -330,5 +321,11 @@ enum _tagAssType
     DEV_TO_MOUDLE  = 3,//设备关联模块
     MOUDLE_TO_DEV  = 4,//模块关联设备
 };
+
+typedef struct
+{
+    string sName;
+    string sValue;
+}taskParam;
 
 #endif
