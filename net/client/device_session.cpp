@@ -268,7 +268,7 @@ void   device_session::open_com()
         if(pSerialPort_ptr_->is_open()){
             boost::system::error_code err=boost::system::error_code();
             handle_connected(err);
-            std::cout<< " open again success!!"<< err.message()<<std::endl;
+            //std::cout<< " open again success!!"<< err.message()<<std::endl;
             return;
         }
         boost::system::error_code  ec;
@@ -280,7 +280,7 @@ void   device_session::open_com()
                 std::cout<< sComStr<<" open error!!"<< ec.message()<<std::endl;
                 return;
             }else {
-                std::cout<< sComStr<<" open success!!"<< "---baud rat:"<<modleInfos_.comMode.irate<<std::endl;
+                //std::cout<< sComStr<<" open success!!"<< "---baud rat:"<<modleInfos_.comMode.irate<<std::endl;
                 pSerialPort_ptr_->set_option(serial_port::baud_rate(modleInfos_.comMode.irate),ec);
                 pSerialPort_ptr_->set_option(serial_port::flow_control(serial_port::flow_control::none),ec);
                 pSerialPort_ptr_->set_option(serial_port::parity(serial_port::parity::none),ec);
@@ -351,7 +351,7 @@ void device_session::agent_connect(std::string hostname,unsigned short port)
     int status;
     if(snmp_ptr_==NULL){
         snmp_ptr_ = new Snmp(status);
-        if(!snmp_ptr_->start_poll_thread(1000))
+        if(!snmp_ptr_->start_poll_thread(4))
             cout<<"start_poll_thread-----error!";
     }
     if(target_ptr_==NULL){
@@ -1022,12 +1022,12 @@ void device_session::start_handler_data(int iaddcode, DevMonitorDataPtr curDataP
 //2016-3-31------处理设备数据----完成
 void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 {
-    cout<<"handler_data start mutex"<<endl;
+    //cout<<"handler_data start mutex"<<endl;
     boost::recursive_mutex::scoped_lock lock(data_deal_mutex);
     //是否在运行图时间
     bool bIsMonitorTime = is_monitor_time(sDevId);
     //打包发送客户端
-    cout<<"start send_monitor_data_message to client ************"+sDevId<<endl;
+    //cout<<"start send_monitor_data_message to client ************"+sDevId<<endl;
     send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
                               ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
@@ -1152,7 +1152,7 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
         start_read_head(bytes_transferred);
 
 
-        cout<< "接收长度---"<<bytes_transferred << std::endl;
+        //cout<< "接收长度---"<<bytes_transferred << std::endl;
 
     }
     else{

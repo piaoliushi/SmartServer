@@ -201,7 +201,7 @@ void Gsms::SmThread()
     SM_PARAM param[256];	// 发送/接收短消息缓冲区
     time_t tmOrg, tmNow;		// 上次和现在的时间，计算超时用
 
-    cout<<"thread start"<<endl;
+    //cout<<"thread start"<<endl;
     {
         boost::recursive_mutex::scoped_lock lock(m_run_mutex);
         b_run_ = true;
@@ -403,7 +403,7 @@ int Gsms::gsmGetResponse(SM_BUFF *pBuff)
         if (strncmp(&pBuff->data[pBuff->len - 4], "OK\r\n", 4) == 0)  nState = GSM_OK;
         else if (strstr(pBuff->data, "+CMS ERROR") != NULL) nState = GSM_ERR;
     }
- cout<<"gsmGetResponse state:"<<nState<<endl;
+ //cout<<"gsmGetResponse state:"<<nState<<endl;
  //memset(pBuff, 0, sizeof(SM_BUFF));
     return nState;
 }
@@ -443,7 +443,7 @@ void Gsms::get_sendmsg_cmd_ack()
     QByteArray qarray = pQSerialport_ptr_->readAll();
     if(qarray.size()==4 && strncmp(qarray.constData(),"\r\n> ",4)==0)
     {
-        cout<<"send message"<<endl;
+        //cout<<"send message"<<endl;
         boost::recursive_mutex::scoped_lock lock(data_mutex);
         nstate=stSendMessageResponse;
         WriteComm(pdu, strlen(pdu));		// 得到肯定回答，继续输出PDU串
@@ -462,21 +462,21 @@ void Gsms::get_Response_cmd_ack()
     {
         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
         n_cmdresult_ = 0;
-        cout<<"result:"<<n_cmdresult_<<endl;
+        //cout<<"result:"<<n_cmdresult_<<endl;
         emit S_state(3,true);
     }
     else if (strstr(qarray.constData(), "+CMS ERROR") != NULL)
        {
         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
         n_cmdresult_ = 1;
-         cout<<"result:"<<n_cmdresult_<<endl;
+         //cout<<"result:"<<n_cmdresult_<<endl;
          emit S_state(3,false);
     }
     else
     {
         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
         n_cmdresult_ = -1;
-         cout<<"result:"<<n_cmdresult_<<endl;
+         //cout<<"result:"<<n_cmdresult_<<endl;
     }
 }
 
@@ -490,7 +490,6 @@ void Gsms::get_CSCA_cmd_ack()
     if(strstr(cach_receive_.constData(),"ERROR")!=NULL)
     {
         cach_receive_.clear();
-      //  emit S_have_GSM_card(false);
         emit S_state(2,false);
         if(nTrycount_<5)
             pTimerTryInit_->start(60000+60000*nTrycount_);
@@ -508,11 +507,10 @@ void Gsms::get_CSCA_cmd_ack()
                 {
                     str_SCA = string(charpos);
                     str_SCA = str_SCA.substr(0,str_SCA.find("\""));
-                    cout<<str_SCA<<endl;
-                    cout<<"CSCA length:"<<str_SCA.length()<<endl;
+                    //cout<<str_SCA<<endl;
+                    //cout<<"CSCA length:"<<str_SCA.length()<<endl;
                     cach_receive_.clear();
                     Run();
-                 //   emit S_have_GSM_card(true);
                     emit S_state(2,true);
                 }
             }

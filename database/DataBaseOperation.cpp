@@ -26,6 +26,13 @@ bool DataBaseOperation::OpenDb( const std::string& serveraddress, const std::str
 
    ConnectionPool::initDb(QString::fromStdString(serveraddress),QString::fromStdString(database)
                           ,QString::fromStdString(uid),QString::fromStdString(pwd));
+
+   QSqlDatabase db = ConnectionPool::openConnection();
+   if(!db.isOpen() || !db.isValid()) {
+       std::cout<<"connect  database  is error ------------------------------ the database is interrupt"<<std::endl;
+       return false;
+   }
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
@@ -142,10 +149,7 @@ bool DataBaseOperation::GetDeviceDataDictionary(map<string,map<int,string> >& ma
             mapDicry[sType]=curInfo;
         }
     }
-    //map<string,map<int,string> >::iterator iter_size = mapDicry.begin();
-    //for(;iter_size!=mapDicry.end();++iter_size){
-    //    cout<<"type:"<<iter_size->first<<"---size:"<<iter_size->second.size()<<endl;
-    //}
+
      ConnectionPool::closeConnection(db);
     return true;
 }
@@ -153,50 +157,6 @@ bool DataBaseOperation::GetDeviceDataDictionary(map<string,map<int,string> >& ma
 //获取某个设备信息(剔除短信猫配置信息)
 bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo& device )
 {
-
-    /*if(!db.isOpen() || !db.isValid()) {//IsOpen()
-        std::cout<<"GetDevInfo is error ------------------------------- the database is interrupt"<<std::endl;
-        return false;
-    }
-
-    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery devquery(db);
-    QString strSql=QString("select a.DeviceNumber,a.AssociateNumber,a.DeviceName,a.DeviceType,a.IsAssociate,a.IsMultiChannel,a.ChannelSize,a.IsUse,a.AddressCode,b.MainCategoryNumber,b.SubCategoryNumber,a.ProtocolNumber\
-                           from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and b.ProtocolNumber=a.ProtocolNumber").arg(QString::fromStdString(strDevnum));
-            devquery.prepare(strSql);
-       if(devquery.exec())   {
-            if(devquery.next())  {
-            device.sDevNum = devquery.value(0).toString().toStdString();
-            device.sDevName = devquery.value(2).toString().toStdString();
-            device.iDevType = devquery.value(3).toInt();
-            device.bAst = devquery.value(4).toBool();
-            device.bMulChannel = devquery.value(5).toBool();
-            device.iChanSize = devquery.value(6).toInt();
-            device.bUsed = devquery.value(7).toBool();
-            device.iAddressCode = devquery.value(8).toInt();
-            device.nDevProtocol = devquery.value(9).toInt();
-            device.nSubProtocol = devquery.value(10).toInt();
-            QString sprotoclnum = devquery.value(11).toString();
-            //获得监控量信息
-            GetDevMonItem(db,strDevnum,sprotoclnum,device.map_MonitorItem);
-            //获得运行图信息
-            GetDevMonitorSch(db,strDevnum,device.vMonitorSch);
-            //获得命令图信息
-            GetCmd(db,strDevnum,device.vCommSch);
-            //获得设备属性信息
-            GetDevProperty(db,strDevnum,device.map_DevProperty);
-            //获得告警配置
-            GetAlarmConfig(db,strDevnum,device.map_AlarmConfig);
-            //获得关联配置
-            GetAssDevChan(db,QString::fromStdString(strDevnum),device.map_AssDevChan);
-            //获得设备联动信息
-
-            }
-        }else {
-            std::cout<<devquery.lastError().text().toStdString()<<"GetDataDictionary---query---error!"<<std::endl;
-            return false;
-        }
-       return true;*/
 
     if(!db.isOpen() || !db.isValid()) {//IsOpen()
         std::cout<<"GetDevInfo is error ------------------------------- the database is interrupt"<<std::endl;

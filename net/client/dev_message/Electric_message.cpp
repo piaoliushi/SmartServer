@@ -333,7 +333,7 @@ namespace hx_net
 
 			struct iec_unit_id *unitp = (struct iec_unit_id *) (&(buf->data));
 
-			cout<<"t->"<<(int)t<<"--caddr->"<<(int)caddr<<"--n->"<<(int)n<<"--cause->"<<(int)cause<<"--test->"<<(int)test<<"--pn->"<<(int)pn<<endl;
+            //cout<<"t->"<<(int)t<<"--caddr->"<<(int)caddr<<"--n->"<<(int)n<<"--cause->"<<(int)cause<<"--test->"<<(int)test<<"--pn->"<<(int)pn<<endl;
 			//接收序号与发送序号是否相同
 			if(buf->h.ic.ns != d_num_r)
 				return -1;

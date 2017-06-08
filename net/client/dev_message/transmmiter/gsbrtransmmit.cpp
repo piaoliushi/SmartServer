@@ -239,7 +239,7 @@ namespace hx_net{
         OctetStr community("private");
         target->set_writecommunity(community);
         int iresult =snmp->set(cmdpdu,*target);
-        cout<<"snmp set back result:"<<iresult<<",back message:"<<snmp->error_msg(iresult)<<endl;
+        //cout<<"snmp set back result:"<<iresult<<",back message:"<<snmp->error_msg(iresult)<<endl;
         if(iresult!=SNMP_CLASS_SUCCESS)
             return false;
         return true;

@@ -53,21 +53,6 @@ bool LocalConfig::load_local_config(const char* sFileName)
         else
             return false;
 
-       /* xml_node<>* xml_sms = root->first_node("sms" );
-        if(xml_sms!=NULL)
-        {
-            long nUse =  strtol(xml_sms->first_attribute("use")->value(),NULL,10);
-            if(nUse>0)
-                sms_use_=true;
-            else
-                sms_use_=false;
-            sms_com_ = xml_sms->first_attribute("com")->value();
-            sms_baud_rate_ =  strtol( xml_sms->first_attribute("baud_rate")->value(),NULL,10);
-            sms_center_number_ = xml_sms->first_attribute("sms_center_number")->value();
-        }
-        else
-            return false;*/
-
         xml_node<>* xml_database = root->first_node("database");
         if(xml_database!=NULL)
         {

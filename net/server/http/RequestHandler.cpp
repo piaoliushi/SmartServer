@@ -9,12 +9,12 @@ request_handler::request_handler()
 , content_length_(0)
 , read_content_length_(0)
 {
-	std::cout << "request_handler constructor!" << std::endl;
+    //std::cout << "request_handler constructor!" << std::endl;
 }
 
 request_handler::~request_handler()
 {
-	std::cout << "request_handler destructor!" << std::endl;
+    //std::cout << "request_handler destructor!" << std::endl;
 }
 
 void request_handler::start(const hx_http_server::request &request, hx_http_server::connection_ptr connection)
@@ -70,7 +70,7 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
 	{
         boost::asio::ip::address clientaddr = connection->socket().remote_endpoint().address();
         string sClientIp = clientaddr.to_v4().to_string();
-        cout<<content_.c_str()<<endl;
+        //cout<<content_.c_str()<<endl;
         //cout<<"content_size:------"<<read_content_length_<<endl;
         if(bohui_protocol_.parseDataFromStr(content_,d_response_body,d_sUrl,sClientIp))
         {

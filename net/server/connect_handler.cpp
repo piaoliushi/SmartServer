@@ -50,7 +50,7 @@ namespace hx_net
             if (now - get_last_hb_time() >180)//超时
 			{
  				close_handler();
-				cout<<"heartbeat timeout!"<<endl;
+                //cout<<"heartbeat timeout!"<<endl;
 				return;
 			}			
 			else
@@ -90,11 +90,11 @@ namespace hx_net
 		googleMsgPtr nullMsg;
 		if(!sendMessage(MSG_HEARTBEAT_ACK,nullMsg))
 		{
-			std::cout << "send heartbeat Ack error"<< std::endl;
+            //std::cout << "send heartbeat Ack error"<< std::endl;
 			return -1;
 		}
 
-		cout<<"send heart beat ack successful!"<<endl;
+        //cout<<"send heart beat ack successful!"<<endl;
 		return 0;
 		
 	}
