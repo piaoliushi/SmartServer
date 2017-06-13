@@ -244,7 +244,9 @@ RESOURCES += \
     image/resource.qrc
 
 DISTFILES += \
-    SmartServer_CN.ts
+    SmartServer_CN.ts \
+    SmartServer.ico \
+    SmartServer.rc
 
 CONFIG(debug, debug|release) {
   #TARGET = $$join(TARGET,,,d)

@@ -201,8 +201,10 @@ void QSvcStatePage::timeUpdate()
     QString current_date = lo.toString(current_date_time,"yyyy-MM-dd hh:mm:ss dddd");
     d_plbDateTime->setText(current_date);
 
-    if(IsStart()==false)
+    if(IsStart()==false){
         StartSvc();
+        onMunualAdjustTime();
+    }
     if(d_bUseNtp)
         checkAutoAdjustTime();
 
@@ -223,8 +225,6 @@ void QSvcStatePage::timeUpdate()
      if(configTm.isValid()==false){
            return;
      }
-     //cout<<"date:"<<curTm.date().day()<<"week:"<<curTm.date().dayOfWeek()<<endl;
-     //cout<<"curTime:"<<curTm.time().toString("hh:mm:ss").toStdString()<<"configTime:"<<configTm.time().toString("hh:mm:ss").toStdString()<<endl;
      if(  curTm.time().secsTo(configTm.time()) == 0){
          if(d_nModNtp==0){//按天
              onMunualAdjustTime();

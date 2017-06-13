@@ -81,8 +81,8 @@ QSqlDatabase ConnectionPoolPrivate::createConnection(const QString &connectionNa
 
         if (testOnBorrow) {
             // 返回连接前访问数据库，如果连接断开，重新建立连接
-            qDebug() << QString("Test connection on borrow, execute: %1, for connection %2")
-                        .arg(testOnBorrowSql).arg(connectionName);
+            //qDebug() << QString("Test connection on borrow, execute: %1, for connection %2")
+            //            .arg(testOnBorrowSql).arg(connectionName);
             QSqlQuery query(testOnBorrowSql, db1);
 
             if (query.lastError().type() != QSqlError::NoError && !db1.open()) {
