@@ -563,15 +563,12 @@ void device_session::start_query_timer(unsigned long nSeconds/* =3 */)
             #endif
                 );
 }
-
 void  device_session::query_send_time_event(const boost::system::error_code& error)
 {
     if(error!= boost::asio::error::operation_aborted)
     {
         if(query_timeout_count_<moxa_config_ptr->query_timeout_count)
         {
-
-
             ++query_timeout_count_;
             if(modleInfos_.iCommunicationMode == CON_MOD_NET){
                 if(modleInfos_.netMode.inet_type == NET_MOD_SNMP || modleInfos_.netMode.inet_type == NET_MOD_HTTP)
@@ -598,6 +595,9 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             cur_dev_id_ = next_dev_id();
             send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
+        start_query_timer(moxa_config_ptr->query_interval);
+    }else{
+        cout<<"query timer  abort:  "<<error<<endl;
         start_query_timer(moxa_config_ptr->query_interval);
     }
 }
@@ -727,8 +727,11 @@ void device_session::close_all()
     set_con_state(con_disconnected);
     connect_timer_.cancel();
     timeout_timer_.cancel();
-    if(modleInfos_.iCommunicationMode==CON_MOD_COM)
-        pSerialPort_ptr_->close();
+    if(modleInfos_.iCommunicationMode==CON_MOD_COM){
+        boost::system::error_code    ec;
+        pSerialPort_ptr_->close(ec);
+        cout<<"close_all----close--com"<<ec<<endl;
+    }
     else
         close_i();   //关闭socket
 
@@ -1067,6 +1070,7 @@ void device_session::clear_dev_alarm(string sDevId)
 
 void device_session::handle_connected(const boost::system::error_code& error)
 {
+
     timeout_timer_.cancel();//关闭重连超时定时器
     if(!error)
     {

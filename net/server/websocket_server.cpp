@@ -20,6 +20,10 @@ websocket_server::websocket_server()
     m_server.set_open_handler(bind(&websocket_server::on_open,this,::_1));
     m_server.set_close_handler(bind(&websocket_server::on_close,this,::_1));
     m_server.set_message_handler(bind(&websocket_server::on_message,this,::_1,::_2));
+
+    m_server.get_alog().clear_channels(websocketpp::log::alevel::frame_header |
+            websocketpp::log::alevel::frame_payload |
+            websocketpp::log::alevel::control);
 }
 
 
