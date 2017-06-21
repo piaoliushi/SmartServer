@@ -565,8 +565,8 @@ void device_session::start_query_timer(unsigned long nSeconds/* =3 */)
 }
 void  device_session::query_send_time_event(const boost::system::error_code& error)
 {
-    if(error!= boost::asio::error::operation_aborted)
-    {
+    //if(error!= boost::asio::error::operation_aborted)
+    //{
         if(query_timeout_count_<moxa_config_ptr->query_timeout_count)
         {
             ++query_timeout_count_;
@@ -596,10 +596,10 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
         start_query_timer(moxa_config_ptr->query_interval);
-    }else{
-        cout<<"query timer  abort:  "<<error<<endl;
-        start_query_timer(moxa_config_ptr->query_interval);
-    }
+    //}else{
+    //    cout<<"query timer  abort:  "<<error<<endl;
+    //    start_query_timer(moxa_config_ptr->query_interval);
+    //}
 }
 //获取同步网络数据，适用http,snmp
 void device_session::get_sync_net_data()
@@ -753,8 +753,8 @@ void device_session::start_task_schedules_timer()
 //定时任务回调
 void device_session::schedules_task_time_out(const boost::system::error_code& error)
 {
-    if(error!= boost::asio::error::operation_aborted)
-    {
+    //if(error!= boost::asio::error::operation_aborted)
+    //{
         time_t curTime = time(0);
         tm *pCurTime = localtime(&curTime);
 
@@ -817,7 +817,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
             }
         }
         start_task_schedules_timer();
-    }
+    //}
 }
 
 void device_session::notify_client_execute_result(string sDevId,string devName,string user,int cmdType, tm *pCurTime,
