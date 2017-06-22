@@ -169,6 +169,7 @@ namespace hx_net
        {
            GetResultData(d_curData_ptr);
            detect_run_state(d_curData_ptr);
+           cout<<"aysnc_data--->devId="<<d_devInfo.sDevNum<<endl;
            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
        }
 

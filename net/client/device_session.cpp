@@ -268,7 +268,6 @@ void   device_session::open_com()
         if(pSerialPort_ptr_->is_open()){
             boost::system::error_code err=boost::system::error_code();
             handle_connected(err);
-            //std::cout<< " open again success!!"<< err.message()<<std::endl;
             return;
         }
         boost::system::error_code  ec;
@@ -280,7 +279,7 @@ void   device_session::open_com()
                 std::cout<< sComStr<<" open error!!"<< ec.message()<<std::endl;
                 return;
             }else {
-                //std::cout<< sComStr<<" open success!!"<< "---baud rat:"<<modleInfos_.comMode.irate<<std::endl;
+
                 pSerialPort_ptr_->set_option(serial_port::baud_rate(modleInfos_.comMode.irate),ec);
                 pSerialPort_ptr_->set_option(serial_port::flow_control(serial_port::flow_control::none),ec);
                 pSerialPort_ptr_->set_option(serial_port::parity(serial_port::parity::none),ec);
@@ -565,8 +564,10 @@ void device_session::start_query_timer(unsigned long nSeconds/* =3 */)
 }
 void  device_session::query_send_time_event(const boost::system::error_code& error)
 {
-    //if(error!= boost::asio::error::operation_aborted)
-    //{
+ //cout<<"query_timer is abort! "<<error.message()<<endl;
+    cout<<"query_timer_event--->devId="<<cur_dev_id_<<endl;
+    if(error!= boost::asio::error::operation_aborted)
+    {
         if(query_timeout_count_<moxa_config_ptr->query_timeout_count)
         {
             ++query_timeout_count_;
@@ -596,10 +597,12 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
         start_query_timer(moxa_config_ptr->query_interval);
-    //}else{
-    //    cout<<"query timer  abort:  "<<error<<endl;
-    //    start_query_timer(moxa_config_ptr->query_interval);
-    //}
+    }else{
+
+        close_all();
+        //query_timer_.cancel();
+        //start_query_timer(moxa_config_ptr->query_interval);
+    }
 }
 //获取同步网络数据，适用http,snmp
 void device_session::get_sync_net_data()
@@ -607,7 +610,11 @@ void device_session::get_sync_net_data()
     query_timeout_count_=0;
     DevMonitorDataPtr curData_ptr(new Data);
     int nResult = dev_agent_and_com[cur_dev_id_].second->decode_msg_body(snmp_ptr_,curData_ptr,target_ptr_);
-   /* if(nResult == 0){
+    if(nResult != 0){
+        cout<<"get_sync_net_data---->dev_agent_and_com--->return:"<<nResult<<endl;
+    }
+
+    /* if(nResult == 0){
         if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
                 .schedule(boost::bind(&device_session::handler_data,this,cur_dev_id_,curData_ptr))) {
             task_count_increase();
@@ -727,6 +734,7 @@ void device_session::close_all()
     set_con_state(con_disconnected);
     connect_timer_.cancel();
     timeout_timer_.cancel();
+    query_timer_.cancel();
     if(modleInfos_.iCommunicationMode==CON_MOD_COM){
         boost::system::error_code    ec;
         pSerialPort_ptr_->close(ec);
