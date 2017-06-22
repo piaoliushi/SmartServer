@@ -43,7 +43,8 @@ private:
     DeviceInfo           &d_devInfo;//设备信息
     boost::recursive_mutex          data_mutex;
     map<string,int> map_Oid;
-    boost::shared_ptr<TaskQueue<DevMonitorDataPtr > > d_task_queue_ptr;//任务队列
+    DevMonitorDataPtr      d_curData_ptr;
+    //boost::shared_ptr<TaskQueue<DevMonitorDataPtr > > d_task_queue_ptr;//任务队列
 
 };
 }

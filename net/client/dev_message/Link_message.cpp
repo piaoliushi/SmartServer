@@ -22,7 +22,7 @@ namespace hx_net
     Link_message::Link_message(session_ptr pSession,DeviceInfo &devInfo)
         :m_pSession(pSession)
         ,d_devInfo(devInfo)
-        ,d_task_queue_ptr(new TaskQueue< DevMonitorDataPtr >)
+        //,d_task_queue_ptr(new TaskQueue< DevMonitorDataPtr >)
     {
         initOid();
     }
@@ -230,6 +230,10 @@ namespace hx_net
 
      int Link_message::decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
      {
+
+         if(data_ptr!=NULL)
+             d_curData_ptr = data_ptr;
+
          switch(d_devInfo.nDevProtocol)
          {
          case LINK_DEVICE:
@@ -237,14 +241,14 @@ namespace hx_net
                  switch (d_devInfo.nSubProtocol)
                  {
                  case LINK_STATELITE_RECEVIE:
-                     return parse_SatelliteReceive_data(snmp,data_ptr,target);
+                     return parse_SatelliteReceive_data(snmp,d_curData_ptr,target);
                  case LINK_TEST_RECEVIE:
-                     return parse_TestReceive_data(snmp,data_ptr,target);
+                     return parse_TestReceive_data(snmp,d_curData_ptr,target);
                  case LINK_SING_NET_ADAPTER:          
                  case LINK_DMP_SWITCH: 
                  case LINK_ASI_ADAPTER:
                  case LINK_WEILE_AVSP_DECODER:
-                     return parse_SingAptReceive_data(snmp,data_ptr,target);
+                     return parse_SingAptReceive_data(snmp,d_curData_ptr,target);
                  default:
                      return RE_NOPROTOCOL;
                  }
@@ -308,8 +312,10 @@ namespace hx_net
 
     void Link_message::parse_Satellite_data_(Pdu &pdu, SnmpTarget &target)
     {
-        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
-        if(cur_data_ptr==NULL)
+//        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
+//        if(cur_data_ptr==NULL)
+//            return;
+        if(d_curData_ptr == NULL)
             return;
         //boost::recursive_mutex::scoped_lock lock(data_mutex);
         for (int i=0; i<pdu.get_vb_count(); i++)
@@ -327,7 +333,7 @@ namespace hx_net
                 dainfo.sValue = cur_value;
                 dainfo.bType=false;
                 dainfo.fValue =  atof(cur_value.c_str());
-                cur_data_ptr->mValues[0] = dainfo;
+                d_curData_ptr->mValues[0] = dainfo;
             }else if(cur_oid == signalLock){
                 dainfo.bType=true;
                 int nRlt = cur_value.find("CB F8 B6 A8");
@@ -338,7 +344,7 @@ namespace hx_net
                     dainfo.sValue = "0";
                     dainfo.fValue=0.0f;
                 }
-                cur_data_ptr->mValues[1] = dainfo;
+                d_curData_ptr->mValues[1] = dainfo;
             }else if(cur_oid == singalber){
                 if(cur_value.empty())
                     cur_value ="45";
@@ -350,7 +356,7 @@ namespace hx_net
                     dainfo.fValue=0.0f;
                 else
                     dainfo.fValue =  atof(cur_value.c_str());
-                cur_data_ptr->mValues[2] = dainfo;
+                d_curData_ptr->mValues[2] = dainfo;
             }else if(cur_oid == signalcn){
                 if(cur_value.empty())
                     cur_value ="30";
@@ -359,14 +365,14 @@ namespace hx_net
                 string_replace(cur_value,"dB","");
                 string_replace(cur_value," ","");
                 dainfo.fValue = atof(cur_value.c_str());
-                cur_data_ptr->mValues[3] = dainfo;
+                d_curData_ptr->mValues[3] = dainfo;
             }else if(cur_oid == totalrate){
                 if(cur_value.empty())
                     cur_value ="10";
                 dainfo.bType=false;
                 dainfo.sValue = cur_value;
                 dainfo.fValue = atof(cur_value.c_str());
-                cur_data_ptr->mValues[4] = dainfo;
+                d_curData_ptr->mValues[4] = dainfo;
             }else if(cur_oid == frequency){
                 if(cur_value.empty())
                     cur_value ="658";
@@ -375,21 +381,21 @@ namespace hx_net
                 string_replace(cur_value,"MHz","");
                 string_replace(cur_value," ","");
                 dainfo.fValue = atof(cur_value.c_str());
-                cur_data_ptr->mValues[5] = dainfo;
+                d_curData_ptr->mValues[5] = dainfo;
             }
         }
-        if(cur_data_ptr->mValues.size()>0){
-            //DevMonitorDataPtr  curCloneData_ptr(new Data(*d_data_ptr.get()));
-            m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
+        if(d_curData_ptr->mValues.size()>0){
+
+            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
         }
 
     }
 
     int Link_message::parse_TestReceive_data(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)
     {
-        if(d_task_queue_ptr->get_Task_Size()>10)
-            return -1;
-        d_task_queue_ptr->SubmitTask(data_ptr);
+//        if(d_task_queue_ptr->get_Task_Size()>10)
+//            return -1;
+//        d_task_queue_ptr->SubmitTask(data_ptr);
         Pdu pdu;
         Vb vbl[3];
         vbl[0].set_oid(Oid("1.3.6.1.2.1.25.2.2.0"));
@@ -408,9 +414,12 @@ namespace hx_net
 
     void Link_message::parse_Testllite_data_(Pdu &pdu, SnmpTarget &target)
     {
-        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
-        if(cur_data_ptr==NULL)
+//        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
+//        if(cur_data_ptr==NULL)
+//            return;
+        if(d_curData_ptr == NULL)
             return;
+
         int pdu_error = pdu.get_error_status();
         if (pdu_error)
             return;
@@ -430,29 +439,29 @@ namespace hx_net
             {
                 dainfo.fValue = dainfo.fValue/1048576.00;
                 dainfo.sValue = str(boost::format("%.2f G")%dainfo.fValue);
-                cur_data_ptr->mValues[0] = dainfo;
+                d_curData_ptr->mValues[0] = dainfo;
             }
             else if(cur_oid=="1.3.6.1.2.1.25.1.6.0")
             {
                 dainfo.sValue = cur_value;
-                cur_data_ptr->mValues[1] = dainfo;
+                d_curData_ptr->mValues[1] = dainfo;
             }
             else if(cur_oid=="1.3.6.1.2.1.25.1.5.0")
             {
                 dainfo.sValue = cur_value;
-                cur_data_ptr->mValues[2] = dainfo;
+                d_curData_ptr->mValues[2] = dainfo;
             }
         }
-        if(cur_data_ptr->mValues.size()>0){
-            m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
+        if(d_curData_ptr->mValues.size()>0){
+            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
         }
     }
 
     int Link_message::parse_SingAptReceive_data(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)
     {
-        if(d_task_queue_ptr->get_Task_Size()>10)
-            return -1;
-         d_task_queue_ptr->SubmitTask(data_ptr);
+//        if(d_task_queue_ptr->get_Task_Size()>10)
+//            return -1;
+//         d_task_queue_ptr->SubmitTask(data_ptr);
         int status = snmp->get(query_pdu,*target, aysnc_callback,this);
         if (status){
             return -1;
@@ -464,9 +473,12 @@ namespace hx_net
 
     void Link_message::parse_SingApt_data(Pdu &pdu, SnmpTarget &target)
     {
-        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
-        if(cur_data_ptr==NULL)
+//        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
+//        if(cur_data_ptr==NULL)
+//            return;
+        if(d_curData_ptr == NULL)
             return;
+
         int pdu_error = pdu.get_error_status();
         if (pdu_error)
             return;
@@ -486,18 +498,21 @@ namespace hx_net
             map<string,int>::iterator iter = map_Oid.find(cur_oid);
             if(iter!=map_Oid.end())
             {
-                cur_data_ptr->mValues[(*iter).second] = dainfo;
+                d_curData_ptr->mValues[(*iter).second] = dainfo;
             }
         }
-        if(cur_data_ptr->mValues.size()>0){
-            m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
+        if(d_curData_ptr->mValues.size()>0){
+            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
         }
     }
 
     void Link_message::parse_DmpSwitch_data(Pdu &pdu, SnmpTarget &target)
     {
-        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
-        if(cur_data_ptr==NULL)
+        //DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
+        //if(cur_data_ptr==NULL)
+        //    return;
+
+        if(d_curData_ptr == NULL)
             return;
         int pdu_error = pdu.get_error_status();
         if (pdu_error)
@@ -518,45 +533,17 @@ namespace hx_net
             map<string,int>::iterator iter = map_Oid.find(cur_oid);
             if(iter!=map_Oid.end())
             {
-                cur_data_ptr->mValues[(*iter).second] = dainfo;
+                d_curData_ptr->mValues[(*iter).second] = dainfo;
             }
         }
-        if(cur_data_ptr->mValues.size()>0){
-            m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
+        if(d_curData_ptr->mValues.size()>0){
+            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
         }
     }
 
     void Link_message::parse_AsiApt_data(Pdu &pdu, SnmpTarget &target)
     {
         parse_DmpSwitch_data(pdu,target);
-        /*DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
-        if(cur_data_ptr==NULL)
-            return;
-        int pdu_error = pdu.get_error_status();
-        if (pdu_error)
-            return;
-        if (pdu.get_vb_count() == 0)
-            return;
-        int vbcount = pdu.get_vb_count();
-        for(int i=0;i<vbcount;++i)
-        {
-            DataInfo dainfo;
-            Vb nextVb;
-            pdu.get_vb(nextVb, i);
-            string cur_oid = nextVb.get_printable_oid();
-            string cur_value =nextVb.get_printable_value();
-            dainfo.bType = false;
-            dainfo.fValue = atof(cur_value.c_str());
-            dainfo.sValue = str(boost::format("%.2f Mbps")%dainfo.fValue);
-            map<string,int>::iterator iter = map_Oid.find(cur_oid);
-            if(iter!=map_Oid.end())
-            {
-                cur_data_ptr->mValues[(*iter).second] = dainfo;
-            }
-        }
-        if(cur_data_ptr->mValues.size()>0){
-            m_pSession->start_handler_data(d_devInfo.sDevNum,cur_data_ptr);
-        }*/
     }
 
      void Link_message::parse_weile_avsp_decorder_data(Pdu &pdu, SnmpTarget &target)
@@ -568,10 +555,10 @@ namespace hx_net
 
     int  Link_message::parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
     {
-        if(d_task_queue_ptr->get_Task_Size()>10)
-            return -1;
-        //cout<<"snmp--------task-----size -------"<<d_task_queue_ptr->get_Task_Size()<<endl;
-        d_task_queue_ptr->SubmitTask(data_ptr);
+        //if(d_task_queue_ptr->get_Task_Size()>10)   // amend by lk 2017-6-22
+        //    return -1;
+        //d_task_queue_ptr->SubmitTask(data_ptr);
+
         Pdu pdu;
         Vb vbl[NUM_SYS_VBS];
         vbl[0].set_oid(rflevel);
@@ -587,67 +574,7 @@ namespace hx_net
         if (status){
             return -1;
         }else{
-
-           /*
-             int vbcount = pdu.get_vb_count();
-            int index = 0; //解析位置
-            DataInfo dainfo;
-            if ( vbcount == NUM_SYS_VBS ) {
-                pdu.get_vblist(vbl, vbcount);
-                 string s=vbl[0].get_printable_value();
-                 dainfo.sValue = s;
-                 dainfo.bType=false;
-                 dainfo.fValue =  atof(s.c_str());
-                 data_ptr->mValues[index++] = dainfo;
-
-                dainfo.bType=true;
-                s=vbl[1].get_printable_value();
-                int nRlt = s.find("CB F8 B6 A8");
-                if(nRlt!=-1){//信号锁
-                    dainfo.sValue = "1";
-                    dainfo.fValue=1.0f;
-                }
-                else{
-                    dainfo.sValue = "0";
-                    dainfo.fValue=0.0f;
-                }
-                data_ptr->mValues[index++] = dainfo;
-
-                dainfo.bType=false;
-                s=vbl[2].get_printable_value();
-                dainfo.sValue = s;
-                string_replace(s,"dB","");
-                string_replace(s," ","");
-                if(s=="N/A")
-                    dainfo.fValue=0.0f;
-                else{
-                    dainfo.fValue =  atof(s.c_str());
-                }
-                data_ptr->mValues[index++] = dainfo;
-
-                dainfo.bType=false;
-                s=vbl[3].get_printable_value();
-                dainfo.sValue = s;
-                string_replace(s,"dB","");
-                string_replace(s," ","");
-                dainfo.fValue = atof(s.c_str());
-                data_ptr->mValues[index++] = dainfo;
-
-                s=vbl[4].get_printable_value();
-                dainfo.sValue = s;
-                dainfo.fValue = atof(s.c_str());
-                data_ptr->mValues[index++] = dainfo;
-
-                s=vbl[5].get_printable_value();
-                dainfo.sValue = s;
-                string_replace(s,"MHz","");
-                string_replace(s," ","");
-                dainfo.fValue = atof(s.c_str());
-                data_ptr->mValues[index++] = dainfo;
-
-                return 0;
-            }*/
-            return 0;
+           return 0;
        }
         return -1;
 

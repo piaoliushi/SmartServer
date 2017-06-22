@@ -24,8 +24,8 @@ device_session::device_session(boost::asio::io_service& io_service,
     #endif
     ,resolver_(io_service)
     ,uresolver_(io_service)
-    ,query_timer_(io_service)
     ,connect_timer_(io_service)
+    ,query_timer_(io_service)
     ,timeout_timer_(io_service)
     ,schedules_task_timer_(io_service)
     ,receive_msg_ptr_(new othdev_message(2048))
@@ -39,6 +39,7 @@ device_session::device_session(boost::asio::io_service& io_service,
     ,snmp_ptr_(NULL)
     ,target_ptr_(NULL)
     ,all_dev_is_use_(false)
+
 {
 
 }
@@ -552,6 +553,7 @@ void device_session::start_read_head(int msgLen)
 void device_session::start_query_timer(unsigned long nSeconds/* =3 */)
 {
     query_timer_.expires_from_now(boost::posix_time::millisec(nSeconds));
+    //query_timer_.expires_at(query_timer_.expires_at() + boost::posix_time::millisec(nSeconds));
     query_timer_.async_wait(
             #ifdef USE_STRAND
                 strand_.wrap(
