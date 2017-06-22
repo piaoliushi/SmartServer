@@ -589,7 +589,6 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
 
             if(modleInfos_.mapDevInfo.size()<=1){
                 close_all();
-                //cout<<"query_send_time_event----close"<<endl;
                 start_connect_timer(moxa_config_ptr->connect_timer_interval);
                 return;
             }
@@ -602,12 +601,14 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             cur_dev_id_ = next_dev_id();
             send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
+        cout<<"query_timer_event_start--->devId="<<cur_dev_id_<<"----"<<tmp_query_cur_time<<endl;
         start_query_timer(moxa_config_ptr->query_interval);
     }else{
 
-        close_all();
+        cout<<"query_timer_event_aborted--->devId="<<cur_dev_id_<<"----"<<tmp_query_cur_time<<endl;
+        //close_all();
         //query_timer_.cancel();
-        //start_query_timer(moxa_config_ptr->query_interval);
+        start_query_timer(moxa_config_ptr->query_interval);
     }
 }
 //获取同步网络数据，适用http,snmp
@@ -740,7 +741,7 @@ void device_session::close_all()
     set_con_state(con_disconnected);
     connect_timer_.cancel();
     timeout_timer_.cancel();
-    query_timer_.cancel();
+    //query_timer_.cancel();
     if(modleInfos_.iCommunicationMode==CON_MOD_COM){
         boost::system::error_code    ec;
         pSerialPort_ptr_->close(ec);
@@ -1258,10 +1259,11 @@ void device_session::handle_read_body(const boost::system::error_code& error, si
 
             if(cur_msg_q_id_<dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY].size()-1)
                 ++cur_msg_q_id_;
-            else
+            else{
+                cur_dev_id_ = next_dev_id();//切换到下一个设备
                 cur_msg_q_id_=0;
+            }
             start_read_head(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
-            //send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
         //else if(nResult>0)//跳过数据(针对数据管理器等设备的非查询指令回复)
         //    start_read_head(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
