@@ -564,8 +564,12 @@ void device_session::start_query_timer(unsigned long nSeconds/* =3 */)
 }
 void  device_session::query_send_time_event(const boost::system::error_code& error)
 {
- //cout<<"query_timer is abort! "<<error.message()<<endl;
-    cout<<"query_timer_event--->devId="<<cur_dev_id_<<endl;
+    static  char tmp_query_cur_time[64];
+    time_t nowtm = time(0);
+    tm *local_time = localtime(&nowtm);
+    strftime(tmp_query_cur_time, sizeof(tmp_query_cur_time), "%Y-%m-%d %H:%M:%S", local_time);
+
+    cout<<"query_timer_event--->devId="<<cur_dev_id_<<"----"<<tmp_query_cur_time<<endl;
     if(error!= boost::asio::error::operation_aborted)
     {
         if(query_timeout_count_<moxa_config_ptr->query_timeout_count)
