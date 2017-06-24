@@ -566,12 +566,12 @@ void device_session::start_query_timer(unsigned long nSeconds/* =3 */)
 }
 void  device_session::query_send_time_event(const boost::system::error_code& error)
 {
-    static  char tmp_query_cur_time[64];
-    time_t nowtm = time(0);
-    tm *local_time = localtime(&nowtm);
-    strftime(tmp_query_cur_time, sizeof(tmp_query_cur_time), "%Y-%m-%d %H:%M:%S", local_time);
+    //static  char tmp_query_cur_time[64];
+    //time_t nowtm = time(0);
+    //tm *local_time = localtime(&nowtm);
+    //strftime(tmp_query_cur_time, sizeof(tmp_query_cur_time), "%Y-%m-%d %H:%M:%S", local_time);
 
-    cout<<"query_timer_event--->devId="<<cur_dev_id_<<"----"<<tmp_query_cur_time<<endl;
+    //cout<<"query_timer_event--->devId="<<cur_dev_id_<<"----"<<tmp_query_cur_time<<endl;
     if(error!= boost::asio::error::operation_aborted)
     {
         if(query_timeout_count_<moxa_config_ptr->query_timeout_count)
@@ -601,11 +601,11 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             cur_dev_id_ = next_dev_id();
             send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
         }
-        cout<<"query_timer_event_start--->devId="<<cur_dev_id_<<"----"<<tmp_query_cur_time<<endl;
+        //cout<<"query_timer_event_start--->devId="<<cur_dev_id_<<"----"<<tmp_query_cur_time<<endl;
         start_query_timer(moxa_config_ptr->query_interval);
     }else{
 
-        cout<<"query_timer_event_aborted--->devId="<<cur_dev_id_<<"----"<<tmp_query_cur_time<<endl;
+        //cout<<"query_timer_event_aborted--->devId="<<cur_dev_id_<<"----"<<tmp_query_cur_time<<endl;
         //close_all();
         //query_timer_.cancel();
         start_query_timer(moxa_config_ptr->query_interval);

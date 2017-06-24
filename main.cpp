@@ -57,6 +57,8 @@ int main(int argc, char *argv[])
 //    QApplication a(argc, argv);
 //#endif
 
+    QtSingleApplication::addLibraryPath("./plugins");
+
 
 #ifndef Q_OS_WIN
 #ifdef ARM_LINUX_DEF
@@ -76,7 +78,6 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
-
 
 
     QApplication::setStyle(QStyleFactory::create("plastique"));

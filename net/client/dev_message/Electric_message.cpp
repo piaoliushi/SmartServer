@@ -528,7 +528,7 @@ namespace hx_net
                 tmUnit.commandId[6] = (uscrc&0x00FF);
                 tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
                 cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
-                tmUnit.commandId[1] = 0x01;
+                /*tmUnit.commandId[1] = 0x01;
                 tmUnit.commandId[2] = 0x00;
                 tmUnit.commandId[3] = 0x0A;
                 tmUnit.commandId[4] = 0x00;
@@ -545,7 +545,7 @@ namespace hx_net
                 uscrc = CRC16_A001(tmUnit.commandId,6);
                 tmUnit.commandId[6] = (uscrc&0x00FF);
                 tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
-                cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);*/
             }
                 break;
             case KSTAR_UPS:
@@ -896,6 +896,8 @@ namespace hx_net
                 for(int i=0;i<16;++i)
                 {
                     dainfo.fValue = ((data[3+i*2]<<8)|data[4+i*2])*0.1;
+                    if(i==0 || i==4 || i==5 || i==6)
+                        dainfo.fValue = dainfo.fValue*0.01;
                     data_ptr->mValues[indexpos++] = dainfo;
                 }
             }
