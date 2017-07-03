@@ -237,7 +237,7 @@ typedef struct
     string sStationNumber;//台站编号
     string sDevNum;       //设备编号
     string sDevName;      //设备名称
-    int    nDevType;        //设备类型
+    int    nDevType;      //设备类型
     int    nConnectType;  //连接类型
     int    nCommType;     //通信方式
     map<int,DeviceMonitorItem> mapMonitorItem;//对应的监控项信息
@@ -247,9 +247,9 @@ typedef struct
 typedef struct
 {
     string    sModleNumber;
-    int    iCommunicationMode;//连接类型0:网口,1:串口
-    NetCommunicationMode   netMode;
-    ComCommunicationMode comMode;
+    int       iCommunicationMode;//连接类型0:网口,1:串口
+    NetCommunicationMode      netMode;
+    ComCommunicationMode      comMode;
     map<string,DeviceInfo>    mapDevInfo;
 }ModleInfo;
 
@@ -270,14 +270,14 @@ typedef struct
 typedef struct
 {
     unsigned long long  nAlarmId;   //告警id
-    int           nType;      //告警类型
-    time_t      startTime; //开始时间
-    int         nTargetId; //指标id
-    int         nModuleId;//模块id
+    int         nType;      //告警类型
+    time_t      startTime;  //开始时间
+    int         nTargetId;  //指标id
+    int         nModuleId;  //模块id
     int         nModuleType;//模块type
-    int         nLimitId;//跃限类型,跃上限...
-    string      sReason;//告警描述
-    bool        bNotifyed;//已通知标志
+    int         nLimitId;   //跃限类型,跃上限...
+    string      sReason;    //告警描述
+    bool        bNotifyed;  //已通知标志
 }CurItemAlarmInfo;
 
 typedef struct DATA_INFO_TAG
@@ -285,12 +285,10 @@ typedef struct DATA_INFO_TAG
     bool       bType;//数据类型: false表示模拟量，true表示状态量
     float      fValue;//当bType为true表示状态量时，dValue == 1.0，界面亮绿灯，反之红灯。
     string     sValue;
-    //bool       bUpdate;//是否已经更新（适应多指令分数据段解析）
 }DataInfo,*pDataInfo;
 
 typedef struct _tagData
 {
-
      map<int,DataInfo> mValues;
 }Data,pData;
 typedef boost::shared_ptr<Data> DevMonitorDataPtr;

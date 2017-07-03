@@ -19,10 +19,14 @@ bool StationConfig::load_station_config()
 {
     mapModleInfo.clear();
     string sLocalStationId = GetInst(LocalConfig).local_station_id();
-    if(!GetInst(DataBaseOperation).GetAllDevInfo(mapModleInfo,sLocalStationId))
+    string sLocalServerId  = GetInst(LocalConfig).local_dev_server_number();
+
+    if(!GetInst(DataBaseOperation).GetAllDevInfo(mapModleInfo,sLocalStationId,sLocalServerId))
         return false;
+
     if(!GetInst(DataBaseOperation).GetDataDictionary(Bohui_Protocol::mapTypeToStr))
         return false;
+
     if(!GetInst(DataBaseOperation).GetDeviceDataDictionary(mapDeviceDicry))
         return false;
 

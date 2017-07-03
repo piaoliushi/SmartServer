@@ -290,7 +290,7 @@ struct DevicePropertyEx
 		,connect_timeout_duration(10)//默认连接超时时长10秒
 		,run_detect_max_count(2)//默认检测功率3次高于0值功率设定值则认为开机
 		,shutdown_detect_max_count(2)//默认检测功率3次低于0值功率设定值则认为关机
-        ,data_save_interval(900)//默认15分钟记录一次数据
+        ,data_save_interval(43200)//默认15分钟记录一次数据
 		,alarm_detect_max_count(2)//默认报警检测次数为2次
 		,cmd_timeout_interval(10)//10默认命令超时循环间隔为10秒钟
         ,cmd_excut_timeout_duration(60)//默认命令发送超时时长为2分钟,超过此时间将不再尝试发送控制命令

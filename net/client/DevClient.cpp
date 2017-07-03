@@ -25,35 +25,41 @@ DevClient::~DevClient()
 {
 
     device_pool_.clear();
+    child_svc_pool_.clear();
 }
 
 //连接所有设备
 void DevClient::connect_all()
 {
     string sLocalStationId = GetInst(LocalConfig).local_station_id();
-    boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
-
-    vector<ModleInfo> &vModle = GetInst(StationConfig).get_Modle();
-    vector<ModleInfo>::iterator modle_iter = vModle.begin();
-    for(;modle_iter != vModle.end();modle_iter++)
+    //连接本地设备
     {
-       if(device_pool_.find(DevKey(sLocalStationId,(*modle_iter).sModleNumber))==device_pool_.end())
+        boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
+        vector<ModleInfo> &vModle = GetInst(StationConfig).get_Modle();
+        vector<ModleInfo>::iterator modle_iter = vModle.begin();
+        for(;modle_iter != vModle.end();modle_iter++)
         {
+           if(device_pool_.find(DevKey(sLocalStationId,(*modle_iter).sModleNumber))==device_pool_.end())
+            {
 
-            session_ptr new_session(new device_session(io_service_pool_.get_io_service(),(*modle_iter),http_report_session_ptr_));
-            device_pool_[DevKey(sLocalStationId,(*modle_iter).sModleNumber)]=new_session;
-            new_session->init_session_config();
-            new_session->connect();
+                session_ptr new_session(new device_session(io_service_pool_.get_io_service(),(*modle_iter),http_report_session_ptr_));
+                device_pool_[DevKey(sLocalStationId,(*modle_iter).sModleNumber)]=new_session;
+                new_session->init_session_config();
+                new_session->connect();
+            }
         }
+    }
+    //连接下级服务
+    {
+
     }
 
     if(GetInst(StationConfig).IsHaveGsm())
     {
         ComCommunicationMode cominfo = GetInst(StationConfig).getGsmInfo();
         if(!m_pGsm_ptr_)
-        {
             m_pGsm_ptr_=boost::shared_ptr<Gsms>(new Gsms());
-        }
+
         if(m_pGsm_ptr_->OpenCom(cominfo.icomport,cominfo.irate))
         {
             QObject::connect(m_pGsm_ptr_.get(),SIGNAL(S_state(int,bool)),GetInst(SvcMgr).get_notify(),SIGNAL(S_gsm_state(int,bool)));

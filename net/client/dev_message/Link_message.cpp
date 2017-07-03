@@ -280,6 +280,13 @@ namespace hx_net
     void aysnc_callback(int reason, Snmp *session,
                 Pdu &pdu, SnmpTarget &target, void *cd)
     {
+        //判断是否接收到查询应答或者trap通知
+        if(reason != SNMP_CLASS_ASYNC_RESPONSE && reason != SNMP_CLASS_NOTIFICATION){
+            cout << "Failed to issue SNMP aysnc_callback: (" << reason  << ") "
+                   << session->error_msg(reason) << endl;
+            return;
+        }
+
         if (cd)
           ((Link_message*)cd)->Link_Callback(reason, session, pdu, target);
     }
@@ -287,11 +294,11 @@ namespace hx_net
 
     void Link_message::Link_Callback(int reason, Snmp *session,Pdu &pdu, SnmpTarget &target)
     {
-        int pdu_error = pdu.get_error_status();
-        if (pdu_error)
-            return;
-        if (pdu.get_vb_count() == 0)
-            return;
+        //int pdu_error = pdu.get_error_status();
+        //if (pdu_error)
+        //    return;
+        //if (pdu.get_vb_count() == 0)
+        //    return;
 
         switch (d_devInfo.nSubProtocol)
         {
@@ -312,20 +319,14 @@ namespace hx_net
 
     void Link_message::parse_Satellite_data_(Pdu &pdu, SnmpTarget &target)
     {
-//        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
-//        if(cur_data_ptr==NULL)
-//            return;
         if(d_curData_ptr == NULL)
             return;
-        //boost::recursive_mutex::scoped_lock lock(data_mutex);
         for (int i=0; i<pdu.get_vb_count(); i++)
         {
             Vb nextVb;
             pdu.get_vb(nextVb, i);
             string cur_oid = nextVb.get_printable_oid();//Oid
             string cur_value =nextVb.get_printable_value();
-            //if(cur_value.empty())
-             //   continue;
             DataInfo dainfo;
             if(cur_oid == rflevel){
                 if(cur_value.empty())
@@ -384,18 +385,15 @@ namespace hx_net
                 d_curData_ptr->mValues[5] = dainfo;
             }
         }
-        if(d_curData_ptr->mValues.size()>0){
 
-            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
-        }
+
+        m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
 
     }
 
     int Link_message::parse_TestReceive_data(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)
     {
-//        if(d_task_queue_ptr->get_Task_Size()>10)
-//            return -1;
-//        d_task_queue_ptr->SubmitTask(data_ptr);
+
         Pdu pdu;
         Vb vbl[3];
         vbl[0].set_oid(Oid("1.3.6.1.2.1.25.2.2.0"));
@@ -404,7 +402,7 @@ namespace hx_net
         for (int i=0; i<NUM_SYS_VBS-3;i++)
             pdu += vbl[i];
         int status = snmp->get(pdu,*target, aysnc_callback,this);
-        if (status){
+        if (status != SNMP_ERROR_SUCCESS){
             return -1;
         }else{
             return 0;
@@ -414,9 +412,7 @@ namespace hx_net
 
     void Link_message::parse_Testllite_data_(Pdu &pdu, SnmpTarget &target)
     {
-//        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
-//        if(cur_data_ptr==NULL)
-//            return;
+
         if(d_curData_ptr == NULL)
             return;
 
@@ -452,16 +448,15 @@ namespace hx_net
                 d_curData_ptr->mValues[2] = dainfo;
             }
         }
-        if(d_curData_ptr->mValues.size()>0){
-            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
-        }
+
+        m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
     }
 
     int Link_message::parse_SingAptReceive_data(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)
     {
-//        if(d_task_queue_ptr->get_Task_Size()>10)
-//            return -1;
-//         d_task_queue_ptr->SubmitTask(data_ptr);
+        if(snmp == NULL)
+            return -1;
+
         int status = snmp->get(query_pdu,*target, aysnc_callback,this);
         if (status){
             return -1;
@@ -473,9 +468,7 @@ namespace hx_net
 
     void Link_message::parse_SingApt_data(Pdu &pdu, SnmpTarget &target)
     {
-//        DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
-//        if(cur_data_ptr==NULL)
-//            return;
+
         if(d_curData_ptr == NULL)
             return;
 
@@ -501,16 +494,14 @@ namespace hx_net
                 d_curData_ptr->mValues[(*iter).second] = dainfo;
             }
         }
-        if(d_curData_ptr->mValues.size()>0){
-            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
-        }
+
+
+        m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+
     }
 
     void Link_message::parse_DmpSwitch_data(Pdu &pdu, SnmpTarget &target)
     {
-        //DevMonitorDataPtr cur_data_ptr  = d_task_queue_ptr->GetTask();
-        //if(cur_data_ptr==NULL)
-        //    return;
 
         if(d_curData_ptr == NULL)
             return;
@@ -536,9 +527,9 @@ namespace hx_net
                 d_curData_ptr->mValues[(*iter).second] = dainfo;
             }
         }
-        if(d_curData_ptr->mValues.size()>0){
-            m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
-        }
+
+        m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+
     }
 
     void Link_message::parse_AsiApt_data(Pdu &pdu, SnmpTarget &target)

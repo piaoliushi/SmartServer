@@ -154,11 +154,11 @@ bool DataBaseOperation::GetDeviceDataDictionary(map<string,map<int,string> >& ma
     return true;
 }
 
-//获取某个设备信息(剔除短信猫配置信息)
-bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo& device )
+//获取某个设备信息(剔除短信猫配置信息,判断该设备是否属于该授权服务器)
+bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo& device,string sServerNumber)
 {
 
-    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+    if(!db.isOpen() || !db.isValid()) {
         std::cout<<"GetDevInfo is error ------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
@@ -166,7 +166,8 @@ bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery devquery(db);
     QString strSql=QString("select a.DeviceNumber,a.AssociateNumber,a.DeviceName,a.DeviceType,a.IsAssociate,a.IsMultiChannel,a.ChannelSize,a.IsUse,a.AddressCode,b.MainCategoryNumber,b.SubCategoryNumber,a.ProtocolNumber\
-                           from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and a.DeviceType<>300 and b.ProtocolNumber=a.ProtocolNumber").arg(QString::fromStdString(strDevnum));
+                           from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and a.DeviceType<>300 and b.ProtocolNumber=a.ProtocolNumber and a.DeviceNumber in \
+                           (select c.objectnumber from platform_server_purview c where c.servernumber='%2' and c.objecttype=0 )").arg(QString::fromStdString(strDevnum) ).arg(QString::fromStdString(sServerNumber) );
             devquery.prepare(strSql);
        if(devquery.exec())   {
             if(devquery.next())  {
@@ -196,14 +197,14 @@ bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo
 
             }
         }else {
-            std::cout<<devquery.lastError().text().toStdString()<<"GetDataDictionary---query---error!"<<std::endl;
+            std::cout<<devquery.lastError().text().toStdString()<<"GetDevInfo---query---error!"<<std::endl;
             return false;
         }
        return true;
 }
 
 //获取所有设备信息
-bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sStationId)
+bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sStationId,string sServerId)
 {
     QSqlDatabase db = ConnectionPool::openConnection();
     if(!db.isOpen() || !db.isValid()) {
@@ -233,9 +234,10 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
             if(net1query.exec(strQdev)) {
                 while(net1query.next()) {
                     DeviceInfo dev;
-                    //获得设备配置信息
-                    GetDevInfo(db,net1query.value(0).toString().toStdString(),dev);
-                    info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
+                    //获得设备配置信息,且判断该设备是否授权
+                    GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
+                    if(dev.sDevNum.length()>0)
+                        info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
                 }
             }
 
@@ -267,7 +269,7 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
                if(net1query.exec(strQdev)) {
                    while(net1query.next()){
                        DeviceInfo dev;
-                       GetDevInfo(db,net1query.value(0).toString().toStdString(),dev);
+                       GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
                        if(dev.sDevNum.length()>0)
                            info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
                    }

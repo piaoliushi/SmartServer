@@ -92,7 +92,12 @@ namespace hx_net
         http_request_session_ptr      http_request_session_ptr_;
         http_request_session_ptr      http_report_session_ptr_;
 
-        boost::shared_ptr<Gsms>    m_pGsm_ptr_;
+        boost::shared_ptr<Gsms>       m_pGsm_ptr_;
+
+        //连接下级服务
+        boost::recursive_mutex        child_svc_mutex_;
+        std::map<string,session_ptr>  child_svc_pool_;//key:servernumber
+
 	};
 }
 

@@ -37,7 +37,7 @@ public:
     bool check_database();
 
     //获得所有设备信息
-    bool GetAllDevInfo(vector<ModleInfo>& v_Linkinfo,string sStationId);
+    bool GetAllDevInfo(vector<ModleInfo>& v_Linkinfo,string sStationId,string sServerId);
 
     //获得数据字典映射表(不包含设备类型字段)
     bool GetDataDictionary(map<int,pair<string,string> >& mapDicry);
@@ -130,7 +130,7 @@ protected:
     bool GetAlarmConfig(QSqlDatabase &db,string strDevnum,map<int,Alarm_config>& map_Alarmconfig);
     //bool GetItemAlarmConfig(QSqlDatabase &db,string strDevnum,int iIndex,vector<Alarm_config>& vAlarmconfig);
     bool GetItemAlarmConfig(QSqlDatabase &db, string strDevnum,int iIndex,int iThid,vector<Alarm_config>& vAlarmconfig);
-    bool GetDevInfo(QSqlDatabase &db,string strDevnum,DeviceInfo& device);
+    bool GetDevInfo(QSqlDatabase &db,string strDevnum,DeviceInfo& device,string sServerNumber);
     bool GetAssDevChan(QSqlDatabase &db, QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev );
 private:
     QString d_serveraddress;
