@@ -11,7 +11,7 @@ Electric_message::Electric_message(session_ptr  pSession,boost::asio::io_service
     ,d_devInfo(devInfo)
     ,d_test_send_timer_(io_service)
     ,d_interrogation_send_timer_(io_service)
-    ,m_Register(false)
+    //,m_Register(false)
     ,d_stopdt(1)
     ,d_testfr(1)
     ,d_num_s(0)
@@ -42,18 +42,6 @@ void Electric_message::SetProtocol(int mainprotocol,int subprotocol)
     switch(mainprotocol){
     case EDA9033:
         break;
-    case ELECTRIC:{
-        switch (subprotocol)
-        {
-        case ELECTRIC_101:
-            m_Register =true;
-            break;
-        case ELECTRIC_104:
-            m_Register = false;
-            break;
-        }
-    }
-        break;
     }
 
     m_Subprotocol = subprotocol;
@@ -63,7 +51,7 @@ void Electric_message::SetProtocol(int mainprotocol,int subprotocol)
 
 bool Electric_message::isRegister()
 {
-    return m_Register;
+    return true;//m_Register;
 }
 
 int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
@@ -124,13 +112,7 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             else
                 return -1;
         }
-        }
-    }
-        break;
-    case ELECTRIC:{
-        switch (d_devInfo.nSubProtocol)
-        {
-        case ELECTRIC_104: {
+        case ABB_104: {
             if(data[0]==START) {
                 int nBodyLen = data[1];
                 if(nBodyLen < IEC_APDU_MIN || nBodyLen > IEC_APDU_MAX)
@@ -178,19 +160,13 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
             m_pSession->start_handler_data(iaddcode,d_curData_ptr);
             return iresult;
         }
-        }
-        break;
-    case ELECTRIC:{
-        switch (d_devInfo.nSubProtocol)
-        {
-        case ELECTRIC_104://标准head/body
+        case ABB_104://标准head/body
         {
             int iresult = parse_104_data(data,d_curData_ptr,nDataLen,iaddcode);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            //m_pSession->start_handler_data(iaddcode,d_curData_ptr);
             return iresult;
         }
         }
-    }
         break;
     }
     return -1;
@@ -212,17 +188,10 @@ bool Electric_message::IsStandardCommand()
         case PAINUO_SPM33:
         case YINGJIA_EM400:
             return true;
-        }
-        return false;
-    }
-        break;
-    case ELECTRIC:{
-        switch (d_devInfo.nSubProtocol)
-        {
-        case ELECTRIC_104:
-        case ELECTRIC_101:
+        case ABB_104:
             return true;
         }
+        return false;
     }
         break;
     }
@@ -233,16 +202,6 @@ void Electric_message::getRegisterCommand(CommandUnit &cmdUnit)
 {
     switch(d_devInfo.nDevProtocol){
     case EDA9033:
-        break;
-    case ELECTRIC:{
-        switch (d_devInfo.nSubProtocol)
-        {
-        case ELECTRIC_104:
-            break;
-        case ELECTRIC_101:
-            return;
-        }
-    }
         break;
     }
 }
@@ -545,7 +504,6 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
-
         case KSTAR_UPS:
         {
             CommandUnit tmUnit;
@@ -563,24 +521,32 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
+        case ABB_104:{
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 2;//IEC_APCI_LEN
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
-    }
-        break;
-    case ELECTRIC:{
-        switch (d_devInfo.nSubProtocol)
-        {
-        case ELECTRIC_104:
             break;
-        case ELECTRIC_101:
-            return;
-
         }
     }
         break;
-
-
-
     }
+}
+
+bool Electric_message::is_auto_run()
+{
+
+    switch(d_devInfo.nDevProtocol){
+        case EDA9033:{
+            switch(d_devInfo.nSubProtocol)
+            {
+            case ABB_104:
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 void Electric_message::GetResultData(DevMonitorDataPtr data_ptr)
@@ -594,7 +560,7 @@ void Electric_message::GetResultData(DevMonitorDataPtr data_ptr)
 
             if((*iter).second.iItemType == 0){
                 data_ptr->mValues[(*iter).first].fValue *= (*iter).second.dRatio;
-                if(data_ptr->mValues[(*iter).first].sValue.empty())//data_ptr->mValues[(*iter).first].fValue
+                if(data_ptr->mValues[(*iter).first].sValue.empty())
                     data_ptr->mValues[(*iter).first].sValue = QString::number(data_ptr->mValues[(*iter).first].fValue,'g',2).toStdString();
             }
             else {
@@ -605,15 +571,7 @@ void Electric_message::GetResultData(DevMonitorDataPtr data_ptr)
     }
 }
 
-bool Electric_message::is_auto_run()
-{
-    switch(d_devInfo.nDevProtocol){
-    case ELECTRIC:
-        return true;
-    }
 
-    return false;
-}
 
 int Electric_message::decode_Eda9033A( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 {

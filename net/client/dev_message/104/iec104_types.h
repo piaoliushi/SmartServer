@@ -27,13 +27,13 @@
 #define M_SP_NA_1	1   //单点遥信变位
 #define M_BO_NA_1	7   //32位比特串
 #define M_ME_NA_1	9   //带品质描述的规一化值
-#define M_ME_NB_1	11 //带品质描述的比例系数
-#define M_ME_NC_1	13 //短浮点数
-#define M_SP_TB_1	    30 //带 CP56Time2a 时标的单点信息
-#define M_BO_TB_1	33 //带 CP56Time2a 时标的 32 比特串
-#define M_ME_TD_1	34 //带 CP56Time2a 时标的测量值规一化值
-#define M_ME_TE_1	35 //带 CP56Time2a 时标的测量值标度化值
-#define M_ME_TF_1	36 //带 CP56Time2a 时标的测量值短浮点数
+#define M_ME_NB_1	11  //带品质描述的比例系数
+#define M_ME_NC_1	13  //短浮点数
+#define M_SP_TB_1	30  //带 CP56Time2a 时标的单点信息
+#define M_BO_TB_1	33  //带 CP56Time2a 时标的 32 比特串
+#define M_ME_TD_1	34  //带 CP56Time2a 时标的测量值规一化值
+#define M_ME_TE_1	35  //带 CP56Time2a 时标的测量值标度化值
+#define M_ME_TF_1	36  //带 CP56Time2a 时标的测量值短浮点数
 
 /* 32-bit string state and change data unit */
 struct iec_stcd {

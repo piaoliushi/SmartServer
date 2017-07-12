@@ -110,9 +110,9 @@ struct iechdr {
 struct iec_buf {
 	unsigned char	start;
 	unsigned char	length;
-	struct iechdr      h;	
-	iec_unit_id			asdu_h;
-	unsigned char  data[255];
+    struct iechdr   h;
+    iec_unit_id		asdu_h;
+    unsigned char   data[255];
 };
 
 enum frame_type {

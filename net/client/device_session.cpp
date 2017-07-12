@@ -934,9 +934,10 @@ void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curData
 
     if(ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
         return ;
-    if(GetInst(DataBaseOperation).AddItemMonitorRecord(sDevId,tmCurTime,curDataPtr,mapMonitorItem)){
-        tmLastSaveTime[sDevId] = tmCurTime;
-    }
+    GetInst(DataBaseOperation).AddItemMonitorRecord(sDevId,tmCurTime,curDataPtr,mapMonitorItem);
+    //amend by lk at 2017-7-12 无论是否记录成功都更新保存时间
+    tmLastSaveTime[sDevId] = tmCurTime;
+    //}
 
 }
 
@@ -1101,8 +1102,10 @@ void device_session::handle_connected(const boost::system::error_code& error)
         set_con_state(con_connected);
         //开始启动接收第一条查询指令的回复数据头
         receive_msg_ptr_->reset();
-        if(dev_agent_and_com[cur_dev_id_].second->IsStandardCommand()==true)
+        if(dev_agent_and_com[cur_dev_id_].second->IsStandardCommand()==true){
+
             start_read_head(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
+        }
         else
             start_read(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
 
@@ -1110,8 +1113,10 @@ void device_session::handle_connected(const boost::system::error_code& error)
         {
             if(dev_agent_and_com[cur_dev_id_].second->is_auto_run()==false)
                 start_query_timer(moxa_config_ptr->query_interval);
-            else
+            else{
                 dev_agent_and_com[cur_dev_id_].second->start();
+            }
+
         }
         //初始化最后保存时间
         time_t curTm = time(0);

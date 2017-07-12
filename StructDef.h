@@ -78,7 +78,7 @@ typedef enum PROTOCOL
 	SHANGHAI_MZ             = 16,//上海明珠
 	HARRIS                           = 17, //哈里斯
 	DE_XIN                            = 18, //德芯
-    ELECTRIC                         =19,  //电力规约
+    ELECTRIC_104                      =19,  //电力规约
     ANTENNA_CONTROL          = 20, //天线控制器
     TSC_TMIEDEV                  = 21, //校时设备
     LINK_DEVICE                   = 22,  //链路设备
@@ -207,6 +207,7 @@ typedef enum EDAPROTOCOL
     PAINUO_SPM33         = 6,//珠海派诺SPM33电表
     KSTAR_UPS            = 7,//科士达UPS
     YINGJIA_EM400        = 8,//广州盈嘉EM400电表
+    ABB_104              = 9,//ABB智能表104协议
 
 }EdaSubProtocol;
 typedef enum WSPROTOCOL
@@ -246,11 +247,11 @@ typedef enum DxPROTOCOL
 }DxSubProtocol;
 
 
-typedef enum ElECTRICPROTOCOL
-{
-	ELECTRIC_104     = 0, 
-	ELECTRIC_101     = 1, 
-}ElectricSubProtocol,*pElectricSubProtocol;
+//typedef enum ElECTRICPROTOCOL
+//{
+//    ELEC_ABB_104     = 0,
+//	ELECTRIC_101     = 1,
+//}ElectricSubProtocol,*pElectricSubProtocol;
 
 typedef enum TIMEROTOCOL
 {
