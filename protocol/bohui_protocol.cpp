@@ -95,8 +95,8 @@ bool Bohui_Protocol::_checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &pri
             if(ver!=NULL)
                 sVer = ver->value();
             msgId = strtol(rootNode->first_attribute("MsgID")->value(),NULL,10);
-           // xml_attribute<char> *prity =  rootNode->first_attribute("Priority");
-           // if(prity!=NULL)
+            // xml_attribute<char> *prity =  rootNode->first_attribute("Priority");
+            // if(prity!=NULL)
             //    priority = strtol( rootNode->first_attribute("Priority")->value(),NULL,10);
             xml_attribute<char> *srcUrl =  rootNode->first_attribute("SrcURL");
             if(srcUrl!=NULL)
@@ -578,6 +578,7 @@ void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
     }
 }
 
+//分析运行图消息
 bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<string,vector<Monitoring_Scheduler> > &mapMonSch)
 {
     nValue = 11;
@@ -693,6 +694,8 @@ void Bohui_Protocol::_setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValu
         }
     }
 }
+
+//分析告警门限消息
 bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,map<string,vector<Alarm_config> > &mapAlarmSet)
 {
     nValue = 11;
@@ -786,6 +789,7 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
      nValue = 0;
     return true;
 }
+
 //告警开关设置
 bool Bohui_Protocol::_parse_alarm_switch_set(xml_node<> *root_node,int &nValue,map<string,vector<Alarm_Switch_Set> > &mapAlarmSwitchSet)
 {
@@ -834,6 +838,7 @@ bool Bohui_Protocol::_parse_alarm_switch_set(xml_node<> *root_node,int &nValue,m
     return true;
 }
 
+//分析告警开关消息
 void Bohui_Protocol::_setAlarmSwitchSetParam(int nDevType,xml_node<> *rootNode,int &nValue)
 {
     nValue = 11;
@@ -854,6 +859,7 @@ void Bohui_Protocol::_setAlarmSwitchSetParam(int nDevType,xml_node<> *rootNode,i
     }else
          cout<<"写入数据库－－－－error"<<endl;
 }
+
 //手动控制(发射机)
 void Bohui_Protocol::_controlDeviceCommand(int nDevType,xml_node<> *rootNode,int &nValue)
 {

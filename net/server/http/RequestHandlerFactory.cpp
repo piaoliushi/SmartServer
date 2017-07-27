@@ -36,7 +36,7 @@ void request_handler_factory::destroy(request_handler_ptr handler)
 void request_handler_factory::register_data_callback(string  sIpAddress,HMsgHandlePtr pMsgHandle )
 {
     boost::recursive_mutex::scoped_lock lock(callback_mutex_);
-    if(map_callback_ptr_.find(sIpAddress)==map_callback_ptr_.end())
+    if(map_callback_ptr_.find(sIpAddress) == map_callback_ptr_.end())
         map_callback_ptr_[sIpAddress] = pMsgHandle;
 
 }
