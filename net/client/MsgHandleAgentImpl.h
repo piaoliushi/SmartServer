@@ -19,10 +19,15 @@ namespace hx_net
         int  check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number);
         int  decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
         int  decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
+        //http消息解析
+        int  decode_http_msg(const string &data,DevMonitorDataPtr data_ptr,CmdType cmdType,int number);
+
+
 		void input_params(const vector<string> &vParam);
 		bool IsStandardCommand();
         void GetAllCmd(CommandAttribute &cmdAll);
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
+        void GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit);
 		int getChannelCount();
 		bool isBelongChannel(int nChnnel,int monitorItemId);
 		bool isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr);

@@ -10,6 +10,8 @@
 #include "./transmmiter/GlsqTransmmit.h"
 #include "./transmmiter/dexintransmmit.h"
 #include "./transmmiter/gsbrtransmmit.h"
+#include "./transmmiter/zctransmmit.h"
+#include "./transmmiter/ckangtetransmmit.h"
 namespace hx_net
 {
 
@@ -80,6 +82,8 @@ namespace hx_net
 
     int Tsmt_message::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
 	{
+        if(!m_ptransmmit)
+            return RE_UNKNOWDEV;
         return m_ptransmmit->check_msg_header(data,nDataLen,cmdType,number);
 	}
 
@@ -112,8 +116,34 @@ namespace hx_net
         int irunstate=dev_unknown;
         if(data_ptr!=NULL)
             d_curData_ptr = data_ptr;
+        if(!m_ptransmmit)
+            return RE_UNKNOWDEV;
         int idecresult = m_ptransmmit->decode_msg_body(snmp,d_curData_ptr,target,irunstate);
 
+        return idecresult;
+    }
+    
+    //http消息解析
+    int  Tsmt_message::decode_http_msg(const string &data,DevMonitorDataPtr data_ptr,CmdType cmdType,int number)
+    {
+        int irunstate=dev_unknown;
+       
+        if(data_ptr!=NULL)
+            d_curData_ptr = data_ptr;
+        int idecresult = m_ptransmmit->decode_msg_body(data,d_curData_ptr,cmdType,number,irunstate);
+        if(idecresult == 0 ) {
+            GetResultData(d_curData_ptr);
+            if(irunstate==dev_unknown)
+                detect_run_state(d_curData_ptr);
+            else {
+                //设置运行状态
+                set_run_state(irunstate);
+            }
+
+            if(m_ptransmmit->IsStandardCommand()){
+                m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+            }
+        }
         return idecresult;
     }
     //获得运行状态
@@ -197,14 +227,26 @@ namespace hx_net
 
     bool Tsmt_message::IsStandardCommand()
 	{
-
+        if(!m_ptransmmit)
+            return false;
         return m_ptransmmit->IsStandardCommand();
 	}
 	
     void Tsmt_message::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)
 	{
-		
+        if(m_ptransmmit!=NULL)
+        {
+            m_ptransmmit->GetSignalCommand(lpParam,cmdUnit);
+        }
 	}
+
+    void Tsmt_message::GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit)
+    {
+        if(m_ptransmmit!=NULL)
+        {
+            m_ptransmmit->GetSignalCommand(cmmType,nIndex,cmdUnit);
+        }
+    }
 
     int   Tsmt_message::cur_dev_state()
     {
@@ -291,6 +333,7 @@ namespace hx_net
         case DLDZ:
             break;
         case CHENGDU_KANGTE_N:
+            m_ptransmmit = new CKangteTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case LIAONING_HS:
             break;
@@ -306,6 +349,9 @@ namespace hx_net
             break;
         case GSBR:
             m_ptransmmit = new GsbrTransmmit(boost::shared_ptr<hx_net::Tsmt_message>(this),d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+            break;
+        case ZHC:
+            m_ptransmmit = new ZcTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         }
     }
@@ -325,6 +371,7 @@ namespace hx_net
         d_cur_snmp = snmp;
         d_cur_target = target;
 
+        //执行任务
         excute_task_cmd();
 
         eErrCode = EC_OPR_ON_GOING;
@@ -415,9 +462,12 @@ namespace hx_net
                     m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
                     d_cur_user_.clear();
                     d_cur_task_ = -1;
+
+                    cout<<"command excute time out!----"<<endl;
                     return;
                 }else{
                     excute_task_cmd();
+                    cout<<"command excute again!----intervale:"<<ninterval<<endl;
                     start_task_timeout_timer();
                 }
             }
@@ -426,6 +476,8 @@ namespace hx_net
 
     void Tsmt_message::exec_trunon_task_(int nType)
     {
+        if(!m_ptransmmit)
+            return;
         //如果发射机正在监测运行状态，不执行开机操作
         if(is_detecting())
             return;
@@ -440,8 +492,8 @@ namespace hx_net
             }
             //主机使用则进行关主机动作
             if(d_relate_tsmt_ptr_->bUsed==true) {
-                if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR
-                                                            ))
+                if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
+                                                            d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR))
                     return ;
             }
             //计算目标天线位置
@@ -455,8 +507,7 @@ namespace hx_net
         }
 
 
-        if(!d_bUse_snmp)
-        {
+        if(!d_bUse_snmp){
             if(m_pSession!=NULL)
                 m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,nType);
         }
@@ -466,12 +517,13 @@ namespace hx_net
     //关机
     void Tsmt_message::exec_trunoff_task_()
     {
+        if(!m_ptransmmit)
+            return;
         if(is_detecting())
             return;
 
 
-        if(!d_bUse_snmp)
-        {
+        if(!d_bUse_snmp){
             if(m_pSession!=NULL)
                 m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0);
         }

@@ -342,7 +342,7 @@ struct DevicePropertyEx
 	double ubb_ratio_value;           //默认电压调整系数（9033A）
 	double ibb_ratio_value;           //默认电流调整系数(9033A)
 	
-	map<int,int>  cmd_ack_length_by_id;//查询命令相应长度 
+    map<int,int>  cmd_ack_length_by_id;//查询命令响应长度
 
 	string  associate_transmit_number;//关联主机id(针对无天线主备机配置)
 	bool    associate_use;//关联主机启用

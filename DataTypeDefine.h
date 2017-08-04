@@ -9,47 +9,45 @@ using namespace std;
 
 enum DEVType
 {
-    DEVICE_TRANSMITTER = 0,//发射机
+    DEVICE_TRANSMITTER       = 0,  //发射机
     DEVICE_ELEC              = 1,  //电力仪
-    DEVICE_TEMP             = 2,   //温湿度计
-    DEVICE_SMOKE          = 3,   //烟雾
-    DEVICE_WATER           = 4, //水禁
-    DEVICE_AIR                = 5,//空调
-    DEVICE_GPS               = 6,//gps
-
-    DEVICE_SWITCH         = 7,//切换设备
-    DEVICE_GPS_TIME      = 8,  //GPS授时器
-
-    DEVICE_GS_RECIVE    =100,//卫星接收机
-    DEVICE_MW               =101,//微波接收机
-    DEVICE_TR                 =102,//光收发器
-    DEVICE_ENCODER      =110,//编码器
-    DEVICE_MUX              =111,//复用器
-    DEVICE_MO                =112,//调制器
-    DEVICE_ANTENNA       =114,//同轴开关
-    DEVICE_EXCITATION    =115,//激励器单设备
-    DEVICE_POWER          =116,//功放单设备
-    DEVICE_MEDIA           =117,//媒体设备
-
-    DEVICE_SMSMODLE = 300,//短信猫
-    DEVICE_ALARM_SOUND = 301,//声光告警器
+    DEVICE_TEMP              = 2,  //温湿度计
+    DEVICE_SMOKE             = 3,  //烟雾
+    DEVICE_WATER             = 4,  //水禁
+    DEVICE_AIR               = 5,  //空调
+    DEVICE_GPS               = 6,  //gps
+    DEVICE_SWITCH            = 7,  //切换设备
+    DEVICE_GPS_TIME          = 8,  //GPS授时器
+    DEVICE_GS_RECIVE         =100, //卫星接收机
+    DEVICE_MW                =101, //微波接收机
+    DEVICE_TR                =102, //光收发器
+    DEVICE_ENCODER           =110, //编码器
+    DEVICE_MUX               =111, //复用器
+    DEVICE_MO                =112, //调制器
+    DEVICE_ANTENNA           =114, //同轴开关
+    DEVICE_EXCITATION        =115, //激励器单设备
+    DEVICE_POWER             =116, //功放单设备
+    DEVICE_MEDIA             =117, //媒体设备
+    DEVICE_SMSMODLE          =300, //短信猫
+    DEVICE_ALARM_SOUND       =301, //声光告警器
 };
 
 #define    ITEM_ANALOG   0  //模拟量
-#define    ITEM_DIGITAL    1  //数字量
+#define    ITEM_DIGITAL  1  //数字量
 
 #define    CON_MOD_NET   1 //网口
-#define    CON_MOD_COM  0 //串口
+#define    CON_MOD_COM   0 //串口
 
-#define    NET_MOD_TCP     0 //TCP
-#define    NET_MOD_UDP    1 //UDP
-#define    NET_MOD_SNMP  2//SNMP
-#define    NET_MOD_HTTP   3// HTTP
-#define    NET_MOD_COM   4//COM
+#define    NET_MOD_TCP   0 //TCP
+#define    NET_MOD_UDP   1 //UDP
+#define    NET_MOD_SNMP  2 //SNMP
+#define    NET_MOD_HTTP  3 // HTTP
+#define    NET_MOD_COM   4 //COM
 
-#define    RUN_TIME_DAY         2 //运行图-天
-#define    RUN_TIME_WEEK      0 //运行图-星期
-#define    RUN_TIME_MONTH    1 //运行图-月
+
+#define    RUN_TIME_WEEK   0 //运行图-星期
+#define    RUN_TIME_MONTH  1 //运行图-月
+#define    RUN_TIME_DAY    2 //运行图-天
 
 
 enum _tag_CommandType{
@@ -64,17 +62,19 @@ typedef struct _tag_M_Sch
         iMonitorWeek=-1;
         iMonitorMonth=-1;
         iMonitorDay=-1;
+        bRunModeFlag=false;//默认非监测时段
 
     }
 
-    int      iMonitorType;    //0=星期，1=月，2=天
-    bool    bMonitorFlag;    //flase-不监测，true-监测
-    int      iMonitorWeek;   //星期(1-7）
-    int      iMonitorMonth;  //月（0-12，0=all）
+    int      iMonitorType;     //0=星期，1=月，2=天
+    bool     bMonitorFlag;     //flase-不启用，true-启用
+    bool     bRunModeFlag;      //false-非监测时段，true-监测时段
+    int      iMonitorWeek;     //星期(1-7）
+    int      iMonitorMonth;    //月（0-12，0=all）
     int      iMonitorDay;      //日(1-31)
-    time_t      tStartTime;        //开始时间
-    time_t      tEndTime;          //结束时间
-    time_t      tAlarmEndTime;     //月运行计划终止日期
+    time_t   tStartTime;       //开始时间
+    time_t   tEndTime;         //结束时间
+    time_t   tAlarmEndTime;    //月运行计划终止日期
 }Monitoring_Scheduler;
 
 typedef struct
@@ -86,13 +86,13 @@ typedef struct
 
 typedef struct
 {
-    int      gid;
-    int      iCommandType; //命令类型
-    int      iDateType;         //时间类型
-    int      iWeek;              //星期(1-7)
+    int      gid;            //唯一标识
+    int      iCommandType;   //命令类型
+    int      iDateType;      //时间类型
+    int      iWeek;          //星期(1-7)
     int      iMonitorMonth;  //月（0-12，0=all）
-    int      iMonitorDay;      //日(1-31)
-    time_t  tCmdEndTime;  //月运行计划终止日期
+    int      iMonitorDay;    //日(1-31)
+    time_t  tCmdEndTime;     //月运行计划终止日期
     time_t  tExecuteTime;
     int iHasParam;
     CmdParam cParam;
@@ -117,10 +117,10 @@ typedef struct
 
 typedef struct
 {
-    int    icomport; //com口ID
-    int    irate;       //波特率
-    int    idata_bit; //数据位
-    int    istop_bit; //停止位
+    int    icomport;   //com口ID
+    int    irate;      //波特率
+    int    idata_bit;  //数据位
+    int    istop_bit;  //停止位
     int    iparity_bit;//校验位
 }ComCommunicationMode;
 
@@ -151,14 +151,14 @@ typedef struct
 typedef struct
 {
     int iAlarmid;         //告警类型id
-    double fLimitvalue;//门限值
+    double fLimitvalue;   //门限值
     int iAlarmlevel;      //告警等级
-    int iLimittype;        //0:上限,1:下线,2:上上限,3:下下限,4:状态量
-    int iLinkageEnable;//联动标志
+    int iLimittype;       //0:上限,1:下线,2:上上限,3:下下限,4:状态量
+    int iLinkageEnable;   //联动标志
     int iDelaytime;       //告警延迟(秒)
-    int iResumetime;   //恢复延迟(秒)
+    int iResumetime;      //恢复延迟(秒)
     int iAlarmtype;       //0:监控量,1:设备
-    string strLinkageRoleNumber;//联动角色
+    string strLinkageRoleNumber;   //联动角色
     vector<LinkAction> vLinkAction;//联动动作
 }Alarm_config;
 
@@ -213,22 +213,22 @@ typedef struct
 
 typedef struct
 {
-    string sDevNum;
-    string sDevName;
-    int     iDevType;//设备类型（0：发射机,1:天线，2：环境，3：电力，4：链路设备）
-    bool   bAst;//是否关联
-    bool   bUsed;//是否启用
+    string  sDevNum;
+    string  sDevName;
+    int     iDevType;     //设备类型（0：发射机,1:天线，2：环境，3：电力，4：链路设备）
+    bool    bAst;         //是否关联
+    bool    bUsed;        //是否启用
     int     nDevProtocol; //设备协议号
     int     nSubProtocol; //设备子协议号
-    bool   bMulChannel;//是否是多通道设备
-    int      iChanSize;//通道数
-    int      iAddressCode;//地址码
-    map<int,DeviceMonitorItem>        map_MonitorItem;//设备监控量
-    map<int,vector<Monitoring_Scheduler> >      vMonitorSch;  //监控计划
-    vector<Command_Scheduler>           vCommSch;   //控制计划
-    map<string,DevProperty>                  map_DevProperty;//设备属性列表
-    map<int,Alarm_config >                    map_AlarmConfig;//设备告警配置
-    map<int,vector<AssDevChan> >       map_AssDevChan;//设备关联设置
+    bool    bMulChannel;  //是否是多通道设备
+    int     iChanSize;    //通道数
+    int     iAddressCode; //地址码
+    map<int,DeviceMonitorItem>                map_MonitorItem; //设备监控量
+    map<int,vector<Monitoring_Scheduler> >    vMonitorSch;     //监控计划
+    vector<Command_Scheduler>                 vCommSch;        //控制计划
+    map<string,DevProperty>                   map_DevProperty; //设备属性列表
+    map<int,Alarm_config >                    map_AlarmConfig; //设备告警配置
+    map<int,vector<AssDevChan> >              map_AssDevChan;  //设备关联设置
 }DeviceInfo,*pDeviceInfo;
 
 

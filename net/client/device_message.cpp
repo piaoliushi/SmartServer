@@ -32,6 +32,31 @@ namespace hx_net
 		return nResult;
 	}
 
+    //用于非标准协议多指令解析
+
+    int othdev_message::check_msg_header(HMsgHandlePtr agentPtr, int msgLen, CmdType cmdType, int number)
+    {
+        if(msgLen>0)
+            move_w_ptr(msgLen);
+        int nResult = agentPtr->check_msg_header(r_ptr(),valid_msg_len(),cmdType,number);
+        if(nResult>0 && space()<nResult)
+        {
+            data_.resize(data_.size()+nResult-space()+1);//重新扩充消息长度
+        }
+        if(nResult>0)
+            move_r_ptr(nResult);
+        return nResult;
+    }
+
+    int othdev_message::decode_msg(HMsgHandlePtr agentPtr, DevMonitorDataPtr data_ptr, int msgLen, int &iaddcode)
+    {
+        int nResult = agentPtr->decode_msg_body(r_ptr(),data_ptr,valid_msg_len(),iaddcode);
+        reset();
+        return nResult;
+    }
+
+
+
     int othdev_message::decode_msg_body(HMsgHandlePtr agentPtr,DevMonitorDataPtr data_ptr,int msgLen,int &iaddcode)
 	{
         if(msgLen>0)
@@ -41,6 +66,7 @@ namespace hx_net
 		reset();
 		return nResult;
 	}
+
 
 	int othdev_message::valid_msg_len()
 	{

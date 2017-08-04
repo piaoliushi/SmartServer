@@ -26,11 +26,9 @@ namespace hx_net
         void   setsession(const session_ptr& _session);
         void   getsession(session_ptr& _session);
 
-        //int check_normal_msg_header(HDevAgentPtr agentPtr,int msgLen,CmdType cmdType=CMD_QUERY,int number=0);
-		
-      //  int decode_msg_body(HDevAgentPtr agentPtr,pTsmtAgentMsgPtr data_ptr_,int msgLen);
+        int check_msg_header(HMsgHandlePtr agentPtr, int msgLen, CmdType cmdType, int number);
 
-      //  int check_msg_header(HDevAgentPtr agentPtr,int msgLen,CmdType cmdType,int number);
+        int decode_msg(HMsgHandlePtr agentPtr, DevMonitorDataPtr data_ptr, int msgLen, int &iaddcode);
 
 		int check_normal_msg_header(HMsgHandlePtr agentPtr,int msgLen,CmdType cmdType,int number);
 
@@ -54,7 +52,7 @@ namespace hx_net
 		vector<unsigned char>    data_;
 		size_t          w_pos_;
 		size_t          r_pos_;
-         session_weak_ptr   session_;//boost::weak_ptr<net_session>
+        session_weak_ptr   session_;
     };
     typedef boost::shared_ptr<hx_net::othdev_message> othdevMsgPtr;
 }

@@ -17,9 +17,13 @@ public:
     void GetAllCmd(CommandAttribute &cmdAll);
     int  check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number);
     int  decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
-    int decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
+    int  decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
+    //http消息解析
+    int  decode_http_msg(const string &data,DevMonitorDataPtr data_ptr,CmdType cmdType,int number);
+
     bool IsStandardCommand();
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
+    void GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit);
     int   cur_dev_state();
     void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
                        bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);

@@ -25,6 +25,7 @@ namespace hx_net
 
         tcp::socket& socket();
         udp::socket& usocket();
+        tcp::socket& httpSocket();
         tcp::endpoint get_addr();
 		udp::endpoint get_udp_addr();
 
@@ -135,8 +136,9 @@ namespace hx_net
 		virtual void handle_read_body(const boost::system::error_code& error, size_t bytes_transferred);
 		virtual void handle_write(const boost::system::error_code& error, size_t bytes_transferred);
 	private:
-        tcp::socket             socket_;
-        udp::socket            udp_socket_;
+        tcp::socket           socket_;
+        tcp::socket           http_socket_;
+        udp::socket           udp_socket_;
 		boost::mutex          socket_mutex_;
     };
     typedef boost::shared_ptr<hx_net::net_session>  session_ptr;

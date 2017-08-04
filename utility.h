@@ -18,4 +18,6 @@ void string_replace(string&s1,const string&s2,const string&s3);
 void Char2Hex(unsigned char ch, char* szHex);
 void CharStr2HexStr(unsigned char const* pucCharStr, string &pszHexStr, int iSize);
 unsigned short CalcCRC16_KT(unsigned char *pdest, int len);
+unsigned short CalcCRC16_USB(unsigned char *pdest, int len);
+void StringTrim(string &s);
 #endif // UTILITY_H

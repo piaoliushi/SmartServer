@@ -80,7 +80,9 @@ SOURCES += main.cpp\
     net/client/dev_message/transmmiter/GlsqTransmmit.cpp \
     net/client/dev_message/antenna_message.cpp \
     gpschecktime.cpp \
-    sms/gsms.cpp
+    sms/gsms.cpp \
+    net/client/dev_message/transmmiter/ckangtetransmmit.cpp \
+    net/client/dev_message/transmmiter/zctransmmit.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -157,7 +159,9 @@ HEADERS  += \
     net/client/dev_message/transmmiter/GlsqTransmmit.h \
     net/client/dev_message/antenna_message.h \
     gpschecktime.h \
-    sms/gsms.h
+    sms/gsms.h \
+    net/client/dev_message/transmmiter/ckangtetransmmit.h \
+    net/client/dev_message/transmmiter/zctransmmit.h
 
 FORMS    += mainwindow.ui
 

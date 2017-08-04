@@ -36,6 +36,8 @@ namespace hx_net
         void connect();
         //开始连接
         void connect(std::string hostname,unsigned short port,bool bReconnect=false);
+        //http连接
+        //void http_connect(std::string hostname,unsigned short port);
         //udp连接
         void udp_connect(std::string hostname,unsigned short port);
         //agent 连接，适用于http,snmp
@@ -100,6 +102,8 @@ namespace hx_net
         void set_stop(bool bStop=true);
         bool is_stop();
         void close_all();
+        void http_close_all();
+
         //判断监测量是否报警
         void check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,bool bMonitor);
 
@@ -156,7 +160,16 @@ namespace hx_net
         void handle_read(const boost::system::error_code& error, size_t bytes_transferred);
         void schedules_task_time_out(const boost::system::error_code& error);
         virtual void handle_write(const boost::system::error_code& error,size_t bytes_transferred);
-
+        //HTTP
+        void http_make_request_msg(int cmdType);//重新组织请求消息
+        //void http_handle_connected(const boost::system::error_code& error);
+        void http_handle_callback(const boost::system::error_code& error);
+        void http_handle_write_request(const boost::system::error_code& err);
+        void http_handle_read_status_line(const boost::system::error_code& err);
+        void http_handle_read_headers(const boost::system::error_code& err);
+        void http_handle_read_content(const boost::system::error_code& err);
+        void http_send_task(const string &sCommandId);
+        void http_cmd_close_i();
 
         //开始执行任务
         bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType);
@@ -225,6 +238,20 @@ namespace hx_net
 
         map<string,parse_ass_dev_ptr>   map_dev_ass_parse_ptr_;//
         map<int,string> map_addcode_devid_;
+
+
+        boost::asio::streambuf http_request_;
+        boost::asio::streambuf http_response_;
+        std::size_t http_content_length_;
+        std::string    http_content_;
+
+        bool short_connect_;//短连接标志（短连接标志为true则无需进行连接状态通知）
+        //string  http_command_id_;//待发指令id
+        //boost::asio::streambuf http_cmd_request_;
+
+
+        urdl::read_stream http_stream_;
+
     };
     typedef boost::shared_ptr<hx_net::device_session> dev_session_ptr;
     typedef boost::weak_ptr<hx_net::device_session>    dev_session_weak_ptr;

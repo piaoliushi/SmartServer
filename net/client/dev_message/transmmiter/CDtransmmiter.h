@@ -16,6 +16,12 @@ namespace hx_net{
 	private:
 		int OnXG_247Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
         int OnKT_digData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+        int OnCG_dig1KwData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+        void amp_data(unsigned char *data,DevMonitorDataPtr data_ptr,int ampnum);
+
+        int KaiTengData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+        int KT_1Kw_813_Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+        void amp_813_data(unsigned char *data,DevMonitorDataPtr data_ptr,int ampnum);
 	private:
 		int m_subprotocol;
 		int m_addresscode;

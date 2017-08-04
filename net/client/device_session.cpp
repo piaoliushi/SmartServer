@@ -39,6 +39,11 @@ device_session::device_session(boost::asio::io_service& io_service,
     ,snmp_ptr_(NULL)
     ,target_ptr_(NULL)
     ,all_dev_is_use_(false)
+    ,http_content_length_(0)
+    ,http_content_("")
+    ,short_connect_(false)
+    //,http_command_id_("")
+    ,http_stream_(io_service)
 
 {
 
@@ -76,16 +81,20 @@ void device_session::init_session_config()
         run_config_ptr[(*iter).first]=dev_config_ptr;
         //获取默认命令配置
         pars_agent->GetAllCmd(*tmpCommand);
+
+        //将配置文件中的自定义命令更新到command_;
+        GetInst(LocalConfig).device_cmd((*iter).first,*tmpCommand);
+
+
         //增加读配置文件获取命令回复长度...
-        if(dev_config_ptr->cmd_ack_length_by_id.size()>0)  {
-            for(int nCmdCount = 0;nCmdCount<tmpCommand->mapCommand[MSG_DEVICE_QUERY].size();++nCmdCount)
-                tmpCommand->mapCommand[MSG_DEVICE_QUERY][nCmdCount].ackLen = dev_config_ptr->cmd_ack_length_by_id[nCmdCount];
-        }
+        //        if(dev_config_ptr->cmd_ack_length_by_id.size()>0)  {
+        //            for(int nCmdCount = 0;nCmdCount<tmpCommand->mapCommand[MSG_DEVICE_QUERY].size();++nCmdCount)
+        //                tmpCommand->mapCommand[MSG_DEVICE_QUERY][nCmdCount].ackLen = dev_config_ptr->cmd_ack_length_by_id[nCmdCount];
+        //        }
 
         dev_agent_and_com[iter->first]=pair<CommandAttrPtr,HMsgHandlePtr>(tmpCommand,pars_agent);
         //判断是否时http代理设置
-        if(modleInfos_.iCommunicationMode==CON_MOD_NET &&
-            modleInfos_.netMode.inet_type == NET_MOD_HTTP){
+        if(modleInfos_.iCommunicationMode==CON_MOD_NET && modleInfos_.netMode.inet_type == NET_MOD_HTTP){
             if(iter->second.map_DevProperty.find("Agent")!=iter->second.map_DevProperty.end())
                 request_handler_factory::get_mutable_instance().register_data_callback(modleInfos_.netMode.strIp,pars_agent);
         }
@@ -142,16 +151,18 @@ string device_session::next_dev_id()
 
 string device_session::get_devid_by_addcode(int iaddcode)
 {
-     map<int,string>::iterator iter = map_addcode_devid_.find(iaddcode);
-     if(iter!=map_addcode_devid_.end())
-         return iter->second;
-     return "-1";
+    map<int,string>::iterator iter = map_addcode_devid_.find(iaddcode);
+    if(iter!=map_addcode_devid_.end())
+        return iter->second;
+    return "-1";
 }
 
 //获得连接状态
 con_state device_session::get_con_state()
 {
     boost::recursive_mutex::scoped_lock llock(con_state_mutex_);
+    //    if(get_run_state(dev_agent_and_com.begin()->first) == dev_running)
+    //        return con_connected;
     return othdev_con_state_;
 }
 //获得运行状态
@@ -170,6 +181,11 @@ void device_session::set_con_state(con_state curState)
     if(othdev_con_state_!=curState)
     {
         othdev_con_state_ = curState;
+
+        //判断该状态翻转是否需要进行设备通断状态通知(http...)
+        if(short_connect_)
+            return;
+
         map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.begin();
         for(;iter!=modleInfos_.mapDevInfo.end();++iter)
         {
@@ -195,7 +211,7 @@ void device_session::set_con_state(con_state curState)
                     netAlarm.nType = 2;//发射机断开
                 }
                 if(netAlarm.nAlarmId>0){
-                    string sReason;
+                    //string sReason;
                     //http_ptr_->send_http_alarm_messge_to_platform((*iter).first,nMod,netAlarm,sReason);
                     if(nMod==1)
                         netAlarm.nAlarmId=-1;
@@ -247,13 +263,16 @@ void device_session::connect()
     if(all_dev_is_use_==false)
         return;
     if(modleInfos_.iCommunicationMode==CON_MOD_NET) {
-        if(modleInfos_.netMode.inet_type == NET_MOD_TCP){
+        if(modleInfos_.netMode.inet_type == NET_MOD_TCP || modleInfos_.netMode.inet_type == NET_MOD_HTTP){
             connect(modleInfos_.netMode.strIp,modleInfos_.netMode.iremote_port);
         }else if(modleInfos_.netMode.inet_type == NET_MOD_UDP){
             udp_connect(modleInfos_.netMode.strIp,modleInfos_.netMode.iremote_port);
         }else if(modleInfos_.netMode.inet_type == NET_MOD_SNMP){
             agent_connect(modleInfos_.netMode.strIp,modleInfos_.netMode.iremote_port);
         }
+        /*else if(modleInfos_.netMode.inet_type == NET_MOD_HTTP){
+            http_connect(modleInfos_.netMode.strIp,modleInfos_.netMode.iremote_port);
+        }*/
     }else if(modleInfos_.iCommunicationMode==CON_MOD_COM){
         open_com();
     }
@@ -323,6 +342,127 @@ void device_session::connect(std::string hostname,unsigned short port,bool bReco
         //出错。。。
     }
 }
+
+//http连接(用来进行控制操作连接)
+/*void device_session::http_connect(std::string hostname,unsigned short port)
+{
+    boost::system::error_code ec;
+    tcp::resolver::query query(hostname, boost::lexical_cast<std::string, unsigned short>(port));
+    tcp::resolver::iterator iter = resolver_.resolve(query, ec);
+    if(iter != tcp::resolver::iterator()){
+        endpoint_ = (*iter).endpoint();
+        httpSocket().async_connect(endpoint_,boost::bind(&device_session::http_handle_connected,
+                                                         this,boost::asio::placeholders::error));
+        start_timeout_timer();//启动超时重连定时器
+    }
+    else {
+        //出错。。。
+    }
+}*/
+
+//关闭http控制连接
+void device_session::http_cmd_close_i(){
+
+    boost::system::error_code ignored_ec;
+    httpSocket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
+    httpSocket().close(ignored_ec);
+}
+
+void device_session::http_handle_callback(const boost::system::error_code& error)
+{
+    if (!error)
+    {
+
+        boost::asio::streambuf http_urdl_response;
+        boost::system::error_code error;
+        while (boost::asio::read(http_stream_, http_urdl_response,
+                   boost::asio::transfer_at_least(1), error));
+
+        string contents;
+        std::istream(&http_urdl_response) >> contents;
+        cout<<contents<<endl;
+        http_stream_.close();
+
+    }else {
+
+      //std::cerr << "Unable to open URL: ";
+      http_stream_.close();
+      std::cerr << error.message() << std::endl;
+    }
+}
+
+
+//void device_session::http_handle_connected(const boost::system::error_code& error)
+//{
+//    if(http_command_id_.length() <= 0)
+//        return;
+
+//    std::ostream request_stream(&http_cmd_request_);
+
+//    request_stream << "GET " << "http://"<<modleInfos_.netMode.strIp<<":"
+//                   <<modleInfos_.netMode.iremote_port<<http_command_id_<< " HTTP/1.0\r\n";
+//    request_stream << "Host: " <<modleInfos_.netMode.strIp << "\r\n";
+//    request_stream << "Accept: */*\r\n";
+//    request_stream << "Connection: close\r\n\r\n";
+
+//    try{
+//        // Send the request.
+//        boost::asio::write(httpSocket(), http_cmd_request_);
+//        boost::asio::streambuf response;
+//        boost::asio::read_until(httpSocket(), response, "\r\n");
+
+//        // Check that response is OK.
+//        std::istream response_stream(&response);
+//        std::string http_version;
+//        response_stream >> http_version;
+//        unsigned int status_code;
+//        response_stream >> status_code;
+//        std::string status_message;
+//        std::getline(response_stream, status_message);
+//        if (!response_stream || http_version.substr(0, 5) != "HTTP/"){
+//            std::cout << "Invalid response\n";
+//            http_cmd_close_i();
+//            return ;
+//        }
+//        if (status_code != 200){
+//            std::cout << "Response returned with status code " << status_code << "\n";
+//            http_cmd_close_i();
+//            return ;
+//        }
+
+//        // Read the response headers, which are terminated by a blank line.
+//        boost::asio::read_until(httpSocket(), response, "\r\n\r\n");
+
+//        // Process the response headers.
+//        std::string header;
+//        while (std::getline(response_stream, header) && header != "\r")
+//            std::cout << header << "\n";
+//        std::cout << "\n";
+
+//        // Write whatever content we already have to output.
+//        if (response.size() > 0)
+//            std::cout << &response;
+
+//        // Read until EOF, writing data to output as we go.
+//        boost::system::error_code error;
+//        while (boost::asio::read(httpSocket(), response,
+//                   boost::asio::transfer_at_least(1), error))
+//            std::cout << &response;
+
+
+//        if (error != boost::asio::error::eof)
+//            throw boost::system::system_error(error);
+
+//        http_cmd_close_i();
+//    }
+//    catch(std::exception& e){
+
+//        http_cmd_close_i();
+//        std::cout << "Exception: " << e.what() << "\n";
+//    }
+//}
+
+
 
 //udp连接
 void device_session::udp_connect(std::string hostname,unsigned short port)
@@ -427,7 +567,7 @@ void device_session::connect_time_event(const boost::system::error_code& error)
     if(error!= boost::asio::error::operation_aborted)
     {
         if(modleInfos_.iCommunicationMode == CON_MOD_NET){
-            if(modleInfos_.netMode.inet_type == NET_MOD_TCP)
+            if(modleInfos_.netMode.inet_type == NET_MOD_TCP || modleInfos_.netMode.inet_type == NET_MOD_HTTP)
             {
                 socket().async_connect(endpoint_,boost::bind(&device_session::handle_connected,
                                                              this,boost::asio::placeholders::error));
@@ -581,7 +721,7 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
         {
             ++query_timeout_count_;
             if(modleInfos_.iCommunicationMode == CON_MOD_NET){
-                if(modleInfos_.netMode.inet_type == NET_MOD_SNMP || modleInfos_.netMode.inet_type == NET_MOD_HTTP)
+                if(modleInfos_.netMode.inet_type == NET_MOD_SNMP)// || modleInfos_.netMode.inet_type == NET_MOD_HTTP
                     get_sync_net_data();//获取网络数据(同步)，使用http,snmp
                 else
                     send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
@@ -635,12 +775,71 @@ bool device_session::sendRawMessage(unsigned char * data_,int nDatalen)
     return true;
 }
 
+//专门用于http协议发送控制指令（同步）
+void device_session::http_send_task(const string &sCommandId){
+
+    /*http_command_id_ = sCommandId;
+    boost::system::error_code ec;
+    tcp::resolver::query query(modleInfos_.netMode.strIp, boost::lexical_cast<std::string, unsigned short>(modleInfos_.netMode.iremote_port));
+    tcp::resolver::iterator iter = resolver_.resolve(query, ec);
+    if(iter != tcp::resolver::iterator()){
+        endpoint_ = (*iter).endpoint();
+        httpSocket().async_connect(endpoint_,boost::bind(&device_session::http_handle_connected,
+                                                         this,boost::asio::placeholders::error));
+    }*/
+
+
+   try
+   {
+        std::ostringstream oss;
+        std::ostream &os = oss;
+        os << "http://" << modleInfos_.netMode.strIp<<":"
+           <<modleInfos_.netMode.iremote_port<<sCommandId;
+
+        boost::system::error_code ec;
+        urdl::url url = urdl::url::from_string(oss.str(), ec);
+
+        //urdl::option_set common_options;
+        //common_options.set_option(urdl::http::max_redirects(0));
+        http_stream_.set_option(urdl::http::request_method("GET"));
+        http_stream_.set_option(urdl::http::request_content_type("text/plain"));
+        //http_stream_.set_option(urdl::http::request_content("1"));
+        //http_stream_.set_options(common_options);
+        //http_stream_.set_ignore_return_content(true);
+
+        http_stream_.async_open(url,boost::bind(&device_session::http_handle_callback,
+                                                         this,boost::asio::placeholders::error));
+
+    }
+    catch(...)
+    {
+        http_stream_.close();
+        std::cerr << "open url error ! "<< std::endl;
+    }
+
+}
+
 //发送命令到设备
 void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId)
 {
     //同步等待
     //boost::asio::deadline_timer delay_send_timer(io_service_, boost::posix_time::milliseconds(2));
     //    delay_send_timer.wait();
+
+    if(modleInfos_.netMode.inet_type == NET_MOD_HTTP){
+
+        map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
+        if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
+            if(iter->second.size()>childId){
+                if(cmdType != MSG_DEVICE_QUERY)
+                    http_send_task(iter->second[childId].sCommandId);
+                else
+                    start_write(iter->second[childId].commandId,iter->second[childId].commandLen);
+            }
+        }
+        return;
+    }
+
 
     map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
     if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
@@ -672,6 +871,19 @@ void device_session::start_write(unsigned char* commStr,int commLen)
                             )
             #endif
                         );
+        }else if(modleInfos_.netMode.inet_type == NET_MOD_HTTP){
+
+            http_make_request_msg(MSG_DEVICE_QUERY);//组织request
+            boost::asio::async_write(socket(), http_request_,
+                         #ifdef USE_STRAND
+                                     strand_.wrap(
+                             #endif
+                                         boost::bind(&device_session::http_handle_write_request, this,
+                                                     boost::asio::placeholders::error)
+                             #ifdef USE_STRAND
+                                         )
+                         #endif
+                                     );
         }
         else if(modleInfos_.netMode.inet_type == NET_MOD_UDP)
         {
@@ -707,6 +919,132 @@ void device_session::start_write(unsigned char* commStr,int commLen)
     }
 }
 
+
+//HTTP
+void device_session::http_make_request_msg(int cmdType){
+
+    devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
+    CommandUnit adjustTmCmd;
+    //dev_agent_and_com[cur_dev_id_].second->GetSignalCommand(commandmsg_,adjustTmCmd);
+    dev_agent_and_com[cur_dev_id_].second->GetSignalCommand(cmdType,0,adjustTmCmd);
+
+    std::ostream request_stream(&http_request_);
+    request_stream << "GET " << "http://"<<modleInfos_.netMode.strIp<<":"
+                   <<modleInfos_.netMode.iremote_port<<adjustTmCmd.sCommandId<< " HTTP/1.0\r\n";
+    request_stream << "Host: " <<modleInfos_.netMode.strIp << "\r\n";
+    request_stream << "Accept: */*\r\n";
+    request_stream << "Connection: close\r\n\r\n";
+}
+
+void device_session::http_handle_write_request(const boost::system::error_code& err)
+{
+    if (!err)
+    {
+        boost::asio::async_read_until(socket(), http_response_, "\r\n",
+                                      boost::bind(&device_session::http_handle_read_status_line, this,
+                                                  boost::asio::placeholders::error));
+    }
+    else
+    {
+        std::cout << "Error: " << err.message() << "\n";
+    }
+}
+
+void device_session::http_handle_read_status_line(const boost::system::error_code& err)
+{
+    if (!err)
+    {
+        // Check that response is OK.
+        std::istream response_stream(&http_response_);
+        std::string http_version;
+        response_stream >> http_version;
+        unsigned int status_code;
+        response_stream >> status_code;
+        std::string status_message;
+        std::getline(response_stream, status_message);
+        if (!response_stream || http_version.substr(0, 5) != "HTTP/"){
+            std::cout << "Invalid response\n";
+            return;
+        }
+        if (status_code != 200){
+            std::cout << "Response returned with status code ";
+            std::cout << status_code << "\n";
+            return;
+        }
+
+        // Read the response headers, which are terminated by a blank line.
+        boost::asio::async_read_until(socket(), http_response_, "\r\n\r\n",
+                                      boost::bind(&device_session::http_handle_read_headers, this,
+                                                  boost::asio::placeholders::error));
+    }
+    else
+    {
+        std::cout << "Error: " << err << "\n";
+    }
+}
+
+void device_session::http_handle_read_headers(const boost::system::error_code& err)
+{
+    if (!err)
+    {
+        // Process the response headers.
+        std::istream response_stream(&http_response_);
+        std::string header;
+        while (std::getline(response_stream, header) && header != "\r");
+            std::cout << "\n";
+        //std::cout << "\n";
+
+        // Write whatever content we already have to output.
+        //if (http_response_.size() > 0)
+        //std::cout << &http_response_;
+
+        // Start reading remaining data until EOF.
+        boost::asio::async_read(socket(), http_response_,
+                                boost::asio::transfer_at_least(1),
+                                boost::bind(&device_session::http_handle_read_content, this,
+                                            boost::asio::placeholders::error));
+    }
+    else
+    {
+        std::cout << "Error: " << err << "\n";
+    }
+}
+
+
+void device_session::http_handle_read_content(const boost::system::error_code& err)
+{
+    if (!err)
+    {
+        // Write all of the data that has been read so far.
+        // std::cout << &http_response_;
+
+
+        // Continue reading remaining data until EOF.
+        boost::asio::async_read(socket(), http_response_,
+                                boost::asio::transfer_at_least(1),
+                                boost::bind(&device_session::http_handle_read_content, this,
+                                            boost::asio::placeholders::error));
+    }
+    else if (err != boost::asio::error::eof)
+    {
+        std::cout << "Error: " << err << "\n";
+    }else if(err == boost::asio::error::eof){
+        boost::asio::streambuf::const_buffers_type cbt = http_response_.data();
+        http_content_ = std::string(buffers_begin(cbt), buffers_begin(cbt) + http_response_.size());
+        //cout<<http_content_;
+
+        //断开http连接
+        http_close_all();
+
+        DevMonitorDataPtr curData_ptr(new Data);
+        int nResult = dev_agent_and_com[cur_dev_id_].second->decode_http_msg(http_content_,curData_ptr,CMD_QUERY,0);
+        if(nResult == 0)
+            handler_data(cur_dev_id_,curData_ptr);//处理数据
+        start_connect_timer(moxa_config_ptr->connect_timer_interval);
+    }
+}
+
+
 //等待任务结束
 //void device_session::wait_task_end()
 //{
@@ -736,6 +1074,25 @@ void device_session::start_write(unsigned char* commStr,int commLen)
 //    return task_count_;
 //}
 
+void device_session::http_close_all(){
+
+    short_connect_ = true;//短连接标志，不进行连接状态通知
+    set_con_state(con_disconnected);
+    connect_timer_.cancel();
+    timeout_timer_.cancel();
+    query_timer_.cancel();
+
+
+    cur_msg_q_id_         =0;//当前命令id
+    query_timeout_count_  =0;//命令发送超时次数清零
+    close_i();   //关闭socket
+    cur_msg_q_id_         =0;//当前命令id
+    query_timeout_count_  =0;//命令发送超时次数清零
+
+    http_request_.consume(http_request_.size());
+    http_response_.consume(http_response_.size());
+}
+
 void device_session::close_all()
 {
     set_con_state(con_disconnected);
@@ -763,6 +1120,10 @@ void device_session::close_all()
     if(target_ptr_!=NULL){
         delete target_ptr_,target_ptr_=NULL;
     }
+
+    http_request_.consume(http_request_.size());
+    http_response_.consume(http_response_.size());
+
 }
 
 //启动任务定时器
@@ -778,84 +1139,81 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
 {
     //if(error!= boost::asio::error::operation_aborted)
     //{
-        time_t curTime = time(0);
-        tm *pCurTime = localtime(&curTime);
+    time_t curTime = time(0);
+    tm *pCurTime = localtime(&curTime);
 
-        unsigned long cur_tm = pCurTime->tm_hour*3600+pCurTime->tm_min*60+pCurTime->tm_sec;
-        map<string,DeviceInfo>::iterator witer = modleInfos_.mapDevInfo.begin();
-        for(;witer!=modleInfos_.mapDevInfo.end();++witer)
+    unsigned long cur_tm = pCurTime->tm_hour*3600+pCurTime->tm_min*60+pCurTime->tm_sec;
+    map<string,DeviceInfo>::iterator witer = modleInfos_.mapDevInfo.begin();
+    for(;witer!=modleInfos_.mapDevInfo.end();++witer)
+    {
+        boost::recursive_mutex::scoped_lock lock(update_cmd_schedule_mutex_);//增加锁防止读写竞争
+        vector<Command_Scheduler>::iterator cmd_iter = witer->second.vCommSch.begin();
+        for(;cmd_iter!=witer->second.vCommSch.end();++cmd_iter)
         {
-            boost::recursive_mutex::scoped_lock lock(update_cmd_schedule_mutex_);//增加锁防止读写竞争
-            vector<Command_Scheduler>::iterator cmd_iter = witer->second.vCommSch.begin();
-            for(;cmd_iter!=witer->second.vCommSch.end();++cmd_iter)
-            {
-                //按天控制
-                if((*cmd_iter).iDateType == RUN_TIME_DAY){
-                    //在５秒内
-                    if(curTime>=(*cmd_iter).tExecuteTime && curTime<(*cmd_iter).tExecuteTime+5){
+            //按天控制
+            if((*cmd_iter).iDateType == RUN_TIME_DAY){
+                //在５秒内
+                if(curTime>=(*cmd_iter).tExecuteTime && curTime<(*cmd_iter).tExecuteTime+5){
+                    e_ErrorCode eResult = EC_OBJECT_NULL;
+                    bool bRslt =  start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
+                    //通知客户端正在执行
+                    if(bRslt==true)
+                        notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
+                                                     (*cmd_iter).iCommandType,pCurTime,true,eResult);
+                }
+            }
+            //按星期控制
+            if((*cmd_iter).iDateType == RUN_TIME_WEEK){
+                if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0)
+                    continue;//超过运行图终止时间且终止时间不为0,则跳过
+                if((pCurTime->tm_wday)== (*cmd_iter).iWeek){
+                    tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
+                    unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
+                    if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
                         e_ErrorCode eResult = EC_OBJECT_NULL;
-                        bool bRslt =  start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
+                        bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
                         //通知客户端正在执行
                         if(bRslt==true)
                             notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
                                                          (*cmd_iter).iCommandType,pCurTime,true,eResult);
                     }
                 }
-                //按星期控制
-                if((*cmd_iter).iDateType == RUN_TIME_WEEK){
-                    if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0)
-                        continue;//超过运行图终止时间且终止时间不为0,则跳过
-                    if((pCurTime->tm_wday)== (*cmd_iter).iWeek){
-                        tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
-                        unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
-                        if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
-                            e_ErrorCode eResult = EC_OBJECT_NULL;
-                            bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
-                            //通知客户端正在执行
-                            if(bRslt==true)
-                                notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
-                                                             (*cmd_iter).iCommandType,pCurTime,true,eResult);
-                        }
-                    }
-                }
-
-                //按月控制
-                if((*cmd_iter).iDateType == RUN_TIME_WEEK){
-                    if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0)
-                        continue;//超过运行图终止时间且终止时间不为0,则跳过
-                    if((pCurTime->tm_mon+1)== (*cmd_iter).iMonitorMonth ||  (*cmd_iter).iMonitorMonth==0){
-                        tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
-                        unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
-                        if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
-                            e_ErrorCode eResult = EC_OBJECT_NULL;
-                            bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
-                            //通知客户端正在执行
-                            if(bRslt==true)
-                                notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
-                                                             (*cmd_iter).iCommandType,pCurTime,true,eResult);
-                        }
-                    }
-                }
-
             }
+
+            //按月控制
+            if((*cmd_iter).iDateType == RUN_TIME_WEEK){
+                if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0)
+                    continue;//超过运行图终止时间且终止时间不为0,则跳过
+                if((pCurTime->tm_mon+1)== (*cmd_iter).iMonitorMonth ||  (*cmd_iter).iMonitorMonth==0){
+                    tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
+                    unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
+                    if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
+                        e_ErrorCode eResult = EC_OBJECT_NULL;
+                        bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
+                        //通知客户端正在执行
+                        if(bRslt==true)
+                            notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
+                                                         (*cmd_iter).iCommandType,pCurTime,true,eResult);
+                    }
+                }
+            }
+
         }
-        start_task_schedules_timer();
+    }
+    start_task_schedules_timer();
     //}
 }
 
 void device_session::notify_client_execute_result(string sDevId,string devName,string user,int cmdType, tm *pCurTime,
-                                   bool bNtfFlash,int eResult)
+                                                  bool bNtfFlash,int eResult)
 {
     static  char str_time[64];
     strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
 
-    if(bNtfFlash){
-        send_command_execute_result_message(GetInst(LocalConfig).local_station_id(),sDevId,
-                                            DEVICE_TRANSMITTER,devName,user,(e_MsgType)cmdType,(e_ErrorCode)eResult);
-    }
+
     //通知http服务器
-    //int CommandType= -1;//(user=="timer")?MSG_TRANSMITTER_TURNON_ACK:MSG_TRANSMITTER_TURNOFF_ACK;
-    string sDesc = devName;
+
+    int cmdAckMsgType = cmdType;
     int cmdOpr=-1;
     int cmdRlt=-1;
     switch (cmdType) {
@@ -863,11 +1221,14 @@ void device_session::notify_client_execute_result(string sDevId,string devName,s
     case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:
     case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR: {
         cmdOpr = (user=="timer")?CMD_EXC_A_ON:CMD_EXC_M_ON;
+        cmdAckMsgType = MSG_TRANSMITTER_TURNON_ACK;
     } break;
     case MSG_TRANSMITTER_TURNOFF_OPR:{
         cmdOpr = (user=="timer")?CMD_EXC_A_OFF:CMD_EXC_M_OFF;
+        cmdAckMsgType +=1;
     }break;
     default:
+        cmdAckMsgType +=1;
         break;
     }
     if(eResult == EC_OPR_ON_GOING)
@@ -881,6 +1242,13 @@ void device_session::notify_client_execute_result(string sDevId,string devName,s
         string sDesc = devName+DEV_CMD_OPR_DESC(cmdOpr);
         sDesc+=DEV_CMD_RESULT_DESC(cmdRlt);
         http_ptr_->send_http_excute_result_messge_to_platform(sDevId,str_time,cmdOpr,sDesc);
+    }
+
+
+    //发送给客户端
+    if(bNtfFlash){
+        send_command_execute_result_message(GetInst(LocalConfig).local_station_id(),sDevId,
+                                            DEVICE_TRANSMITTER,devName,user,(e_MsgType)cmdAckMsgType,(e_ErrorCode)eResult);
     }
 }
 
@@ -899,7 +1267,7 @@ dev_opr_state  device_session::get_opr_state(string sdevId){
 bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType)
 {
 
-    if(!is_connected()){
+    if(!is_connected() && short_connect_==false){
         opResult = EC_NET_ERROR;
         return false;
     }
@@ -979,9 +1347,11 @@ bool device_session::is_monitor_time(string sDevId)
     if(day_iter!=modleInfos_.mapDevInfo[sDevId].vMonitorSch.end()){
         vector<Monitoring_Scheduler>::iterator iter = day_iter->second.begin();
         for(;iter!=day_iter->second.end();++iter){
-            tm *pCurTime = localtime(&curTime);
-            if(curTime>=(*iter).tStartTime && curTime<(*iter).tEndTime){
-                return (*iter).bMonitorFlag;
+            if(!(*iter).bMonitorFlag)
+                continue;
+            //tm *pCurTime = localtime(&curTime);
+            if(curTime>=(*iter).tStartTime && curTime<(*iter).tEndTime && (*iter).bMonitorFlag){
+                return (*iter).bRunModeFlag;
             }
         }
     }
@@ -990,6 +1360,9 @@ bool device_session::is_monitor_time(string sDevId)
     if(week_iter!=modleInfos_.mapDevInfo[sDevId].vMonitorSch.end()){
         vector<Monitoring_Scheduler>::iterator iter = week_iter->second.begin();
         for(;iter!=week_iter->second.end();++iter){
+            if(!(*iter).bMonitorFlag)
+                continue;
+
             tm *pCurTime = localtime(&curTime);
             if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0)
                 continue;//超过运行图终止时间且终止时间不为0,则跳过
@@ -998,8 +1371,8 @@ bool device_session::is_monitor_time(string sDevId)
                 unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
                 tm *pSetTimeE = localtime(&((*iter).tEndTime));
                 unsigned long set_tm_e = pSetTimeE->tm_hour*3600+pSetTimeE->tm_min*60+pSetTimeE->tm_sec;
-                if(cur_tm>=set_tm_s && cur_tm<set_tm_e){
-                    return (*iter).bMonitorFlag;
+                if(cur_tm>=set_tm_s && cur_tm<set_tm_e && (*iter).bMonitorFlag){
+                    return (*iter).bRunModeFlag;
                 }
             }
         }
@@ -1009,6 +1382,9 @@ bool device_session::is_monitor_time(string sDevId)
     if(month_iter!=modleInfos_.mapDevInfo[sDevId].vMonitorSch.end()){
         vector<Monitoring_Scheduler>::iterator iter = month_iter->second.begin();
         for(;iter!=month_iter->second.end();++iter){
+
+            if(!(*iter).bMonitorFlag)
+                continue;
             tm *pCurTime = localtime(&curTime);
             if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0)
                 continue;//超过运行图终止时间且终止时间不为0,则跳过
@@ -1020,7 +1396,7 @@ bool device_session::is_monitor_time(string sDevId)
                     tm *pSetTimeE = localtime(&((*iter).tEndTime));
                     unsigned long set_tm_e = pSetTimeE->tm_hour*3600+pSetTimeE->tm_min*60+pSetTimeE->tm_sec;
                     if(cur_tm>=set_tm_s && cur_tm<set_tm_e){
-                        return (*iter).bMonitorFlag;
+                        return (*iter).bRunModeFlag;
                     }
                 }
             }
@@ -1033,7 +1409,7 @@ bool device_session::is_monitor_time(string sDevId)
 //开始处理监测数据
 void device_session::start_handler_data(string sDevId,DevMonitorDataPtr curDataPtr,bool bCheckAlarm)
 {
-   /*if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
+    /*if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
             .schedule(boost::bind(&device_session::handler_data,this,sDevId,curDataPtr)))
     {
         task_count_increase();
@@ -1052,8 +1428,8 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 {
 
     boost::recursive_mutex::scoped_lock lock(data_deal_mutex);
-     if(curDataPtr->mValues.size()<=0)
-         return;
+    if(curDataPtr->mValues.size()<=0)
+        return;
     //是否在运行图时间
     bool bIsMonitorTime = is_monitor_time(sDevId);
     //打包发送客户端
@@ -1062,6 +1438,7 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     //打包发送http消息到上级平台
     if(is_need_report_data(sDevId)){
         string sDesDevId = sDevId;
+        //用来适应模块隶属于设备的问题
         map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
         http_ptr_->send_http_data_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[sDevId].iDevType,
                                                      curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
@@ -1109,7 +1486,8 @@ void device_session::handle_connected(const boost::system::error_code& error)
         else
             start_read(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
 
-        if(modleInfos_.netMode.inet_type == NET_MOD_TCP || modleInfos_.iCommunicationMode==CON_MOD_COM)
+        if(modleInfos_.netMode.inet_type == NET_MOD_TCP || modleInfos_.netMode.inet_type == NET_MOD_HTTP ||
+                modleInfos_.iCommunicationMode==CON_MOD_COM)
         {
             if(dev_agent_and_com[cur_dev_id_].second->is_auto_run()==false)
                 start_query_timer(moxa_config_ptr->query_interval);
@@ -1126,6 +1504,8 @@ void device_session::handle_connected(const boost::system::error_code& error)
         return;
     }
     else	{
+
+        cout<< error.message() << std::endl;
         close_i();
         start_connect_timer();
     }
@@ -1173,11 +1553,11 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
             {
                 query_timeout_count_ = 0;
                 string sdevid = get_devid_by_addcode(iaddcode);
-//                if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
-//                        .schedule(boost::bind(&device_session::handler_data,this,sdevid,curData_ptr)))
-//                {
-//                    task_count_increase();
-//                }
+                //                if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
+                //                        .schedule(boost::bind(&device_session::handler_data,this,sdevid,curData_ptr)))
+                //                {
+                //                    task_count_increase();
+                //                }
 
                 handler_data(sdevid,curData_ptr);
             }
@@ -1299,12 +1679,12 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
         return;
     if(!error)
     {
-        static  char str_time[64];
-        time_t curTm = time(0);
-        tm *local_time = localtime(&curTm);
-        strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+        //static  char str_time[64];
+        //time_t curTm = time(0);
+        //tm *local_time = localtime(&curTm);
+        //strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
 
-        int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,
+        int nResult = receive_msg_ptr_->check_msg_header(dev_agent_and_com[cur_dev_id_].second,
                                                                 bytes_transferred,CMD_QUERY,cur_msg_q_id_);
         if(nResult == 0)
         {
@@ -1319,7 +1699,7 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
                 cur_msg_q_id_=0;
                 DevMonitorDataPtr curData_ptr(new Data);
                 int iaddcode=-1;
-                int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
+                int nResult = receive_msg_ptr_->decode_msg(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
                 if(nResult == 0 || nResult==-2){
                     string sdevid = get_devid_by_addcode(iaddcode);
                     handler_data(sdevid,curData_ptr);//处理数据
@@ -1372,8 +1752,8 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
     if(!bMod){//0:告警产生
 
         curAlarm.sReason = str(boost::format("%1%%2%,当前值：%3%%4%,门限值：%5%%6%")
-                                %ItemInfo.sItemName%CONST_STR_ALARM_CONTENT(curAlarm.nLimitId)
-                                %fValue%ItemInfo.sUnit%fLimitValue%ItemInfo.sUnit);
+                               %ItemInfo.sItemName%CONST_STR_ALARM_CONTENT(curAlarm.nLimitId)
+                               %fValue%ItemInfo.sUnit%fLimitValue%ItemInfo.sUnit);
 
         bool bRslt = GetInst(DataBaseOperation).AddItemAlarmRecord(devId,curAlarm.startTime,
                                                                    ItemInfo.iItemIndex,curAlarm.nLimitId,curAlarm.nType,
@@ -1466,18 +1846,18 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                     mapItemAlarm[devId][ItemInfo.iItemIndex][iLimittype] = tmp_alarm_info;
                 }
             }else {
-                    //没有找到增加该告警监控项
-                    tmp_alarm_info.startTime = time(0);//记录时间
-                    tmp_alarm_info.nType = ItemInfo.vItemAlarm[nIndex].iAlarmid;//告警类型
-                    tmp_alarm_info.nLimitId = iLimittype;//限值类型
-                    tmp_alarm_info.nModuleId = ItemInfo.iModDevId;
-                    tmp_alarm_info.nModuleType = ItemInfo.iModTypeId;
-                    tmp_alarm_info.nTargetId = ItemInfo.iTargetId;
-                    tmp_alarm_info.bNotifyed = false;
-                    map<int,CurItemAlarmInfo>  tmTypeAlarm;
-                    tmTypeAlarm[iLimittype] = tmp_alarm_info;
-                   // boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
-                    mapItemAlarm[devId][ItemInfo.iItemIndex] = tmTypeAlarm;
+                //没有找到增加该告警监控项
+                tmp_alarm_info.startTime = time(0);//记录时间
+                tmp_alarm_info.nType = ItemInfo.vItemAlarm[nIndex].iAlarmid;//告警类型
+                tmp_alarm_info.nLimitId = iLimittype;//限值类型
+                tmp_alarm_info.nModuleId = ItemInfo.iModDevId;
+                tmp_alarm_info.nModuleType = ItemInfo.iModTypeId;
+                tmp_alarm_info.nTargetId = ItemInfo.iTargetId;
+                tmp_alarm_info.bNotifyed = false;
+                map<int,CurItemAlarmInfo>  tmTypeAlarm;
+                tmTypeAlarm[iLimittype] = tmp_alarm_info;
+                // boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
+                mapItemAlarm[devId][ItemInfo.iItemIndex] = tmTypeAlarm;
             }
         }else {
             //当前没有告警,判断是否存在此告警,确定是否需要恢复,移除该告警

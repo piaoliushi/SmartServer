@@ -77,6 +77,14 @@ namespace hx_net
         return m_msgImpl->decode_msg_body(snmp,data_ptr,target);
     }
 
+    //http消息解析
+    int  MsgHandleAgent::decode_http_msg(const string &data,DevMonitorDataPtr data_ptr,CmdType cmdType,int number)
+    {
+        if(m_msgImpl==NULL)
+            return -1;
+        return m_msgImpl->decode_http_msg(data,data_ptr,cmdType,number);
+    }
+
 	void  MsgHandleAgent::input_params(const vector<string> &vParam)
 	{
 		if(m_msgImpl==NULL)
@@ -104,6 +112,14 @@ namespace hx_net
 			return;
 		return m_msgImpl->GetSignalCommand(lpParam,cmdUnit);
 	}
+
+    void MsgHandleAgent::GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit)
+    {
+        if(m_msgImpl==NULL)
+            return;
+        return m_msgImpl->GetSignalCommand(cmmType,nIndex,cmdUnit);
+    }
+
 
     void MsgHandleAgent::GetAllCmd(CommandAttribute &cmdAll)
     {

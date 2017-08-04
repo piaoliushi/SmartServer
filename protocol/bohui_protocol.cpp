@@ -613,7 +613,8 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
             rapidxml::xml_attribute<char> * attrType = setnode->first_attribute("Type");
             if(attrType==NULL)
                 return false;
-            tmSch.bMonitorFlag = atoi(attrType->value());//监测标志0:停播
+            tmSch.bMonitorFlag = true;
+            tmSch.bRunModeFlag = atoi(attrType->value());//监测标志0:停播
             //开始时间
             QDateTime qdt;
             rapidxml::xml_attribute<char> * attrStarttime = setnode->first_attribute("StartTime");

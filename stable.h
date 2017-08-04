@@ -1,6 +1,6 @@
 #ifndef STABLE_H
 #define STABLE_H
-
+#define foreach Q_FOREACH
 #include <string>
 #include <stdexcept>
 #include <algorithm>

@@ -152,7 +152,8 @@ namespace hx_net
                             map<int,map<int,CurItemAlarmInfo> > curAlarm;
                             con_state  netState = GetInst(SvcMgr).get_dev_net_state(sstationid,*itersNum);
                             dev_run_state   runState = GetInst(SvcMgr).get_dev_run_state(sstationid,*itersNum);
-
+                            if(runState >= dev_running && runState < dev_unknown)
+                                netState = con_connected;
                             GetInst(SvcMgr).get_dev_alarm_state(sstationid,*itersNum,curAlarm);
                             //收集设备连接信息
                             DevNetStatus *dev_n_s = loginAck.add_cdevcurnetstatus();

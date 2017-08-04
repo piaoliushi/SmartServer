@@ -16,11 +16,13 @@ namespace hx_net
         virtual int check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number){return -1;}
         virtual int decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode){return -1;}
         virtual int decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target){return -1;}
+        virtual int decode_http_msg(const string &data,DevMonitorDataPtr data_ptr,CmdType cmdType,int number){return -1;}
         virtual int PreHandleMsg(){return -1;}
         virtual void input_params(const vector<string> &vParam){}
 		virtual bool IsStandardCommand(){return false;}
         virtual void GetAllCmd(CommandAttribute &cmdAll){}
         virtual void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit){}
+        virtual void GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit){}
 		virtual bool isRegister(){return true;}
         virtual void getRegisterCommand(CommandUnit &cmdUnit){}
 		virtual int start(){return -1;}

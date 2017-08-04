@@ -18,9 +18,9 @@ typedef struct CMDBUF_TAG
 typedef enum CMDTYPE
 {
 	NO_CMDTYPE = -1,//未知命令
-	CMD_QUERY  = 0,//查询命令
-	CMD_OPEN   = 1,//开机命令
-	CMD_CLOSE  = 2,//关机命令
+    CMD_QUERY  =  0,//查询命令
+    CMD_OPEN   =  1,//开机命令
+    CMD_CLOSE  =  2,//关机命令
 	CMD_ADJUST_TIME = 3,//校时指令
 	CMD_SWITCH_CHANNEL = 4,//切换通道指令
 }CmdType,*pCmdType;
@@ -36,6 +36,7 @@ typedef struct CMDUnit
 		ackLen=0;
 	}
 	unsigned char commandId[128];
+    string        sCommandId;
 	int           commandLen;
 	int           ackLen;
 }CommandUnit;
@@ -59,33 +60,34 @@ typedef struct
 //协议类型
 typedef enum PROTOCOL
 {
-	BEIJ_GME                      = 0, //吉兆系列
-	BEIJING_BEIGUANG     = 1, //北广系列
-	CHENGDU_KT_CG       = 2, //成都成广、凯腾系列
-	SHANGUANG               = 3, //陕广系列
-	HAGUANG                    = 4, //哈广系列
-	ANSHAN                       = 5, //鞍山系列
-	HANGCHUN                 = 6, //杭州杭醇系列
-	HUIXIN                           = 7, //汇鑫系列
-	ITALY_TECHNO            = 8, //意大利TECHNO系列
-	EKA                                 = 9, //EKA系列
-	GE_RS                             = 10,//德国RS
-	DLDZ                               = 11,//大连东芝
-	EDA9033                        = 12,//EDA电表
-	WS2032                          = 13,//温湿度计
-	CHENGDU_KANGTE_N = 14,//成都康特
-	LIAONING_HS                = 15,//辽宁发射机厂
-	SHANGHAI_MZ             = 16,//上海明珠
-	HARRIS                           = 17, //哈里斯
-	DE_XIN                            = 18, //德芯
-    ELECTRIC_104                      =19,  //电力规约
-    ANTENNA_CONTROL          = 20, //天线控制器
-    TSC_TMIEDEV                  = 21, //校时设备
-    LINK_DEVICE                   = 22,  //链路设备
-    SHANGHAI_ALL_BAND      = 23,   //上海功放机器
-    MEDIA_DEVICE                 = 24,   //媒体设备
-    GLSQ                  =26, //桂林思奇
-    GSBR                  =27  //高斯贝尔
+    BEIJ_GME              = 0,  //吉兆系列
+    BEIJING_BEIGUANG      = 1,  //北广系列
+    CHENGDU_KT_CG         = 2,  //成都成广、凯腾系列
+    SHANGUANG             = 3,  //陕广系列
+    HAGUANG               = 4,  //哈广系列
+    ANSHAN                = 5,  //鞍山系列
+    HANGCHUN              = 6,  //杭州杭醇系列
+    HUIXIN                = 7,  //汇鑫系列
+    ITALY_TECHNO          = 8,  //意大利TECHNO系列
+    EKA                   = 9,  //EKA系列
+    GE_RS                 = 10, //德国RS
+    DLDZ                  = 11, //大连东芝
+    EDA9033               = 12, //EDA电表
+    WS2032                = 13, //温湿度计
+    CHENGDU_KANGTE_N      = 14, //成都康特
+    LIAONING_HS           = 15, //辽宁发射机厂
+    SHANGHAI_MZ           = 16, //上海明珠
+    HARRIS                = 17, //哈里斯
+    DE_XIN                = 18, //德芯
+    ELECTRIC_104          = 19, //电力规约
+    ANTENNA_CONTROL       = 20, //天线控制器
+    TSC_TMIEDEV           = 21, //校时设备
+    LINK_DEVICE           = 22, //链路设备
+    SHANGHAI_ALL_BAND     = 23, //上海功放机器
+    MEDIA_DEVICE          = 24, //媒体设备
+    GLSQ                  = 26, //桂林思奇
+    GSBR                  = 27, //高斯贝尔
+    ZHC                   = 29, //众传
 }Protocol,*pProtocol;
 
 typedef enum ANTENAPROTOCOL
@@ -125,9 +127,11 @@ typedef enum CDPROTOCOL
 	CHENGDU_KAITENG_300W  = 1,
 	CHENGDU_CHENGGUANG    = 2,
 	CHENGDU_KT_DIG        = 3,
-	CHENGDU_KAITENG_TV10KW= 4,
-    CHENGDU_XINGUANG      = 5,
-    CHENGDU_XINGUANG_247 = 6,
+    CHENGDU_KAITENG_TV10KW = 4,
+    CHENGDU_XINGUANG       = 5,
+    CHENGDU_XINGUANG_247   = 6,
+    CHENGDU_CHENGGUANG_DIG = 7,//成广1Kw数字
+    CHENGDU_KAITENG_KFS_II = 8,//凯腾KFS-II-813 1Kw
 }CdSubProtocol;
 typedef enum SGPROTOCOL
 {
@@ -224,6 +228,7 @@ typedef enum WSPROTOCOL
 typedef enum KANGTEPROTOCOL
 {
 	KT_TV_Netport      = 0,//康特电视网口
+    KT_HTTP            = 1,//康特http
 }KangTeSubProtocol;
 typedef enum LIAOPROTOCOL
 {
@@ -298,4 +303,8 @@ typedef enum GSBR_TAG
 {
     GSBR_SNMP = 0,
 }GsbrSubProtocol;
+typedef enum ZHC_TAG
+{
+    ZHC_618F = 0,
+}ZhcSybProtocol;
 #endif

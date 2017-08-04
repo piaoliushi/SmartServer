@@ -116,6 +116,14 @@ namespace hx_net
         return m_pbaseMsg->decode_msg_body(snmp,data_ptr,target);
     }
 
+    //http消息解析
+    int  MsgHandleAgentImpl::decode_http_msg(const string &data,DevMonitorDataPtr data_ptr,CmdType cmdType,int number)
+    {
+        if(m_pbaseMsg==NULL)
+            return -1;
+        return m_pbaseMsg->decode_http_msg(data,data_ptr,cmdType,number);
+    }
+
     /*HDevAgentPtr MsgHandleAgentImpl::DevAgent()
 	{
 		if(m_pbaseMsg==NULL)
@@ -150,6 +158,13 @@ namespace hx_net
 			return;
 		return m_pbaseMsg->GetSignalCommand(lpParam,cmdUnit);
 	}
+
+    void MsgHandleAgentImpl::GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit)
+    {
+        if(m_pbaseMsg==NULL)
+            return;
+        return m_pbaseMsg->GetSignalCommand(cmmType,nIndex,cmdUnit);
+    }
 
 	int MsgHandleAgentImpl::getChannelCount()
 	{

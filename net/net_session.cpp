@@ -15,6 +15,7 @@ namespace hx_net
     net_session::net_session(boost::asio::io_service& io_service)
 		:socket_(io_service)
 		,udp_socket_(io_service)
+        ,http_socket_(io_service)
 	{
 
 	}
@@ -30,6 +31,10 @@ namespace hx_net
 		//socket_.set_option(tcp::no_delay(true));
 		return socket_;
 	}
+
+     tcp::socket& net_session::httpSocket(){
+         return http_socket_;
+     }
 
     udp::socket& net_session::usocket()
 	{
@@ -52,7 +57,7 @@ namespace hx_net
         int nConMod = con_mod();
 		boost::system::error_code ignored_ec;
 		boost::mutex::scoped_lock lock(socket_mutex_);
-        if(nConMod == NET_MOD_TCP){
+        if(nConMod == NET_MOD_TCP || nConMod == NET_MOD_HTTP){
 			socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignored_ec);
 			socket_.close(ignored_ec);
         }

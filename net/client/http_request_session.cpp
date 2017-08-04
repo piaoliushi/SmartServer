@@ -53,6 +53,7 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
   //开始连接
  void http_request_session::openUrl()
  {
+
      do
      {
          //从队列中取任务进行处理
@@ -97,7 +98,7 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
    if (!ec)
    {
 
-       std::cerr << "open URL ok !!!: ";
+       //std::cerr << "open URL ok !!!: ";
         http_stream_.close();
        //http_stream_.async_read_some(boost::asio::buffer(data_),boost::bind(&http_request_session::read_handler, this,
        //                                                                                         boost::asio::placeholders::error,
