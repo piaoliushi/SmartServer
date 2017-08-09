@@ -174,10 +174,6 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
 {
     xml_document<> xml_reportMsg;
     //本地MsgId暂时固定为2
-    //time_t curTime = time(0);
-    //tm *local_time = localtime(&curTime);
-    //static  char str_time[64];
-    //strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
     string str_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString();
     //类型分类判断
     int nCmdType = -1;
@@ -212,7 +208,7 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                 //string sType = boost::lexical_cast<std::string>(cell_iter->second.iTargetId);
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
-               xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleID",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
+                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleID",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
                 string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
                 if(curData->mValues[cell_iter->first].bType==true)
                     sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
@@ -293,9 +289,9 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                  if(nDevType < DEVICE_ELEC || nDevType >= DEVICE_GPS)
                     xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
                   if(nDevType>DEVICE_GPS_TIME){
-                      //暂时链路设备通道未做划分----待修改
-                      xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("QualitySrc","0"));
-                      xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("SrcIndex","0"));
+                      //链路设备通道划分与发射机的模块及块内id共用配置字段
+                      xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("QualitySrc",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
+                      xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("SrcIndex",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
                   }
 
                  string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
@@ -343,7 +339,12 @@ bool Bohui_Protocol::createReportAlarmDataMsg(int nReplyId,int nCmdType,string s
             xml_Alarm =  xml_reportMsg.allocate_node(node_element,"Alarm");
             xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("DevID",xml_reportMsg.allocate_string(sDevId.c_str())));
         }else if(BH_POTO_LinkDevAlarmReport == nCmdType){//链路设备告警
-
+            xml_Alarm =  xml_reportMsg.allocate_node(node_element,"Alarm");
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("DevID",xml_reportMsg.allocate_string(sDevId.c_str())));
+            //AlarmSrc与ModuleType共用配置字段
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("AlarmSrc",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(alarmInfo.nModuleType).c_str())));
+            //SrcIndex与ModuleID共用配置字段
+            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("SrcIndex",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(alarmInfo.nModuleId).c_str())));
             //暂时未实现..........
         }else if(BH_POTO_CommunicationReport == nCmdType){//设备通讯异常
             xml_Alarm = xml_reportMsg.allocate_node(node_element,"Communication");
@@ -358,9 +359,7 @@ bool Bohui_Protocol::createReportAlarmDataMsg(int nReplyId,int nCmdType,string s
            xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Desc",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[alarmInfo.nType].first).c_str())));
         if(sReason.empty()==false)
             xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Reason",xml_reportMsg.allocate_string(sReason.c_str())));
-        //tm * local_time = localtime(&(alarmInfo.startTime));
-        //static  char str_time[64];
-        //strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+
         string str_time = QDateTime::fromTime_t(alarmInfo.startTime).toString("yyyy-MM-dd hh:mm:ss").toStdString();
          if(BH_POTO_CommunicationReport == nCmdType)
             xml_Alarm->append_attribute(xml_reportMsg.allocate_attribute("Time",xml_reportMsg.allocate_string(str_time.c_str())));

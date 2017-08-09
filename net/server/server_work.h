@@ -110,12 +110,8 @@ public:
 		case MSG_TRANSMITTER_RISE_POWER_OPR://发射机升功率
 		case MSG_TRANSMITTER_REDUCE_POWER_OPR://发射机降功率
         case MSG_SET_FREQUENCY_OPR:
-        case MSG_SEARCH_FREQUENCY_OPR:
-        case MSG_0401_SWITCH_OPR:
-        case MSG_CONTROL_MOD_SWITCH_OPR:
-        case MSG_ADJUST_TIME_SET_OPR:
-        case MSG_GENERAL_COMMAND_OPR:
-        case MSG_SWITCH_AUDIO_CHANNEL_OPR://切换音频通道
+        case MSG_SEARCH_FREQUENCY_OPR:        
+        case MSG_ADJUST_TIME_SET_OPR:       
         case MSG_DEV_RESET_OPR:
         {
             devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
@@ -137,6 +133,25 @@ public:
 
         }
         break;
+        case MSG_0401_SWITCH_OPR:
+        case MSG_CONTROL_MOD_SWITCH_OPR:
+        case MSG_GENERAL_COMMAND_OPR:
+        case MSG_SWITCH_AUDIO_CHANNEL_OPR://切换音频通道
+        {
+            devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
+            commandmsg_->ParseFromArray(task->body(),task->bodySize());
+            string sUsr = commandmsg_->soperuser();
+            e_ErrorCode nReult = GetInst(SvcMgr).excute_command(commandmsg_->sdevid(),MsgPtr->type,sUsr,commandmsg_);
+            devCommdRsltPtr ackMsg(new DeviceCommandResultNotify);
+            ackMsg->set_sstationid(commandmsg_->sstationid());
+            ackMsg->set_sdevid(commandmsg_->sdevid());
+            ackMsg->set_sdevname(commandmsg_->sdevname());
+            ackMsg->set_edevtype(commandmsg_->edevtype());
+            ackMsg->set_eerrorid(nReult);
+            ackMsg->set_soperuser(commandmsg_->soperuser());
+            psession->sendMessage((e_MsgType)(MsgPtr->type+1),ackMsg);
+        }
+            break;
 		case MSG_DEV_REALTIME_DATA_NOTIFY://下级台站实时设备数据
 			psession->dev_data_notify(task);
 			break;

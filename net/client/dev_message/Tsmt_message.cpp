@@ -12,6 +12,7 @@
 #include "./transmmiter/gsbrtransmmit.h"
 #include "./transmmiter/zctransmmit.h"
 #include "./transmmiter/ckangtetransmmit.h"
+#include "./transmmiter/harristransmmit.h"
 namespace hx_net
 {
 
@@ -316,7 +317,7 @@ namespace hx_net
             m_ptransmmit = new ShTransmmit(m_pSession,d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case HUIXIN:
-             m_ptransmmit = new AhhxTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+            m_ptransmmit = new AhhxTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case HAGUANG:
             break;
@@ -340,6 +341,7 @@ namespace hx_net
         case SHANGHAI_MZ:
             break;
         case HARRIS:
+            m_ptransmmit = new CHarrisTransmmit(boost::shared_ptr<hx_net::Tsmt_message>(this),d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case DE_XIN:
             m_ptransmmit = new DeXinTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);

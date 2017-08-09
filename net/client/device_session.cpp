@@ -819,6 +819,11 @@ void device_session::http_send_task(const string &sCommandId){
 
 }
 
+void device_session::send_cmd_to_dev(CommandUnit cmdUnit)
+{
+    start_write(cmdUnit.commandId,cmdUnit.commandLen);
+}
+
 //发送命令到设备
 void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId)
 {
@@ -1762,7 +1767,9 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
             //提交监控量告警到上级平台
             string sDesDevId = devId;
             map_dev_ass_parse_ptr_[devId]->get_parent_device_id(sDesDevId);
-            http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm.sReason);
+            if(GetInst(LocalConfig).http_svc_use())
+                http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,
+                                                              bMod,curAlarm,curAlarm.sReason);
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
                                      ,modleInfos_.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
@@ -1776,7 +1783,9 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
             //提交监控量告警到上级平台
             string sDesDevId = devId;
             map_dev_ass_parse_ptr_[devId]->get_parent_device_id(sDesDevId);
-            http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,bMod,curAlarm,curAlarm. sReason);
+            if(GetInst(LocalConfig).http_svc_use())
+                http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,
+                                                              bMod,curAlarm,curAlarm.sReason);
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
                                      ,modleInfos_.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
@@ -1920,7 +1929,7 @@ void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPt
         parse_item_alarm(sDevId,dbValue,iterItem->second,bTmpAlarmNow);
     }
     //如果有新告警产生,则立刻发送一次监控数据
-    if(bTmpAlarmNow==true){
+    if(bTmpAlarmNow==true && GetInst(LocalConfig).report_use()){
         string sDesDevId = sDevId;
         map_dev_ass_parse_ptr_[sDesDevId]->get_parent_device_id(sDesDevId);
         http_ptr_->send_http_data_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[sDevId].iDevType,
@@ -1942,7 +1951,7 @@ void device_session::sendSmsToUsers(int nLevel,string &sContent)
     }
 
 }
-//用来执行通用指令,根据具体参数,组织命令字符串,同时发送命令消息
+//用来执行通用指令,根据具体参数,组织命令字符串,同时发送命令消息（废弃）
 bool device_session::excute_general_command(int cmdType,devCommdMsgPtr lpParam,e_ErrorCode &opResult)
 {
     CommandUnit adjustTmCmd;
@@ -2036,6 +2045,7 @@ void device_session::clear_dev_item_alarm(string sDevId,int nitemId)
     iter->second.clear();
 }
 
+//发送联动指令
 void device_session::send_action_conmmand(map<int,vector<ActionParam> > &param,string sUser,int actionType,e_ErrorCode &opResult){
 
     if(!is_connected()){

@@ -15,7 +15,7 @@
 #define totalrate    "1.3.6.1.4.1.8201.5.7.1.1.5.0"
 //频率
 #define frequency	"1.3.6.1.4.1.8201.5.7.1.1.7.0"
-
+#include <QString>
 namespace hx_net
 {
 
@@ -25,6 +25,8 @@ namespace hx_net
         //,d_task_queue_ptr(new TaskQueue< DevMonitorDataPtr >)
     {
         initOid();
+        if(IsStandardCommand())
+            d_curData_ptr = DevMonitorDataPtr(new Data);
     }
 
     Link_message::~Link_message(void)
@@ -223,12 +225,318 @@ namespace hx_net
         query_pdu += vbl;
     }
 
+    int Link_message::decode_0401AV(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        // aa 41 11 00 01 00 06 00 00 33 10 43 55
+        iaddcode = data[3]*256+data[4];
+        DataInfo dainfo;
+        int ichanel;
+        ichanel = data[7];
+        dainfo.bType = true;
+        for(int i=0;i<4;++i)
+        {
+            dainfo.fValue = 0;
+            data_ptr->mValues[i] = dainfo;
+        }
+        if(ichanel>=0 && ichanel<4)
+        {
+            data_ptr->mValues[ichanel].fValue = 1.0;
+        }
+
+
+        if(data[8]==0x00)
+        {
+            dainfo.fValue = 1.0;
+            data_ptr->mValues[4] = dainfo;
+            dainfo.fValue = 0;
+            data_ptr->mValues[5] = dainfo;
+        }
+        else
+        {
+            dainfo.fValue = 1.0;
+            data_ptr->mValues[5] = dainfo;
+            dainfo.fValue = 0;
+            data_ptr->mValues[4] = dainfo;
+        }
+        int inputstate = data[9];
+        for(int i=0;i<8;++i)
+        {
+           dainfo.fValue = Getbit(inputstate,i);
+           data_ptr->mValues[6+i] = dainfo;
+        }
+        dainfo.bType = false;
+        dainfo.fValue = data[10];
+        data_ptr->mValues[14] = dainfo;
+        return 0;
+    }
+
+    int Link_message::decode_0401DA(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        iaddcode = data[3]*256+data[4];
+        DataInfo dainfo;
+        int ichanel = data[7];
+        dainfo.bType = true;
+        for(int i=0;i<4;++i)
+        {
+            dainfo.fValue = 0;
+            data_ptr->mValues[i] = dainfo;
+        }
+        data_ptr->mValues[15] = dainfo;
+        if(ichanel>=0 && ichanel<4)
+        {
+            data_ptr->mValues[ichanel].fValue = 1.0;
+        }
+        if(ichanel==4)
+            data_ptr->mValues[15].fValue = 1.0;
+        if(data[8]==0x00)
+        {
+            dainfo.fValue = 1.0;
+            data_ptr->mValues[4] = dainfo;
+            dainfo.fValue = 0;
+            data_ptr->mValues[5] = dainfo;
+        }
+        else
+        {
+            dainfo.fValue = 1.0;
+            data_ptr->mValues[5] = dainfo;
+            dainfo.fValue = 0;
+            data_ptr->mValues[4] = dainfo;
+        }
+        int inputstate = data[9];
+        for(int i=0;i<4;++i)
+        {
+           dainfo.fValue = Getbit(inputstate,i)==0 ? 1:0;
+           data_ptr->mValues[6+i] = dainfo;
+        }
+        inputstate = data[10];
+        dainfo.bType = false;
+        int ornum=0;
+        for(int i=0;i<4;++i)
+        {
+            ornum = int(3*pow(4.0,i));
+            dainfo.fValue = ((inputstate&ornum)>>2*i);
+            data_ptr->mValues[10+i] = dainfo;
+        }
+        dainfo.fValue = data[11];
+        data_ptr->mValues[14] = dainfo;
+        dainfo.fValue = data[22];
+        data_ptr->mValues[16] = dainfo;
+        dainfo.fValue = data[21];
+        data_ptr->mValues[17] = dainfo;
+        return 0;
+    }
+
+    int Link_message::decode_0401DABS(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        iaddcode = data[3]*256+data[4];
+        int nCmd = data[2];
+        DataInfo dainfo;
+        if(nCmd!=0x77)
+        {
+            int ichanel = data[7];
+            dainfo.bType = true;
+            for(int i=0;i<4;++i)
+            {
+                dainfo.fValue = 0;
+                data_ptr->mValues[i] = dainfo;
+            }
+            data_ptr->mValues[15] = dainfo;
+            if(ichanel>=0 && ichanel<4)
+            {
+                data_ptr->mValues[ichanel].fValue = 1.0;
+            }
+            if(ichanel==4)
+                data_ptr->mValues[15].fValue = 1.0;
+            if(data[8]==0x00)
+            {
+                dainfo.fValue = 1.0;
+                data_ptr->mValues[4] = dainfo;
+                dainfo.fValue = 0;
+                data_ptr->mValues[5] = dainfo;
+            }
+            else
+            {
+                dainfo.fValue = 1.0;
+                data_ptr->mValues[5] = dainfo;
+                dainfo.fValue = 0;
+                data_ptr->mValues[4] = dainfo;
+            }
+            int inputstate = data[9];
+            for(int i=0;i<4;++i)
+            {
+               dainfo.fValue = Getbit(inputstate,i)==0 ? 1:0;
+               data_ptr->mValues[6+i] = dainfo;
+            }
+            inputstate = data[10];
+            dainfo.bType = false;
+            int ornum=0;
+            for(int i=0;i<4;++i)
+            {
+                ornum = int(3*pow(4.0,i));
+                dainfo.fValue = ((inputstate&ornum)>>2*i);
+                data_ptr->mValues[10+i] = dainfo;
+            }
+            dainfo.fValue = data[11];
+            data_ptr->mValues[14] = dainfo;
+        }
+        else
+        {
+            dainfo.bType = false;
+            dainfo.fValue = data[8];
+            data_ptr->mValues[16] = dainfo;
+            dainfo.fValue = data[7];
+            data_ptr->mValues[17] = dainfo;
+            dainfo.fValue = data[10];
+            data_ptr->mValues[18] = dainfo;
+            dainfo.fValue = data[9];
+            data_ptr->mValues[19] = dainfo;
+            dainfo.fValue = data[12];
+            data_ptr->mValues[20] = dainfo;
+            dainfo.fValue = data[11];
+            data_ptr->mValues[21] = dainfo;
+            dainfo.fValue = data[14];
+            data_ptr->mValues[22] = dainfo;
+            dainfo.fValue = data[13];
+            data_ptr->mValues[23] = dainfo;
+            dainfo.fValue = data[16];
+            data_ptr->mValues[24] = dainfo;
+            dainfo.fValue = data[15];
+            data_ptr->mValues[25] = dainfo;
+        }
+        return 0;
+    }
+
+    void Link_message::GetSwitchCmd(devCommdMsgPtr lpParam, CommandUnit &cmdUnit)
+    {
+        switch (d_devInfo.nSubProtocol){
+        case LINK_HX_0401_AV:{
+            if(lpParam->cparams().size()<1)
+                return;
+            int nChannel = atoi(lpParam->cparams(0).sparamvalue().c_str());
+            cmdUnit.commandLen = 13;
+            cmdUnit.ackLen = 0;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x41;
+            cmdUnit.commandId[2] = 0x22;
+            cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x06;
+            cmdUnit.commandId[7] = nChannel;
+            cmdUnit.commandId[8] = 0x00;
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = nChannel;
+            cmdUnit.commandId[12] = 0x55;
+        }
+            break;
+        case LINK_HX_0401_DA:
+        case LINK_HX_0401_DABS:
+        {
+            if(lpParam->cparams().size()<1)
+                return;
+            int nChannel = atoi(lpParam->cparams(0).sparamvalue().c_str());
+            cmdUnit.commandLen = 14;
+            cmdUnit.ackLen = 7;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x45;
+            cmdUnit.commandId[2] = 0x22;
+            cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x07;
+            cmdUnit.commandId[7] = nChannel;
+            cmdUnit.commandId[8] = 0x00;
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = 0x00;
+            cmdUnit.commandId[12] = nChannel;
+            cmdUnit.commandId[13] = 0x55;
+        }
+            break;
+        default:
+            break;
+        }
+    }
+
+    void Link_message::GetControlModCmd(devCommdMsgPtr lpParam, CommandUnit &cmdUnit)
+    {
+        switch (d_devInfo.nSubProtocol){
+        case LINK_HX_0401_AV:
+        {
+            if(lpParam->cparams().size()<1)
+                return;
+            int nMode = atoi(lpParam->cparams(0).sparamvalue().c_str());
+            cmdUnit.commandLen = 13;
+            cmdUnit.ackLen = 0;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x41;
+            cmdUnit.commandId[2] = 0x66;
+            cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x06;
+            cmdUnit.commandId[7] = 0x00;
+            cmdUnit.commandId[8] = nMode;
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = nMode;
+            cmdUnit.commandId[12] = 0x55;
+        }
+            break;
+        case LINK_HX_0401_DA:
+        case LINK_HX_0401_DABS:
+        {
+            if(lpParam->cparams().size()<1)
+                return;
+            int nMode = atoi(lpParam->cparams(0).sparamvalue().c_str());
+            cmdUnit.commandLen = 14;
+            cmdUnit.ackLen = 0;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x45;
+            cmdUnit.commandId[2] = 0x66;
+            cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x07;
+            cmdUnit.commandId[7] = 0x00;
+            cmdUnit.commandId[8] = nMode;
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = 0x00;
+            cmdUnit.commandId[12] = nMode;
+            cmdUnit.commandId[13] = 0x55;
+        }
+            break;
+        default:
+            break;
+        }
+    }
+
     int Link_message::check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number)
     {
+        switch (d_devInfo.nSubProtocol){
+        case LINK_HX_0401_AV:{
+            if(data[0]==0xAA && data[1]==0x41)
+                return (data[5]*256+data[6]);
+            else
+                return RE_HEADERROR;
+        }
+        case LINK_HX_0401_DA:
+        case LINK_HX_0401_DABS:
+        {
+            if(data[0]==0xAA && data[1]==0x45)
+                return (data[5]*256+data[6]);
+            else
+                return RE_HEADERROR;
+        }
+        default:
+            break;
+        }
         return RE_UNKNOWDEV;
     }
 
-     int Link_message::decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
+    int Link_message::decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
      {
 
          if(data_ptr!=NULL)
@@ -260,11 +568,39 @@ namespace hx_net
 
     int Link_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
     {
-        return RE_UNKNOWDEV;
+        if(data_ptr!=NULL)
+            d_curData_ptr = data_ptr;
+        int idecresult = RE_UNKNOWDEV;
+        switch (d_devInfo.nSubProtocol) {
+        case LINK_HX_0401_AV:
+            idecresult = decode_0401AV(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
+        case LINK_HX_0401_DA:
+            idecresult = decode_0401DA(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
+        case LINK_HX_0401_DABS:
+            idecresult = decode_0401DABS(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
+        default:
+            break;
+        }
+        if(idecresult == 0 ) {
+            GetResultData(d_curData_ptr);
+            if(IsStandardCommand()){
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            }
+        }
+        return idecresult;
     }
 
     bool Link_message::IsStandardCommand()
     {
+        switch (d_devInfo.nSubProtocol){
+        case LINK_HX_0401_AV:
+        case LINK_HX_0401_DA:
+        case LINK_HX_0401_DABS:
+            return true;
+        }
         return false;
     }
 
@@ -274,6 +610,73 @@ namespace hx_net
 
     void Link_message::GetAllCmd( CommandAttribute &cmdAll )
     {
+        switch (d_devInfo.nSubProtocol){
+        case LINK_HX_0401_AV:{
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 13;
+            tmUnit.ackLen = 7;
+            tmUnit.commandId[0] = 0xAA;
+            tmUnit.commandId[1] = 0x41;
+            tmUnit.commandId[2] = 0x11;
+            tmUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            tmUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            tmUnit.commandId[5] = 0x00;
+            tmUnit.commandId[6] = 0x06;
+            tmUnit.commandId[7] = 0x00;
+            tmUnit.commandId[8] = 0x00;
+            tmUnit.commandId[9] = 0x00;
+            tmUnit.commandId[10] = 0x00;
+            tmUnit.commandId[11] = 0x00;
+            tmUnit.commandId[12] = 0x55;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case LINK_HX_0401_DA:{
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 14;
+            tmUnit.ackLen = 7;
+            tmUnit.commandId[0] = 0xAA;
+            tmUnit.commandId[1] = 0x45;
+            tmUnit.commandId[2] = 0x11;
+            tmUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            tmUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            tmUnit.commandId[5] = 0x00;
+            tmUnit.commandId[6] = 0x07;
+            tmUnit.commandId[7] = 0x00;
+            tmUnit.commandId[8] = 0x00;
+            tmUnit.commandId[9] = 0x00;
+            tmUnit.commandId[10] = 0x00;
+            tmUnit.commandId[11] = 0x00;
+            tmUnit.commandId[12] = 0x00;
+            tmUnit.commandId[13] = 0x55;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case LINK_HX_0401_DABS:
+        {
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 14;
+            tmUnit.ackLen = 7;
+            tmUnit.commandId[0] = 0xAA;
+            tmUnit.commandId[1] = 0x45;
+            tmUnit.commandId[2] = 0x11;
+            tmUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            tmUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            tmUnit.commandId[5] = 0x00;
+            tmUnit.commandId[6] = 0x07;
+            tmUnit.commandId[7] = 0x00;
+            tmUnit.commandId[8] = 0x00;
+            tmUnit.commandId[9] = 0x00;
+            tmUnit.commandId[10] = 0x00;
+            tmUnit.commandId[11] = 0x00;
+            tmUnit.commandId[12] = 0x00;
+            tmUnit.commandId[13] = 0x55;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            tmUnit.commandId[2] = 0x77;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        }
     }
 
 
@@ -314,6 +717,49 @@ namespace hx_net
             return parse_AsiApt_data(pdu,target);
         case LINK_WEILE_AVSP_DECODER:
             return parse_weile_avsp_decorder_data(pdu,target);
+        }
+    }
+
+    void Link_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode, bool bSnmp, Snmp *snmp, CTarget *target)
+    {
+        eErrCode = EC_UNKNOWN;
+        switch (icmdType) {
+        case MSG_ADJUST_TIME_SET_OPR:
+        {
+        }
+            break;
+        default:
+            break;
+        }
+    }
+
+    void Link_message::exec_general_task(int icmdType, string sUser, devCommdMsgPtr lpParam, e_ErrorCode &eErrCode)
+    {
+        eErrCode = EC_UNKNOWN;
+        CommandUnit cmdUnit;
+        cmdUnit.commandLen = 0;
+        switch (icmdType) {
+        case MSG_CONTROL_MOD_SWITCH_OPR:
+        {
+            GetControlModCmd(lpParam,cmdUnit);
+        }
+            break;
+        case MSG_0401_SWITCH_OPR://通道切换
+        {
+            GetSwitchCmd(lpParam,cmdUnit);
+        }
+            break;
+        case MSG_GENERAL_COMMAND_OPR://
+            break;
+        case MSG_SWITCH_AUDIO_CHANNEL_OPR://切换音频通道
+            break;
+        default:
+            break;
+        }
+        if(cmdUnit.commandLen>0)
+        {
+            eErrCode = EC_OK;
+            m_pSession->send_cmd_to_dev(cmdUnit);
         }
     }
 
@@ -539,7 +985,29 @@ namespace hx_net
 
      void Link_message::parse_weile_avsp_decorder_data(Pdu &pdu, SnmpTarget &target)
      {
-          parse_DmpSwitch_data(pdu,target);
+         parse_DmpSwitch_data(pdu,target);
+     }
+
+     void Link_message::GetResultData(DevMonitorDataPtr data_ptr)
+     {
+         map<int,DeviceMonitorItem>::iterator iter = d_devInfo.map_MonitorItem.begin();
+         for(;iter!=d_devInfo.map_MonitorItem.end();++iter)
+         {
+             map<int,DataInfo>::iterator diter = data_ptr->mValues.find((*iter).first);
+             if(diter!=data_ptr->mValues.end())
+             {
+
+                 if((*iter).second.iItemType == 0){
+                     data_ptr->mValues[(*iter).first].fValue *= (*iter).second.dRatio;
+                     if(data_ptr->mValues[(*iter).first].sValue.empty())
+                         data_ptr->mValues[(*iter).first].sValue = QString::number(data_ptr->mValues[(*iter).first].fValue,'g',2).toStdString();
+                 }
+                 else {
+                     if((*iter).second.dRatio==0)
+                         data_ptr->mValues[(*iter).first].fValue = data_ptr->mValues[(*iter).first].fValue==1.0f ? 0:1;
+                 }
+             }
+         }
      }
 
 

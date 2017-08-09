@@ -82,7 +82,8 @@ SOURCES += main.cpp\
     gpschecktime.cpp \
     sms/gsms.cpp \
     net/client/dev_message/transmmiter/ckangtetransmmit.cpp \
-    net/client/dev_message/transmmiter/zctransmmit.cpp
+    net/client/dev_message/transmmiter/zctransmmit.cpp \
+    net/client/dev_message/transmmiter/harristransmmit.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -161,7 +162,8 @@ HEADERS  += \
     gpschecktime.h \
     sms/gsms.h \
     net/client/dev_message/transmmiter/ckangtetransmmit.h \
-    net/client/dev_message/transmmiter/zctransmmit.h
+    net/client/dev_message/transmmiter/zctransmmit.h \
+    net/client/dev_message/transmmiter/harristransmmit.h
 
 FORMS    += mainwindow.ui
 

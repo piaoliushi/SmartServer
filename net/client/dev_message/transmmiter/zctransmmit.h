@@ -1,18 +1,10 @@
 #ifndef ZCTRANSMMIT_H
 #define ZCTRANSMMIT_H
 #include "Transmmiter.h"
+#include "../../device_session.h"
 namespace hx_net{
 class ZcTransmmit:public Transmmiter
 {
-    typedef struct
-    {
-        unsigned char uHeadFlag[2]; //固定的命令头 10 02
-        int uSendID;
-        int uRecvID;
-        unsigned char uFunc;
-        unsigned char uSubFunc;
-        unsigned short uDatalen;
-    }AckHeader,*pAckHeader;
 public:
     ZcTransmmit(int subprotocol,int addresscode);
 
@@ -23,9 +15,10 @@ public:
     void GetAllCmd(CommandAttribute &cmdAll);
 private:
     int Zhc618F_Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+    int Zhc10KWTv_Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
 private:
     int m_subprotocol;
-    int m_addresscode;
+    int m_addresscode;  
 };
 
 #endif // ZCTRANSMMIT_H

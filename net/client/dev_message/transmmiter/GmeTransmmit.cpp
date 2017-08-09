@@ -102,6 +102,8 @@ namespace hx_net{
             return GmeFMData(data,data_ptr,nDataLen,runstate);
         case BEIJING_JIZHAO_SIMTV:
             return GmeSIMData(data,data_ptr,nDataLen,runstate);
+        case GME_SIMTV1014A:
+            return GmeSIM1014AData(data,data_ptr,nDataLen,runstate);
         }
         return -1;
 	}
@@ -466,6 +468,116 @@ namespace hx_net{
 			dtinfo.fValue = (float)tmp;
 			data_ptr->mValues[indexpos++] = dtinfo;
 		}
-		return 0;
-	}
+        return 0;
+    }
+
+    int GmeTransmmit::GmeSIM1014AData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+    {
+        int indexpos =0; //存放第一个变量的位置
+        int HiByte;  //高字节
+        int LoByte;  //低字节
+        int tmp;
+        float ftmp;
+        if(data[0]==m_addresscode)
+            data = data+1;
+        DataInfo dtinfo;
+        dtinfo.bType = false;
+        HiByte = data[676];//GME 1014A 格式例外
+        LoByte = data[677];
+        tmp = HiByte*256+LoByte;
+        dtinfo.fValue = ((float)tmp) *(float)(0.01);
+        data_ptr->mValues[indexpos++] = dtinfo;
+        float outpwr = (float)tmp;
+        HiByte = data[678];
+        LoByte = data[679];
+        ftmp = (HiByte*256+LoByte) *0.01;
+        float refpwr =0;
+        if(ftmp > 1.0)//驻波比小于1
+        {
+            refpwr = (float)(((ftmp -1))/(ftmp +1) * data_ptr->mValues[0].fValue *30);
+        }else
+            refpwr =0;
+        dtinfo.fValue = refpwr;
+        data_ptr->mValues[indexpos++] = dtinfo;
+        dtinfo.fValue = ftmp;
+        data_ptr->mValues[indexpos++] = dtinfo;
+        LoByte = data[31];
+        dtinfo.bType = true;
+        for(int i = 2;i <8; i++)
+        {
+            dtinfo.fValue = Getbit(LoByte,i)==1 ? 0:1;
+            data_ptr->mValues[indexpos++] = dtinfo;
+        }
+        LoByte = data[106];
+        for(int i=7;i>=0;--i)
+        {
+            dtinfo.fValue = Getbit(LoByte,i)==1 ? 0:1;
+            data_ptr->mValues[indexpos++] = dtinfo;
+        }
+        dtinfo.bType = false;
+        for(int i=0;i<5;++i)
+        {
+            HiByte = data[107+2*i];
+            LoByte = data[108+2*i];
+            if(i==1)
+            {
+                ftmp = HiByte*256+LoByte;
+            }
+            else
+                ftmp = (HiByte*256+LoByte)*0.1;
+            dtinfo.fValue = ftmp;
+            data_ptr->mValues[indexpos++] = dtinfo;
+        }
+        dtinfo.bType = true;
+        LoByte = data[117];
+        for(int i=7;i>=0;--i)
+        {
+            dtinfo.fValue = Getbit(LoByte,i)==1 ? 0:1;
+            data_ptr->mValues[indexpos++] = dtinfo;
+        }
+        dtinfo.bType = false;
+        for(int i=0;i<5;++i)
+        {
+            HiByte = data[118+2*i];
+            LoByte = data[119+2*i];
+            if(i==1)
+            {
+                ftmp = HiByte*256+LoByte;
+            }
+            else
+                ftmp = (HiByte*256+LoByte)*0.1;
+            dtinfo.fValue = ftmp;
+            data_ptr->mValues[indexpos++] = dtinfo;
+        }
+        int gnum=0;
+        gnum = (int)(nDataLen-128)/32;
+        for(int i =0 ;i <gnum ;i++)
+        {
+            HiByte = data[128 + 32 *i +6*2];//取功放输入高字节
+            LoByte = data[128 + 32 *i +6*2 +1]; //取功放输入低字节
+            int tmp = ((HiByte <<8 ) | LoByte);
+            float ftmp = (float)tmp;
+            ftmp *= (float)0.01;
+            dtinfo.fValue = ftmp;
+            data_ptr->mValues[indexpos++] = dtinfo;
+            HiByte = data[128 + 32 *i +7*2];//取功放输出高字节
+            LoByte = data[128 + 32 *i +7*2+1]; //取功放输出低字节
+            tmp = ((HiByte <<8 ) | LoByte);
+            dtinfo.fValue = tmp;
+            data_ptr->mValues[indexpos++] = dtinfo;
+        }
+        for(int k=0;k<12;k++)
+        {
+            HiByte = data[32 + 2*k];
+            LoByte = data[32 + 2*k +1];
+
+            tmp = ((HiByte <<8 ) | LoByte);
+
+            if(tmp >52)
+                tmp =48;
+            dtinfo.fValue = tmp;
+            data_ptr->mValues[indexpos++] = dtinfo;
+        }
+        return 0;
+    }
 }

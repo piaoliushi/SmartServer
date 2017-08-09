@@ -72,6 +72,8 @@ namespace hx_net
         void start_task_schedules_timer();
         //发送命令到设备
         void send_cmd_to_dev(string sDevId,int cmdType,int childId);
+        void send_cmd_to_dev(CommandUnit cmdUnit);
+
         //更新运行图
         void update_monitor_time(string devId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                                  vector<Command_Scheduler> &cmmdScheduler);

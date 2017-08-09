@@ -49,7 +49,7 @@ protected:
     void exec_trunoff_task_();
     void  excute_task_cmd();
     void  GetResultData(DevMonitorDataPtr data_ptr);
-    void   CreateObject();
+    void  CreateObject();
     bool  cmd_excute_is_ok();
     void  check_device_alarm(int nAlarmType);
 private:

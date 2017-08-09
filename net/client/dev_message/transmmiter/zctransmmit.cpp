@@ -12,6 +12,7 @@ namespace hx_net{
        switch(m_subprotocol)
        {
        case ZHC_618F:
+       case ZHC_10KWTV:
        {
            if(data[0]==0x10 && data[1]==0x02)
                return ((data[13]<<8)|data[12]);
@@ -29,6 +30,8 @@ namespace hx_net{
        {
        case ZHC_618F:
            return Zhc618F_Data(data,data_ptr,nDataLen,runstate);
+       case ZHC_10KWTV:
+           return Zhc10KWTv_Data(data,data_ptr,nDataLen,runstate);
        }
        return RE_NOPROTOCOL;
    }
@@ -38,6 +41,7 @@ namespace hx_net{
        switch(m_subprotocol)
        {
        case ZHC_618F:
+       case ZHC_10KWTV:
            return true;
        }
        return false;
@@ -60,6 +64,7 @@ namespace hx_net{
        switch(m_subprotocol)
        {
        case ZHC_618F:
+       case ZHC_10KWTV:
        {
            CommandUnit tmUnit;
            tmUnit.commandId[0] = 0x10;
@@ -147,7 +152,7 @@ namespace hx_net{
            dataindex++;
        }
        //偏移14字节到数据区
-      // data = data+14;
+       data = data+14;
        DataInfo dainfo;
        dainfo.bType = true;
        dainfo.fValue = cdata[0];
@@ -184,6 +189,126 @@ namespace hx_net{
        dainfo.bType = false;
        dainfo.fValue = ((cdata[16]<<8)|cdata[15])*0.001;
        data_ptr->mValues[0] = dainfo;
+       dainfo.fValue = ((cdata[18]<<8)|cdata[17])*0.1;
+       data_ptr->mValues[16] = dainfo;
+       dainfo.fValue = ((cdata[20]<<8)|cdata[19])*0.01;
+       data_ptr->mValues[17] = dainfo;
+       data_ptr->mValues[1] = dainfo;
+       if((data[9]&0x80)==0x00)
+       {
+           dainfo.fValue = cdata[21];
+       }
+       else
+       {
+           dainfo.fValue = (cdata[21]&0x7F)*(-1);
+       }
+       data_ptr->mValues[18] = dainfo;
+       dainfo.fValue = ((cdata[23]<<8)|cdata[22])*0.1;
+       data_ptr->mValues[19] = dainfo;
+       dainfo.fValue = cdata[24];
+       data_ptr->mValues[20] = dainfo;
+       for(int i=0;i<4;++i)
+       {
+           dainfo.fValue = cdata[25+i]*0.1;
+           data_ptr->mValues[21+i] = dainfo;
+       }
+       dainfo.bType = true;
+       for(int i=0;i<8;++i)
+       {
+           dainfo.fValue = Getbit(cdata[29],i)==0 ? 1:0;
+           data_ptr->mValues[25+i] = dainfo;
+       }
+       for(int i=0;i<3;++i)
+       {
+           dainfo.fValue = Getbit(cdata[30],i)==0 ? 1:0;
+           data_ptr->mValues[33+i] = dainfo;
+       }
+       dainfo.bType = false;
+       if(data_ptr->mValues[0].fValue*1000>data_ptr->mValues[1].fValue)
+       {
+           dainfo.fValue = sqrt((data_ptr->mValues[0].fValue*1000+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue));
+       }
+       else
+           dainfo.fValue = 1.0;
+       return 0;
+   }
+
+   int ZcTransmmit::Zhc10KWTv_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+   {
+       unsigned char ucFunc = data[10];
+       unsigned char ucSubFunc = data[11];
+       unsigned char cDes[2]={0};
+       cDes[0]=0x10;
+       cDes[1]=0x03;
+
+       int nDatapos = kmp(data,nDataLen,cDes,2);
+       if(nDatapos<0)
+       {
+           int dataindex = 0;
+           for(int i=14;i<nDataLen-1;++i)
+           {
+               if(data[i]==0x10 && data[i+1]==0x10)
+               {
+                  dataindex++;
+                  i++;
+               }
+           }
+           return dataindex;
+       }
+       if(ucFunc!=0x04 || ucSubFunc!=0x04)
+           return -2;
+       //开始整理数据
+       unsigned char cdata[100];
+       int dataindex = 0;
+       for(int i=14;i<nDataLen-1;++i)
+       {
+           if(data[i]==0x10 && data[i+1]==0x10)
+           {
+               i+=1;
+           }
+           cdata[dataindex] = data[i];
+           dataindex++;
+       }
+       //偏移14字节到数据区
+       data = data+14;
+       DataInfo dainfo;
+       dainfo.bType = true;
+       dainfo.fValue = cdata[0];
+       runstate = cdata[0]==0? 1:0;
+       data_ptr->mValues[3] = dainfo;
+       dainfo.bType = false;
+       dainfo.fValue = ((cdata[2]<<8)|cdata[1])*0.1;
+       data_ptr->mValues[4] = dainfo;
+       dainfo.fValue = dainfo.fValue*0.1;
+       data_ptr->mValues[0] = dainfo;
+       dainfo.fValue = ((cdata[4]<<8)|cdata[3])*0.1;
+       data_ptr->mValues[5] = dainfo;
+       dainfo.fValue = ((cdata[6]<<8)|cdata[5])*0.1;
+       data_ptr->mValues[6] = dainfo;
+       dainfo.fValue = ((cdata[8]<<8)|cdata[7])*0.1;
+       data_ptr->mValues[7] = dainfo;
+       if((data[9]&0x80)==0x00)
+       {
+           dainfo.fValue = cdata[9];
+       }
+       else
+       {
+           dainfo.fValue = (cdata[9]&0x7F)*(-1);
+       }
+       data_ptr->mValues[8] = dainfo;
+       dainfo.fValue = ((cdata[11]<<8)|cdata[10])*0.1;
+       data_ptr->mValues[9] = dainfo;
+       dainfo.fValue = ((cdata[13]<<8)|cdata[12])*0.1;
+       data_ptr->mValues[10] = dainfo;
+       dainfo.bType = true;
+       for(int i=0;i<5;++i)
+       {
+           dainfo.fValue = Getbit(cdata[14],i)==0 ? 1:0;
+           data_ptr->mValues[11+i] = dainfo;
+       }
+       dainfo.bType = false;
+       //dainfo.fValue = ((cdata[16]<<8)|cdata[15])*0.001;
+       //data_ptr->mValues[0] = dainfo;
        dainfo.fValue = ((cdata[18]<<8)|cdata[17])*0.1;
        data_ptr->mValues[16] = dainfo;
        dainfo.fValue = ((cdata[20]<<8)|cdata[19])*0.01;

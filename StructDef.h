@@ -240,9 +240,12 @@ typedef enum SHANGHAIPROTOCOL
 {
 	MZ_DTV1000        = 0,//明珠数字电视1000
 }MzSubProtocol;
+
 typedef enum HarPROTOCOL
 {
-	HARRIS_AM50       = 0,//哈里斯中波50Kw
+    HARRIS_AM50       = 0,//哈里斯中波50Kw
+    HARRIS_ZXB       = 1,//
+    HARRIS_SNMP       = 2,//SNMP协议
 }HarSubPrototcol;
 
 typedef enum DxPROTOCOL
@@ -266,14 +269,14 @@ typedef enum TIMEROTOCOL
 typedef enum LINK_DEVICE
 {
     LINK_STATELITE_RECEVIE = 0,//卫星接收机
-
     LINK_TEST_RECEVIE      = 3,//SNMP测试
     LINK_SING_NET_ADAPTER = 4, //
     LINK_DMP_SWITCH = 5, //dmp切换器
     LINK_ASI_ADAPTER = 8,//asi适配器
     LINK_WEILE_AVSP_DECODER = 9,//伟乐avs+解码器
-
-
+    LINK_HX_0401_AV = 10,//汇鑫0401AV+切换器
+    LINK_HX_0401_DA = 11,//汇鑫0401DA切换器
+    LINK_HX_0401_DABS = 12,//汇鑫0401DABS切换器
 }LinkDeviceSubProtocol;
 
 typedef enum RESOLVE_TAG  //resolve
@@ -295,16 +298,22 @@ typedef enum  MEDIASUBPROTOCL_TAG
 {
     MEDIA_DTMB = 0,
 }MediaSubProtocol;
+
 typedef enum GLSQ_TAG
 {
     GLSQ_T = 0,//思奇T型发射机
 }GlsqSubProtocol;
+
 typedef enum GSBR_TAG
 {
     GSBR_SNMP = 0,
 }GsbrSubProtocol;
+
+
 typedef enum ZHC_TAG
 {
     ZHC_618F = 0,
+    ZHC_10KWTV = 1,
 }ZhcSybProtocol;
+
 #endif
