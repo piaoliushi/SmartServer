@@ -20,7 +20,7 @@ namespace hx_net{
          {
          case KT_TV_Netport:{
              if(data[0]==0x55 && data[1]==0xAA)
-                 return 0;
+                 return RE_SUCCESS;
              else
              {
                  unsigned char cDes[2]={0};
@@ -38,24 +38,20 @@ namespace hx_net{
      {
          switch(m_subprotocol)
          {
-         case KT_TV_Netport:{
+         case KT_TV_Netport:
              return KTTvNetPortData(data,data_ptr,nDataLen,runstate);
          }
-         default:
-             return RE_NOPROTOCOL;
-         }
+         return RE_NOPROTOCOL;
      }
 
      int CKangteTransmmit::decode_msg_body(const string &data,DevMonitorDataPtr data_ptr,CmdType cmdType,int number, int &runstate)
      {
          switch(m_subprotocol)
          {
-         case KT_HTTP:{
+         case KT_HTTP:
              return KT_Http_NetPortData(data,data_ptr,cmdType,number,runstate);
          }
-         default:
-             return RE_NOPROTOCOL;
-         }
+         return RE_NOPROTOCOL;
      }
 
      bool CKangteTransmmit::IsStandardCommand()
@@ -143,7 +139,7 @@ namespace hx_net{
              vtUnit.push_back(tmUnit);
              cmdAll.mapCommand[MSG_DEVICE_QUERY] = vtUnit;
 
-             tmUnit.sCommandId = "/SmartWeb/index.php/Pagedata/test_http_data_response";///ctrl.cgi?action=txon
+             tmUnit.sCommandId = "/ctrl.cgi?action=txon";
              tmUnit.commandLen = tmUnit.sCommandId.length();
              tmUnit.ackLen = 0;
              vector<CommandUnit> vtTurnOnUnit;

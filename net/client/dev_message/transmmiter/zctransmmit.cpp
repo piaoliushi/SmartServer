@@ -17,7 +17,7 @@ namespace hx_net{
            if(data[0]==0x10 && data[1]==0x02)
                return ((data[13]<<8)|data[12]);
            else
-               return -1;
+               return RE_HEADERROR;
        }
            break;
        }
@@ -138,7 +138,7 @@ namespace hx_net{
            return dataindex;
        }
        if(ucFunc!=0x04 || ucSubFunc!=0x04)
-           return -2;
+           return RE_CMDACK;
        //开始整理数据
        unsigned char cdata[100];
        int dataindex = 0;
@@ -256,7 +256,7 @@ namespace hx_net{
            return dataindex;
        }
        if(ucFunc!=0x04 || ucSubFunc!=0x04)
-           return -2;
+           return RE_CMDACK;
        //开始整理数据
        unsigned char cdata[100];
        int dataindex = 0;

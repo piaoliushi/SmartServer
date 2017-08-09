@@ -18,13 +18,13 @@ namespace hx_net{
              {
              case DX_DIG_TV:
              {
-                         if(data[0]==0xAA && data[1]==m_addresscode)
-                             return ((data[4]<<8)|data[3])+1;
-                         else
-                             return -1;
-                     }
+                 if(data[0]==0xAA && data[1]==m_addresscode)
+                     return ((data[4]<<8)|data[3])+1;
+                 else
+                     return RE_HEADERROR;
              }
-             return -1;
+             }
+             return RE_NOPROTOCOL;
          }
 
          int DeXinTransmmit::decode_msg_body(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
@@ -34,7 +34,7 @@ namespace hx_net{
              case DX_DIG_TV:
                  return OnDigTVData(data,data_ptr,nDataLen,runstate);
              }
-             return -1;
+             return RE_NOPROTOCOL;
          }
 
          bool DeXinTransmmit::IsStandardCommand()
@@ -158,7 +158,7 @@ namespace hx_net{
          int DeXinTransmmit::OnDigTVData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate)
          {
              if(data[2]!=0x44)
-                     return -2;
+                     return RE_CMDACK;
                  int lastCount = nDataLen;
                  data=data+5;
                  lastCount-=5;

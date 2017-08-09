@@ -12,7 +12,7 @@ namespace hx_net{
               int  decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
               int decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target,int& runstate);
               bool IsStandardCommand();
-              void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit){};
+              void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
               void GetAllCmd(CommandAttribute &cmdAll);
               void harris_Callback(int reason, Snmp *session,Pdu &pdu, SnmpTarget &target);
               bool exec_cmd(Snmp *snmp, int cmdtype, CTarget *target);

@@ -27,7 +27,7 @@ namespace hx_net{
             if(data[0]==0x55 && data[2]==0xF3)
             {
                 if(data[1]< 0x99 )
-                    return 0;
+                    return RE_SUCCESS;
             }
             else
             {
@@ -44,10 +44,9 @@ namespace hx_net{
             if(data[0]==0x55 && data[2]==0xF3)
             {
                 if(data[1]< 0x99 )
-                    return 0;
+                    return RE_SUCCESS;
             }
-            else
-            {
+            else {
                 unsigned char cDes[3]={0};
                 cDes[0]=0x55;
                 cDes[1] = 0x35;
@@ -58,10 +57,8 @@ namespace hx_net{
             break;
         case HUIXIN_0804D:
                 {
-                    if(data[0]==0xAA) //&& pHeader[1]==0x33
-                    {
-                        return 0;
-                    }
+                    if(data[0]==0xAA)
+                        return RE_SUCCESS;
                     else
                     {//查找日期+时间头，若找到返回第一个字节位置
                         unsigned char cDes[2]={0};
@@ -74,7 +71,7 @@ namespace hx_net{
             case HUIXIN_0401_AV:
                 {
                     if(data[0]==0xAA && data[1]==0x41)
-                        return 0;
+                        return RE_SUCCESS;
                     else
                     {
                         unsigned char cDes[2]={0};
@@ -87,7 +84,7 @@ namespace hx_net{
             case HUIXIN_0401_SKY:
                 {
                     if(data[0]==0xAA && data[1]==0x43)
-                        return 0;
+                        return RE_SUCCESS;
                     else
                     {
                         unsigned char cDes[2]={0};
@@ -101,7 +98,7 @@ namespace hx_net{
             case HUIXIN_0401_DA:
                 {
                     if(data[0]==0xAA && data[1]==0x45)
-                        return 0;
+                        return RE_SUCCESS;
                     else
                     {
                         unsigned char cDes[2]={0};
@@ -114,45 +111,41 @@ namespace hx_net{
             case HUIXIN_DATA_MGR:
                 {
                     if(data[0]!=0x7E || data[1]!=0x30)
-                        return -1;
+                        return RE_HEADERROR;
                     else
-                    {
-                        return int((data[5]<<8)|data[4]);
-                    }
+                       return int((data[5]<<8)|data[4]);
                 }
                 break;
             case HUIXIN_6300:
-                if(data[0]!=0xAA || data[1]!=0x63)
-                    return -1;
-                else
                 {
-                    return int((data[5]<<8)|data[6]);
+                     if(data[0]!=0xAA || data[1]!=0x63)
+                         return RE_HEADERROR;
+                     else
+                         return int((data[5]<<8)|data[6]);
                 }
                 break;
             case HUIXIN_9020:
-                if(data[0]!=0xAA || data[1]!=0x92)
-                    return -1;
-                else
                 {
-                    return int((data[5]<<8)|data[6]);
+                    if(data[0]!=0xAA || data[1]!=0x92)
+                         return RE_HEADERROR;
+                    else
+                         return int((data[5]<<8)|data[6]);
                 }
                 break;
             case HUIXIN_740P:
-                if(data[0]!=0x7E || data[1]!=0x74)
-                    return -1;
-                else
                 {
-                    return int((data[5]<<8)|data[6]);
+                    if(data[0]!=0x7E || data[1]!=0x74)
+                        return RE_HEADERROR;
+                    else
+                        return int((data[5]<<8)|data[6]);
                 }
                 break;
             case HUIXIN_0214:
                 {
                     if(data[0]!=0x7E || data[1]!=0x40)
-                        return -1;
+                        return RE_HEADERROR;
                     else
-                    {
                         return int((data[6]<<8)|data[5]);
-                    }
                 }
                 break;
         }
@@ -166,7 +159,7 @@ namespace hx_net{
         case HUIXIN_993:
            return Md993Data(data,data_ptr,nDataLen,runstate);
 		}
-		return -1;
+        return RE_NOPROTOCOL;
 	}
 
     bool AhhxTransmmit::IsStandardCommand()

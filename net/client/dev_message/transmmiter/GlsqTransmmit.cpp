@@ -21,17 +21,14 @@ namespace hx_net{
             if(data[0]==0x24)
                 return data[1]-4;
             else
-            {
-//                unsigned char cDes[1]={0};
-//                cDes[0]=0x24;
-//                return kmp(data,nDataLen,cDes,1);
-                return -1;
-            }
+                return RE_HEADERROR;
         }
             break;
         default:
             break;
         }
+
+        return RE_NOPROTOCOL;
     }
 
     int GlsqTransmmit::decode_msg_body(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
@@ -44,7 +41,7 @@ namespace hx_net{
         default:
             break;
         }
-        return -1;
+        return RE_NOPROTOCOL;
     }
 
     bool GlsqTransmmit::IsStandardCommand()

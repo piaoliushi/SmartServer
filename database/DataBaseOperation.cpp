@@ -24,21 +24,21 @@ DataBaseOperation::~DataBaseOperation()
 bool DataBaseOperation::OpenDb( const std::string& serveraddress, const std::string& database, const std::string& uid, const std::string& pwd, int timeout, std::string link_driver,std::string driverName/*="SQL Native Client"*/ )
 {
 
-   ConnectionPool::initDb(QString::fromStdString(serveraddress),QString::fromStdString(database)
-                          ,QString::fromStdString(uid),QString::fromStdString(pwd));
+    ConnectionPool::initDb(QString::fromStdString(serveraddress),QString::fromStdString(database)
+                           ,QString::fromStdString(uid),QString::fromStdString(pwd));
 
-   QSqlDatabase db = ConnectionPool::openConnection();
-   if(!db.isOpen() || !db.isValid()) {
-       std::cout<<"connect  database  is error ------------------------------ the database is interrupt"<<std::endl;
-       return false;
-   }
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {
+        std::cout<<"connect  database  is error ------------------------------ the database is interrupt"<<std::endl;
+        return false;
+    }
     ConnectionPool::closeConnection(db);
     return true;
 }
 
 bool DataBaseOperation::CloseDb()
 {
-  return true;
+    return true;
 }
 
 bool DataBaseOperation::IsOpen()
@@ -54,12 +54,12 @@ bool DataBaseOperation::check_database()
         QSqlQuery query;
         QString sNow("select now()");
         query.prepare(sNow);
-         if(!query.exec()){
-             d_db_check_time = QDateTime::currentDateTime();
-             StartReOpen();
-             return false;
-         }
-         d_db_check_time = QDateTime::currentDateTime();
+        if(!query.exec()){
+            d_db_check_time = QDateTime::currentDateTime();
+            StartReOpen();
+            return false;
+        }
+        d_db_check_time = QDateTime::currentDateTime();
     }
     return true;
 }
@@ -67,15 +67,15 @@ bool DataBaseOperation::check_database()
 
 void DataBaseOperation::StartReOpen()
 {
-     if(reconnect_thread_==NULL)
+    if(reconnect_thread_==NULL)
         reconnect_thread_.reset(new boost::thread(boost::bind(&DataBaseOperation::ReOpen,this)));
 }
 
 bool DataBaseOperation::ReOpen()
 {
-     CloseDb();
+    CloseDb();
 
-     d_cur_Notify->OnDatabase(false);
+    d_cur_Notify->OnDatabase(false);
 
     QSqlDatabase q_db = QSqlDatabase::addDatabase("QPSQL");
     q_db.setHostName(d_serveraddress);//设置主机名
@@ -84,8 +84,8 @@ bool DataBaseOperation::ReOpen()
     q_db.setPassword(d_pwd);//设置用户密码
     if(!q_db.open())
     {
-      boost::this_thread::sleep(boost::posix_time::milliseconds(5000));
-      return ReOpen();
+        boost::this_thread::sleep(boost::posix_time::milliseconds(5000));
+        return ReOpen();
     }else {
         d_cur_Notify->OnDatabase(true);
     }
@@ -106,13 +106,13 @@ bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicr
     query.prepare(strSql);
     if(!query.exec()){
         cout<<query.lastError().text().toStdString()<<"GetDataDictionary---query---error!"<<endl;
-         ConnectionPool::closeConnection(db);
+        ConnectionPool::closeConnection(db);
         return false;
     }
     while(query.next()) {
         mapDicry[query.value(0).toInt()] = pair<string,string>(query.value(1).toString().toStdString(),query.value(2).toString().toStdString());
     }
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
@@ -128,29 +128,29 @@ bool DataBaseOperation::GetDeviceDataDictionary(map<string,map<int,string> >& ma
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery query(db);
     QString strSql=QString("select type,code,name,remark from data_dictionary where type in('s_tsmt_target_desc','s_sh_tsmt_rf_mod','s_sh_tsmt_gps_s',\
-'s_sh_tsmt_cpilot','s_sh_tsmt_chpn','s_rsps_result_desc','s_dtmb_mod','s_dtmb_base','s_cmd_result_desc','s_cmd_opr_desc','s_base','s_alarm_event') order by type,code");
-    query.prepare(strSql);
+                           's_sh_tsmt_cpilot','s_sh_tsmt_chpn','s_rsps_result_desc','s_dtmb_mod','s_dtmb_base','s_cmd_result_desc','s_cmd_opr_desc','s_base','s_alarm_event') order by type,code");
+            query.prepare(strSql);
     if(!query.exec()){
         cout<<query.lastError().text().toStdString()<<"GetDataDictionary---query---error!"<<endl;
-         ConnectionPool::closeConnection(db);
+        ConnectionPool::closeConnection(db);
         return false;
     }
     while(query.next()) {
-            string sType = query.value(0).toString().toStdString();
-            int nCode = query.value(1).toInt();
-            QString qname = query.value(2).toString();
+        string sType = query.value(0).toString().toStdString();
+        int nCode = query.value(1).toInt();
+        QString qname = query.value(2).toString();
 
         map<string,map<int,string> >::iterator iter = mapDicry.find(sType);
         if(iter!=mapDicry.end()){
             mapDicry[sType][nCode] = qname.toStdString();
         }else {
-             map<int,string> curInfo;
+            map<int,string> curInfo;
             curInfo[nCode]=qname.toStdString();
             mapDicry[sType]=curInfo;
         }
     }
 
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
@@ -167,9 +167,9 @@ bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo
     QSqlQuery devquery(db);
     QString strSql=QString("select a.DeviceNumber,a.AssociateNumber,a.DeviceName,a.DeviceType,a.IsAssociate,a.IsMultiChannel,a.ChannelSize,a.IsUse,a.AddressCode,b.MainCategoryNumber,b.SubCategoryNumber,a.ProtocolNumber\
                            from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and a.DeviceType<>300 and b.ProtocolNumber=a.ProtocolNumber and a.DeviceNumber in \
-                           (select c.objectnumber from platform_server_purview c where c.servernumber='%2' and c.objecttype=0 )").arg(QString::fromStdString(strDevnum) ).arg(QString::fromStdString(sServerNumber) );
+            (select c.objectnumber from platform_server_purview c where c.servernumber='%2' and c.objecttype=0 )").arg(QString::fromStdString(strDevnum) ).arg(QString::fromStdString(sServerNumber) );
             devquery.prepare(strSql);
-       if(devquery.exec())   {
+            if(devquery.exec())   {
             if(devquery.next())  {
             device.sDevNum = devquery.value(0).toString().toStdString();
             device.sDevName = devquery.value(2).toString().toStdString();
@@ -188,19 +188,19 @@ bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo
             GetDevMonitorSch(db,strDevnum,device.vMonitorSch);
             //获得命令图信息
             GetCmd(db,strDevnum,device.vCommSch);
-             //获得设备属性信息
+            //获得设备属性信息
             GetDevProperty(db,strDevnum,device.map_DevProperty);
-             //获得告警配置
+            //获得告警配置
             GetAlarmConfig(db,strDevnum,device.map_AlarmConfig);
-             //获得关联配置
+            //获得关联配置
             GetAssDevChan(db,QString::fromStdString(strDevnum),device.map_AssDevChan);
 
-            }
-        }else {
+}
+}else {
             std::cout<<devquery.lastError().text().toStdString()<<"GetDevInfo---query---error!"<<std::endl;
             return false;
-        }
-       return true;
+}
+            return true;
 }
 
 //获取所有设备信息
@@ -215,10 +215,10 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery netquery(db);
     QString strSql=QString("select NetType,IpAddress,LocalPort,PeerPort,ConnectType,CommTypeNumber from Net_Communication_Mode where CommTypeNumber in\
-         (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=5)").arg(QString::fromStdString(sStationId));
-    netquery.prepare(strSql);
-    if(netquery.exec()){
-        while(netquery.next()){
+                           (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=5)").arg(QString::fromStdString(sStationId));
+                           netquery.prepare(strSql);
+            if(netquery.exec()){
+            while(netquery.next()){
             ModleInfo info;
             info.iCommunicationMode = 1;
             info.netMode.inet_type = netquery.value(0).toInt();
@@ -232,59 +232,59 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
             QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
             QSqlQuery net1query(db);
             if(net1query.exec(strQdev)) {
-                while(net1query.next()) {
-                    DeviceInfo dev;
-                    //获得设备配置信息,且判断该设备是否授权
-                    GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
-                    if(dev.sDevNum.length()>0)
-                        info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
-                }
-            }
+            while(net1query.next()) {
+            DeviceInfo dev;
+            //获得设备配置信息,且判断该设备是否授权
+            GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
+            if(dev.sDevNum.length()>0)
+                info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
+}
+}
 
             if(net1query.size()>0 && info.mapDevInfo.size()>0)
-                v_Linkinfo.push_back(info);
+            v_Linkinfo.push_back(info);
+}
+}
+else {
+cout<<netquery.lastError().text().toStdString()<<"GetAllDevInfo---netquery---error!"<<endl;
+}
+QSqlQuery comquery(db);
+strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode where CommTypeNumber in\
+               (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=4)").arg(QString::fromStdString(sStationId));
+               comquery.prepare(strSql);
+        if(comquery.exec()){
+        while(comquery.next()) {
+        ModleInfo info;
+        info.iCommunicationMode = 0;
+        info.comMode.icomport = comquery.value(0).toInt();
+        info.comMode.irate = comquery.value(1).toInt();
+        info.comMode.idata_bit = comquery.value(2).toInt();
+        info.comMode.istop_bit = comquery.value(3).toInt();
+        info.comMode.iparity_bit = comquery.value(4).toInt();
+
+        QString qtrNum = comquery.value(5).toString();
+        info.sModleNumber = qtrNum.toStdString();
+        QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
+        QSqlQuery net1query(db);
+        if(net1query.exec(strQdev)) {
+        while(net1query.next()){
+        DeviceInfo dev;
+        GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
+        if(dev.sDevNum.length()>0)
+        info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
         }
-    }
-    else {
-          cout<<netquery.lastError().text().toStdString()<<"GetAllDevInfo---netquery---error!"<<endl;
-    }
-    QSqlQuery comquery(db);
-       strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode where CommTypeNumber in\
-                      (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=4)").arg(QString::fromStdString(sStationId));
-       comquery.prepare(strSql);
-       if(comquery.exec()){
-           while(comquery.next()) {
-               ModleInfo info;
-               info.iCommunicationMode = 0;
-               info.comMode.icomport = comquery.value(0).toInt();
-               info.comMode.irate = comquery.value(1).toInt();
-               info.comMode.idata_bit = comquery.value(2).toInt();
-               info.comMode.istop_bit = comquery.value(3).toInt();
-               info.comMode.iparity_bit = comquery.value(4).toInt();
+        }
 
-               QString qtrNum = comquery.value(5).toString();
-               info.sModleNumber = qtrNum.toStdString();
-               QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
-               QSqlQuery net1query(db);
-               if(net1query.exec(strQdev)) {
-                   while(net1query.next()){
-                       DeviceInfo dev;
-                       GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
-                       if(dev.sDevNum.length()>0)
-                           info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
-                   }
-               }
-
-               if(net1query.size()>0 && info.mapDevInfo.size()>0)
-                   v_Linkinfo.push_back(info);
-           }
-       }else{
-             cout<<comquery.lastError().text().toStdString()<<"GetAllDevInfo---comquery---error!"<<endl;
-       }
+        if(net1query.size()>0 && info.mapDevInfo.size()>0)
+        v_Linkinfo.push_back(info);
+        }
+        }else{
+cout<<comquery.lastError().text().toStdString()<<"GetAllDevInfo---comquery---error!"<<endl;
+}
 
 
-    ConnectionPool::closeConnection(db);
-    return true;
+ConnectionPool::closeConnection(db);
+return true;
 }
 
 //获取设备监控运行图
@@ -299,9 +299,9 @@ bool DataBaseOperation::GetDevMonitorSch(QSqlDatabase &db, string strDevnum,map<
     QSqlQuery schquery(db);
     QString strSql=QString("select id,ObjectNumber,WeekDay,Enable,StartTime,EndTime,datetype,month,day, \
                            alarmendtime,mode from Monitoring_Scheduler where ObjectNumber='%1'").arg(QString::fromStdString(strDevnum));
-    schquery.prepare(strSql);
-    if(schquery.exec()){
-        while(schquery.next()) {
+            schquery.prepare(strSql);
+            if(schquery.exec()){
+            while(schquery.next()) {
             Monitoring_Scheduler msch;
             msch.iMonitorWeek = schquery.value(2).toInt();
             msch.bMonitorFlag = schquery.value(3).toBool();
@@ -313,13 +313,13 @@ bool DataBaseOperation::GetDevMonitorSch(QSqlDatabase &db, string strDevnum,map<
             msch.tAlarmEndTime = schquery.value(9).toDateTime().toTime_t();
             msch.bRunModeFlag = schquery.value(10).toBool();
             mapMonitorSch[iMonitorType].push_back(msch);
-        }
-    }
-    else {
-        cout<<schquery.lastError().text().toStdString()<<"GetDevMonitorSch---schquery---error!"<<endl;
-        return false;
-    }
-    return true;
+}
+}
+            else {
+            cout<<schquery.lastError().text().toStdString()<<"GetDevMonitorSch---schquery---error!"<<endl;
+            return false;
+}
+            return true;
 }
 
 //获得命令参数
@@ -342,7 +342,7 @@ bool DataBaseOperation::GetCmdParam(QSqlDatabase &db, string strCmdnum,CmdParam&
         }
     }
     else {
-         cout<<cmdparquery.lastError().text().toStdString()<<"GetCmdParam---cmdparquery---error!"<<endl;
+        cout<<cmdparquery.lastError().text().toStdString()<<"GetCmdParam---cmdparquery---error!"<<endl;
         return false;
     }
     return true;
@@ -359,11 +359,11 @@ bool DataBaseOperation::GetCmd(QSqlDatabase &db, string strDevnum,vector<Command
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery cmdschquery(db);
     QString strSql=QString("select id,CommandType,WeekDay,StartTime,HasParam,ParamNumber,month,day,commandendtime,\
-                datetype,param1,UseP2,param2 from Command_Scheduler where ObjectNumber='%1' and Enable=1").arg(QString::fromStdString(strDevnum));
+                           datetype,param1,UseP2,param2 from Command_Scheduler where ObjectNumber='%1' and Enable=1").arg(QString::fromStdString(strDevnum));
 
-    cmdschquery.prepare(strSql);
-    if(cmdschquery.exec()){
-        while(cmdschquery.next()){
+            cmdschquery.prepare(strSql);
+            if(cmdschquery.exec()){
+            while(cmdschquery.next()){
             Command_Scheduler cmd_sch;
             cmd_sch.gid = cmdschquery.value(0).toInt();
             cmd_sch.iCommandType = cmdschquery.value(1).toInt();
@@ -373,29 +373,29 @@ bool DataBaseOperation::GetCmd(QSqlDatabase &db, string strDevnum,vector<Command
             if(cmd_sch.iHasParam>=1){
             //    string sparnum = cmdschquery.value(5).toString().toStdString();
             //    GetCmdParam(db,sparnum,cmd_sch.cParam);
-                cmd_sch.cParam.sParam1 = cmdschquery.value(10).toString().toStdString();
-                cmd_sch.cParam.bUseP2 = cmdschquery.value(11).toBool();
-                cmd_sch.cParam.sParam2 = cmdschquery.value(12).toString().toStdString();
-            }
+            cmd_sch.cParam.sParam1 = cmdschquery.value(10).toString().toStdString();
+            cmd_sch.cParam.bUseP2 = cmdschquery.value(11).toBool();
+            cmd_sch.cParam.sParam2 = cmdschquery.value(12).toString().toStdString();
+}
             cmd_sch.iMonitorMonth = cmdschquery.value(6).toInt();
             cmd_sch.iMonitorDay = cmdschquery.value(7).toInt();
             cmd_sch.tCmdEndTime = cmdschquery.value(8).toDateTime().toTime_t();
             cmd_sch.iDateType = cmdschquery.value(9).toInt();
             vcmdsch.push_back(cmd_sch);
-        }
-    }
-    else{
-        cout<<cmdschquery.lastError().text().toStdString()<<"GetCmd---cmdschquery---error!"<<endl;
-        return false;
-    }
-    return true;
+}
+}
+            else{
+            cout<<cmdschquery.lastError().text().toStdString()<<"GetCmd---cmdschquery---error!"<<endl;
+            return false;
+}
+            return true;
 }
 
 //设备设备监控量
 bool DataBaseOperation::GetDevMonItem(QSqlDatabase &db, string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item )
 {
     //QSqlDatabase db = ConnectionPool::openConnection();
-   /* if(!db.isOpen() || !db.isValid()) {//IsOpen()
+    /* if(!db.isOpen() || !db.isValid()) {//IsOpen()
         std::cout<<"GetDevMonItem is error --------------------------------the database is interrupt"<<std::endl;
         return false;
     }
@@ -432,39 +432,39 @@ bool DataBaseOperation::GetDevMonItem(QSqlDatabase &db, string strDevnum,QString
     return true;*/
 
     if(!db.isOpen() || !db.isValid()) {//IsOpen()
-          std::cout<<"GetDevMonItem is error --------------------------------the database is interrupt"<<std::endl;
-          return false;
-      }
-  boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-  QSqlQuery itemschquery(db);
-  QString strSql=QString("select a.MonitoringIndex,a.MonitoringName,a.Ratio,a.ItemType,a.ItemValueType,a.AlarmEnable,a.IsUpload,c.name,a.alarmtype,a.type,a.moduletype,a.moduleid \
-                         from Monitoring_Device_Item a left join data_dictionary c on c.code=a.unitstring and c.type='CompanyType'\
-                         where a.DeviceNumber='%1'").arg(QString::fromStdString(strDevnum));
-          itemschquery.prepare(strSql);
-          if(itemschquery.exec()) {
-              while(itemschquery.next()) {
-                  DeviceMonitorItem item;
-                  item.iItemIndex = itemschquery.value(0).toInt();
-                  item.sItemName = itemschquery.value(1).toString().toStdString();
-                  item.dRatio = itemschquery.value(2).toDouble();
-                  item.iItemType = itemschquery.value(3).toInt();
-                  item.iItemvalueType = itemschquery.value(4).toInt();
-                  item.bAlarmEnable = itemschquery.value(5).toBool();
-                  item.bUpload = itemschquery.value(6).toBool();
-                  item.sUnit = itemschquery.value(7).toString().toStdString();
-                  int iAlarmid = itemschquery.value(8).toInt();
-                  GetItemAlarmConfig(db,strDevnum,item.iItemIndex,iAlarmid,item.vItemAlarm);
+        std::cout<<"GetDevMonItem is error --------------------------------the database is interrupt"<<std::endl;
+        return false;
+    }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    QSqlQuery itemschquery(db);
+    QString strSql=QString("select a.MonitoringIndex,a.MonitoringName,a.Ratio,a.ItemType,a.ItemValueType,a.AlarmEnable,a.IsUpload,c.name,a.alarmtype,a.type,a.moduletype,a.moduleid \
+                           from Monitoring_Device_Item a left join data_dictionary c on c.code=a.unitstring and c.type='CompanyType'\
+            where a.DeviceNumber='%1'").arg(QString::fromStdString(strDevnum));
+            itemschquery.prepare(strSql);
+            if(itemschquery.exec()) {
+            while(itemschquery.next()) {
+            DeviceMonitorItem item;
+            item.iItemIndex = itemschquery.value(0).toInt();
+            item.sItemName = itemschquery.value(1).toString().toStdString();
+            item.dRatio = itemschquery.value(2).toDouble();
+            item.iItemType = itemschquery.value(3).toInt();
+            item.iItemvalueType = itemschquery.value(4).toInt();
+            item.bAlarmEnable = itemschquery.value(5).toBool();
+            item.bUpload = itemschquery.value(6).toBool();
+            item.sUnit = itemschquery.value(7).toString().toStdString();
+            int iAlarmid = itemschquery.value(8).toInt();
+            GetItemAlarmConfig(db,strDevnum,item.iItemIndex,iAlarmid,item.vItemAlarm);
 
-                  item.iTargetId = itemschquery.value(9).toInt();
-                  item.iModTypeId = itemschquery.value(10).toInt();
-                  item.iModDevId = itemschquery.value(11).toInt();
-                  map_item[item.iItemIndex] = item;
-               }
-          } else{
-               cout<<itemschquery.lastError().text().toStdString()<<"GetDevMonItem---itemschquery---error!"<<endl;
-              return false;
-          }
-  return true;
+            item.iTargetId = itemschquery.value(9).toInt();
+            item.iModTypeId = itemschquery.value(10).toInt();
+            item.iModDevId = itemschquery.value(11).toInt();
+            map_item[item.iItemIndex] = item;
+}
+} else{
+cout<<itemschquery.lastError().text().toStdString()<<"GetDevMonItem---itemschquery---error!"<<endl;
+return false;
+}
+return true;
 
 }
 
@@ -489,12 +489,12 @@ bool DataBaseOperation::GetDevProperty(QSqlDatabase &db, string strDevnum,map<st
             dp.property_value = itemschquery.value(2).toString().toStdString();
             dp.property_name = itemschquery.value(3).toString().toStdString();
             map_property[dp.property_name] = dp;
-            }
-        }  else{
-                    cout<<itemschquery.lastError().text().toStdString()<<"GetDevProperty---itemschquery---error!"<<endl;
-                    return false;
-            }
-    return true;
+}
+}  else{
+cout<<itemschquery.lastError().text().toStdString()<<"GetDevProperty---itemschquery---error!"<<endl;
+return false;
+}
+return true;
 }
 
 //获取网络配置属性
@@ -511,19 +511,19 @@ bool DataBaseOperation::GetNetProperty(QSqlDatabase &db, string strConTypeNumber
                            where CommTypeNumber='%1'").arg(QString::fromStdString(strConTypeNumber));
             netquery.prepare(strSql);
             if(netquery.exec()) {
-                 if(netquery.next()) {
-                         nmode.inet_type = netquery.value(0).toInt();
-                         nmode.strIp = netquery.value(1).toString().toStdString();
-                         nmode.ilocal_port = netquery.value(2).toInt();
-                        nmode.iremote_port = netquery.value(3).toInt();
-                        nmode.ilink_type = netquery.value(4).toInt();
-                }  else
-                    return false;
-            }
+            if(netquery.next()) {
+            nmode.inet_type = netquery.value(0).toInt();
+            nmode.strIp = netquery.value(1).toString().toStdString();
+            nmode.ilocal_port = netquery.value(2).toInt();
+            nmode.iremote_port = netquery.value(3).toInt();
+            nmode.ilink_type = netquery.value(4).toInt();
+}  else
+            return false;
+}
             else {
-             cout<<netquery.lastError().text().toStdString()<<"GetNetProperty---netquery---error!"<<endl;
-                 return false;
-            }
+            cout<<netquery.lastError().text().toStdString()<<"GetNetProperty---netquery---error!"<<endl;
+            return false;
+}
             return true;
 }
 
@@ -541,27 +541,27 @@ bool DataBaseOperation::GetComProperty(QSqlDatabase &db, string strConTypeNumber
                            where CommTypeNumber='%1'").arg(QString::fromStdString(strConTypeNumber));
             comquery.prepare(strSql);
             if(comquery.exec()) {
-                 if(comquery.next()) {
-                    cmode.icomport = comquery.value(0).toInt();
-                    cmode.irate = comquery.value(1).toInt();
-                     cmode.idata_bit = comquery.value(2).toInt();
-                      cmode.istop_bit = comquery.value(3).toInt();
-                     cmode.iparity_bit = comquery.value(4).toInt();
-                }
-                else
-                     return false;
-                } else  {
-                          cout<<comquery.lastError().text().toStdString()<<"GetComProperty---comquery---error!"<<endl;
-                        return false;
-                    }
-     return true;
+            if(comquery.next()) {
+            cmode.icomport = comquery.value(0).toInt();
+            cmode.irate = comquery.value(1).toInt();
+            cmode.idata_bit = comquery.value(2).toInt();
+            cmode.istop_bit = comquery.value(3).toInt();
+            cmode.iparity_bit = comquery.value(4).toInt();
+}
+            else
+            return false;
+} else  {
+            cout<<comquery.lastError().text().toStdString()<<"GetComProperty---comquery---error!"<<endl;
+            return false;
+}
+            return true;
 }
 
 //获取联动动作参数
 bool DataBaseOperation::GetLinkActionParam(QSqlDatabase &db, string strParamnum,map<int,vector<ActionParam> >& map_Params)
 {
 
-   /* if(!db.isOpen() || !db.isValid()) {//IsOpen()
+    /* if(!db.isOpen() || !db.isValid()) {//IsOpen()
         std::cout<<"GetLinkActionParam is error --------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
@@ -585,7 +585,7 @@ bool DataBaseOperation::GetLinkActionParam(QSqlDatabase &db, string strParamnum,
     }
     return true;*/
 
-        //QSqlDatabase db = ConnectionPool::openConnection();
+    //QSqlDatabase db = ConnectionPool::openConnection();
     if(!db.isOpen() || !db.isValid()) {//IsOpen()
         std::cout<<"GetLinkActionParam is error --------------------------------- the database is interrupt"<<std::endl;
         return false;
@@ -605,7 +605,7 @@ bool DataBaseOperation::GetLinkActionParam(QSqlDatabase &db, string strParamnum,
         }
     }
     else{
-          cout<<actpquery.lastError().text().toStdString()<<"GetLinkActionParam---actpquery---error!"<<endl;
+        cout<<actpquery.lastError().text().toStdString()<<"GetLinkActionParam---actpquery---error!"<<endl;
         return false;
     }
     return true;
@@ -626,21 +626,21 @@ bool DataBaseOperation::GetLinkAction(QSqlDatabase &db, string strLinkRolenum,ve
             actquery.prepare(strSql);
             if(actquery.exec()) {
             while(actquery.next())  {
-                LinkAction laction;
-                laction.strActionNum = actquery.value(0).toString().toStdString();
-                laction.strActionNam = actquery.value(1).toString().toStdString();
-                laction.iActionType = actquery.value(2).toInt();
-                laction.iIshaveParam = actquery.value(3).toInt();
-                if(!GetLinkActionParam(db,actquery.value(4).toString().toStdString(),laction.map_Params))
-                    laction.iIshaveParam = 0;
-                vLinkAction.push_back(laction);
-                }
-            }
+            LinkAction laction;
+            laction.strActionNum = actquery.value(0).toString().toStdString();
+            laction.strActionNam = actquery.value(1).toString().toStdString();
+            laction.iActionType = actquery.value(2).toInt();
+            laction.iIshaveParam = actquery.value(3).toInt();
+            if(!GetLinkActionParam(db,actquery.value(4).toString().toStdString(),laction.map_Params))
+            laction.iIshaveParam = 0;
+            vLinkAction.push_back(laction);
+}
+}
             else  {
-                    cout<<actquery.lastError().text().toStdString()<<"GetLinkAction---actquery---error!"<<endl;
-                    return false;
-                }
-      return true;
+            cout<<actquery.lastError().text().toStdString()<<"GetLinkAction---actquery---error!"<<endl;
+            return false;
+}
+            return true;
 }
 
 //获得关联设备信息
@@ -664,7 +664,7 @@ bool DataBaseOperation::GetAssDevChan(QSqlDatabase &db, QString strDevNum,map<in
         }
     }
     else{
-         cout<<itemschquery.lastError().text().toStdString()<<"GetAssDevChan---itemschquery---error!"<<endl;
+        cout<<itemschquery.lastError().text().toStdString()<<"GetAssDevChan---itemschquery---error!"<<endl;
         return false;
     }
     return true;
@@ -680,10 +680,10 @@ bool DataBaseOperation::GetAlarmConfig(QSqlDatabase &db, string strDevnum,map<in
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery alarmconfigquery(db);
     QString strSql=QString("select a.MonitoringIndex,a.LimitValue,a.AlarmLevel,a.JumpLimitType,a.LinkageEnable,a.LinkageRoleNumber,a.delaytime,a.LinkageRoleNumber,a.alarmconfigtype \
-                         ,a.resumeduration  from Alarm_Item_config a,device_alarm_switch b where a.DeviceNumber='%1' and b.alarmenable>0 and a.alarmconfigtype<>0 and b.devicenumber=a.DeviceNumber and \
+                           ,a.resumeduration  from Alarm_Item_config a,device_alarm_switch b where a.DeviceNumber='%1' and b.alarmenable>0 and a.alarmconfigtype<>0 and b.devicenumber=a.DeviceNumber and \
             b.alarmswitchtype=a.MonitoringIndex").arg(QString::fromStdString(strDevnum));
             alarmconfigquery.prepare(strSql);
-     if(alarmconfigquery.exec()) {
+            if(alarmconfigquery.exec()) {
             while(alarmconfigquery.next()){
             Alarm_config acfig;
             int iItemid = alarmconfigquery.value(0).toInt();
@@ -692,7 +692,7 @@ bool DataBaseOperation::GetAlarmConfig(QSqlDatabase &db, string strDevnum,map<in
             acfig.iLimittype = alarmconfigquery.value(3).toInt();
             acfig.iLinkageEnable = alarmconfigquery.value(4).toInt();
             if(acfig.iLinkageEnable>0)
-                GetLinkAction(db,alarmconfigquery.value(5).toString().toStdString(),acfig.vLinkAction);
+            GetLinkAction(db,alarmconfigquery.value(5).toString().toStdString(),acfig.vLinkAction);
 
             acfig.iDelaytime = alarmconfigquery.value(6).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(7).toString().toStdString();
@@ -700,12 +700,12 @@ bool DataBaseOperation::GetAlarmConfig(QSqlDatabase &db, string strDevnum,map<in
             acfig.iResumetime = alarmconfigquery.value(9).toInt();
             acfig.iAlarmid = iItemid;
             map_Alarmconfig[iItemid] = acfig;
-            }
-    } else {
-              cout<<alarmconfigquery.lastError().text().toStdString()<<"GetAlarmConfig---alarmconfigquery---error!"<<endl;
+}
+} else {
+            cout<<alarmconfigquery.lastError().text().toStdString()<<"GetAlarmConfig---alarmconfigquery---error!"<<endl;
             return false;
-        }
-  return true;
+}
+            return true;
 }
 
 //获得监控量告警配置信息
@@ -719,7 +719,7 @@ bool DataBaseOperation::GetItemAlarmConfig(QSqlDatabase &db, string strDevnum,in
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery alarmconfigquery(db);
     QString strSql=QString("select a.LimitValue,a.AlarmLevel,a.JumpLimitType,a.LinkageEnable,a.LinkageRoleNumber,a.delaytime,a.LinkageRoleNumber,a.alarmconfigtype \
-                         ,a.resumeduration  from Alarm_Item_config a ,device_alarm_switch b where a.DeviceNumber='%1' and a.monitoringindex=%2 and a.alarmconfigtype=0 and b.alarmenable>0 \
+                           ,a.resumeduration  from Alarm_Item_config a ,device_alarm_switch b where a.DeviceNumber='%1' and a.monitoringindex=%2 and a.alarmconfigtype=0 and b.alarmenable>0 \
             and b.devicenumber=a.DeviceNumber and b.alarmswitchtype=a.MonitoringIndex and a.alarmenable>0").arg(QString::fromStdString(strDevnum)).arg(iIndex);
             alarmconfigquery.prepare(strSql);
             if(alarmconfigquery.exec()){
@@ -730,20 +730,20 @@ bool DataBaseOperation::GetItemAlarmConfig(QSqlDatabase &db, string strDevnum,in
             acfig.iLimittype = alarmconfigquery.value(2).toInt();
             acfig.iLinkageEnable = alarmconfigquery.value(3).toInt();
             if(acfig.iLinkageEnable>0)
-                GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
+            GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
             acfig.iDelaytime = alarmconfigquery.value(5).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
             acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
             acfig.iAlarmid = iThid;
             acfig.iResumetime = alarmconfigquery.value(8).toInt();
             vAlarmconfig.push_back(acfig);
-            }
-        } else {
-             cout<<alarmconfigquery.lastError().text().toStdString()<<"GetItemAlarmConfig---alarmconfigquery---error!"<<endl;
+}
+} else {
+            cout<<alarmconfigquery.lastError().text().toStdString()<<"GetItemAlarmConfig---alarmconfigquery---error!"<<endl;
             return false;
-       }
+}
 
-     return true;
+            return true;
 }
 
 
@@ -796,11 +796,11 @@ bool DataBaseOperation::SetEnableMonitor( string strDevnum,int iItemIndex,bool b
     QString strSql=QString("update alarm_item_config set alarmenable=%1 where DeviceNumber='%2' and MonitoringIndex=%3").arg(bEnabled).arg(QString::fromStdString(strDevnum)).arg(iItemIndex);
     qquery.prepare(strSql);
     if(!qquery.exec()){
-         cout<<qquery.lastError().text().toStdString()<<"SetEnableMonitor---qquery---error!"<<endl;
-          ConnectionPool::closeConnection(db);
+        cout<<qquery.lastError().text().toStdString()<<"SetEnableMonitor---qquery---error!"<<endl;
+        ConnectionPool::closeConnection(db);
         return false;
     }
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
@@ -827,7 +827,7 @@ bool DataBaseOperation::UpdateMonitorItem( string strDevnum,DeviceMonitorItem di
     qquery.bindValue(":DeviceNumber",QString::fromStdString(strDevnum));
     qquery.bindValue(":MonitoringIndex",ditem.iItemIndex);
     if(!qquery.exec()){
-         cout<<qquery.lastError().text().toStdString()<<"UpdateMonitorItem---qquery---error!"<<endl;
+        cout<<qquery.lastError().text().toStdString()<<"UpdateMonitorItem---qquery---error!"<<endl;
         return false;
     }
     return true;
@@ -848,7 +848,7 @@ bool DataBaseOperation::UpdateMonitorItems( string strDevnum,vector<DeviceMonito
                            AlarmEnable=:AlarmEnable,IsUpload=:IsUpload,UnitString=:UnitString where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
             qquery.prepare(strSql);
 
-    vector<DeviceMonitorItem>::iterator iter = v_ditem.begin();
+            vector<DeviceMonitorItem>::iterator iter = v_ditem.begin();
     QSqlDatabase::database().transaction();
     for(;iter!=v_ditem.end();++iter){
         qquery.bindValue(":MonitoringName",QString::fromStdString((*iter).sItemName));
@@ -863,13 +863,13 @@ bool DataBaseOperation::UpdateMonitorItems( string strDevnum,vector<DeviceMonito
         if(!qquery.exec()) {
             cout<<qquery.lastError().text().toStdString()<<"UpdateMonitorItems---qquery---error!"<<endl;
             QSqlDatabase::database().rollback();
-             ConnectionPool::closeConnection(db);
+            ConnectionPool::closeConnection(db);
             return false;
         }
     }
 
     QSqlDatabase::database().commit();
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
@@ -885,8 +885,8 @@ bool DataBaseOperation::UpdateItemAlarmConfig( string strDevnum,int iIndex,Alarm
     QSqlQuery qquery(db);
     QString strSql=QString("update action_parameter_content set LimitValue=:LimitValue,AlarmLevel=:AlarmLevel,JumpLimitType=:JumpLimitType,LinkageEnable=:LinkageEnable,\
                            LinkageRoleNumber=:LinkageRoleNumber where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
-    qquery.prepare(strSql);
-    qquery.bindValue(":LimitValue",alarm_config.fLimitvalue);
+            qquery.prepare(strSql);
+            qquery.bindValue(":LimitValue",alarm_config.fLimitvalue);
     qquery.bindValue(":AlarmLevel",alarm_config.iAlarmlevel);
     qquery.bindValue(":JumpLimitType",alarm_config.iLimittype);
     qquery.bindValue(":LinkageEnable",alarm_config.iLinkageEnable);
@@ -895,10 +895,10 @@ bool DataBaseOperation::UpdateItemAlarmConfig( string strDevnum,int iIndex,Alarm
     qquery.bindValue(":MonitoringIndex",iIndex);
     if(!qquery.exec()){
         cout<<qquery.lastError().text().toStdString()<<"UpdateItemAlarmConfig---qquery---error!"<<endl;
-         ConnectionPool::closeConnection(db);
+        ConnectionPool::closeConnection(db);
         return false;
     }
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
@@ -926,14 +926,14 @@ bool DataBaseOperation::UpdateItemAlarmConfigs( string strDevnum,map<int,Alarm_c
         qquery.bindValue(":DeviceNumber",QString::fromStdString(strDevnum));
         qquery.bindValue(":MonitoringIndex",(*iter).first);
         if(!qquery.exec()){
-             cout<<qquery.lastError().text().toStdString()<<"UpdateItemAlarmConfigs---qquery---error!"<<endl;
+            cout<<qquery.lastError().text().toStdString()<<"UpdateItemAlarmConfigs---qquery---error!"<<endl;
             QSqlDatabase::database().rollback();
-             ConnectionPool::closeConnection(db);
+            ConnectionPool::closeConnection(db);
             return false;
         }
     }
     QSqlDatabase::database().commit();
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
@@ -963,8 +963,8 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
     inquery.bindValue(":alarmtypeid",nalarmTypeId);
     inquery.bindValue(":alarmreason",QString::fromStdString(sreason));
     if(!inquery.exec()){
-         cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
-          ConnectionPool::closeConnection(db);
+        cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
+        ConnectionPool::closeConnection(db);
         return false;
     }
     strSql=QString("select max(id) from device_alarm_record");
@@ -976,7 +976,7 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
     }else{
         cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery2---error!"<<endl;
     }
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return  true;
 }
 //添加告警结束记录
@@ -1000,11 +1000,11 @@ bool DataBaseOperation::AddItemEndAlarmRecord( time_t endTime,unsigned long long
     inquery.bindValue(":alarmendtime",qdt);
     if(!inquery.exec()){
         cout<<inquery.lastError().text().toStdString()<<"AddItemEndAlarmRecord---inquery---error!"<<endl;
-         ConnectionPool::closeConnection(db);
+        ConnectionPool::closeConnection(db);
         return false;
     }
 
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return  true;
 }
 
@@ -1038,58 +1038,58 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
         if(!inquery.exec()){
             cout<<inquery.lastError().text().toStdString()<<"AddItemMonitorRecord---inquery---error!"<<endl;
             QSqlDatabase::database().rollback();
-             ConnectionPool::closeConnection(db);
+            ConnectionPool::closeConnection(db);
             return false;
         }
     }
     QSqlDatabase::database().commit();
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
 //改完待测2016-03-30 16:53
 bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &mapAlarmSwitchSet,int& resValue)
 {
-  QSqlDatabase db = ConnectionPool::openConnection();
-  if(!db.isOpen() || !db.isValid()) {//IsOpen()
-      resValue = 3;
-      std::cout<<"SetEnableAlarm is error ----------------------- the database is interrupt"<<std::endl;
-      return false;
-  }
-  boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-  map<string,vector<Alarm_Switch_Set> >::iterator iter = mapAlarmSwitchSet.begin();
-  for(;iter!=mapAlarmSwitchSet.end();++iter){
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        resValue = 3;
+        std::cout<<"SetEnableAlarm is error ----------------------- the database is interrupt"<<std::endl;
+        return false;
+    }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    map<string,vector<Alarm_Switch_Set> >::iterator iter = mapAlarmSwitchSet.begin();
+    for(;iter!=mapAlarmSwitchSet.end();++iter){
 
-      QString qsTransNum = QString::fromStdString(iter->first);
-      QSqlDatabase::database().transaction();
-      QString strDel = QString("delete from device_alarm_switch where devicenumber='%1'").arg(qsTransNum);
-      QSqlQuery qsDel(db);
-      if(!qsDel.exec(strDel)) {
-          cout<<qsDel.lastError().text().toStdString()<<"SetEnableAlarm---qsDel---error!"<<endl;
-          QSqlDatabase::database().rollback();
-          resValue = 3;
-           ConnectionPool::closeConnection(db);
-          return false;
-      }
-      QSqlQuery qsInsert(db);
-      QString strSql = QString("insert into device_alarm_switch(devicenumber,alarmswitchtype,alarmenable,description) values(:devicenumber,:alarmswitchtype,:alarmenable,:description)");
-      qsInsert.prepare(strSql);
-      qsInsert.bindValue(":devicenumber",qsTransNum);
+        QString qsTransNum = QString::fromStdString(iter->first);
+        QSqlDatabase::database().transaction();
+        QString strDel = QString("delete from device_alarm_switch where devicenumber='%1'").arg(qsTransNum);
+        QSqlQuery qsDel(db);
+        if(!qsDel.exec(strDel)) {
+            cout<<qsDel.lastError().text().toStdString()<<"SetEnableAlarm---qsDel---error!"<<endl;
+            QSqlDatabase::database().rollback();
+            resValue = 3;
+            ConnectionPool::closeConnection(db);
+            return false;
+        }
+        QSqlQuery qsInsert(db);
+        QString strSql = QString("insert into device_alarm_switch(devicenumber,alarmswitchtype,alarmenable,description) values(:devicenumber,:alarmswitchtype,:alarmenable,:description)");
+        qsInsert.prepare(strSql);
+        qsInsert.bindValue(":devicenumber",qsTransNum);
 
-      for(int i=0;i<iter->second.size();++i){
-             qsInsert.bindValue(":alarmswitchtype",iter->second[i].iAlarmid);
-              qsInsert.bindValue(":alarmenable",iter->second[i].iSwtich);
-              if(iter->second[i].sDes.empty()==false)
-                 qsInsert.bindValue(":description",iter->second[i].sDes.empty());
-              if(!qsInsert.exec()) {
-                  QSqlDatabase::database().rollback();
-                  resValue = 3;
-                   ConnectionPool::closeConnection(db);
-                  return false;
-              }
-         }
-      QSqlDatabase::database().commit();
-      }
+        for(int i=0;i<iter->second.size();++i){
+            qsInsert.bindValue(":alarmswitchtype",iter->second[i].iAlarmid);
+            qsInsert.bindValue(":alarmenable",iter->second[i].iSwtich);
+            if(iter->second[i].sDes.empty()==false)
+                qsInsert.bindValue(":description",iter->second[i].sDes.empty());
+            if(!qsInsert.exec()) {
+                QSqlDatabase::database().rollback();
+                resValue = 3;
+                ConnectionPool::closeConnection(db);
+                return false;
+            }
+        }
+        QSqlDatabase::database().commit();
+    }
 
 
     ConnectionPool::closeConnection(db);
@@ -1118,7 +1118,7 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
             cout<<qsDel.lastError().text().toStdString()<<"SetEnableAlarm---qsDel2---error!"<<endl;
             QSqlDatabase::database().rollback();
             resValue = 3;
-             ConnectionPool::closeConnection(db);
+            ConnectionPool::closeConnection(db);
             return false;
         }
 
@@ -1146,14 +1146,14 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
                 cout<<qsInsert.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
                 QSqlDatabase::database().rollback();
                 resValue = 3;
-                 ConnectionPool::closeConnection(db);
+                ConnectionPool::closeConnection(db);
                 return false;
             }
         }
         QSqlDatabase::database().commit();
     }
     resValue = 0;
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
@@ -1179,7 +1179,7 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
             cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel---error!"<<endl;
             QSqlDatabase::database().rollback();
             resValue = 3;
-             ConnectionPool::closeConnection(db);
+            ConnectionPool::closeConnection(db);
             return false;
         }
 
@@ -1190,7 +1190,7 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
             cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel2---error!"<<endl;
             QSqlDatabase::database().rollback();
             resValue = 3;
-             ConnectionPool::closeConnection(db);
+            ConnectionPool::closeConnection(db);
             return false;
         }
 
@@ -1198,13 +1198,13 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
         QSqlQuery insertQuery(db);//0:星期 1:月 2:天
         strSql = QString("insert into monitoring_scheduler(objectnumber,weekday,enable,starttime,endtime,datetype,month,day,alarmendtime,mode) \
                          values(:objectnumber,:weekday,:enable,:starttime,:endtime,:datetype,:month,:day,:alarmendtime,:mode)");
-        insertQuery.prepare(strSql);
-        insertQuery.bindValue(":objectnumber",sDevNum);
+                         insertQuery.prepare(strSql);
+                insertQuery.bindValue(":objectnumber",sDevNum);
 
         QString strCmd = QString("insert into command_scheduler(objectnumber,paramnumber,enable,weekday,starttime,commandtype,hasparam,datetype,month,day,commandendtime) \
                                  values(:objectnumber,'',1,:weekday,:starttime,:commandtype,0,:datetype,:month,:day,:commandendtime)");
                                  QSqlQuery insertCmdopenQuery(db);
-        insertCmdopenQuery.prepare(strCmd);
+                insertCmdopenQuery.prepare(strCmd);
         insertCmdopenQuery.bindValue(":objectnumber",sDevNum);
         insertCmdopenQuery.bindValue(":commandtype",15);
         QSqlQuery insertCmdcloseQuery(db);
@@ -1260,33 +1260,33 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
                 cout<<insertQuery.lastError().text().toStdString()<<"SetAlarmTime---insertQuery---error!"<<endl;
                 QSqlDatabase::database().rollback();
                 resValue = 3;
-                 ConnectionPool::closeConnection(db);
+                ConnectionPool::closeConnection(db);
                 return false;
             }
             if(!insertCmdopenQuery.exec()) {
                 cout<<insertCmdopenQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdopenQuery---error!"<<endl;
                 QSqlDatabase::database().rollback();
                 resValue = 3;
-                 ConnectionPool::closeConnection(db);
+                ConnectionPool::closeConnection(db);
                 return false;
             }
             if(!insertCmdcloseQuery.exec()) {
                 cout<<insertCmdcloseQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdcloseQuery---error!"<<endl;
                 QSqlDatabase::database().rollback();
                 resValue = 3;
-                 ConnectionPool::closeConnection(db);
+                ConnectionPool::closeConnection(db);
                 return false;
             }
         }
 
     }
     QSqlDatabase::database().commit();
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
 bool DataBaseOperation::GetUpdateDevTimeScheduleInfo( string strDevnum,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
-                                              vector<Command_Scheduler> &cmmdScheduler  )
+                                                      vector<Command_Scheduler> &cmmdScheduler  )
 {
     QSqlDatabase db = ConnectionPool::openConnection();
     if(!db.isOpen() || !db.isValid()) {//IsOpen()
@@ -1310,27 +1310,28 @@ bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& devi
 
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery devquery(db);
-    QString strSql=QString("select a.DeviceNumber,a.ProtocolNumber\
+    QString strSql=QString("select a.DeviceNumber,a.ProtocolNumber \
                            from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and b.ProtocolNumber=a.ProtocolNumber").arg(QString::fromStdString(strDevnum));
-            devquery.prepare(strSql);
-            if(devquery.exec())   {
+    devquery.prepare(strSql);
+    if(devquery.exec())   {
             if(devquery.next())  {
             device.sDevNum = devquery.value(0).toString().toStdString();
             QString sprotoclnum = devquery.value(1).toString();
             if(GetDevMonItem(db,strDevnum,sprotoclnum,device.map_MonitorItem)==false){
-            ConnectionPool::closeConnection(db);
-            return false;
-}
+                ConnectionPool::closeConnection(db);
+                return false;
+            }
             if(GetAlarmConfig(db,strDevnum,device.map_AlarmConfig)==false){
-            ConnectionPool::closeConnection(db);
-            return false;
-}
-}
-}else {
+                ConnectionPool::closeConnection(db);
+                return false;
+            }
+        }
+    }else {
             std::cout<<devquery.lastError().text().toStdString()<<"GetUpdateDevAlarmInfo---query---error!"<<std::endl;
             ConnectionPool::closeConnection(db);
             return false;
-}
+          }
+
             ConnectionPool::closeConnection(db);
             return true;
 }
@@ -1346,28 +1347,28 @@ bool DataBaseOperation::GetUserInfoByNumber(const string sNumber,UserInformation
 
     try
     {
-    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery userquery(db);
-    QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber,telephone from Users where Number='%1'").arg(QString::fromStdString(sNumber));
-    if(!userquery.exec(strSql)){
-        cout<<userquery.lastError().text().toStdString()<<"GetUserInfoByNumber---userquery---error!"<<endl;
-         ConnectionPool::closeConnection(db);
-        return false;
-    }
-    if(userquery.next()){
+        boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+        QSqlQuery userquery(db);
+        QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber,telephone from Users where Number='%1'").arg(QString::fromStdString(sNumber));
+        if(!userquery.exec(strSql)){
+            cout<<userquery.lastError().text().toStdString()<<"GetUserInfoByNumber---userquery---error!"<<endl;
+            ConnectionPool::closeConnection(db);
+            return false;
+        }
+        if(userquery.next()){
 
-        user.sNumber = userquery.value(0).toString().toStdString();
-        user.sPassword = userquery.value(1).toString().toStdString();
-        user.nControlLevel = userquery.value(2).toInt();
-        user.sHeadship = userquery.value(3).toString().toStdString();
-        user.sJobNumber = userquery.value(4).toString().toStdString();
-        user.sTelephone = userquery.value(5).toString().toStdString();
-    }
+            user.sNumber = userquery.value(0).toString().toStdString();
+            user.sPassword = userquery.value(1).toString().toStdString();
+            user.nControlLevel = userquery.value(2).toInt();
+            user.sHeadship = userquery.value(3).toString().toStdString();
+            user.sJobNumber = userquery.value(4).toString().toStdString();
+            user.sTelephone = userquery.value(5).toString().toStdString();
+        }
     }catch(...){
-         ConnectionPool::closeConnection(db);
+        ConnectionPool::closeConnection(db);
         return false;
     }
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 
 }
@@ -1383,27 +1384,27 @@ bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
 
     try
     {
-    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlQuery userquery(db);
-    QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber from Users where Name='%1'").arg(QString::fromStdString(sName));
-    if(!userquery.exec(strSql)){
-        cout<<userquery.lastError().text().toStdString()<<"GetUserInfo---userquery---error!"<<endl;
-         ConnectionPool::closeConnection(db);
-        return false;
-    }
-    if(userquery.next()){
-        user.sName = sName;
-        user.sNumber = userquery.value(0).toString().toStdString();
-        user.sPassword = userquery.value(1).toString().toStdString();
-        user.nControlLevel = userquery.value(2).toInt();
-        user.sHeadship = userquery.value(3).toString().toStdString();
-        user.sJobNumber = userquery.value(4).toString().toStdString();
-    }
+        boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+        QSqlQuery userquery(db);
+        QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber from Users where Name='%1'").arg(QString::fromStdString(sName));
+        if(!userquery.exec(strSql)){
+            cout<<userquery.lastError().text().toStdString()<<"GetUserInfo---userquery---error!"<<endl;
+            ConnectionPool::closeConnection(db);
+            return false;
+        }
+        if(userquery.next()){
+            user.sName = sName;
+            user.sNumber = userquery.value(0).toString().toStdString();
+            user.sPassword = userquery.value(1).toString().toStdString();
+            user.nControlLevel = userquery.value(2).toInt();
+            user.sHeadship = userquery.value(3).toString().toStdString();
+            user.sJobNumber = userquery.value(4).toString().toStdString();
+        }
     }catch(...){
-         ConnectionPool::closeConnection(db);
+        ConnectionPool::closeConnection(db);
         return false;
     }
-     ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
@@ -1419,8 +1420,8 @@ bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<st
     QSqlQuery query(db);
     QString strSql=QString("select a.objectnumber from user_role_object a,users b where b.number='%1' and a.rolenumber=b.rolenumber").arg(QString::fromStdString(sUserId));
     if(!query.exec(strSql)){
-         cout<<query.lastError().text().toStdString()<<"GetAllAuthorizeDevByUser---query---error!"<<endl;
-         ConnectionPool::closeConnection(db);
+        cout<<query.lastError().text().toStdString()<<"GetAllAuthorizeDevByUser---query---error!"<<endl;
+        ConnectionPool::closeConnection(db);
         return false;
     }
     while(query.next()){
@@ -1435,66 +1436,66 @@ bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<st
 
 //节目信号告警/恢复
 bool DataBaseOperation::AddProgramSignalAlarmRecord(string strDevNum, string strFrqName,time_t startTime,int nlimitType,
-                                  int nalarmTypeId,unsigned long long& irecordid )
+                                                    int nalarmTypeId,unsigned long long& irecordid )
 {
     QSqlDatabase db = ConnectionPool::openConnection();
     if(!db.isOpen() || !db.isValid()) {//IsOpen()
         std::cout<<"AddProgramSignalAlarmRecord error  ------ the database is interrupt"<<std::endl;
         return false;
     }
-       boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-       QSqlQuery inquery(db);
-       QString strSql;
-       if(nlimitType==ALARM_SWITCH)
-       {
-           strSql = QString("insert into dtmb_alarm_record(devicenumber,freq,alarmtype,alarmstarttime,alarmid) values(:devicenumer,:freq,:alarmtype,:alarmstarttime,:alarmid)");
-           inquery.prepare(strSql);
-           inquery.bindValue(":freq",atoi(strFrqName.c_str()));//
-           inquery.bindValue(":alarmtype",nalarmTypeId);
-           inquery.bindValue(":devicenumer",QString::fromStdString(strDevNum));
-           inquery.bindValue(":alarmid",0);
-           QDateTime qdt;
-         //  tm *ltime = localtime(&startTime);
-           qdt=QDateTime::fromTime_t(startTime);
-           //qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
-          // qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
-           inquery.bindValue(":alarmstarttime",qdt);
-           if(!inquery.exec()){
-                cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
-                ConnectionPool::closeConnection(db);
-               return false;
-           }
-           strSql=QString("select max(id) from dtmb_alarm_record");
-           inquery.prepare(strSql);
-           if(inquery.exec()){
-               if(inquery.next()){
-                   irecordid = inquery.value(0).toULongLong();
-               }
-           }else{
-               cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery2---error!"<<endl;
-           }
-           ConnectionPool::closeConnection(db);
-           return  true;
-       }
-       else if(nlimitType==ALARM_RESUME)
-       {
-           strSql = QString("update dtmb_alarm_record set alarmendtime=:alarmendtime where alarmid=:id");
-           inquery.prepare(strSql);
-           QDateTime qdt;
-           tm *ltime = localtime(&startTime);
-           qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
-           qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
-           inquery.bindValue(":alarmendtime",qdt);
-           inquery.bindValue(":id",irecordid);
-           if(!inquery.exec()){
-                cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
-                ConnectionPool::closeConnection(db);
-               return false;
-           }
-       }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    QSqlQuery inquery(db);
+    QString strSql;
+    if(nlimitType==ALARM_SWITCH)
+    {
+        strSql = QString("insert into dtmb_alarm_record(devicenumber,freq,alarmtype,alarmstarttime,alarmid) values(:devicenumer,:freq,:alarmtype,:alarmstarttime,:alarmid)");
+        inquery.prepare(strSql);
+        inquery.bindValue(":freq",atoi(strFrqName.c_str()));//
+        inquery.bindValue(":alarmtype",nalarmTypeId);
+        inquery.bindValue(":devicenumer",QString::fromStdString(strDevNum));
+        inquery.bindValue(":alarmid",0);
+        QDateTime qdt;
+        //  tm *ltime = localtime(&startTime);
+        qdt=QDateTime::fromTime_t(startTime);
+        //qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
+        // qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
+        inquery.bindValue(":alarmstarttime",qdt);
+        if(!inquery.exec()){
+            cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
+            ConnectionPool::closeConnection(db);
+            return false;
+        }
+        strSql=QString("select max(id) from dtmb_alarm_record");
+        inquery.prepare(strSql);
+        if(inquery.exec()){
+            if(inquery.next()){
+                irecordid = inquery.value(0).toULongLong();
+            }
+        }else{
+            cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery2---error!"<<endl;
+        }
+        ConnectionPool::closeConnection(db);
+        return  true;
+    }
+    else if(nlimitType==ALARM_RESUME)
+    {
+        strSql = QString("update dtmb_alarm_record set alarmendtime=:alarmendtime where alarmid=:id");
+        inquery.prepare(strSql);
+        QDateTime qdt;
+        tm *ltime = localtime(&startTime);
+        qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
+        qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
+        inquery.bindValue(":alarmendtime",qdt);
+        inquery.bindValue(":id",irecordid);
+        if(!inquery.exec()){
+            cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
+            ConnectionPool::closeConnection(db);
+            return false;
+        }
+    }
 
-       ConnectionPool::closeConnection(db);
-       return true;
+    ConnectionPool::closeConnection(db);
+    return true;
 
 }
 
@@ -1585,28 +1586,28 @@ bool DataBaseOperation::GetAllUserInfoByStation(const string sStationNumber, Log
 
 bool DataBaseOperation::AddDutyLog(const string sUserNumber, const string sContent, int nType)
 {
-     QSqlDatabase db = ConnectionPool::openConnection();
-     if(!db.isOpen() || !db.isValid()) {//IsOpen()
-         std::cout<<"AddDutyLog error  ------ the database is interrupt"<<std::endl;
-         return false;
-     }
-     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-     QSqlQuery insertquery(db);
-     QString strSql;
-     strSql = QString("insert into duty_log(usernumber,time,content,dutylogtype) values(:usernumber,:time,:content,:dutylogtype)");
-     QDateTime qdt=QDateTime::currentDateTime();
-     insertquery.prepare(strSql);
-     insertquery.bindValue(":usernumber",QString::fromStdString(sUserNumber));
-     insertquery.bindValue(":time",qdt);
-     insertquery.bindValue(":content",QString::fromStdString(sContent));
-     insertquery.bindValue(":dutylogtype",nType);
-     if(!insertquery.exec()){
-         cout<<insertquery.lastError().text().toStdString()<<"AddDutyLog---inquery---error!"<<endl;
-         ConnectionPool::closeConnection(db);
-         return false;
-     }
-     ConnectionPool::closeConnection(db);
-     return true;
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"AddDutyLog error  ------ the database is interrupt"<<std::endl;
+        return false;
+    }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    QSqlQuery insertquery(db);
+    QString strSql;
+    strSql = QString("insert into duty_log(usernumber,time,content,dutylogtype) values(:usernumber,:time,:content,:dutylogtype)");
+    QDateTime qdt=QDateTime::currentDateTime();
+    insertquery.prepare(strSql);
+    insertquery.bindValue(":usernumber",QString::fromStdString(sUserNumber));
+    insertquery.bindValue(":time",qdt);
+    insertquery.bindValue(":content",QString::fromStdString(sContent));
+    insertquery.bindValue(":dutylogtype",nType);
+    if(!insertquery.exec()){
+        cout<<insertquery.lastError().text().toStdString()<<"AddDutyLog---inquery---error!"<<endl;
+        ConnectionPool::closeConnection(db);
+        return false;
+    }
+    ConnectionPool::closeConnection(db);
+    return true;
 }
 
 bool DataBaseOperation::AddHandove(const string sHandoveNumber, const string sSuccessorNumber, const string &sLogContents, const time_t ttime)

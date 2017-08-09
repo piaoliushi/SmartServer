@@ -30,17 +30,13 @@ namespace hx_net{
 			{
 				time_t tNow = time(0);
                 tm *tmNow = localtime(&tNow);
-                //char xxx[1024];
-                //memset(xxx,0,1024);
-                //memcpy(xxx,data,1023);
-               // int yyy = Dec2Hex(tmNow->tm_mon) ;
 				if((data[0]==m_addresscode || data[0]==0xff) && 
                     data[1]>=0 && data[2]<=Dec2Hex(tmNow->tm_mon+1) &&  data[2]>0 &&
 					data[3]<=0x31 && data[3]>0 && data[4]<0x24 && 
 					data[4]>=0 && data[5]<0x60 && data[5]>=0 && 
 					data[6]<0x60 && data[6]>=0)
 				{
-					return 0;
+                    return RE_SUCCESS;
 				}
 				else
 				{//查找日期+时间头，若找到返回第一个字节位置
@@ -64,7 +60,7 @@ namespace hx_net{
 
 
 				if(nDataLen<2)
-					return -1;
+                    return RE_HEADERROR;
 				if(data[0]==0xEA && data[1]==0x02)
 				{//整机功率，则计算数据体长度
 					int niDataLen, HiByte,LoByte;
@@ -72,7 +68,7 @@ namespace hx_net{
 					LoByte=data[3];
 					niDataLen=HiByte<<8|LoByte;
 					if(nDataLen==nDataLen+5)
-						return 0;
+                        return RE_SUCCESS;
 					return (niDataLen+5-nDataLen);
 				}
 				else
@@ -105,7 +101,7 @@ namespace hx_net{
         case GME_SIMTV1014A:
             return GmeSIM1014AData(data,data_ptr,nDataLen,runstate);
         }
-        return -1;
+        return RE_NOPROTOCOL;
 	}
 
 	bool GmeTransmmit::IsStandardCommand()

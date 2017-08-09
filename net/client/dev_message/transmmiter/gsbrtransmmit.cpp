@@ -45,7 +45,7 @@ namespace hx_net{
         default:
             break;
         }
-        return RE_UNKNOWDEV;
+        return RE_NOPROTOCOL;
     }
 
     int GsbrTransmmit::decode_msg_body(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
@@ -55,7 +55,7 @@ namespace hx_net{
         default:
             break;
         }
-        return RE_UNKNOWDEV;
+        return RE_NOPROTOCOL;
     }
 
     int GsbrTransmmit::decode_msg_body(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target, int &runstate)
@@ -67,7 +67,7 @@ namespace hx_net{
         default:
             break;
         }
-        return RE_UNKNOWDEV;
+        return RE_NOPROTOCOL;
     }
 
     bool GsbrTransmmit::IsStandardCommand()

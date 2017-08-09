@@ -21,14 +21,12 @@ namespace hx_net{
 		case LNSZ_169:
 			{
 				if(data[0]==0xFC && data[nDataLen-1]==0xFD)
-					return 0;
+                    return RE_SUCCESS;
 				else
-					return -1;
+                    return RE_HEADERROR;
 			}
-		default:
-			return -1;
 		}
-		return -1;
+        return RE_NOPROTOCOL;
 	}
 
 	bool LngdTransmmit::IsStandardCommand()
@@ -57,7 +55,7 @@ namespace hx_net{
 		case LNSZ_169:
 			break;
 		}
-		return -1;
+        return RE_NOPROTOCOL;
 	}
 
 	void LngdTransmmit::GetAllCmd( CommandAttribute &cmdAll )

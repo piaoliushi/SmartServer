@@ -53,19 +53,17 @@ const char AGCstate[][10]={"OFF","INT","A_IN","IN_A"};
                 if(data[0]==0xA5 && data[1]==0x5A)
                     return (((data[3]<<8)|data[2])-4);
                 else
-                    return -1;
+                    return RE_HEADERROR;
             }
         case All_Band_Exc:
         {
             if(data[0]==0x00 && data[1]==0x76 && data[3]==0x80)
                 return (data[2]-4);
             else
-                return -1;
+                return RE_HEADERROR;
         }
-        default:
-            return -1;
         }
-        return -1;
+        return RE_NOPROTOCOL;
     }
 
     bool ShTransmmit::isLastQueryCmd()
@@ -94,12 +92,11 @@ const char AGCstate[][10]={"OFF","INT","A_IN","IN_A"};
     int ShTransmmit::decode_msg_body( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate )
     {
 
-        int nResult=-1;
+        int nResult=RE_NOPROTOCOL;
         switch(m_subprotocol)
         {
         case All_Band_Pa:{
             nResult = OnAllBandData(data,data_ptr,nDataLen,runstate);
-
             break;
         }
         case All_Band_Exc:{

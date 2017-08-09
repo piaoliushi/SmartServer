@@ -1524,7 +1524,7 @@ void device_session::handle_read_head(const boost::system::error_code& error, si
     {
         int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,
                                                                 bytes_transferred,CMD_QUERY,cur_msg_q_id_);
-        if(nResult>0)
+        if(nResult>RE_SUCCESS)
             start_read_body(nResult);
         else{
             close_all();
@@ -1549,7 +1549,7 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
     {
         int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,bytes_transferred,CMD_QUERY,cur_msg_q_id_);
 
-        if(nResult == 0)
+        if(nResult == RE_SUCCESS || nResult == RE_CMDACK)
         {
             DevMonitorDataPtr curData_ptr(new Data);
             int iaddcode=-1;
@@ -1647,7 +1647,7 @@ void device_session::handle_read_body(const boost::system::error_code& error, si
         int iaddcode=-1;
         int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,
                                                         bytes_transferred,iaddcode);
-        if(nResult==0 || nResult==-2)//查询数据解析正确,-2为控制指令返回值
+        if(nResult==RE_SUCCESS || nResult==RE_CMDACK)//查询数据解析正确,-2为控制指令返回值
         {
             query_timeout_count_ = 0;
             /*if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
@@ -1684,14 +1684,10 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
         return;
     if(!error)
     {
-        //static  char str_time[64];
-        //time_t curTm = time(0);
-        //tm *local_time = localtime(&curTm);
-        //strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
 
         int nResult = receive_msg_ptr_->check_msg_header(dev_agent_and_com[cur_dev_id_].second,
                                                                 bytes_transferred,CMD_QUERY,cur_msg_q_id_);
-        if(nResult == 0)
+        if(nResult == RE_SUCCESS || nResult == RE_CMDACK)
         {
             query_timeout_count_ = 0;
             if(cur_msg_q_id_<dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY].size()-1)
@@ -1705,7 +1701,7 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
                 DevMonitorDataPtr curData_ptr(new Data);
                 int iaddcode=-1;
                 int nResult = receive_msg_ptr_->decode_msg(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
-                if(nResult == 0 || nResult==-2){
+                if(nResult == RE_SUCCESS || nResult == RE_CMDACK){
                     string sdevid = get_devid_by_addcode(iaddcode);
                     handler_data(sdevid,curData_ptr);//处理数据
                     cur_dev_id_ = next_dev_id();//切换到下一个设备
@@ -1719,10 +1715,10 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
             }
             start_read(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
         }
-        else if(nResult>0){//还有后续消息
+        else if(nResult > RE_SUCCESS){//还有后续消息
             start_read(nResult);
         }
-        else if(nResult == -1){
+        else if(nResult == RE_HEADERROR){
             close_all();
             start_connect_timer();
             return;

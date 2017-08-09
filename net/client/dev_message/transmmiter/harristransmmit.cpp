@@ -9,13 +9,17 @@ namespace hx_net{
              initOid();
          }
 
+          void CHarrisTransmmit::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)
+          {
+
+          }
          int CHarrisTransmmit::check_msg_header(unsigned char *data, int nDataLen, CmdType cmdType, int number)
          {
              switch(m_subprotocol)
              {
              case HARRIS_AM50:{
                  if(data[0]==0x48 && data[1]==0x42)
-                     return 0;
+                     return RE_SUCCESS;
                  else
                  {
                      unsigned char cDes[2]={0};
@@ -25,22 +29,16 @@ namespace hx_net{
                  }
              }
                  break;
-             default:
-                 break;
              }
-             return RE_UNKNOWDEV;
+             return RE_NOPROTOCOL;
          }
 
          int CHarrisTransmmit::decode_msg_body(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
          {
              switch(m_subprotocol)
              {
-             case HARRIS_AM50:{
+             case HARRIS_AM50:
                  return OnHarrisAm50(data,data_ptr,nDataLen,runstate);
-             }
-                 break;
-             default:
-                 break;
              }
              return RE_UNKNOWDEV;
          }
@@ -50,9 +48,6 @@ namespace hx_net{
              {
              case HARRIS_SNMP:
                  return get_snmp(snmp,data_ptr,target);
-                 break;
-             default:
-                 break;
              }
              return RE_UNKNOWDEV;
          }

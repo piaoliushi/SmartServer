@@ -21,9 +21,9 @@ int Antenna_message::check_msg_header(unsigned char *data, int nDataLen, CmdType
         switch (d_devInfo.nSubProtocol) {
         case HX_MD981:
             if(data[0]==0xAA && data[1]==0x11 && data[11]==0xCC)
-                return 0;
+                return RE_SUCCESS;
             else
-                return -1;
+                return RE_HEADERROR;
         default:
             return RE_NOPROTOCOL;
         }

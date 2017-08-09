@@ -22,7 +22,7 @@ namespace hx_net{
         case CHENGDU_KAITENG_KFS_II:
         {
             if(data[0]==0x7e && data[12]==m_addresscode && data[13]==0x86)
-                return 0;
+                return RE_SUCCESS;
             else
             {
                 unsigned char cDes[14]={0};
@@ -52,7 +52,7 @@ namespace hx_net{
         case CHENGDU_KT_DIG:
         {
             if(data[0]==0xAA && data[1]==0xFF && data[2]==m_addresscode)
-                return 0;
+                return RE_SUCCESS;
             else
             {
                 unsigned char cDes[3]={0};
@@ -65,7 +65,7 @@ namespace hx_net{
         case CHENGDU_CHENGGUANG_DIG:
         {
             if(data[0]==m_addresscode &&data[1]==0x10)
-                return 0;
+                return RE_SUCCESS;
             else
             {
                 unsigned char cDes[2]={0};
@@ -109,21 +109,18 @@ namespace hx_net{
 			break;
 		case CHENGDU_KT_DIG:
             return OnKT_digData(data,data_ptr,nDataLen,runstate);
-			break;
 		case CHENGDU_KAITENG_TV10KW:
 			break;
 		case CHENGDU_XINGUANG:
 			break;
 		case CHENGDU_XINGUANG_247:
-			{
-				return OnXG_247Data(data,data_ptr,nDataLen,runstate);
-			}
+            return OnXG_247Data(data,data_ptr,nDataLen,runstate);
         case CHENGDU_CHENGGUANG_DIG:
             return OnCG_dig1KwData(data,data_ptr,nDataLen,runstate);
         case CHENGDU_KAITENG_KFS_II:
             return KT_1Kw_813_Data(data,data_ptr,nDataLen,runstate);
 		}
-		return -1;
+        return RE_NOPROTOCOL;
 	}
 
 	void CDtransmmiter::GetAllCmd( CommandAttribute &cmdAll )
@@ -700,7 +697,7 @@ namespace hx_net{
     int CDtransmmiter::OnCG_dig1KwData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
     {
         if(nDataLen<8)
-            return -2;
+            return RE_CMDACK;
         while(nDataLen>=8)
         {
             int unitIndex = data[1];

@@ -7,6 +7,14 @@
 using namespace std;
 
 
+typedef enum RESOLVE_TAG  //resolve
+{
+    RE_SUCCESS    =  0, //解析正确
+    RE_HEADERROR  = -1, //数据头错误
+    RE_NOPROTOCOL = -2, //未定义协议
+    RE_UNKNOWDEV  = -3, //未定义的设备类型
+    RE_CMDACK     = -4, //命令回复，无需解析
+}ResolveErrorCode;
 
 typedef struct CMDBUF_TAG
 {
@@ -278,15 +286,6 @@ typedef enum LINK_DEVICE
     LINK_HX_0401_DA = 11,//汇鑫0401DA切换器
     LINK_HX_0401_DABS = 12,//汇鑫0401DABS切换器
 }LinkDeviceSubProtocol;
-
-typedef enum RESOLVE_TAG  //resolve
-{
-    RE_SUCCESS = 0,  //解析正确
-    RE_CMDACK  = -1, //命令回复，无需解析
-    RE_NOPROTOCOL = -2,//未定义协议
-    RE_UNKNOWDEV  = -3,//未定义的设备类型
-    RE_HEADERROR  = -4,//数据头错误
-}ResolveErrorCode;
 
 typedef enum SHANGHAIPROTOCL
 {
