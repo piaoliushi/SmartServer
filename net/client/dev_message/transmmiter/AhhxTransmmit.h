@@ -13,6 +13,7 @@ namespace hx_net{
 		void GetAllCmd(CommandAttribute &cmdAll);
 	private:
         int Md993Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+        int Md996Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
 	private:
 		int m_subprotocol;
 		int m_addresscode;

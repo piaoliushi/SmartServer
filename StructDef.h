@@ -184,7 +184,8 @@ typedef enum HXPROTOCOL
 	HUIXIN_761            = 15, //761(新版760)
 	HUIXIN_0214           = 16,  //数字切换器
 	HUIXIN_0401_DABS      = 17,
-	HUIXIN_0804D          = 18 //矩阵
+    HUIXIN_0804D          = 18, //矩阵
+    HUIXIN_996            = 22
 
 }HxSubPrototcol;
 typedef enum ITPROTOCOL

@@ -284,7 +284,7 @@ namespace hx_net
         }
         if(d_devInfo.nDevProtocol==HUIXIN)
         {
-            if(d_devInfo.iDevType==0)
+            if(d_devInfo.iDevType==0 || d_devInfo.iDevType==22)
             {
                 float fdata1 = sqrt(data_ptr->mValues[0].fValue*1000)+sqrt(data_ptr->mValues[1].fValue);
                 float fdata2 = sqrt(data_ptr->mValues[0].fValue*1000)-sqrt(data_ptr->mValues[1].fValue);

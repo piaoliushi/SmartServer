@@ -17,8 +17,8 @@ namespace hx_net{
 
     int AhhxTransmmit::check_msg_header( unsigned char *data,int nDataLen,CmdType cmdType,int number)
 	{
-		switch(m_subprotocol)
-		{
+        switch(m_subprotocol)
+        {
         case HUIXIN_993:
         case HUIXIN_JWT:
         case HUIXIN_HN:
@@ -37,10 +37,10 @@ namespace hx_net{
                 cDes[2] = 0xF3;
                 return kmp(data,nDataLen,cDes,3);
             }
-			}
-			break;
+        }
+            break;
         case ANHUI_994:
-            {
+        {
             if(data[0]==0x55 && data[2]==0xF3)
             {
                 if(data[1]< 0x99 )
@@ -50,106 +50,116 @@ namespace hx_net{
                 unsigned char cDes[3]={0};
                 cDes[0]=0x55;
                 cDes[1] = 0x35;
-                cDes[2] = 0xF3;      
+                cDes[2] = 0xF3;
                 return kmp(data,nDataLen,cDes,3);
             }
-            }
+        }
             break;
         case HUIXIN_0804D:
-                {
-                    if(data[0]==0xAA)
-                        return RE_SUCCESS;
-                    else
-                    {//查找日期+时间头，若找到返回第一个字节位置
-                        unsigned char cDes[2]={0};
-                        cDes[0]=0xAA;
-                        cDes[1]=0x33;
-                        return kmp(data,nDataLen,cDes,2);
-                    }
-                }
-                break;
-            case HUIXIN_0401_AV:
-                {
-                    if(data[0]==0xAA && data[1]==0x41)
-                        return RE_SUCCESS;
-                    else
-                    {
-                        unsigned char cDes[2]={0};
-                        cDes[0]=0xAA;
-                        cDes[1]=0x41;
-                        return kmp(data,nDataLen,cDes,2);
-                    }
-                }
-                break;
-            case HUIXIN_0401_SKY:
-                {
-                    if(data[0]==0xAA && data[1]==0x43)
-                        return RE_SUCCESS;
-                    else
-                    {
-                        unsigned char cDes[2]={0};
-                        cDes[0]=0xAA;
-                        cDes[1]=0x43;
-                        return kmp(data,nDataLen,cDes,2);
-                    }
-                }
-                break;
-            case HUIXIN_0401_DABS:
-            case HUIXIN_0401_DA:
-                {
-                    if(data[0]==0xAA && data[1]==0x45)
-                        return RE_SUCCESS;
-                    else
-                    {
-                        unsigned char cDes[2]={0};
-                        cDes[0]=0xAA;
-                        cDes[1]=0x45;
-                        return kmp(data,nDataLen,cDes,2);
-                    }
-                }
-                break;
-            case HUIXIN_DATA_MGR:
-                {
-                    if(data[0]!=0x7E || data[1]!=0x30)
-                        return RE_HEADERROR;
-                    else
-                       return int((data[5]<<8)|data[4]);
-                }
-                break;
-            case HUIXIN_6300:
-                {
-                     if(data[0]!=0xAA || data[1]!=0x63)
-                         return RE_HEADERROR;
-                     else
-                         return int((data[5]<<8)|data[6]);
-                }
-                break;
-            case HUIXIN_9020:
-                {
-                    if(data[0]!=0xAA || data[1]!=0x92)
-                         return RE_HEADERROR;
-                    else
-                         return int((data[5]<<8)|data[6]);
-                }
-                break;
-            case HUIXIN_740P:
-                {
-                    if(data[0]!=0x7E || data[1]!=0x74)
-                        return RE_HEADERROR;
-                    else
-                        return int((data[5]<<8)|data[6]);
-                }
-                break;
-            case HUIXIN_0214:
-                {
-                    if(data[0]!=0x7E || data[1]!=0x40)
-                        return RE_HEADERROR;
-                    else
-                        return int((data[6]<<8)|data[5]);
-                }
-                break;
+        {
+            if(data[0]==0xAA)
+                return RE_SUCCESS;
+            else
+            {//查找日期+时间头，若找到返回第一个字节位置
+                unsigned char cDes[2]={0};
+                cDes[0]=0xAA;
+                cDes[1]=0x33;
+                return kmp(data,nDataLen,cDes,2);
+            }
         }
-		return RE_NOPROTOCOL;
+            break;
+        case HUIXIN_0401_AV:
+        {
+            if(data[0]==0xAA && data[1]==0x41)
+                return RE_SUCCESS;
+            else
+            {
+                unsigned char cDes[2]={0};
+                cDes[0]=0xAA;
+                cDes[1]=0x41;
+                return kmp(data,nDataLen,cDes,2);
+            }
+        }
+            break;
+        case HUIXIN_0401_SKY:
+        {
+            if(data[0]==0xAA && data[1]==0x43)
+                return RE_SUCCESS;
+            else
+            {
+                unsigned char cDes[2]={0};
+                cDes[0]=0xAA;
+                cDes[1]=0x43;
+                return kmp(data,nDataLen,cDes,2);
+            }
+        }
+            break;
+        case HUIXIN_0401_DABS:
+        case HUIXIN_0401_DA:
+        {
+            if(data[0]==0xAA && data[1]==0x45)
+                return RE_SUCCESS;
+            else
+            {
+                unsigned char cDes[2]={0};
+                cDes[0]=0xAA;
+                cDes[1]=0x45;
+                return kmp(data,nDataLen,cDes,2);
+            }
+        }
+            break;
+        case HUIXIN_DATA_MGR:
+        {
+            if(data[0]!=0x7E || data[1]!=0x30)
+                return RE_HEADERROR;
+            else
+                return int((data[5]<<8)|data[4]);
+        }
+            break;
+        case HUIXIN_6300:
+        {
+            if(data[0]!=0xAA || data[1]!=0x63)
+                return RE_HEADERROR;
+            else
+                return int((data[5]<<8)|data[6]);
+        }
+            break;
+        case HUIXIN_9020:
+        {
+            if(data[0]!=0xAA || data[1]!=0x92)
+                return RE_HEADERROR;
+            else
+                return int((data[5]<<8)|data[6]);
+        }
+            break;
+        case HUIXIN_740P:
+        {
+            if(data[0]!=0x7E || data[1]!=0x74)
+                return RE_HEADERROR;
+            else
+                return int((data[5]<<8)|data[6]);
+        }
+            break;
+        case HUIXIN_0214:
+        {
+            if(data[0]!=0x7E || data[1]!=0x40)
+                return RE_HEADERROR;
+            else
+                return int((data[6]<<8)|data[5]);
+        }
+            break;
+        case HUIXIN_996:
+        {
+            if(data[0]!=0x7E || data[1]!=0x30)
+                return RE_HEADERROR;
+            else
+            {
+                return int((data[5]<<8)|data[4]);
+            }
+        }
+            break;
+        }
+        return RE_NOPROTOCOL;
 	}
 
     int AhhxTransmmit::decode_msg_body( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate )
@@ -158,6 +168,8 @@ namespace hx_net{
 		{
         case HUIXIN_993:
            return Md993Data(data,data_ptr,nDataLen,runstate);
+        case HUIXIN_996:
+            return Md996Data(data,data_ptr,nDataLen,runstate);
 		}
         return RE_NOPROTOCOL;
 	}
@@ -173,6 +185,7 @@ namespace hx_net{
         case HUIXIN_730P:
         case HUIXIN_761:
         case HUIXIN_0214:
+        case HUIXIN_996:
             return true;
 		}
 		return false;
@@ -246,6 +259,44 @@ namespace hx_net{
              cmdAll.mapCommand[MSG_TRANSMITTER_REDUCE_POWER_OPR] = vtDwUnit;
         }
             break;
+        case HUIXIN_996:
+        {
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 9;
+            tmUnit.ackLen = 6;
+            tmUnit.commandId[0] = 0x7E;
+            tmUnit.commandId[1] = 0x30;
+            tmUnit.commandId[2] = (m_addresscode&0x00FF);
+            tmUnit.commandId[3] = ((m_addresscode&0xFF00)>>8);
+            tmUnit.commandId[4] = 0x03;
+            tmUnit.commandId[5] = 0x00;
+            tmUnit.commandId[6] = 0x01;
+            tmUnit.commandId[7] = 0x11;
+            tmUnit.commandId[8] = 0x55;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            tmUnit.commandLen = 10;
+            tmUnit.commandId[4] = 0x04;
+            tmUnit.commandId[6] = 0x01;
+            tmUnit.commandId[7] = 0x77;
+            tmUnit.commandId[8] = 0x01;
+            tmUnit.commandId[9] = 0x55;
+            cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
+            tmUnit.commandId[8] = 0x02;
+            cmdAll.mapCommand[MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR].push_back(tmUnit);
+            tmUnit.commandId[8] = 0x03;
+            cmdAll.mapCommand[MSG_TRANSMITTER_LOW_POWER_TURNON_OPR].push_back(tmUnit);
+            tmUnit.commandId[8] = 0x00;
+            cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
+            tmUnit.commandId[7] = 0xB3;
+            tmUnit.commandId[8] = 0x01;
+            cmdAll.mapCommand[MSG_TRANSMITTER_RISE_POWER_OPR].push_back(tmUnit);
+            tmUnit.commandId[8] = 0x02;
+            cmdAll.mapCommand[MSG_TRANSMITTER_REDUCE_POWER_OPR].push_back(tmUnit);
+            tmUnit.commandId[8] = 0x03;
+            cmdAll.mapCommand[MSG_DEV_RESET_OPR].push_back(tmUnit);
+
+        }
+            break;
         }
     }
     int AhhxTransmmit::Md993Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
@@ -285,5 +336,37 @@ namespace hx_net{
             }
         }
         return 0;
+    }
+
+    int AhhxTransmmit::Md996Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+    {
+        int nCmd = data[7];
+        if(nCmd!=0x11)
+        {
+            return RE_CMDACK;
+        }
+        int nAdc_Count,nSta_Cout;
+        nAdc_Count = data[16];
+        nSta_Cout = data[2*nAdc_Count+17];
+        DataInfo dtinfo;
+        dtinfo.bType = false;
+        for(int i=0;i<nAdc_Count;++i)
+        {
+            if(i==2)
+            {
+               continue;
+            }
+            else{
+                dtinfo.fValue = data[18+2*i]*256+data[17+2*i];
+                data_ptr->mValues[i] = dtinfo;
+            }
+        }
+        dtinfo.bType = true;
+        for(int i=0;i<nSta_Cout;++i)
+        {
+            dtinfo.fValue = data[2*nAdc_Count+18+i];
+            data_ptr->mValues[50+i] = dtinfo;
+        }
+        return RE_SUCCESS;
     }
 }

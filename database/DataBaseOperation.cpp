@@ -670,7 +670,7 @@ bool DataBaseOperation::GetAssDevChan(QSqlDatabase &db, QString strDevNum,map<in
     return true;
 }
 
-//获得告警配置
+//获得设备整机告警配置
 bool DataBaseOperation::GetAlarmConfig(QSqlDatabase &db, string strDevnum,map<int,Alarm_config>& map_Alarmconfig )
 {
     if(!db.isOpen() || !db.isValid()) {
@@ -681,7 +681,7 @@ bool DataBaseOperation::GetAlarmConfig(QSqlDatabase &db, string strDevnum,map<in
     QSqlQuery alarmconfigquery(db);
     QString strSql=QString("select a.MonitoringIndex,a.LimitValue,a.AlarmLevel,a.JumpLimitType,a.LinkageEnable,a.LinkageRoleNumber,a.delaytime,a.LinkageRoleNumber,a.alarmconfigtype \
                            ,a.resumeduration  from Alarm_Item_config a,device_alarm_switch b where a.DeviceNumber='%1' and b.alarmenable>0 and a.alarmconfigtype<>0 and b.devicenumber=a.DeviceNumber and \
-            b.alarmswitchtype=a.MonitoringIndex").arg(QString::fromStdString(strDevnum));
+            b.alarmswitchtype=a.MonitoringIndex and a.alarmenable>0 ").arg(QString::fromStdString(strDevnum));
             alarmconfigquery.prepare(strSql);
             if(alarmconfigquery.exec()) {
             while(alarmconfigquery.next()){
@@ -692,7 +692,7 @@ bool DataBaseOperation::GetAlarmConfig(QSqlDatabase &db, string strDevnum,map<in
             acfig.iLimittype = alarmconfigquery.value(3).toInt();
             acfig.iLinkageEnable = alarmconfigquery.value(4).toInt();
             if(acfig.iLinkageEnable>0)
-            GetLinkAction(db,alarmconfigquery.value(5).toString().toStdString(),acfig.vLinkAction);
+                GetLinkAction(db,alarmconfigquery.value(5).toString().toStdString(),acfig.vLinkAction);
 
             acfig.iDelaytime = alarmconfigquery.value(6).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(7).toString().toStdString();
@@ -724,20 +724,20 @@ bool DataBaseOperation::GetItemAlarmConfig(QSqlDatabase &db, string strDevnum,in
             alarmconfigquery.prepare(strSql);
             if(alarmconfigquery.exec()){
             while(alarmconfigquery.next()) {
-            Alarm_config acfig;
-            acfig.fLimitvalue = alarmconfigquery.value(0).toDouble();
-            acfig.iAlarmlevel = alarmconfigquery.value(1).toInt();
-            acfig.iLimittype = alarmconfigquery.value(2).toInt();
-            acfig.iLinkageEnable = alarmconfigquery.value(3).toInt();
-            if(acfig.iLinkageEnable>0)
-            GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
-            acfig.iDelaytime = alarmconfigquery.value(5).toInt();
-            acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
-            acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
-            acfig.iAlarmid = iThid;
-            acfig.iResumetime = alarmconfigquery.value(8).toInt();
-            vAlarmconfig.push_back(acfig);
-}
+                Alarm_config acfig;
+                acfig.fLimitvalue = alarmconfigquery.value(0).toDouble();
+                acfig.iAlarmlevel = alarmconfigquery.value(1).toInt();
+                acfig.iLimittype = alarmconfigquery.value(2).toInt();
+                acfig.iLinkageEnable = alarmconfigquery.value(3).toInt();
+                if(acfig.iLinkageEnable>0)
+                    GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
+                acfig.iDelaytime = alarmconfigquery.value(5).toInt();
+                acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
+                acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
+                acfig.iAlarmid = iThid;
+                acfig.iResumetime = alarmconfigquery.value(8).toInt();
+                vAlarmconfig.push_back(acfig);
+            }
 } else {
             cout<<alarmconfigquery.lastError().text().toStdString()<<"GetItemAlarmConfig---alarmconfigquery---error!"<<endl;
             return false;
