@@ -378,9 +378,10 @@ void device_session::http_handle_callback(const boost::system::error_code& error
         while (boost::asio::read(http_stream_, http_urdl_response,
                    boost::asio::transfer_at_least(1), error));
 
-        string contents;
-        std::istream(&http_urdl_response) >> contents;
-        cout<<contents<<endl;
+        boost::asio::streambuf::const_buffers_type cbt = http_urdl_response.data();
+        std::string request_contents(boost::asio::buffers_begin(cbt), boost::asio::buffers_end(cbt));
+        cout<<request_contents<<endl;
+
         http_stream_.close();
 
     }else {
