@@ -386,8 +386,7 @@ void device_session::http_handle_callback(const boost::system::error_code& error
 
     }else {
 
-      //std::cerr << "Unable to open URL: ";
-      http_stream_.close();
+        http_stream_.close();
       std::cerr << error.message() << std::endl;
     }
 }

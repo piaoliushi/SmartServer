@@ -30,7 +30,6 @@ protected:
     int KD40RData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int C2000_M21A_Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int FRT_X06A_Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
-    int On992Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int C2000_A2_Data(unsigned char *data, DevMonitorDataPtr data_ptr,
                                      int nDataLen, int &iaddcode);
     int C2000_BB3_Data(unsigned char *data, DevMonitorDataPtr data_ptr,

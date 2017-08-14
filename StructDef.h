@@ -168,24 +168,7 @@ typedef enum HXPROTOCOL
 {
 	HUIXIN_993            = 0,//汇鑫993数据采集单元
 	ANHUI_994             = 1,//安徽汇鑫994NEW
-	HUIXIN_JWT            = 2,//金网通
-	HUIXIN_HN             = 3,//海纳
-	HUIXIN_992            = 4,//环境采集设备
-	HUIXIN_760            = 5,//
-	HUIXIN_0401_AV        = 6,
-	HUIXIN_0401_DA        = 7,
-	HUIXIN_0401_SKY       = 8,
-	HUIXIN_DATA_MGR       = 9, //综合数据管理器
-	HUIXIN_993_EX         = 10,
-	HUIXIN_6300           = 11, //音频处理器
-	HUIXIN_9020           = 12, //多路调幅度测试仪
-	HUIXIN_740P           = 13, //740+
-	HUIXIN_730P           = 14, //730+
-	HUIXIN_761            = 15, //761(新版760)
-	HUIXIN_0214           = 16,  //数字切换器
-	HUIXIN_0401_DABS      = 17,
-    HUIXIN_0804D          = 18, //矩阵
-    HUIXIN_996            = 22
+    HUIXIN_996            = 2,
 
 }HxSubPrototcol;
 typedef enum ITPROTOCOL

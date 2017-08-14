@@ -39,7 +39,7 @@ void DevClient::connect_all()
         vector<ModleInfo>::iterator modle_iter = vModle.begin();
         for(;modle_iter != vModle.end();modle_iter++)
         {
-           if(device_pool_.find(DevKey(sLocalStationId,(*modle_iter).sModleNumber))==device_pool_.end())
+            if(device_pool_.find(DevKey(sLocalStationId,(*modle_iter).sModleNumber))==device_pool_.end())
             {
 
                 session_ptr new_session(new device_session(io_service_pool_.get_io_service(),(*modle_iter),http_report_session_ptr_));
@@ -62,7 +62,8 @@ void DevClient::connect_all()
 
         if(m_pGsm_ptr_->OpenCom(cominfo.icomport,cominfo.irate))
         {
-            QObject::connect(m_pGsm_ptr_.get(),SIGNAL(S_state(int,bool)),GetInst(SvcMgr).get_notify(),SIGNAL(S_gsm_state(int,bool)));
+            QObject::connect(m_pGsm_ptr_.get(),SIGNAL(S_state(int,bool)),
+                             GetInst(SvcMgr).get_notify(),SIGNAL(S_gsm_state(int,bool)));
             m_pGsm_ptr_->gsmInit();
         }
     }

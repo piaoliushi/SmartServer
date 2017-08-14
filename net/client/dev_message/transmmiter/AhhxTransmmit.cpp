@@ -19,11 +19,7 @@ namespace hx_net{
 	{
         switch(m_subprotocol)
         {
-        case HUIXIN_993:
-        case HUIXIN_JWT:
-        case HUIXIN_HN:
-        case HUIXIN_992:
-        case HUIXIN_993_EX:{
+        case HUIXIN_993:{
             if(data[0]==0x55 && data[2]==0xF3)
             {
                 if(data[1]< 0x99 )
@@ -53,99 +49,6 @@ namespace hx_net{
                 cDes[2] = 0xF3;
                 return kmp(data,nDataLen,cDes,3);
             }
-        }
-            break;
-        case HUIXIN_0804D:
-        {
-            if(data[0]==0xAA)
-                return RE_SUCCESS;
-            else
-            {//查找日期+时间头，若找到返回第一个字节位置
-                unsigned char cDes[2]={0};
-                cDes[0]=0xAA;
-                cDes[1]=0x33;
-                return kmp(data,nDataLen,cDes,2);
-            }
-        }
-            break;
-        case HUIXIN_0401_AV:
-        {
-            if(data[0]==0xAA && data[1]==0x41)
-                return RE_SUCCESS;
-            else
-            {
-                unsigned char cDes[2]={0};
-                cDes[0]=0xAA;
-                cDes[1]=0x41;
-                return kmp(data,nDataLen,cDes,2);
-            }
-        }
-            break;
-        case HUIXIN_0401_SKY:
-        {
-            if(data[0]==0xAA && data[1]==0x43)
-                return RE_SUCCESS;
-            else
-            {
-                unsigned char cDes[2]={0};
-                cDes[0]=0xAA;
-                cDes[1]=0x43;
-                return kmp(data,nDataLen,cDes,2);
-            }
-        }
-            break;
-        case HUIXIN_0401_DABS:
-        case HUIXIN_0401_DA:
-        {
-            if(data[0]==0xAA && data[1]==0x45)
-                return RE_SUCCESS;
-            else
-            {
-                unsigned char cDes[2]={0};
-                cDes[0]=0xAA;
-                cDes[1]=0x45;
-                return kmp(data,nDataLen,cDes,2);
-            }
-        }
-            break;
-        case HUIXIN_DATA_MGR:
-        {
-            if(data[0]!=0x7E || data[1]!=0x30)
-                return RE_HEADERROR;
-            else
-                return int((data[5]<<8)|data[4]);
-        }
-            break;
-        case HUIXIN_6300:
-        {
-            if(data[0]!=0xAA || data[1]!=0x63)
-                return RE_HEADERROR;
-            else
-                return int((data[5]<<8)|data[6]);
-        }
-            break;
-        case HUIXIN_9020:
-        {
-            if(data[0]!=0xAA || data[1]!=0x92)
-                return RE_HEADERROR;
-            else
-                return int((data[5]<<8)|data[6]);
-        }
-            break;
-        case HUIXIN_740P:
-        {
-            if(data[0]!=0x7E || data[1]!=0x74)
-                return RE_HEADERROR;
-            else
-                return int((data[5]<<8)|data[6]);
-        }
-            break;
-        case HUIXIN_0214:
-        {
-            if(data[0]!=0x7E || data[1]!=0x40)
-                return RE_HEADERROR;
-            else
-                return int((data[6]<<8)|data[5]);
         }
             break;
         case HUIXIN_996:
@@ -178,13 +81,6 @@ namespace hx_net{
 	{
 		switch(m_subprotocol)
 		{
-        case HUIXIN_DATA_MGR:
-        case HUIXIN_6300:
-        case HUIXIN_9020:
-        case HUIXIN_740P:
-        case HUIXIN_730P:
-        case HUIXIN_761:
-        case HUIXIN_0214:
         case HUIXIN_996:
             return true;
 		}
@@ -202,8 +98,6 @@ namespace hx_net{
 		{
         case HUIXIN_993:
         case ANHUI_994:
-        case HUIXIN_JWT:
-        case HUIXIN_HN:
         {
             CommandUnit tmUnit;
             tmUnit.commandLen = 5;

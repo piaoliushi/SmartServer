@@ -132,32 +132,6 @@ namespace hx_net
 				}
 			}
 			break;
-		case HUIXIN:
-			{
-				switch (d_devInfo.nSubProtocol)
-				{
-				case HUIXIN_992:
-					{
-						if(data[0]==0x55 && data[2]==0xF3)
-						{
-							if(data[1]< 0x99 )
-								return 0;
-						}
-						else
-						{
-							unsigned char cDes[3]={0};
-							cDes[0]=0x55;
-							cDes[1] = 0x65;
-							cDes[2] = 0xF3;
-							return kmp(data,nDataLen,cDes,3);
-						}
-					}
-					break;
-				default:
-					return RE_NOPROTOCOL;
-				}
-			}
-			break;
 		}
 		
 		return RE_UNKNOWDEV;
@@ -207,18 +181,6 @@ namespace hx_net
                     m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                     return iresult;
                 }
-				default:
-					return RE_NOPROTOCOL;
-				}
-			}
-			break;
-		case HUIXIN:
-			{
-				switch (d_devInfo.nSubProtocol)
-				{
-				case HUIXIN_992:
-                    return On992Data(data,data_ptr,nDataLen,iaddcode);
-					break;
 				default:
 					return RE_NOPROTOCOL;
 				}
@@ -498,25 +460,6 @@ namespace hx_net
 
 			}
 			break;
-		case HUIXIN:
-			{
-				switch (d_devInfo.nSubProtocol)
-				{
-				case HUIXIN_992:
-					{
-						CommandUnit tmUnit;
-						tmUnit.commandId[0] = 0x55;
-						tmUnit.commandId[1] = 0x02;
-						tmUnit.commandId[2] = 0xF1;
-						tmUnit.commandId[3] = 0xF1;
-						tmUnit.commandId[4] = 0x00;
-						cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
-					}
-					break;
-				}
-			}
-			break;
-
 		}
 	}
 
@@ -724,43 +667,6 @@ namespace hx_net
 		return RE_SUCCESS;
 	}
 
-    int Envir_message::On992Data( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
-	{
-		unsigned char bdata1,bdata2,bdata3,bdata4;
-		float fdat;
-		int indexpos=0;
-		DataInfo dainfo;
-		dainfo.bType = false;
-        iaddcode = d_devInfo.iAddressCode;
-		for(int i=0;i<9;i++)//取温度
-		{
-			bdata1 = data[3 + 4*i];//通道号码必须从9开始
-			bdata2 = data[4 + 4*i];
-			bdata3 = data[5 + 4*i];
-			bdata4 = data[6 + 4*i];
-
-			*(((char*)(&fdat) + 0)) = bdata1;
-			*(((char*)(&fdat) + 1)) = bdata2;
-			*(((char*)(&fdat) + 2)) = bdata3;
-			*(((char*)(&fdat) + 3)) = bdata4;
-			dainfo.fValue = fdat;
-			data_ptr->mValues[indexpos++] = dainfo;
-		}
-		bdata1 = data[39];
-		dainfo.bType = true;
-		for(int i =0; i<5;i++)//取火灾数据
-		{
-			dainfo.fValue = Getbit(bdata1,i)==0? 0:1;
-			data_ptr->mValues[indexpos++] = dainfo;
-		}
-		bdata1 = data[40];
-		for(int i =0; i<5;i++)//取水灾数据
-		{
-			dainfo.fValue = Getbit(bdata1,i)==0? 0:1;
-			data_ptr->mValues[indexpos++] = dainfo;
-		}
-		return RE_SUCCESS;
-    }
 
     int Envir_message::C2000_A2_Data(unsigned char *data, DevMonitorDataPtr data_ptr,
                                      int nDataLen, int &iaddcode)
