@@ -366,27 +366,34 @@ namespace hx_net
         d_cur_user_ = sUser;//记录当前用户，定时，自动，人工
         if(cmd_excute_is_ok()){
             eErrCode = EC_OK;
+            m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
             return;
         }
 
+        //snmp参数设置专用
         d_bUse_snmp = bSnmp;
         d_cur_snmp = snmp;
         d_cur_target = target;
 
-        //执行任务
-        excute_task_cmd();
+        //初始化错误码
+        eErrCode = EC_UNKNOWN;
 
-        eErrCode = EC_OPR_ON_GOING;
+        //执行任务
+        excute_task_cmd(eErrCode);
+
+
 
         std::time(&d_OprStartTime);//循环执行计时开始
         tm *pCurTime = localtime(&d_OprStartTime);
         m_pSession-> notify_client_execute_result(d_devInfo.sDevNum,d_devInfo.sDevName,sUser,
                                   d_cur_task_,pCurTime,false,eErrCode);
-        //目前只有发射机的开关机进行循环发送
+        //目前只有发射机的开关机进行循环发送（）
         if(icmdType >=MSG_TRANSMITTER_TURNON_OPR &&  icmdType < MSG_TRANSMITTER_RISE_POWER_OPR){
             start_task_timeout_timer();
-        }else
+        }else{
+            //恢复执行标志
             m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
+        }
     }
 
     //启动任务定时器
@@ -397,27 +404,41 @@ namespace hx_net
             this,boost::asio::placeholders::error));
     }
 
-    void Tsmt_message::excute_task_cmd()
+    void Tsmt_message::excute_task_cmd(e_ErrorCode &eErrCode)
     {
         switch (d_cur_task_) {
-        case MSG_TRANSMITTER_TURNON_OPR:
-            exec_trunon_task_(HIGH_POWER_ON);
+        case MSG_TRANSMITTER_TURNON_OPR:{
+            eErrCode = EC_OPR_ON_GOING;
+            exec_trunon_task_(HIGH_POWER_ON,eErrCode);
+        }
             break;
-        case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:
-            exec_trunon_task_(MIDDLE_POWER_ON);
+        case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:{
+            eErrCode = EC_OPR_ON_GOING;
+            exec_trunon_task_(MIDDLE_POWER_ON,eErrCode);
+        }
             break;
-        case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR:
-            exec_trunon_task_(LOW_POWER_ON);
+        case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR:{
+            eErrCode = EC_OPR_ON_GOING;
+            exec_trunon_task_(LOW_POWER_ON,eErrCode);
+        }
             break;
-        case MSG_TRANSMITTER_TURNOFF_OPR:
-            exec_trunoff_task_();
+        case MSG_TRANSMITTER_TURNOFF_OPR:{
+            eErrCode = EC_OPR_ON_GOING;
+            exec_trunoff_task_(eErrCode);
+        }
+            break;
+        default:{
+           //执行其他任务
+           exec_other_task_(eErrCode);
+        }
             break;
         }
     }
+
+    //适用于需要循环执行的控制指令（暂时只用于发射机开关状态）
     bool  Tsmt_message::cmd_excute_is_ok()
     {
          bool  bCmdExcComplet = false;
-         e_ErrorCode bCmdExcRslt = EC_FAILED;
          switch (d_cur_task_) {
          case MSG_TRANSMITTER_TURNON_OPR:
          case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:
@@ -429,8 +450,6 @@ namespace hx_net
              if(is_shut_down())
                  bCmdExcComplet = true;
              } break;
-         default:
-             return true;
          }
 
          return bCmdExcComplet;
@@ -468,7 +487,8 @@ namespace hx_net
                     cout<<"command excute time out!----"<<endl;
                     return;
                 }else{
-                    excute_task_cmd();
+                    e_ErrorCode eErrCode = EC_OPR_ON_GOING;
+                    excute_task_cmd(eErrCode);
                     cout<<"command excute again!----intervale:"<<ninterval<<endl;
                     start_task_timeout_timer();
                 }
@@ -476,7 +496,7 @@ namespace hx_net
         }
     }
 
-    void Tsmt_message::exec_trunon_task_(int nType)
+    void Tsmt_message::exec_trunon_task_(int nType,e_ErrorCode &eErrCode)
     {
         if(!m_ptransmmit)
             return;
@@ -511,26 +531,43 @@ namespace hx_net
 
         if(!d_bUse_snmp){
             if(m_pSession!=NULL)
-                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,nType);
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,nType,eErrCode);
         }
         else
             m_ptransmmit->exec_cmd(d_cur_snmp,MSG_TRANSMITTER_TURNON_OPR,d_cur_target);
     }
+
     //关机
-    void Tsmt_message::exec_trunoff_task_()
+    void Tsmt_message::exec_trunoff_task_(e_ErrorCode &eErrCode)
     {
         if(!m_ptransmmit)
             return;
         if(is_detecting())
             return;
 
-
         if(!d_bUse_snmp){
             if(m_pSession!=NULL)
-                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0);
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0,eErrCode);
         }
         else
             m_ptransmmit->exec_cmd(d_cur_snmp,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_target);
+
+        return;
+    }
+
+    //其他控制指令
+    void Tsmt_message::exec_other_task_(e_ErrorCode &eErrCode)
+    {
+        if(!m_ptransmmit)
+            return;
+
+        eErrCode = EC_CMD_SEND_SUCCEED;
+        if(!d_bUse_snmp){
+            if(m_pSession!=NULL)
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0,eErrCode);
+        }
+        else
+            m_ptransmmit->exec_cmd(d_cur_snmp,d_cur_task_,d_cur_target);
 
         return;
     }

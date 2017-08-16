@@ -42,12 +42,13 @@ public:
 
 protected:
     //任务超时回调
-    void schedules_task_time_out(const boost::system::error_code& error);
+    void  schedules_task_time_out(const boost::system::error_code& error);
     //检测运行状态
-    void detect_run_state(DevMonitorDataPtr curDataPtr);
-    void exec_trunon_task_(int nType);
-    void exec_trunoff_task_();
-    void  excute_task_cmd();
+    void  detect_run_state(DevMonitorDataPtr curDataPtr);
+    void  exec_trunon_task_(int nType,e_ErrorCode &eErrCode);
+    void  exec_trunoff_task_(e_ErrorCode &eErrCode);
+    void  exec_other_task_(e_ErrorCode &eErrCode);
+    void  excute_task_cmd(e_ErrorCode &eErrCode);
     void  GetResultData(DevMonitorDataPtr data_ptr);
     void  CreateObject();
     bool  cmd_excute_is_ok();

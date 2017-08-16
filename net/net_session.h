@@ -118,8 +118,8 @@ namespace hx_net
         virtual bool excute_command(int cmdType,string sUser,devCommdMsgPtr lpParam,e_ErrorCode &opResult){return false;}
 
         //发送命令到设备
-        virtual void send_cmd_to_dev(string sDevId,int cmdType,int childId){}
-        virtual void send_cmd_to_dev(CommandUnit cmdUnit){}
+        virtual void send_cmd_to_dev(string sDevId,int cmdType,int childId,e_ErrorCode &eErrCode){}
+        virtual void send_cmd_to_dev(CommandUnit cmdUnit,e_ErrorCode &eErrCode){}
         virtual bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType){return false;}
 
         virtual void init_session_config(){}

@@ -723,10 +723,14 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             if(modleInfos_.iCommunicationMode == CON_MOD_NET){
                 if(modleInfos_.netMode.inet_type == NET_MOD_SNMP)// || modleInfos_.netMode.inet_type == NET_MOD_HTTP
                     get_sync_net_data();//获取网络数据(同步)，使用http,snmp
-                else
-                    send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
-            }else if(modleInfos_.iCommunicationMode == CON_MOD_COM)
-                send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
+                else{
+                    e_ErrorCode eErrCode = EC_UNKNOWN;
+                    send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_,eErrCode);
+                }
+            }else if(modleInfos_.iCommunicationMode == CON_MOD_COM){
+                e_ErrorCode eErrCode = EC_UNKNOWN;
+                send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_,eErrCode);
+            }
         }
         else{
 
@@ -743,7 +747,8 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             //	,curData_ptr,modleInfos_.mapDevInfo[cur_dev_id_].mapMonitorItem);
 
             cur_dev_id_ = next_dev_id();
-            send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
+            e_ErrorCode eErrCode = EC_UNKNOWN;
+            send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_,eErrCode);
         }
 
         start_query_timer(moxa_config_ptr->query_interval);
@@ -819,13 +824,13 @@ void device_session::http_send_task(const string &sCommandId){
 
 }
 
-void device_session::send_cmd_to_dev(CommandUnit cmdUnit)
+void device_session::send_cmd_to_dev(CommandUnit cmdUnit,e_ErrorCode &eErrCode)
 {
     start_write(cmdUnit.commandId,cmdUnit.commandLen);
 }
 
 //发送命令到设备
-void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId)
+void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId,e_ErrorCode &eErrCode)
 {
     //同步等待
     //boost::asio::deadline_timer delay_send_timer(io_service_, boost::posix_time::milliseconds(2));
@@ -836,6 +841,8 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId)
         map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
         if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
             if(iter->second.size()>childId){
+
+                eErrCode = EC_CMD_SEND_SUCCEED;
                 if(cmdType != MSG_DEVICE_QUERY)
                     http_send_task(iter->second[childId].sCommandId);
                 else
@@ -849,6 +856,11 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId)
     map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
     if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
         if(iter->second.size()>childId){
+            string strHex;
+            CharStr2HexStr(iter->second[childId].commandId,strHex,iter->second[childId].commandLen);
+            cout<<"command string:"<<strHex<<endl;
+
+            eErrCode = EC_CMD_SEND_SUCCEED;
             start_write(iter->second[childId].commandId,iter->second[childId].commandLen);
         }
     }
@@ -1694,7 +1706,8 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
             {
                 ++cur_msg_q_id_;
                 boost::this_thread::sleep(boost::posix_time::milliseconds(200));
-                send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_);
+                e_ErrorCode eErrCode = EC_UNKNOWN;
+                send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_,eErrCode);
             }
             else{
                 cur_msg_q_id_=0;

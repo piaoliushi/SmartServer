@@ -216,6 +216,8 @@ typedef enum WSPROTOCOL
 	FRT_X06A            = 5,
     C2000_A2_8020       = 6,
     C2000_SDD8020_BB3   = 7,
+    NT511_AD            = 8,
+
 }WsSubProtocol;
 typedef enum KANGTEPROTOCOL
 {
@@ -280,6 +282,11 @@ typedef enum SHANGHAIPROTOCL
 typedef enum  MEDIASUBPROTOCL_TAG
 {
     MEDIA_DTMB = 0,
+    MD_740P    = 1,//汇鑫MD740+
+    MD_740BD_II= 2,//汇鑫MD740两路板卡
+    MD_760BD_IV= 3,//汇鑫MD760板卡
+    DTMB_BD    = 4,//DTMB板卡
+
 }MediaSubProtocol;
 
 typedef enum GLSQ_TAG

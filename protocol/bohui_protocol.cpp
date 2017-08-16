@@ -887,7 +887,7 @@ void Bohui_Protocol::_controlDeviceCommand(int nDevType,xml_node<> *rootNode,int
     }
 }
 
-//分析信号上报告警,数据上报
+//分析信号上报告警,数据上报（DTMB相关）
 bool Bohui_Protocol::_parseSignalReportMsg(string sIp,xml_node<> * InfoNode)
 {
         rapidxml::xml_node<>* dataNode = InfoNode->first_node("AlarmSearchFSet");
@@ -960,7 +960,7 @@ bool Bohui_Protocol::_parseSignalReportMsg(string sIp,xml_node<> * InfoNode)
    // }
     return true;
 }
-
+//创建dtmb节目信息（DTMB相关）
 bool Bohui_Protocol::creatQueryDtmbPrgInfoMsg(string &reportBody)
 {
      std::string  srcUrl = str(boost::format("http://%1%:%2%")%GetInst(LocalConfig).http_svc_ip()%GetInst(LocalConfig).http_svc_port());

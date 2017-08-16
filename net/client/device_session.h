@@ -71,8 +71,8 @@ namespace hx_net
         //启动定时控制
         void start_task_schedules_timer();
         //发送命令到设备
-        void send_cmd_to_dev(string sDevId,int cmdType,int childId);
-        void send_cmd_to_dev(CommandUnit cmdUnit);
+        void send_cmd_to_dev(string sDevId,int cmdType,int childId,e_ErrorCode &eErrCode);
+        void send_cmd_to_dev(CommandUnit cmdUnit,e_ErrorCode &eErrCode);
 
         //更新运行图
         void update_monitor_time(string devId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,

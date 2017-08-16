@@ -23,9 +23,15 @@ public:
 protected:
     void record_alarm_and_notify(string &prgName,int nMod,CurItemAlarmInfo &curAlarm);
 private:
+    int Md740PData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
+    int Md740BDData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
+    int Md760BDData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
+    int DtmbBDData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
+private:
     session_ptr         m_pSession;//关联连接对象
     DeviceInfo           &d_devInfo;//设备信息
     pDevicePropertyExPtr d_devProperty;
+    DevMonitorDataPtr     d_curData_ptr;
     boost::asio::deadline_timer     task_timeout_timer_;//控制任务执行定时器
     boost::recursive_mutex          alarm_mutex_;
     //<频率,<告警类型,告警信息> >

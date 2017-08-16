@@ -127,6 +127,12 @@ namespace hx_net
                     return data[5];
                 }
                     break;
+                case NT511_AD:
+                {
+                    if(data[0]!=d_devInfo.iAddressCode || data[1]!=0x03)
+                        return RE_HEADERROR;
+                    return data[2]+2;
+                }
                 default:
                     return RE_NOPROTOCOL;
 				}
@@ -181,7 +187,13 @@ namespace hx_net
                     m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                     return iresult;
                 }
-				default:
+                case NT511_AD:
+                {
+                    int iresult = NT511_AD_Data(data,d_curData_ptr,nDataLen,iaddcode);
+                    m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                    return iresult;
+                }
+                default:
 					return RE_NOPROTOCOL;
 				}
 			}
@@ -219,7 +231,9 @@ namespace hx_net
 		case FRT_X06A:
         case C2000_A2_8020:
         case C2000_SDD8020_BB3:
-			return true;
+        case NT511_AD:
+            return true;
+
 
 		}
 		return false;
@@ -456,10 +470,26 @@ namespace hx_net
 
                 }
                     break;
+                case NT511_AD:{
+                    CommandUnit tmUnit;
+                    tmUnit.ackLen = 3;
+                    tmUnit.commandLen = 8;
+                    tmUnit.commandId[0] = d_devInfo.iAddressCode;
+                    tmUnit.commandId[1] = 0x03;
+                    tmUnit.commandId[2] = 0x00;
+                    tmUnit.commandId[3] = 0x01;
+                    tmUnit.commandId[4] = 0x00;
+                    tmUnit.commandId[5] = 0x08;
+                    unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                    cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
+                }
+                    break;
                 }
 
-			}
-			break;
+        }
+            break;
 		}
 	}
 
@@ -733,7 +763,7 @@ namespace hx_net
                                      bool bSnmp,Snmp *snmp,CTarget *target)
     {
         if(m_pSession!=NULL)
-            m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,icmdType,0);
+            m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,icmdType,0,eErrCode);
     }
 
     //执行通用命令
@@ -744,7 +774,7 @@ namespace hx_net
             if(m_pSession!=NULL){
                 eErrCode = EC_OK;
                 int param_2 = atoi(lpParam->cparams(0).sparamvalue().c_str());
-                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,param_2);
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,param_2,eErrCode);
             }
         }
             break;
@@ -764,12 +794,41 @@ namespace hx_net
 
                 if(param.size()>=2){
                     int param_2 = atoi(param[1][0].strParamValue.c_str());
-                    m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNON_OPR,param_2);
+                    m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNON_OPR,param_2,eErrCode);
                 }
             }
         }
             break;
         }
+    }
+
+    int Envir_message::NT511_AD_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        iaddcode = data[0];
+        DataInfo dainfo;
+        dainfo.bType = false;
+        for(int i=0;i<4;++i)
+        {
+            dainfo.fValue = data[3+2*i]*256+data[4+2*i]-20;
+            data_ptr->mValues[i] = dainfo;
+        }
+        dainfo.bType = true;
+        for(int j=0;j<4;++j)
+        {
+            dainfo.fValue = Getbit(data[12+2*j],1);
+            data_ptr->mValues[4+6*j] = dainfo;
+            dainfo.fValue = Getbit(data[12+2*j],2);
+            data_ptr->mValues[5+6*j] = dainfo;
+            dainfo.fValue = Getbit(data[12+2*j],3);
+            data_ptr->mValues[6+6*j] = dainfo;
+            dainfo.fValue = Getbit(data[12+2*j],4);
+            data_ptr->mValues[7+6*j] = dainfo;
+            dainfo.fValue = Getbit(data[12+2*j],6);
+            data_ptr->mValues[8+6*j] = dainfo;
+            dainfo.fValue = Getbit(data[12+2*j],7);
+            data_ptr->mValues[9+6*j] = dainfo;
+        }
+        return RE_SUCCESS;
     }
 
 }

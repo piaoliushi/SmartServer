@@ -759,7 +759,7 @@ namespace hx_net
         if(cmdUnit.commandLen>0)
         {
             eErrCode = EC_OK;
-            m_pSession->send_cmd_to_dev(cmdUnit);
+            m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
         }
     }
 

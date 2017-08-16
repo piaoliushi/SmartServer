@@ -79,9 +79,9 @@ typedef struct _tag_M_Sch
 
 typedef struct
 {
-    string sParam1;
-    bool   bUseP2;
-    string sParam2;
+    string sParam1;  //参数1
+    bool   bUseP2;   //是否有参数2
+    string sParam2;  //参数2
 }CmdParam;
 
 typedef struct
@@ -92,17 +92,18 @@ typedef struct
     int      iWeek;          //星期(1-7)
     int      iMonitorMonth;  //月（0-12，0=all）
     int      iMonitorDay;    //日(1-31)
-    time_t  tCmdEndTime;     //月运行计划终止日期
-    time_t  tExecuteTime;
-    int iHasParam;
-    CmdParam cParam;
+    time_t   tCmdEndTime;    //月运行计划终止日期
+    time_t   tExecuteTime;   //执行时间
+    int      iHasParam;      //是否带参
+    CmdParam cParam;         //参数
+    int      iChannelId;     //通道编号
 }Command_Scheduler;
 
 typedef struct
 {
     string property_num;
     string property_name;
-    int     property_type;
+    int    property_type;
     string property_value;
 }DevProperty;
 
