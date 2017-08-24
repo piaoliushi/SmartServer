@@ -77,6 +77,8 @@ private:
     Snmp                  *d_cur_snmp;
     bool                   d_bUse_snmp;
     CTarget               *d_cur_target;
+
+    //map<int,time_t>        d_tmLastSaveTime;//数据保存时间
 };
 typedef boost::shared_ptr<hx_net::Tsmt_message>  Tsmt_message_ptr;
 typedef boost::weak_ptr<hx_net::Tsmt_message>    Tsmt_message_weak_ptr;

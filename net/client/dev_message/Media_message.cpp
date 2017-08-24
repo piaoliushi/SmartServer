@@ -389,7 +389,7 @@ namespace hx_net
         }
     }
 
-    //添加数据
+    //添加数据(http消息)
     bool  Media_message::add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData)
     {
 

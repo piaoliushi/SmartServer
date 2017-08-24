@@ -126,7 +126,7 @@ namespace hx_net
         //等待任务结束
         //void wait_task_end();
         //是否在监测时间段
-        bool is_monitor_time(string sDevId);
+        bool is_monitor_time(string sDevId);//,int ichannel=0
 
         void sendSmsToUsers(int nLevel,string &sContent);
 
@@ -238,7 +238,7 @@ namespace hx_net
         boost::shared_ptr<boost::asio::serial_port> pSerialPort_ptr_;//串口操作
         bool all_dev_is_use_;
 
-        map<string,parse_ass_dev_ptr>   map_dev_ass_parse_ptr_;//
+        map<string,parse_ass_dev_ptr>   map_dev_ass_parse_ptr_;
         map<int,string> map_addcode_devid_;
 
 

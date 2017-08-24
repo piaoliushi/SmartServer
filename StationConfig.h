@@ -74,6 +74,8 @@ public:
      bool IsHaveGsm(){return bHave_GSM_model;}
      ComCommunicationMode getGsmInfo(){return Gsm_model_info;}
 
+     bool get_dev_propery(string sDevId,string sName,string &sValue);
+
 private:
 	vector<TransmitterInformation>mapTransmitterInfo;//台站id为索引
     vector<AntennaInformation> mapAntennaInfo;//台站id为索引

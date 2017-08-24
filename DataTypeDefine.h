@@ -63,6 +63,7 @@ typedef struct _tag_M_Sch
         iMonitorMonth=-1;
         iMonitorDay=-1;
         bRunModeFlag=false;//默认非监测时段
+        iChannelId=0;
 
     }
 
@@ -75,6 +76,7 @@ typedef struct _tag_M_Sch
     time_t   tStartTime;       //开始时间
     time_t   tEndTime;         //结束时间
     time_t   tAlarmEndTime;    //月运行计划终止日期
+    int      iChannelId;       //通道编号
 }Monitoring_Scheduler;
 
 typedef struct
@@ -84,8 +86,11 @@ typedef struct
     string sParam2;  //参数2
 }CmdParam;
 
-typedef struct
+typedef struct _tag_Command_Scheduler
 {
+    _tag_Command_Scheduler(){
+        iChannelId=0;
+    }
     int      gid;            //唯一标识
     int      iCommandType;   //命令类型
     int      iDateType;      //时间类型

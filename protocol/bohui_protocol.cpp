@@ -209,6 +209,10 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleID",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
+
+                if(cell_iter->second.sUnit == "W" && cell_iter->first==0)//适应博汇发射功率为W的需求
+                    curData->mValues[cell_iter->first].fValue *=1000;
+
                 string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
                 if(curData->mValues[cell_iter->first].bType==true)
                     sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
@@ -482,8 +486,15 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
                 if(bFind==false){
                     xml_linkdev_list = xml_doc.allocate_node(node_element,DEVICE_TYPE_XML_DESC[nCmdType]);
                     xml_resps_info->append_node(xml_linkdev_list);
-                    xml_linkdev_list->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>( (*iter).second.iDevType).c_str())));
+
+                    map<string,DevProperty>::iterator attribut_iter = (*iter).second.map_DevProperty.find("Type");
+                    if(attribut_iter!=(*iter).second.map_DevProperty.end())
+                        xml_linkdev_list->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(attribut_iter->second.property_value.c_str())));
+                    else
+                        xml_linkdev_list->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>( (*iter).second.iDevType).c_str())));
+
                     xml_linkdev_list->append_attribute(xml_doc.allocate_attribute("Desc"," "));//链路设备名称暂略
+
                 }
                 xml_device = xml_doc.allocate_node(node_element,"Dev");
                 xml_linkdev_list->append_node(xml_device);

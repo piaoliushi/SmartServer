@@ -69,6 +69,8 @@ namespace hx_net
              d_antenna_Agent_= true;
         }
 
+
+
 	}
 
     Tsmt_message::~Tsmt_message(void)

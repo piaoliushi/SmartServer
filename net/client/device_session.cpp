@@ -93,6 +93,7 @@ void device_session::init_session_config()
         //        }
 
         dev_agent_and_com[iter->first]=pair<CommandAttrPtr,HMsgHandlePtr>(tmpCommand,pars_agent);
+
         //判断是否时http代理设置
         if(modleInfos_.iCommunicationMode==CON_MOD_NET && modleInfos_.netMode.inet_type == NET_MOD_HTTP){
             if(iter->second.map_DevProperty.find("Agent")!=iter->second.map_DevProperty.end())
@@ -104,6 +105,7 @@ void device_session::init_session_config()
         mapItemAlarm.insert(std::make_pair(iter->first,devAlarmItem));
         //定时数据保存时间初始化
         tmLastSaveTime.insert(std::make_pair(iter->first,time(0)));
+
         //定时数据发送时间
         tmLastSendHttpTime.insert(std::make_pair(iter->first,time(0)));
         //目前只有发射机类型设备才启用定时任务(定时开关机)
@@ -490,12 +492,14 @@ void device_session::agent_connect(std::string hostname,unsigned short port)
     IpAddress ipAddr(hostname.c_str());
     if (!ipAddr.valid())
         return;
+
     int status;
     if(snmp_ptr_==NULL){
         snmp_ptr_ = new Snmp(status);
         if(!snmp_ptr_->start_poll_thread(4))
             cout<<"start_poll_thread-----error!";
     }
+
     if(target_ptr_==NULL){
         target_ptr_ = new CTarget(ipAddr);
         if (! target_ptr_->valid())
@@ -1344,7 +1348,12 @@ bool device_session::is_need_report_data(string sDevId)
     time_t tmCurTime;
     time(&tmCurTime);
     double ninterval = difftime(tmCurTime,tmLastSendHttpTime[sDevId]);
-    if(ninterval<10)//间隔保存时间 need amend;
+
+    int nReportSpan = 10;
+    map<string,DevProperty>::iterator iter_propty = modleInfos_.mapDevInfo[sDevId].map_DevProperty.find("ReportSpan");
+    if(iter_propty!= modleInfos_.mapDevInfo[sDevId].map_DevProperty.end())
+        nReportSpan = atoi(iter_propty->second.property_value.c_str());
+    if(ninterval<nReportSpan)//间隔保存时间 need amend;
         return false;
     tmLastSendHttpTime[sDevId] = tmCurTime;
     return true;
@@ -1366,7 +1375,8 @@ bool device_session::is_monitor_time(string sDevId)
         for(;iter!=day_iter->second.end();++iter){
             if(!(*iter).bMonitorFlag)
                 continue;
-            //tm *pCurTime = localtime(&curTime);
+            //if((*iter).iChannelId != ichannel)//add by lk 2017-8-17(区分通道控制)
+            //    continue;
             if(curTime>=(*iter).tStartTime && curTime<(*iter).tEndTime && (*iter).bMonitorFlag){
                 return (*iter).bRunModeFlag;
             }
@@ -1379,7 +1389,8 @@ bool device_session::is_monitor_time(string sDevId)
         for(;iter!=week_iter->second.end();++iter){
             if(!(*iter).bMonitorFlag)
                 continue;
-
+            //if((*iter).iChannelId != ichannel)//add by lk 2017-8-17(区分通道控制)
+            //    continue;
             tm *pCurTime = localtime(&curTime);
             if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0)
                 continue;//超过运行图终止时间且终止时间不为0,则跳过
@@ -1402,6 +1413,8 @@ bool device_session::is_monitor_time(string sDevId)
 
             if(!(*iter).bMonitorFlag)
                 continue;
+            //if((*iter).iChannelId != ichannel)//add by lk 2017-8-17(区分通道控制)
+            //    continue;
             tm *pCurTime = localtime(&curTime);
             if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0)
                 continue;//超过运行图终止时间且终止时间不为0,则跳过
@@ -2022,7 +2035,7 @@ void device_session::update_monitor_time(string devId,map<int,vector<Monitoring_
 void  device_session::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo)
 {
     {
-        //更新整机
+        //更新整机告警配置
         boost::recursive_mutex::scoped_lock alarm_lock(update_alarm_config_mutex_);
         modleInfos_.mapDevInfo[sDevId].map_AlarmConfig = devInfo.map_AlarmConfig;
     }
@@ -2038,6 +2051,7 @@ void  device_session::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo)
         }
     }
 }
+
 //清理设备未设置的告警项
 void device_session::clear_dev_item_alarm(string sDevId,int nitemId)
 {

@@ -265,3 +265,21 @@ bool StationConfig::get_dev_base_info(string sStationId,string sDevId,DevBaseInf
 	return false;
 }
 
+//根据设备id与属性名,查找属性值
+bool StationConfig::get_dev_propery(string sDevId,string sName,string &sValue){
+    vector<ModleInfo>::iterator iter = mapModleInfo.begin();
+    for(;iter!=mapModleInfo.end();++iter){
+        map<string,DeviceInfo>::iterator dev_iter = (*iter).mapDevInfo.find(sDevId);
+        if(dev_iter!=(*iter).mapDevInfo.end()){
+
+            map<string,DevProperty>::iterator prp_iter = (dev_iter->second).map_DevProperty.find(sName);
+            if(prp_iter!= (dev_iter->second).map_DevProperty.end()){
+
+                sValue = (prp_iter->second).property_value;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}

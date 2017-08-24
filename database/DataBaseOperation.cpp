@@ -7,7 +7,7 @@
 #include "../rapidxml/rapidxml_utils.hpp"
 #include "../protocol/bohui_const_define.h"
 #include "ConnectionPool.h"
-
+#include "../StationConfig.h"
 namespace db {
 
 DataBaseOperation::DataBaseOperation()
@@ -237,7 +237,7 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
             //获得设备配置信息,且判断该设备是否授权
             GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
             if(dev.sDevNum.length()>0)
-                info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
+            info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
 }
 }
 
@@ -359,7 +359,7 @@ bool DataBaseOperation::GetCmd(QSqlDatabase &db, string strDevnum,vector<Command
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery cmdschquery(db);
     QString strSql=QString("select id,CommandType,WeekDay,StartTime,HasParam,ParamNumber,month,day,commandendtime,\
-                           datetype,param1,UseP2,param2 from Command_Scheduler where ObjectNumber='%1' and Enable=1").arg(QString::fromStdString(strDevnum));
+                           datetype,param1,UseP2,param2,channelid from Command_Scheduler where ObjectNumber='%1' and Enable=1").arg(QString::fromStdString(strDevnum));
 
             cmdschquery.prepare(strSql);
             if(cmdschquery.exec()){
@@ -381,6 +381,7 @@ bool DataBaseOperation::GetCmd(QSqlDatabase &db, string strDevnum,vector<Command
             cmd_sch.iMonitorDay = cmdschquery.value(7).toInt();
             cmd_sch.tCmdEndTime = cmdschquery.value(8).toDateTime().toTime_t();
             cmd_sch.iDateType = cmdschquery.value(9).toInt();
+            cmd_sch.iChannelId = cmdschquery.value(13).toInt();//add by lk 2017-8-17
             vcmdsch.push_back(cmd_sch);
 }
 }
@@ -692,7 +693,7 @@ bool DataBaseOperation::GetAlarmConfig(QSqlDatabase &db, string strDevnum,map<in
             acfig.iLimittype = alarmconfigquery.value(3).toInt();
             acfig.iLinkageEnable = alarmconfigquery.value(4).toInt();
             if(acfig.iLinkageEnable>0)
-                GetLinkAction(db,alarmconfigquery.value(5).toString().toStdString(),acfig.vLinkAction);
+            GetLinkAction(db,alarmconfigquery.value(5).toString().toStdString(),acfig.vLinkAction);
 
             acfig.iDelaytime = alarmconfigquery.value(6).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(7).toString().toStdString();
@@ -724,20 +725,20 @@ bool DataBaseOperation::GetItemAlarmConfig(QSqlDatabase &db, string strDevnum,in
             alarmconfigquery.prepare(strSql);
             if(alarmconfigquery.exec()){
             while(alarmconfigquery.next()) {
-                Alarm_config acfig;
-                acfig.fLimitvalue = alarmconfigquery.value(0).toDouble();
-                acfig.iAlarmlevel = alarmconfigquery.value(1).toInt();
-                acfig.iLimittype = alarmconfigquery.value(2).toInt();
-                acfig.iLinkageEnable = alarmconfigquery.value(3).toInt();
-                if(acfig.iLinkageEnable>0)
-                    GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
-                acfig.iDelaytime = alarmconfigquery.value(5).toInt();
-                acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
-                acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
-                acfig.iAlarmid = iThid;
-                acfig.iResumetime = alarmconfigquery.value(8).toInt();
-                vAlarmconfig.push_back(acfig);
-            }
+            Alarm_config acfig;
+            acfig.fLimitvalue = alarmconfigquery.value(0).toDouble();
+            acfig.iAlarmlevel = alarmconfigquery.value(1).toInt();
+            acfig.iLimittype = alarmconfigquery.value(2).toInt();
+            acfig.iLinkageEnable = alarmconfigquery.value(3).toInt();
+            if(acfig.iLinkageEnable>0)
+            GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
+            acfig.iDelaytime = alarmconfigquery.value(5).toInt();
+            acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
+            acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
+            acfig.iAlarmid = iThid;
+            acfig.iResumetime = alarmconfigquery.value(8).toInt();
+            vAlarmconfig.push_back(acfig);
+}
 } else {
             cout<<alarmconfigquery.lastError().text().toStdString()<<"GetItemAlarmConfig---alarmconfigquery---error!"<<endl;
             return false;
@@ -1077,7 +1078,25 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
         qsInsert.bindValue(":devicenumber",qsTransNum);
 
         for(int i=0;i<iter->second.size();++i){
-            qsInsert.bindValue(":alarmswitchtype",iter->second[i].iAlarmid);
+            QSqlQuery qsIect(db);
+            QString qssql=QString("select monitoringindex from monitoring_device_item where devicenumber=:devicenumber and alarmtype=:alarmtype");
+            qsIect.prepare(qssql);
+            int itype=iter->second[i].iAlarmid;
+            qsIect.bindValue(":devicenumber",qsTransNum);
+            qsIect.bindValue(":alarmtype",itype);
+            if(!qsIect.exec())
+            {
+                cout<<qsIect.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
+                QSqlDatabase::database().rollback();
+                resValue = 3;
+                ConnectionPool::closeConnection(db);
+                return false;
+            }
+            if(qsIect.next())
+            {
+                itype = qsIect.value(0).toInt();
+            }
+            qsInsert.bindValue(":alarmswitchtype",itype);
             qsInsert.bindValue(":alarmenable",iter->second[i].iSwtich);
             if(iter->second[i].sDes.empty()==false)
                 qsInsert.bindValue(":description",iter->second[i].sDes.empty());
@@ -1131,7 +1150,23 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
         for(int i=0;i<iter->second.size();++i){
 
             int itype = iter->second[i].iAlarmid;
-
+            QSqlQuery qsIect(db);
+            QString qssql=QString("select monitoringindex from monitoring_device_item where devicenumber=:devicenumber and alarmtype=:alarmtype");
+            qsIect.prepare(qssql);
+            qsIect.bindValue(":devicenumber",qsTransNum);
+            qsIect.bindValue(":alarmtype",itype);
+            if(!qsIect.exec())
+            {
+                cout<<qsIect.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
+                QSqlDatabase::database().rollback();
+                resValue = 3;
+                ConnectionPool::closeConnection(db);
+                return false;
+            }
+            if(qsIect.next())
+            {
+                itype = qsIect.value(0).toInt();
+            }
             if(itype!=512 && itype!=511)
                 qsInsert.bindValue(":alarmconfigtype",0);
             else
@@ -1141,7 +1176,19 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
             qsInsert.bindValue(":delaytime", iter->second[i].iDelaytime);
             qsInsert.bindValue(":resumeduration", iter->second[i].iResumetime);
             qsInsert.bindValue(":jumplimittype",iter->second[i].iLimittype);
-            qsInsert.bindValue(":limitvalue",iter->second[i].fLimitvalue);
+
+
+            //查找是否有Power与RePower属性(适应博汇发射机入射与反射门限百分比设定)
+            string sLimitValue = "";
+            if(itype==0 &&  GetInst(StationConfig).get_dev_propery(iter->first,"Power",sLimitValue)  ){
+                double dbLimit = (atof(sLimitValue.c_str()) * iter->second[i].fLimitvalue)/double(100000.0f);
+                qsInsert.bindValue(":limitvalue",dbLimit);
+            }else  if(itype == 1 && GetInst(StationConfig).get_dev_propery(iter->first,"RePower",sLimitValue)){
+                double dbLimit = atof(sLimitValue.c_str()) * iter->second[i].fLimitvalue;
+                qsInsert.bindValue(":limitvalue",dbLimit);
+            }else
+                qsInsert.bindValue(":limitvalue",iter->second[i].fLimitvalue);
+
             if(!qsInsert.exec())  {
                 cout<<qsInsert.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
                 QSqlDatabase::database().rollback();
@@ -1312,28 +1359,28 @@ bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& devi
     QSqlQuery devquery(db);
     QString strSql=QString("select a.DeviceNumber,a.ProtocolNumber \
                            from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and b.ProtocolNumber=a.ProtocolNumber").arg(QString::fromStdString(strDevnum));
-    devquery.prepare(strSql);
-    if(devquery.exec())   {
+            devquery.prepare(strSql);
+            if(devquery.exec())   {
             if(devquery.next())  {
             device.sDevNum = devquery.value(0).toString().toStdString();
             QString sprotoclnum = devquery.value(1).toString();
             if(GetDevMonItem(db,strDevnum,sprotoclnum,device.map_MonitorItem)==false){
-                ConnectionPool::closeConnection(db);
-                return false;
-            }
+            ConnectionPool::closeConnection(db);
+            return false;
+}
             if(GetAlarmConfig(db,strDevnum,device.map_AlarmConfig)==false){
-                ConnectionPool::closeConnection(db);
-                return false;
-            }
-        }
-    }else {
+            ConnectionPool::closeConnection(db);
+            return false;
+}
+}
+}else {
             std::cout<<devquery.lastError().text().toStdString()<<"GetUpdateDevAlarmInfo---query---error!"<<std::endl;
             ConnectionPool::closeConnection(db);
             return false;
-          }
+}
 
             ConnectionPool::closeConnection(db);
-            return true;
+    return true;
 }
 
 //根据用户编号获取用户信息
