@@ -1466,13 +1466,13 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
                               ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
-    if(is_need_report_data(sDevId)){
+    //if(is_need_report_data(sDevId)){
         string sDesDevId = sDevId;
         //用来适应模块隶属于设备的问题
         map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
         http_ptr_->send_http_data_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[sDevId].iDevType,
                                                      curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
-    }
+    //}
     //检测当前报警状态
     check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
     //如果在监测时间段则保存当前记录
