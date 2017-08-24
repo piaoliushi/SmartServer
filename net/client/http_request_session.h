@@ -52,7 +52,8 @@ private:
 
 
     boost::recursive_mutex         http_stream_mutex_;//http上报对象互斥量
-    time_t   report_span_;//上报时间统计
+    time_t   report_span_;//动环上报时间统计
+
     xml_document<> xml_reportMsg;//临时缓存上报数据
     map<int,xml_node<>* >   xml_mapQualityMsg;//缓存设备节点
     map<string,xml_node<>*> xml_mapDevMsg;//缓存设备数据

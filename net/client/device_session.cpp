@@ -1349,11 +1349,11 @@ bool device_session::is_need_report_data(string sDevId)
     time(&tmCurTime);
     double ninterval = difftime(tmCurTime,tmLastSendHttpTime[sDevId]);
 
-    int nReportSpan = 10;
+    int nReportSpan =  GetInst(LocalConfig).report_span();//10;
     map<string,DevProperty>::iterator iter_propty = modleInfos_.mapDevInfo[sDevId].map_DevProperty.find("ReportSpan");
     if(iter_propty!= modleInfos_.mapDevInfo[sDevId].map_DevProperty.end())
         nReportSpan = atoi(iter_propty->second.property_value.c_str());
-    if(ninterval<nReportSpan)//间隔保存时间 need amend;
+    if(ninterval<nReportSpan)//间隔上报时间 need amend;
         return false;
     tmLastSendHttpTime[sDevId] = tmCurTime;
     return true;
@@ -1466,13 +1466,20 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
                               ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
-    //if(is_need_report_data(sDevId)){
+    int nDevType = modleInfos_.mapDevInfo[sDevId].iDevType;
+    if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
+
+        string sDesDevId = sDevId;
+        map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
+        http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
+                                                     curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+    }else if(is_need_report_data(sDevId)){
         string sDesDevId = sDevId;
         //用来适应模块隶属于设备的问题
         map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
-        http_ptr_->send_http_data_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[sDevId].iDevType,
+        http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
                                                      curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
-    //}
+    }
     //检测当前报警状态
     check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
     //如果在监测时间段则保存当前记录

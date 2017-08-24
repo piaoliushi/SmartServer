@@ -226,7 +226,6 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
     case DEVICE_WATER:{//水禁
 
         map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
-        //int iIndexId = 1;
         for(;cell_iter!=mapMonitorItem.end();++cell_iter){
 
             if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
@@ -268,7 +267,8 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
                     string sIndexId = str(boost::format("%d")%cell_iter->first);
                     xml_dev_node->append_attribute(xmlMsg.allocate_attribute("ID",xmlMsg.allocate_string(sIndexId.c_str())));
 
-                }
+                }else
+                    continue;
 
             }
 
