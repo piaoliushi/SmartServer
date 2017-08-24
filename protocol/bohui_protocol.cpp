@@ -168,6 +168,166 @@ bool Bohui_Protocol::creatExcutResultReportMsg(int nReplyId,int nCmdType,string 
     return true;
 }
 
+
+//创建动环消息头
+bool Bohui_Protocol::createPowerEnvReportHeadMsg(xml_document<> &xmlMsg,xml_node<>* &pHeadMsg)
+{
+    //本地MsgId暂时固定为2
+
+    xml_node<> *msgRootNode = _createResponseXmlHeader(xmlMsg,2,-1);
+    if(msgRootNode!=NULL)
+    {
+        xml_node<> *xml_resps = xmlMsg.allocate_node(node_element,CONST_STR_BOHUI_TYPE[BH_POTO_EnvQualityRealtimeReport]);
+        msgRootNode->append_node(xml_resps);
+        pHeadMsg = xml_resps;
+
+        return true;
+    }
+    return false;
+}
+
+//创建动环消息体
+bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,xml_node<>*> &mXml_Quality,string sDevId,int nDevType
+                                                 ,DevMonitorDataPtr &curData,map<int,DeviceMonitorItem> &mapMonitorItem)
+{
+    xml_node<> *xml_Quality = NULL;
+    xml_node<> *xml_dev_node = NULL;
+
+    map<int,xml_node<>*>::iterator iter = mXml_Quality.find(nDevType);
+
+    switch (nDevType) {
+    case DEVICE_ELEC:{//电力仪
+
+        if(iter!=mXml_Quality.end())
+            xml_Quality = iter->second;
+        else{
+            xml_Quality = xmlMsg.allocate_node(node_element,"ThreePhasePowerDev");
+            mXml_Quality[nDevType] = xml_Quality;
+        }
+
+        xml_dev_node = xmlMsg.allocate_node(node_element,"ThreePhasePower");
+        xml_dev_node->append_attribute(xmlMsg.allocate_attribute("ID",xmlMsg.allocate_string(sDevId.c_str())));
+    }
+        break;
+    case DEVICE_TEMP:{//温湿度
+        if(iter!=mXml_Quality.end())
+            xml_Quality = iter->second;
+        else{
+
+            xml_Quality = xmlMsg.allocate_node(node_element,"TempHumidityDev");
+            mXml_Quality[nDevType] = xml_Quality;
+        }
+
+        xml_dev_node = xmlMsg.allocate_node(node_element,"TempHumidity");
+        xml_dev_node->append_attribute(xmlMsg.allocate_attribute("ID",xmlMsg.allocate_string(sDevId.c_str())));
+    }
+        break;
+    case DEVICE_SMOKE://烟雾
+    case DEVICE_WATER:{//水禁
+
+        map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
+        //int iIndexId = 1;
+        for(;cell_iter!=mapMonitorItem.end();++cell_iter){
+
+            if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
+                continue;
+            if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
+                continue;
+
+            string sItemName = cell_iter->second.sItemName;
+            //499对应“水”关键字
+            string waterkey = mapTypeToStr[499].second.c_str();
+            size_t nOffset = sItemName.find(waterkey.c_str(),0);
+            if(nOffset != string::npos){
+                map<int,xml_node<>*>::iterator iter = mXml_Quality.find(DEVICE_WATER);
+                if(iter!=mXml_Quality.end())
+                    xml_Quality = iter->second;
+                else{
+                    xml_Quality = xmlMsg.allocate_node(node_element,"WaterAlarmDev");//FireAlarmDev
+                    mXml_Quality[DEVICE_WATER] = xml_Quality;
+                }
+
+                xml_dev_node = xmlMsg.allocate_node(node_element,"WaterAlarm");
+                string sIndexId = str(boost::format("%d")%cell_iter->first);
+                xml_dev_node->append_attribute(xmlMsg.allocate_attribute("ID",xmlMsg.allocate_string(sIndexId.c_str())));
+            }else {
+                //500对应“火”关键字
+                string firekey = mapTypeToStr[500].second;
+                size_t nOffset = sItemName.find(firekey.c_str(),0);
+                if(nOffset != string::npos){
+
+                    map<int,xml_node<>*>::iterator iter = mXml_Quality.find(DEVICE_SMOKE);
+                    if(iter!=mXml_Quality.end())
+                        xml_Quality = iter->second;
+                    else{
+                        xml_Quality = xmlMsg.allocate_node(node_element,"FireAlarmDev");
+                        mXml_Quality[DEVICE_SMOKE] = xml_Quality;
+                    }
+
+                    xml_dev_node = xmlMsg.allocate_node(node_element,"FireAlarm");
+                    string sIndexId = str(boost::format("%d")%cell_iter->first);
+                    xml_dev_node->append_attribute(xmlMsg.allocate_attribute("ID",xmlMsg.allocate_string(sIndexId.c_str())));
+
+                }
+
+            }
+
+            xml_Quality->append_node(xml_dev_node);
+
+            xml_node<> *xml_Quality_Index = NULL;
+            xml_Quality_Index = xmlMsg.allocate_node(node_element,mapTypeToStr[cell_iter->second.iTargetId].second.c_str());
+
+            string  sValue ="0";
+            if(curData->mValues[cell_iter->first].bType==true)
+                sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
+
+            xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
+
+
+           xml_dev_node ->append_node(xml_Quality_Index);
+
+         }
+
+
+    }
+        return true;
+    }
+
+
+    xml_Quality->append_node(xml_dev_node);
+
+
+     map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
+     for(;cell_iter!=mapMonitorItem.end();++cell_iter){
+
+         if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
+             continue;
+         if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
+             continue;
+
+         xml_node<> *xml_Quality_Index = NULL;
+         xml_Quality_Index = xmlMsg.allocate_node(node_element,mapTypeToStr[cell_iter->second.iTargetId].second.c_str());
+
+         string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
+         if(curData->mValues[cell_iter->first].bType==true)
+             sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
+
+         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
+
+         if(nDevType==DEVICE_ELEC || nDevType==DEVICE_TEMP)
+             xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Unit",xmlMsg.allocate_string(cell_iter->second.sUnit.c_str())));
+
+         if(nDevType!=DEVICE_SMOKE && nDevType!=DEVICE_WATER)
+             xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
+
+        xml_dev_node ->append_node(xml_Quality_Index);
+     }
+
+
+
+    return true;
+}
+
 //创建上报数据消息
 bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType,DevMonitorDataPtr &curData,
                          map<int,DeviceMonitorItem> &mapMonitorItem,string &reportBody)
@@ -389,12 +549,7 @@ xml_node<>*  Bohui_Protocol::_createResponseXmlHeader(xml_document<>  &xmlMsg,in
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("Version","1.0"));
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("MsgID",xmlMsg.allocate_string(boost::lexical_cast<std::string>(nReplyId).c_str())));
         //string typ=nType>0?"Down":"Up";
-        nodeHeader->append_attribute(xmlMsg.allocate_attribute("Type","Up"));//typ.c_str()
-       // time_t curTime = time(0);
-        //tm *ltime = localtime(&curTime);
-
-        //std::string createTM = str(boost::format("%1%-%2%-%3% %4%:%5%:%6%")%(ltime->tm_year+1900)%(ltime->tm_mon+1)
-        //                           %ltime->tm_mday%ltime->tm_hour%ltime->tm_min%ltime->tm_sec);
+        nodeHeader->append_attribute(xmlMsg.allocate_attribute("Type","Up"));
         std::string createTM = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString();
 
         nodeHeader->append_attribute(xmlMsg.allocate_attribute("DateTime",xmlMsg.allocate_string(createTM.c_str())));

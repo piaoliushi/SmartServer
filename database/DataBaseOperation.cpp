@@ -111,6 +111,7 @@ bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicr
     }
     while(query.next()) {
         mapDicry[query.value(0).toInt()] = pair<string,string>(query.value(1).toString().toStdString(),query.value(2).toString().toStdString());
+        //cout<<query.value(1).toString().toStdString()<<query.value(2).toString().toStdString()<<endl;
     }
     ConnectionPool::closeConnection(db);
     return true;

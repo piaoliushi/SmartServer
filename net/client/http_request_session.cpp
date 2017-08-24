@@ -11,11 +11,12 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
     ,d_bExit_(false)
     ,http_stream_(http_io_service_)
 {
-       deal_thread_.reset(new boost::thread(boost::bind(&http_request_session::openUrl,this)));
+    report_span_ = time(0);
+    deal_thread_.reset(new boost::thread(boost::bind(&http_request_session::openUrl,this)));
 }
 
- http_request_session::~http_request_session(void)
- {
+http_request_session::~http_request_session(void)
+{
      setExit();
      if(deal_thread_!=NULL)
      {
@@ -100,11 +101,6 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
 
        //std::cerr << "open URL ok !!!: ";
         http_stream_.close();
-       //http_stream_.async_read_some(boost::asio::buffer(data_),boost::bind(&http_request_session::read_handler, this,
-       //                                                                                         boost::asio::placeholders::error,
-        //                                                                                        boost::asio::placeholders::bytes_transferred));
-
-
    }else {
 
      //std::cerr << "Unable to open URL: ";
@@ -114,31 +110,76 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
 
  }
 
-/* void http_request_session::read_handler(const boost::system::error_code& ec, std::size_t length)
+ //判断当前时间是否需要上传
+ bool http_request_session::is_need_report_data()
  {
-     if (!ec)
-     {
-         //http_stream_.close();
-         std::cerr << length << std::endl;
+     time_t tmCurTime;
+     time(&tmCurTime);
+     double ninterval = difftime(tmCurTime,report_span_);
 
-     }
-     else
-     {
-         //http_stream_.close();
-       std::cerr << "Unable to open URL: ";
-       std::cerr << ec.message() << std::endl;
-     }
-     //http_stream_.close();
- }*/
+     int nReportSpan = GetInst(LocalConfig).report_span();
+     if(ninterval<nReportSpan)//间隔保存时间 need amend;
+         return false;
+     report_span_ = tmCurTime;
+     return true;
+ }
+
  //上报http消息到上级平台(数据)
  void http_request_session::send_http_data_messge_to_platform(string sDevid,int nDevType,DevMonitorDataPtr &curData,
                                                               map<int,DeviceMonitorItem> &mapMonitorItem)
  {
-     string sReportMsg;
-     Bohui_Protocol  bh_ptcl;
-     bh_ptcl.createReportDataMsg(-1,sDevid,nDevType,curData,mapMonitorItem,sReportMsg);
-     if(sReportMsg.empty()==false)
-         putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+      if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
+
+           boost::recursive_mutex::scoped_lock lock(deal_thread_mutex_);
+           if(is_need_report_data()){
+               //发送数据
+               string sReportMsg;
+               Bohui_Protocol  bh_ptcl;
+               xml_node<>* pHeadMsg=NULL;//消息头节点
+               if(bh_ptcl.createPowerEnvReportHeadMsg(xml_reportMsg,pHeadMsg)) {
+                   if(xml_mapDevMsg.find(sDevid)==xml_mapDevMsg.end()){
+
+                       bh_ptcl.appendPowerEnvReportBodyMsg(xml_reportMsg,xml_mapQualityMsg,sDevid,
+                                                           nDevType,curData,mapMonitorItem);
+
+                       xml_mapDevMsg[sDevid] = pHeadMsg;
+                   }
+
+                     map<int,xml_node<>* >::iterator iter = xml_mapQualityMsg.begin();
+                     for(;iter!=xml_mapQualityMsg.end();++iter){
+
+                        pHeadMsg->append_node(iter->second);
+
+                     }
+
+                     rapidxml::print(std::back_inserter(sReportMsg), xml_reportMsg, 0);
+
+               }
+
+               if(sReportMsg.empty()==false)
+                   putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+               xml_reportMsg.clear();
+               xml_mapQualityMsg.clear();
+               xml_mapDevMsg.clear();
+           }else{
+               //添加数据
+               Bohui_Protocol  bh_ptcl;
+               if(xml_mapDevMsg.find(sDevid) == xml_mapDevMsg.end()){
+
+                   bh_ptcl.appendPowerEnvReportBodyMsg(xml_reportMsg,xml_mapQualityMsg,sDevid,
+                                                       nDevType,curData,mapMonitorItem);
+                   xml_mapDevMsg[sDevid] = NULL;
+               }
+
+           }
+
+      }else{
+          string sReportMsg;
+          Bohui_Protocol  bh_ptcl;
+          bh_ptcl.createReportDataMsg(-1,sDevid,nDevType,curData,mapMonitorItem,sReportMsg);
+          if(sReportMsg.empty()==false)
+              putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+      }
  }
 
  //上报http消息到上级平台(告警)

@@ -19,6 +19,7 @@ LocalConfig::LocalConfig(void)
     ,local_port_(5000)
     ,report_svc_url_("")
     ,report_use_(false)
+    ,report_span_(10)
     ,http_upload_use_(false)
     ,ntp_upload_use_(false)
     ,ntp_mod_(1)
@@ -93,6 +94,7 @@ bool LocalConfig::load_local_config(const char* sFileName)
                 else
                     report_use_=false;
                 report_svc_url_ = xml_report_svc->first_attribute("url")->value();
+                report_span_ = strtol(xml_report_svc->first_attribute("span")->value(),NULL,10);
             }
             //本地http服务配置
             xml_node<>* xml_http_svc = xml_upload_svc_root->first_node("http_svc");

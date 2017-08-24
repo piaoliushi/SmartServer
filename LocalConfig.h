@@ -40,10 +40,12 @@ public:
 
     bool   report_use(){return report_use_;}
     string report_svc_url(){return report_svc_url_;}
+    int    report_span(){return report_span_;}
 
     bool   http_svc_use(){return http_upload_use_;}
     string http_svc_ip(){return http_svc_ip_;}
     string http_svc_port(){return http_svc_port_;}
+
     string ntp_svc_ip(){return ntp_svc_ip_;}
     bool  ntp_svc_use(){return ntp_upload_use_;}
 	
@@ -73,6 +75,7 @@ private:
 
     bool   report_use_;//是否上传数据
     string report_svc_url_;//上报目标url
+    int    report_span_;//上报间隔
 
     string ntp_svc_ip_;//ntp服务器
     bool ntp_upload_use_;

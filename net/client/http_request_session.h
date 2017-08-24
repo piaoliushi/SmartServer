@@ -3,6 +3,11 @@
 #include "../net_session.h"
 #include "../taskqueue.h"
 #include <urdl/read_stream.hpp>
+#include "./rapidxml/rapidxml.hpp"
+#include "./rapidxml/rapidxml_utils.hpp"
+#include "./rapidxml/rapidxml_print.hpp"
+
+using namespace rapidxml;
 namespace hx_net {
 class http_request_session;
 typedef boost::shared_ptr<http_request_session>  http_request_session_ptr;
@@ -32,8 +37,10 @@ protected:
     void setExit();
     //void  read_handler(const boost::system::error_code& ec, std::size_t length);
     void  open_handler(const boost::system::error_code& ec);
+    //判断当前时间是否需要上传
+    bool  is_need_report_data();
 private:
-    //boost::recursive_mutex         http_stream_mutex_;//http上报对象互斥量
+
     boost::asio::io_service    &http_io_service_;
     boost::shared_ptr<TaskQueue<pair<string,string> > > _taskqueueptr;//任务队列
 
@@ -42,6 +49,13 @@ private:
     bool d_bExit_;
     bool asycFlag_;
     urdl::read_stream http_stream_;
+
+
+    boost::recursive_mutex         http_stream_mutex_;//http上报对象互斥量
+    time_t   report_span_;//上报时间统计
+    xml_document<> xml_reportMsg;//临时缓存上报数据
+    map<int,xml_node<>* >   xml_mapQualityMsg;//缓存设备节点
+    map<string,xml_node<>*> xml_mapDevMsg;//缓存设备数据
 };
 
 }
