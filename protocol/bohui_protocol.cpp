@@ -1040,6 +1040,10 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
             }
         }
         //mapAlarmSet[qsTransNum] = vAlarmConf;
+
+        if(qsTransNum == "10100007"){
+            cout<<"yangan-----10100007---AlarmSize="<<mapAlarmSet.size()<<endl;
+        }
     }
     nValue = 0;
     return true;
