@@ -235,7 +235,7 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
 
             string sItemName = cell_iter->second.sItemName;
             //499对应“水”关键字
-            string waterkey = mapTypeToStr[499].second.c_str();
+            string waterkey = mapTypeToStr[499].second;
             size_t nOffset = sItemName.find(waterkey.c_str(),0);
             if(nOffset != string::npos){
                 map<int,xml_node<>*>::iterator iter = mXml_Quality.find(DEVICE_WATER);
@@ -247,7 +247,8 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
                 }
 
                 xml_dev_node = xmlMsg.allocate_node(node_element,"WaterAlarm");
-                string sIndexId = str(boost::format("%d")%cell_iter->first);
+                //string sIndexId = str(boost::format("%d")%cell_iter->first);
+                string sIndexId = str(boost::format("%s-%d")%sDevId%cell_iter->first);
                 xml_dev_node->append_attribute(xmlMsg.allocate_attribute("ID",xmlMsg.allocate_string(sIndexId.c_str())));
             }else {
                 //500对应“火”关键字
@@ -264,7 +265,8 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
                     }
 
                     xml_dev_node = xmlMsg.allocate_node(node_element,"FireAlarm");
-                    string sIndexId = str(boost::format("%d")%cell_iter->first);
+
+                    string sIndexId = str(boost::format("%s-%d")%sDevId%cell_iter->first);
                     xml_dev_node->append_attribute(xmlMsg.allocate_attribute("ID",xmlMsg.allocate_string(sIndexId.c_str())));
 
                 }else
@@ -667,8 +669,42 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
                          xml_device->append_attribute(xml_doc.allocate_attribute("Type","3"));
                  }
                  else{
-                     xml_device->append_attribute(xml_doc.allocate_attribute("ID",(*iter).second.sDevNum.c_str()));
-                     xml_device->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>( (*iter).second.iDevType).c_str())));
+                     int nDevType = iter->second.iDevType;
+                     //针对烟感水浸进行设备id拆分
+                     if(nDevType == DEVICE_SMOKE || nDevType==DEVICE_WATER){
+
+                         map<int,DeviceMonitorItem>::iterator cell_iter = iter->second.map_MonitorItem.begin();
+                         for(;cell_iter!=iter->second.map_MonitorItem.end();++cell_iter){
+
+                             if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
+                                 continue;
+                             if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
+                                 continue;
+
+                             string sItemName = cell_iter->second.sItemName;
+                             //499对应“水”关键字
+                             string waterkey = mapTypeToStr[499].second.c_str();
+                             size_t nOffset = sItemName.find(waterkey.c_str(),0);
+                             if(nOffset != string::npos){
+                                 string sIndexId = str(boost::format("%s-%d")%(*iter).second.sDevNum%cell_iter->first);
+                                 xml_device->append_attribute(xml_doc.allocate_attribute("ID",xml_doc.allocate_string(sIndexId.c_str())));
+                                 xml_device->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>(DEVICE_WATER).c_str())));
+                             }else{
+                                 string firekey = mapTypeToStr[500].second;
+                                 size_t nOffset = sItemName.find(firekey.c_str(),0);
+                                 if(nOffset != string::npos){
+                                     string sIndexId = str(boost::format("%s-%d")%(*iter).second.sDevNum%cell_iter->first);
+                                     xml_device->append_attribute(xml_doc.allocate_attribute("ID",xml_doc.allocate_string(sIndexId.c_str())));
+                                     xml_device->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>(DEVICE_SMOKE).c_str())));
+                                 }else
+                                     continue;
+                             }
+                         }
+                     }else{
+                         xml_device->append_attribute(xml_doc.allocate_attribute("ID",(*iter).second.sDevNum.c_str()));
+                         xml_device->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>( (*iter).second.iDevType).c_str())));
+                     }
+
                  }
 
                 //链路设备名称暂略

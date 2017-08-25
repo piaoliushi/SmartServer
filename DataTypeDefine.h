@@ -24,6 +24,7 @@ enum DEVType
     DEVICE_ENCODER           =110, //编码器
     DEVICE_MUX               =111, //复用器
     DEVICE_MO                =112, //调制器
+    DEVICE_ADAPTER           =113, //适配器
     DEVICE_ANTENNA           =114, //同轴开关
     DEVICE_EXCITATION        =115, //激励器单设备
     DEVICE_POWER             =116, //功放单设备
