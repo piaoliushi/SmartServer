@@ -72,6 +72,14 @@ protected:
 
     //分析信号告警,数据上报
     bool _parseSignalReportMsg(string sIp,xml_node<> * InfoNode);
+
+    //检查后添加告警使能
+    void _checkAndAppendAlarmSwitch(vector<Alarm_Switch_Set> &vConfig, Alarm_Switch_Set &curConfig);
+
+    //检查后添加告警门限(只过滤烟感水禁)
+    void _checkAndAppendAlarmLimit(vector<Alarm_config> &vConfig, Alarm_config &curConfig);
+
+
 public:
     static  map<int,pair<string,string> >   mapTypeToStr;
     static  string  SrcCode;

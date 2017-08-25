@@ -1066,8 +1066,8 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
         QSqlDatabase::database().transaction();
         QString strDel = QString("delete from device_alarm_switch where devicenumber='%1'").arg(qsTransNum);
         QSqlQuery qsDel(db);
-        if(!qsDel.exec(strDel)) {
-            cout<<qsDel.lastError().text().toStdString()<<"SetEnableAlarm---qsDel---error!"<<endl;
+        if(!qsDel.exec(strDel)) {//qsDel.lastError().text().toStdString()<<
+            cout<<"SetEnableAlarm---qsDel---error!"<<endl;
             QSqlDatabase::database().rollback();
             resValue = 3;
             ConnectionPool::closeConnection(db);
@@ -1087,12 +1087,15 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
             qsIect.bindValue(":alarmtype",itype);
             if(!qsIect.exec())
             {
-                cout<<qsIect.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
+                //<<qsIect.lastError().text().toStdString()
+                cout<<"SetEnableAlarm---qsInsert3---error!-----itype="<<itype<<endl;
                 QSqlDatabase::database().rollback();
                 resValue = 3;
                 ConnectionPool::closeConnection(db);
                 return false;
             }
+
+            cout<<"qslect----exec---ok"<<iter->first<<endl;
             while(qsIect.next())
             {
                 itype = qsIect.value(0).toInt();

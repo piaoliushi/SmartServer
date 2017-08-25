@@ -929,9 +929,11 @@ void Bohui_Protocol::_setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValu
 {
     nValue = 11;
     map<string,vector<Alarm_config> > mapAlarmSet;
-    if(_parse_alarm_param_set(rootNode,nValue,mapAlarmSet)==false)
+    if(_parse_alarm_param_set(rootNode,nValue,mapAlarmSet)==false){
+        cout<<"_parse_alarm_param_set----error!"<<endl;
         return;
-    if (GetInst(DataBaseOperation).SetAlarmLimit(mapAlarmSet,nValue)==true)//nDevType,
+    }
+   if (GetInst(DataBaseOperation).SetAlarmLimit(mapAlarmSet,nValue)==true)//nDevType,
     {
         nValue=0;
         // 通知设备服务......
@@ -942,7 +944,10 @@ void Bohui_Protocol::_setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValu
                 GetInst(hx_net::SvcMgr).update_dev_alarm_config(iter->first,devInfo);
             }
         }
-    }
+    }else
+   {
+       cout<<"SetAlarmLimit----error!---nValue---"<<nValue<<endl;
+   }
 }
 
 //分析告警门限消息
@@ -1034,16 +1039,15 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
                         curConf.fLimitvalue =1;
                         curConf.iLimittype = 4;
                         //vAlarmConf.push_back(curConf);
-                        mapAlarmSet[qsTransNum].push_back(curConf);
+                        //mapAlarmSet[qsTransNum].push_back(curConf);
+                        _checkAndAppendAlarmLimit(mapAlarmSet[qsTransNum],curConf);
                     }
                 }
             }
         }
         //mapAlarmSet[qsTransNum] = vAlarmConf;
 
-        if(qsTransNum == "10100007"){
-            cout<<"yangan-----10100007---AlarmSize="<<mapAlarmSet.size()<<endl;
-        }
+
     }
     nValue = 0;
     return true;
@@ -1079,12 +1083,11 @@ bool Bohui_Protocol::_parse_alarm_switch_set(xml_node<> *root_node,int &nValue,m
             if(qsTransNum.length()>8)
                 qsTransNum = qsTransNum.substr(0,8);
         }
-
+        //cout<<"qsTransNum--substr="<<qsTransNum<<endl;
         if(mapAlarmSwitchSet.find(qsTransNum) == mapAlarmSwitchSet.end()){
              vector<Alarm_Switch_Set> vAlarmSwich;
              mapAlarmSwitchSet[qsTransNum] = vAlarmSwich;
         }
-
         rapidxml::xml_node<>* alswNode = tranNode->first_node("AlarmSwitch");
         for(;alswNode!=NULL;alswNode=alswNode->next_sibling())
         {
@@ -1100,24 +1103,58 @@ bool Bohui_Protocol::_parse_alarm_switch_set(xml_node<> *root_node,int &nValue,m
                 if(atDesc!=NULL)
                     tmpConf.sDes = atDesc->value();
                 //vAlarmSwich.push_back(tmpConf);
-                mapAlarmSwitchSet[qsTransNum].push_back(tmpConf);
+                //mapAlarmSwitchSet[qsTransNum].push_back(tmpConf);
+
+                _checkAndAppendAlarmSwitch(mapAlarmSwitchSet[qsTransNum],tmpConf);
             }
         }
         //mapAlarmSwitchSet[qsTransNum] = vAlarmSwich;
 
+        cout<<"mapAlarmSwitchSet------id:"<<qsTransNum<<"size:"<<mapAlarmSwitchSet[qsTransNum].size();
         tranNode=tranNode->next_sibling();
     }
+
     nValue = 0;
     return true;
 }
+
+//检查是否需要加入到告警
+void Bohui_Protocol::_checkAndAppendAlarmSwitch(vector<Alarm_Switch_Set> &vConfig,Alarm_Switch_Set &curConfig)
+{
+    vector<Alarm_Switch_Set>::iterator iter = vConfig.begin();
+    bool bfind = false;
+    for(;iter!=vConfig.end();++iter){
+        if((*iter).iAlarmid == curConfig.iAlarmid)
+            return;
+    }
+    vConfig.push_back(curConfig);
+}
+
+//检查后添加告警门限(只过滤烟感水禁)
+void Bohui_Protocol::_checkAndAppendAlarmLimit(vector<Alarm_config> &vConfig, Alarm_config &curConfig)
+{
+    vector<Alarm_config>::iterator iter = vConfig.begin();
+    bool bfind = false;
+    for(;iter!=vConfig.end();++iter){
+        if((*iter).iAlarmid == curConfig.iAlarmid)
+            return;
+    }
+    vConfig.push_back(curConfig);
+}
+
+
 
 //分析告警开关消息
 void Bohui_Protocol::_setAlarmSwitchSetParam(int nDevType,xml_node<> *rootNode,int &nValue)
 {
     nValue = 11;
     map<string,vector<Alarm_Switch_Set> > mapAlarmSwtichSet;
-    if(_parse_alarm_switch_set(rootNode,nValue,mapAlarmSwtichSet)==false)
+    if(_parse_alarm_switch_set(rootNode,nValue,mapAlarmSwtichSet)==false){
+        cout<<"_parse_alarm_switch_set----error!"<<endl;
         return;
+    }
+
+    cout<<"_parse_alarm_switch_set-----ok!"<<endl;
     if (GetInst(DataBaseOperation).SetEnableAlarm(mapAlarmSwtichSet,nValue)==true)//nDevType,
     {
         nValue =0;
