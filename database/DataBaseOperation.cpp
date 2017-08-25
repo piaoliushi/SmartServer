@@ -1093,20 +1093,22 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
                 ConnectionPool::closeConnection(db);
                 return false;
             }
-            if(qsIect.next())
+            while(qsIect.next())
             {
                 itype = qsIect.value(0).toInt();
+                qsInsert.bindValue(":alarmswitchtype",itype);
+                qsInsert.bindValue(":alarmenable",iter->second[i].iSwtich);
+                if(iter->second[i].sDes.empty()==false)
+                    qsInsert.bindValue(":description",iter->second[i].sDes.empty());
+                if(!qsInsert.exec()) {
+                    QSqlDatabase::database().rollback();
+                    resValue = 3;
+                    ConnectionPool::closeConnection(db);
+                    return false;
+                }
+
             }
-            qsInsert.bindValue(":alarmswitchtype",itype);
-            qsInsert.bindValue(":alarmenable",iter->second[i].iSwtich);
-            if(iter->second[i].sDes.empty()==false)
-                qsInsert.bindValue(":description",iter->second[i].sDes.empty());
-            if(!qsInsert.exec()) {
-                QSqlDatabase::database().rollback();
-                resValue = 3;
-                ConnectionPool::closeConnection(db);
-                return false;
-            }
+
         }
         QSqlDatabase::database().commit();
     }
@@ -1164,39 +1166,41 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
                 ConnectionPool::closeConnection(db);
                 return false;
             }
-            if(qsIect.next())
-            {
-                itype = qsIect.value(0).toInt();
-            }
+
             if(itype!=512 && itype!=511)
                 qsInsert.bindValue(":alarmconfigtype",0);
             else
                 qsInsert.bindValue(":alarmconfigtype",1);
-            qsInsert.bindValue(":monitoringindex",itype);
-
-            qsInsert.bindValue(":delaytime", iter->second[i].iDelaytime);
-            qsInsert.bindValue(":resumeduration", iter->second[i].iResumetime);
-            qsInsert.bindValue(":jumplimittype",iter->second[i].iLimittype);
 
 
-            //查找是否有Power与RePower属性(适应博汇发射机入射与反射门限百分比设定)
-            string sLimitValue = "";
-            if(itype==0 &&  GetInst(StationConfig).get_dev_propery(iter->first,"Power",sLimitValue)  ){
-                double dbLimit = (atof(sLimitValue.c_str()) * iter->second[i].fLimitvalue)/double(100000.0f);
-                qsInsert.bindValue(":limitvalue",dbLimit);
-            }else  if(itype == 1 && GetInst(StationConfig).get_dev_propery(iter->first,"RePower",sLimitValue)){
-                double dbLimit = atof(sLimitValue.c_str()) * iter->second[i].fLimitvalue;
-                qsInsert.bindValue(":limitvalue",dbLimit);
-            }else
-                qsInsert.bindValue(":limitvalue",iter->second[i].fLimitvalue);
+            while(qsIect.next())
+            {
+                itype = qsIect.value(0).toInt();
 
-            if(!qsInsert.exec())  {
-                cout<<qsInsert.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
-                QSqlDatabase::database().rollback();
-                resValue = 3;
-                ConnectionPool::closeConnection(db);
-                return false;
+                qsInsert.bindValue(":monitoringindex",itype);
+                qsInsert.bindValue(":delaytime", iter->second[i].iDelaytime);
+                qsInsert.bindValue(":resumeduration", iter->second[i].iResumetime);
+                qsInsert.bindValue(":jumplimittype",iter->second[i].iLimittype);
+                //查找是否有Power与RePower属性(适应博汇发射机入射与反射门限百分比设定)
+                string sLimitValue = "";
+                if(itype==0 &&  GetInst(StationConfig).get_dev_propery(iter->first,"Power",sLimitValue)  ){
+                    double dbLimit = (atof(sLimitValue.c_str()) * iter->second[i].fLimitvalue)/double(100000.0f);
+                    qsInsert.bindValue(":limitvalue",dbLimit);
+                }else  if(itype == 1 && GetInst(StationConfig).get_dev_propery(iter->first,"RePower",sLimitValue)){
+                    double dbLimit = atof(sLimitValue.c_str()) * iter->second[i].fLimitvalue;
+                    qsInsert.bindValue(":limitvalue",dbLimit);
+                }else
+                    qsInsert.bindValue(":limitvalue",iter->second[i].fLimitvalue);
+
+                if(!qsInsert.exec())  {
+                    cout<<qsInsert.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
+                    QSqlDatabase::database().rollback();
+                    resValue = 3;
+                    ConnectionPool::closeConnection(db);
+                    return false;
+                }
             }
+
         }
         QSqlDatabase::database().commit();
     }

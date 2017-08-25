@@ -958,7 +958,7 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
 
     for(;tranNode!=NULL;tranNode=tranNode->next_sibling())
     {
-        vector<Alarm_config> vAlarmConf;
+
         rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("TransmitterID");
         if(attr==NULL){
             attr = tranNode->first_attribute("ID");
@@ -967,6 +967,20 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
             }
         }
         string qsTransNum = attr->value();
+
+        //将烟感水浸设备分解出来
+        size_t nOffset = qsTransNum.find("-",0);
+        if(nOffset != string::npos){
+            if(qsTransNum.length()>8)
+                qsTransNum = qsTransNum.substr(0,8);
+        }
+
+        if(mapAlarmSet.find(qsTransNum) == mapAlarmSet.end()){
+             vector<Alarm_config> vAlarmConf;
+             mapAlarmSet[qsTransNum] = vAlarmConf;
+        }
+
+
         rapidxml::xml_node<>* alswNode = tranNode->first_node("AlarmParam");
         if(alswNode == NULL)
             return false;
@@ -993,7 +1007,8 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
                     if(slmt.empty()==false){
                         curConf.iLimittype = 1;
                         curConf.fLimitvalue = atof(atTP->value());
-                        vAlarmConf.push_back(curConf);
+                        //vAlarmConf.push_back(curConf);
+                        mapAlarmSet[qsTransNum].push_back(curConf);
                     }
                 }else{
                     nFind++;
@@ -1005,7 +1020,8 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
                     if(slmt.empty()==false){
                         curConf.iLimittype = 0;
                         curConf.fLimitvalue = atof(atTP->value());
-                        vAlarmConf.push_back(curConf);
+                        //vAlarmConf.push_back(curConf);
+                        mapAlarmSet[qsTransNum].push_back(curConf);
                     }
                 }else{
                     nFind++;
@@ -1017,12 +1033,13 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
                     {
                         curConf.fLimitvalue =1;
                         curConf.iLimittype = 4;
-                        vAlarmConf.push_back(curConf);
+                        //vAlarmConf.push_back(curConf);
+                        mapAlarmSet[qsTransNum].push_back(curConf);
                     }
                 }
             }
         }
-        mapAlarmSet[qsTransNum] = vAlarmConf;
+        //mapAlarmSet[qsTransNum] = vAlarmConf;
     }
     nValue = 0;
     return true;
@@ -1039,8 +1056,8 @@ bool Bohui_Protocol::_parse_alarm_switch_set(xml_node<> *root_node,int &nValue,m
             return false;
     }
     while(tranNode!=NULL){
-        string ss = tranNode->value();
-        vector<Alarm_Switch_Set>  vAlarmSwich;
+        //string ss = tranNode->value();
+        //vector<Alarm_Switch_Set>  vAlarmSwich;
         rapidxml::xml_attribute<char> * attr = tranNode->first_attribute("TransmitterID");
         if(attr==NULL){
             attr = tranNode->first_attribute("ID");
@@ -1051,6 +1068,19 @@ bool Bohui_Protocol::_parse_alarm_switch_set(xml_node<> *root_node,int &nValue,m
         }
 
         string qsTransNum = attr->value();
+
+        //将烟感水浸设备分解出来
+        size_t nOffset = qsTransNum.find("-",0);
+        if(nOffset != string::npos){
+            if(qsTransNum.length()>8)
+                qsTransNum = qsTransNum.substr(0,8);
+        }
+
+        if(mapAlarmSwitchSet.find(qsTransNum) == mapAlarmSwitchSet.end()){
+             vector<Alarm_Switch_Set> vAlarmSwich;
+             mapAlarmSwitchSet[qsTransNum] = vAlarmSwich;
+        }
+
         rapidxml::xml_node<>* alswNode = tranNode->first_node("AlarmSwitch");
         for(;alswNode!=NULL;alswNode=alswNode->next_sibling())
         {
@@ -1065,10 +1095,11 @@ bool Bohui_Protocol::_parse_alarm_switch_set(xml_node<> *root_node,int &nValue,m
                 rapidxml::xml_attribute<>* atDesc = alswNode->first_attribute("Desc");
                 if(atDesc!=NULL)
                     tmpConf.sDes = atDesc->value();
-                vAlarmSwich.push_back(tmpConf);
+                //vAlarmSwich.push_back(tmpConf);
+                mapAlarmSwitchSet[qsTransNum].push_back(tmpConf);
             }
         }
-        mapAlarmSwitchSet[qsTransNum] = vAlarmSwich;
+        //mapAlarmSwitchSet[qsTransNum] = vAlarmSwich;
 
         tranNode=tranNode->next_sibling();
     }
