@@ -658,9 +658,12 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
                 xml_device->append_attribute(xml_doc.allocate_attribute("DevID",(*iter).second.sDevNum.c_str()));
                 xml_device->append_attribute(xml_doc.allocate_attribute("DevName",(*iter).second.sDevName.c_str()));
             }else{
-                xml_device = xml_doc.allocate_node(node_element,DEVICE_TYPE_XML_DESC[nCmdType]);
-                xml_resps_info->append_node(xml_device);
+
                  if(nCmdType==BH_POTO_TransmitterQuery){
+
+                     xml_device = xml_doc.allocate_node(node_element,DEVICE_TYPE_XML_DESC[nCmdType]);
+                     xml_resps_info->append_node(xml_device);
+
                      xml_device->append_attribute(xml_doc.allocate_attribute("TransmitterID",(*iter).second.sDevNum.c_str()));
                      map<string,DevProperty>::iterator attribut_iter = (*iter).second.map_DevProperty.find("Type");
                      if(attribut_iter!=(*iter).second.map_DevProperty.end())
@@ -686,21 +689,66 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
                              string waterkey = mapTypeToStr[499].second.c_str();
                              size_t nOffset = sItemName.find(waterkey.c_str(),0);
                              if(nOffset != string::npos){
+
+                                 xml_device = xml_doc.allocate_node(node_element,DEVICE_TYPE_XML_DESC[nCmdType]);
+                                 xml_resps_info->append_node(xml_device);
+
                                  string sIndexId = str(boost::format("%s-%d")%(*iter).second.sDevNum%cell_iter->first);
                                  xml_device->append_attribute(xml_doc.allocate_attribute("ID",xml_doc.allocate_string(sIndexId.c_str())));
                                  xml_device->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>(DEVICE_WATER).c_str())));
+                                 xml_device->append_attribute(xml_doc.allocate_attribute("Name",xml_doc.allocate_string(sItemName.c_str())));
+                                 //型号
+                                 map<string,DevProperty>::iterator iter_propty =  (*iter).second.map_DevProperty.find("Model");
+                                 if(iter_propty!= (*iter).second.map_DevProperty.end())
+                                     xml_device->append_attribute(xml_doc.allocate_attribute("Model",(*iter_propty).second.property_value.c_str()));
+                                 //制造商
+                                 iter_propty =  (*iter).second.map_DevProperty.find("Manufacturer");
+                                 if(iter_propty!= (*iter).second.map_DevProperty.end())
+                                     xml_device->append_attribute(xml_doc.allocate_attribute("Manufacturer",(*iter_propty).second.property_value.c_str()));
+                                 //设备描述
+                                 iter_propty =  (*iter).second.map_DevProperty.find("Desc");
+                                 if(iter_propty!= (*iter).second.map_DevProperty.end())
+                                     xml_device->append_attribute(xml_doc.allocate_attribute("Desc",(*iter_propty).second.property_value.c_str()));
+
                              }else{
                                  string firekey = mapTypeToStr[500].second;
                                  size_t nOffset = sItemName.find(firekey.c_str(),0);
                                  if(nOffset != string::npos){
+
+                                     //分配节点
+                                     xml_device = xml_doc.allocate_node(node_element,DEVICE_TYPE_XML_DESC[nCmdType]);
+                                     xml_resps_info->append_node(xml_device);
+
+
                                      string sIndexId = str(boost::format("%s-%d")%(*iter).second.sDevNum%cell_iter->first);
                                      xml_device->append_attribute(xml_doc.allocate_attribute("ID",xml_doc.allocate_string(sIndexId.c_str())));
                                      xml_device->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>(DEVICE_SMOKE).c_str())));
+                                     xml_device->append_attribute(xml_doc.allocate_attribute("Name",xml_doc.allocate_string(sItemName.c_str())));
+                                     //型号
+                                     map<string,DevProperty>::iterator iter_propty =  (*iter).second.map_DevProperty.find("Model");
+                                     if(iter_propty!= (*iter).second.map_DevProperty.end())
+                                         xml_device->append_attribute(xml_doc.allocate_attribute("Model",(*iter_propty).second.property_value.c_str()));
+                                     //制造商
+                                     iter_propty =  (*iter).second.map_DevProperty.find("Manufacturer");
+                                     if(iter_propty!= (*iter).second.map_DevProperty.end())
+                                         xml_device->append_attribute(xml_doc.allocate_attribute("Manufacturer",(*iter_propty).second.property_value.c_str()));
+                                     //设备描述
+                                     iter_propty =  (*iter).second.map_DevProperty.find("Desc");
+                                     if(iter_propty!= (*iter).second.map_DevProperty.end())
+                                         xml_device->append_attribute(xml_doc.allocate_attribute("Desc",(*iter_propty).second.property_value.c_str()));
+
+
                                  }else
                                      continue;
                              }
                          }
+
+                        continue;
+
                      }else{
+
+                         xml_device = xml_doc.allocate_node(node_element,DEVICE_TYPE_XML_DESC[nCmdType]);
+                         xml_resps_info->append_node(xml_device);
                          xml_device->append_attribute(xml_doc.allocate_attribute("ID",(*iter).second.sDevNum.c_str()));
                          xml_device->append_attribute(xml_doc.allocate_attribute("Type",xml_doc.allocate_string(boost::lexical_cast<std::string>( (*iter).second.iDevType).c_str())));
                      }
@@ -917,7 +965,7 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
             if(attr==NULL){
                 continue;
             }
-         }
+        }
         string qsTransNum = attr->value();
         rapidxml::xml_node<>* alswNode = tranNode->first_node("AlarmParam");
         if(alswNode == NULL)
@@ -929,66 +977,54 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
                 int itype = atoi(atType->value());
                 curConf.iAlarmid = itype;
                 rapidxml::xml_attribute<>* atDuration=NULL;
-              /*  if(itype==512)
-                {
-                    atDuration = alswNode->first_attribute("EarlyDuration");
-                    if(atDuration==NULL)
-                        return false;
-                    curConf.iDelaytime = atoi(atDuration->value());
-                    atDuration = alswNode->first_attribute("DelayedDuration");
-                    if(atDuration==NULL)
-                        return false;
-                     curConf.iResumetime = atoi(atDuration->value());
-                } else {*/
-                    atDuration = alswNode->first_attribute("Duration");
-                    if(atDuration==NULL)
-                         return false;
-                    curConf.iDelaytime = atoi(atDuration->value());
-                    atDuration = alswNode->first_attribute("ResumeDuration");
-                    if(atDuration==NULL)
-                       return false;
-                    curConf.iResumetime = atoi(atDuration->value());
-                //}
-                    int nFind = 0;
-                    rapidxml::xml_attribute<>* atTP = alswNode->first_attribute("DownThreshold");
-                    if(atTP!=NULL){
+                atDuration = alswNode->first_attribute("Duration");
+                if(atDuration==NULL)
+                    return false;
+                curConf.iDelaytime = atoi(atDuration->value());
+                atDuration = alswNode->first_attribute("ResumeDuration");
+                if(atDuration==NULL)
+                    return false;
+                curConf.iResumetime = atoi(atDuration->value());
+                int nFind = 0;
+                rapidxml::xml_attribute<>* atTP = alswNode->first_attribute("DownThreshold");
+                if(atTP!=NULL){
 
-                        string slmt=atTP->value();
-                        if(slmt.empty()==false){
-                            curConf.iLimittype = 1;
-                            curConf.fLimitvalue = atof(atTP->value());
-                            vAlarmConf.push_back(curConf);
-                        }
-                    }else{
-                        nFind++;
-                   }
-                    atTP = alswNode->first_attribute("UpThreshold");
-                    if(atTP!=NULL){
-
-                        string slmt=atTP->value();
-                        if(slmt.empty()==false){
-                            curConf.iLimittype = 0;
-                            curConf.fLimitvalue = atof(atTP->value());
-                            vAlarmConf.push_back(curConf);
-                        }
-                    }else{
-                        nFind++;
+                    string slmt=atTP->value();
+                    if(slmt.empty()==false){
+                        curConf.iLimittype = 1;
+                        curConf.fLimitvalue = atof(atTP->value());
+                        vAlarmConf.push_back(curConf);
                     }
+                }else{
+                    nFind++;
+                }
+                atTP = alswNode->first_attribute("UpThreshold");
+                if(atTP!=NULL){
 
-                    if(nFind==2)
+                    string slmt=atTP->value();
+                    if(slmt.empty()==false){
+                        curConf.iLimittype = 0;
+                        curConf.fLimitvalue = atof(atTP->value());
+                        vAlarmConf.push_back(curConf);
+                    }
+                }else{
+                    nFind++;
+                }
+
+                if(nFind==2)
+                {
+                    if(itype==(511) || itype==(512)||itype==(612)||itype==(633)||itype ==(634)||itype ==(703))
                     {
-                        if(itype==(511) || itype==(512)||itype==(612)||itype==(633)||itype ==(634)||itype ==(703))
-                        {
-                             curConf.fLimitvalue =1;
-                             curConf.iLimittype = 4;
-                             vAlarmConf.push_back(curConf);
-                        }
-                   }
-               }
+                        curConf.fLimitvalue =1;
+                        curConf.iLimittype = 4;
+                        vAlarmConf.push_back(curConf);
+                    }
+                }
             }
+        }
         mapAlarmSet[qsTransNum] = vAlarmConf;
     }
-     nValue = 0;
+    nValue = 0;
     return true;
 }
 
