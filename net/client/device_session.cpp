@@ -202,7 +202,7 @@ void device_session::set_con_state(con_state curState)
                 GetInst(SvcMgr).get_notify()->OnDevStatus((*iter).first,-1);
             }
 
-            // send_device_data_state_notify((*iter).first);
+            //send_device_data_state_notify((*iter).first);
             //通知http服务器(设备网络异常)
 
             if(iter->second.iDevType == DEVICE_TRANSMITTER){
@@ -1467,6 +1467,7 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
                               ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
     int nDevType = modleInfos_.mapDevInfo[sDevId].iDevType;
+    //动环设备博汇要求收集发送
     if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
 
         string sDesDevId = sDevId;
@@ -1796,9 +1797,17 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
             //提交监控量告警到上级平台
             string sDesDevId = devId;
             map_dev_ass_parse_ptr_[devId]->get_parent_device_id(sDesDevId);
-            if(GetInst(LocalConfig).http_svc_use())
+            if(GetInst(LocalConfig).http_svc_use()){
+                int nDevType = modleInfos_.mapDevInfo[devId].iDevType;
+                //针对烟感水浸设备做id替换
+                if(nDevType==DEVICE_SMOKE || nDevType==DEVICE_WATER){
+
+                   sDesDevId = str(boost::format("%s-%d")%sDesDevId%ItemInfo.iItemIndex);
+                }
+
                 http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,
                                                               bMod,curAlarm,curAlarm.sReason);
+            }
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
                                      ,modleInfos_.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
@@ -1812,9 +1821,17 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
             //提交监控量告警到上级平台
             string sDesDevId = devId;
             map_dev_ass_parse_ptr_[devId]->get_parent_device_id(sDesDevId);
-            if(GetInst(LocalConfig).http_svc_use())
-                http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,
-                                                              bMod,curAlarm,curAlarm.sReason);
+            if(GetInst(LocalConfig).http_svc_use()){
+                int nDevType = modleInfos_.mapDevInfo[devId].iDevType;
+                //针对烟感水浸设备做id替换
+                if(nDevType==DEVICE_SMOKE || nDevType==DEVICE_WATER){
+
+                   sDesDevId = str(boost::format("%s-%d")%sDesDevId%ItemInfo.iItemIndex);
+                }
+
+                http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,nDevType,bMod,curAlarm,curAlarm.sReason);
+            }
+
             //发送监控量报警到客户端
             send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
                                      ,modleInfos_.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);

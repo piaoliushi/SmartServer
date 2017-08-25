@@ -196,6 +196,7 @@ http_request_session::~http_request_session(void)
      else if(nDevType==DEVICE_TRANSMITTER)
          temType = BH_POTO_QualityAlarmReport;//发射机设备
      if(temType>=0){
+
         bh_ptcl.createReportAlarmDataMsg(-1,temType,sDevid,alarmInfo,nMod,reason,sReportMsg);
         if(sReportMsg.empty()==false)
             putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);

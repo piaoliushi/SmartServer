@@ -364,6 +364,7 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
 
             map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
             for(;cell_iter!=mapMonitorItem.end();++cell_iter){
+
                 if(cell_iter->second.bUpload == false)
                    continue;
                 xml_node<> *xml_Quality_Index = xml_reportMsg.allocate_node(node_element,"QualityIndex ");
@@ -371,8 +372,8 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleID",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
-
-                if(cell_iter->second.sUnit == "W" && cell_iter->first==0)//适应博汇发射功率为W的需求
+                //适应博汇发射功率为W的需求
+                if(cell_iter->second.sUnit == "W" && cell_iter->first==0)
                     curData->mValues[cell_iter->first].fValue *=1000;
 
                 string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
@@ -383,6 +384,8 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                 xml_Quality->append_node(xml_Quality_Index);
 
             }
+
+
         }else {//动环链路数据上报//if(BH_POTO_EnvQualityRealtimeReport == nCmdType)
             xml_node<> *xml_dev_node = NULL;
             switch (nDevType) {
