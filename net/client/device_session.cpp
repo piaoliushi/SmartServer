@@ -1467,6 +1467,15 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
                               ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     //打包发送http消息到上级平台
     int nDevType = modleInfos_.mapDevInfo[sDevId].iDevType;
+    if(nDevType == DEVICE_TRANSMITTER){//博汇发射机需要上报开关机状态
+        //插入一条编号为500的运行状态指标
+        int runState = (get_run_state(sDevId)==dev_running)?1:0;
+        DataInfo  tmInfo;
+        tmInfo.bType=1;
+        tmInfo.fValue = runState;
+        curDataPtr->mValues[500] = tmInfo;
+    }
+
     //动环设备博汇要求收集发送
     if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
 
@@ -1481,6 +1490,9 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
         http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
                                                      curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     }
+
+
+
     //检测当前报警状态
     check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
     //如果在监测时间段则保存当前记录
