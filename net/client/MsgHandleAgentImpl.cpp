@@ -39,7 +39,13 @@ namespace hx_net
         case DEVICE_GPS:
             m_pbaseMsg = new Timer_message(m_pSessionPtr,m_devInfo);
             break;
-        case DEVICE_GS_RECIVE:
+        case DEVICE_GS_RECIVE://卫星接收机
+        case DEVICE_MW://微波接收机
+        case DEVICE_TR://光收发器
+        case DEVICE_ENCODER://编码器
+        case DEVICE_MUX://复用器
+        case DEVICE_MO://调制器
+        case DEVICE_ADAPTER://适配器
             m_pbaseMsg = new Link_message(m_pSessionPtr,m_devInfo);
             break;
         case DEVICE_MEDIA:	{
