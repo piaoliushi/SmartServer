@@ -430,7 +430,8 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
             case DEVICE_TR://光收发器
             case DEVICE_ENCODER://编码器
             case DEVICE_MUX://复用器
-            case DEVICE_MO:{//调制器
+            case DEVICE_MO://调制器
+            case DEVICE_ADAPTER:{//适配器
                 //xml_Quality = xml_reportMsg.allocate_node(node_element,"SatelliteRecever");
                 //xml_resps->append_node(xml_Quality);
                 xml_dev_node = xml_reportMsg.allocate_node(node_element,"Dev");
