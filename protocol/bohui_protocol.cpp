@@ -373,12 +373,14 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("ModuleID",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
                 //适应博汇发射功率为W的需求
-                if(cell_iter->second.sUnit == "W" && cell_iter->first==0)
-                    curData->mValues[cell_iter->first].fValue *=1000;
+                float fCurValue = curData->mValues[cell_iter->first].fValue;
+                if(cell_iter->second.sUnit == "W" && cell_iter->first==0){
+                    fCurValue *=1000;
+                }
 
-                string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
+                string  sValue = str(boost::format("%.2f")%fCurValue);
                 if(curData->mValues[cell_iter->first].bType==true)
-                    sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
+                    sValue = str(boost::format("%d")%fCurValue);
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(sValue.c_str())));
                 xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
                 xml_Quality->append_node(xml_Quality_Index);
