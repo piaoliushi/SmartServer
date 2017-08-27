@@ -161,7 +161,7 @@ bool Bohui_Protocol::creatExcutResultReportMsg(int nReplyId,int nCmdType,string 
          xml_resps->append_attribute(xml_reportMsg.allocate_attribute("TransmitterID",xml_reportMsg.allocate_string(sDevId.c_str())));
          xml_resps->append_attribute(xml_reportMsg.allocate_attribute("CmdStatus",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(devState).c_str())));
          xml_resps->append_attribute(xml_reportMsg.allocate_attribute("Time",xml_reportMsg.allocate_string(sTime.c_str())));
-          xml_resps->append_attribute(xml_reportMsg.allocate_attribute("CmdStatusDesc",xml_reportMsg.allocate_string(sDesc.c_str())));
+         xml_resps->append_attribute(xml_reportMsg.allocate_attribute("CmdStatusDesc",xml_reportMsg.allocate_string(sDesc.c_str())));
      }
 
     rapidxml::print(std::back_inserter(reportBody), xml_reportMsg, 0);

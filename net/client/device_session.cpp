@@ -1158,8 +1158,7 @@ void device_session::start_task_schedules_timer()
 //定时任务回调
 void device_session::schedules_task_time_out(const boost::system::error_code& error)
 {
-    //if(error!= boost::asio::error::operation_aborted)
-    //{
+
     time_t curTime = time(0);
     tm *pCurTime = localtime(&curTime);
 
@@ -1187,7 +1186,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
             if((*cmd_iter).iDateType == RUN_TIME_WEEK){
                 if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0)
                     continue;//超过运行图终止时间且终止时间不为0,则跳过
-                if((pCurTime->tm_wday)== (*cmd_iter).iWeek){
+                if((pCurTime->tm_wday)== (*cmd_iter).iWeek%7){
                     tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
                     unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
                     if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
@@ -1222,7 +1221,6 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
         }
     }
     start_task_schedules_timer();
-    //}
 }
 
 void device_session::notify_client_execute_result(string sDevId,string devName,string user,int cmdType, tm *pCurTime,
@@ -1394,7 +1392,8 @@ bool device_session::is_monitor_time(string sDevId)
             tm *pCurTime = localtime(&curTime);
             if(curTime> (*iter).tAlarmEndTime &&  (*iter).tAlarmEndTime>0)
                 continue;//超过运行图终止时间且终止时间不为0,则跳过
-            if((pCurTime->tm_wday)== (*iter).iMonitorWeek){
+
+            if((pCurTime->tm_wday)== (*iter).iMonitorWeek%7){
                 tm *pSetTimeS = localtime(&((*iter).tStartTime));
                 unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
                 tm *pSetTimeE = localtime(&((*iter).tEndTime));
@@ -1465,6 +1464,7 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     //打包发送客户端
     send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
                               ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+
     //打包发送http消息到上级平台
     int nDevType = modleInfos_.mapDevInfo[sDevId].iDevType;
     if(nDevType == DEVICE_TRANSMITTER){//博汇发射机需要上报开关机状态
