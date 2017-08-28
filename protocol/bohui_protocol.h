@@ -31,11 +31,20 @@ public:
     bool creatQueryDtmbPrgInfoMsg(string &reportBody);
 
     //创建动环消息头
-    bool createPowerEnvReportHeadMsg(xml_document<> &xmlMsg,xml_node<>* &pHeadMsg);
+    bool createReportHeadMsg(xml_document<> &xmlMsg,xml_node<>* &pHeadMsg,int ReportType);
 
-    //创建动环消息体
+    //创建动环消息体（合并多个动环设备）
     bool appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,xml_node<>*> &mXml_Quality,string sDevId,int nDevType
                                                      ,DevMonitorDataPtr &curData,map<int,DeviceMonitorItem> &mapMonitorItem);
+
+    //创建发射机上报消息体（合并多个发射机设备）
+    bool appendTransmitterReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,string sDevId,DevMonitorDataPtr &curData,
+                                     map<int,DeviceMonitorItem> &mapMonitorItem);
+
+    //创建链路设备上报消息体(合并多个链路设备)
+    bool appendLinkReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,string sDevId,
+                                 int nDevType,DevMonitorDataPtr &curData,
+                                 map<int,DeviceMonitorItem> &mapMonitorItem);
 
 protected:
     //创建xml头信息

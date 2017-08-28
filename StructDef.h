@@ -203,7 +203,9 @@ typedef enum EDAPROTOCOL
     PAINUO_SPM33         = 6,//珠海派诺SPM33电表
     KSTAR_UPS            = 7,//科士达UPS
     YINGJIA_EM400        = 8,//广州盈嘉EM400电表
-    ABB_104              = 9,//ABB智能表104协议
+    YISITE_EA66          = 9,//易事特UPS
+    ACR_NET_EM           = 10,//安科瑞网络电力仪表
+    ABB_104              = 100,//ABB104电表
 
 }EdaSubProtocol;
 typedef enum WSPROTOCOL

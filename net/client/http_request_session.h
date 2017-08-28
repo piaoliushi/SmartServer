@@ -38,7 +38,7 @@ protected:
     //void  read_handler(const boost::system::error_code& ec, std::size_t length);
     void  open_handler(const boost::system::error_code& ec);
     //判断当前时间是否需要上传
-    bool  is_need_report_data();
+    bool  is_need_report_data(time_t &oldtime);
 private:
 
     boost::asio::io_service    &http_io_service_;
@@ -51,12 +51,23 @@ private:
     urdl::read_stream http_stream_;
 
 
-    boost::recursive_mutex         http_stream_mutex_;//http上报对象互斥量
-    time_t   report_span_;//动环上报时间统计
+    boost::recursive_mutex         http_env_stream_mutex_; //动环上报对象互斥量
+    time_t                         env_report_span_;       //动环上报时间统计
+    xml_document<>                 xml_env_reportMsg;      //动环临时缓存上报数据
+    map<int,xml_node<>* >          xml_env_mapQualityMsg;  //动环缓存设备节点
+    map<string,xml_node<>*>        xml_env_mapDevMsg;      //动环缓存设备记录
 
-    xml_document<> xml_reportMsg;//临时缓存上报数据
-    map<int,xml_node<>* >   xml_mapQualityMsg;//缓存设备节点
-    map<string,xml_node<>*> xml_mapDevMsg;//缓存设备数据
+    boost::recursive_mutex         http_tsmt_stream_mutex_;//发射机上报对象互斥量
+    time_t                         tsmt_report_span_;      //发射机上报时间统计
+    xml_document<>                 xml_tsmt_reportMsg;     //发射机临时缓存上报数据
+    map<string,xml_node<>* >       xml_tsmt_mapQualityMsg; //发射机缓存设备节点
+    map<string,xml_node<>*>        xml_tsmt_mapDevMsg;     //发射机缓存设备记录
+
+    boost::recursive_mutex         http_link_stream_mutex_;//链路上报对象互斥量
+    time_t                         link_report_span_;      //链路上报时间统计
+    xml_document<>                 xml_link_reportMsg;     //链路临时缓存上报数据
+    map<string,xml_node<>* >       xml_link_mapQualityMsg; //链路缓存设备节点
+    map<string,xml_node<>*>        xml_link_mapDevMsg;     //链路缓存设备记录
 };
 
 }

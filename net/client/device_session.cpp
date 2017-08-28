@@ -1461,9 +1461,6 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
         return;
     //是否在运行图时间
     bool bIsMonitorTime = is_monitor_time(sDevId);
-    //打包发送客户端
-    send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
-                              ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
 
     //打包发送http消息到上级平台
     int nDevType = modleInfos_.mapDevInfo[sDevId].iDevType;
@@ -1476,19 +1473,28 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
         curDataPtr->mValues[500] = tmInfo;
     }
 
-    //动环设备博汇要求收集发送
-    if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
+    //打包发送客户端
+    send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
+                              ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
 
-        string sDesDevId = sDevId;
-        map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
-        http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
-                                                     curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
-    }else if(is_need_report_data(sDevId)){
-        string sDesDevId = sDevId;
-        //用来适应模块隶属于设备的问题
-        map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
-        http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
-                                                     curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+
+
+    //动环设备博汇要求收集发送(暂针对动环做单独收集处理...)
+    if(GetInst(LocalConfig).http_svc_use() == true){
+
+        //if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
+
+            string sDesDevId = sDevId;
+            map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
+            http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
+                                                         curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+        //}else if(is_need_report_data(sDevId)){
+//            string sDesDevId = sDevId;
+//            //用来适应模块隶属于设备的问题
+//            map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
+//            http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
+//                                                         curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+//        }
     }
 
 

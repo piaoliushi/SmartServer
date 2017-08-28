@@ -11,7 +11,10 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
     ,d_bExit_(false)
     ,http_stream_(http_io_service_)
 {
-    report_span_ = time(0);
+    env_report_span_  = time(0);
+    tsmt_report_span_ = time(0);
+    link_report_span_ = time(0);
+
     deal_thread_.reset(new boost::thread(boost::bind(&http_request_session::openUrl,this)));
 }
 
@@ -111,69 +114,140 @@ http_request_session::~http_request_session(void)
  }
 
  //判断当前时间是否需要上传
- bool http_request_session::is_need_report_data()
+ bool http_request_session::is_need_report_data(time_t &oldtime)
  {
      time_t tmCurTime;
      time(&tmCurTime);
-     double ninterval = difftime(tmCurTime,report_span_);
+     double ninterval = difftime(tmCurTime,oldtime);
 
      int nReportSpan = GetInst(LocalConfig).report_span();
      if(ninterval<nReportSpan)//间隔保存时间 need amend;
          return false;
-     report_span_ = tmCurTime;
+     oldtime = tmCurTime;
      return true;
  }
+
+
+
 
  //上报http消息到上级平台(数据)
  void http_request_session::send_http_data_messge_to_platform(string sDevid,int nDevType,DevMonitorDataPtr &curData,
                                                               map<int,DeviceMonitorItem> &mapMonitorItem)
  {
-      if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
+     //动环数据收集发送
+      if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){//动环设备
 
-           boost::recursive_mutex::scoped_lock lock(deal_thread_mutex_);
-           if(is_need_report_data()){
+           boost::recursive_mutex::scoped_lock lock(http_env_stream_mutex_);
+           if(is_need_report_data(env_report_span_)){
                //发送数据
                string sReportMsg;
                Bohui_Protocol  bh_ptcl;
                xml_node<>* pHeadMsg=NULL;//消息头节点
-               if(bh_ptcl.createPowerEnvReportHeadMsg(xml_reportMsg,pHeadMsg)) {
-                   if(xml_mapDevMsg.find(sDevid)==xml_mapDevMsg.end()){
+               if(bh_ptcl.createReportHeadMsg(xml_env_reportMsg,pHeadMsg,BH_POTO_EnvQualityRealtimeReport)) {
+                   if(xml_env_mapDevMsg.find(sDevid)==xml_env_mapDevMsg.end()){
 
-                       bh_ptcl.appendPowerEnvReportBodyMsg(xml_reportMsg,xml_mapQualityMsg,sDevid,
+                       bh_ptcl.appendPowerEnvReportBodyMsg(xml_env_reportMsg,xml_env_mapQualityMsg,sDevid,
                                                            nDevType,curData,mapMonitorItem);
-
-                       xml_mapDevMsg[sDevid] = pHeadMsg;
+                       xml_env_mapDevMsg[sDevid] = pHeadMsg;
                    }
-
-                     map<int,xml_node<>* >::iterator iter = xml_mapQualityMsg.begin();
-                     for(;iter!=xml_mapQualityMsg.end();++iter){
-
-                        pHeadMsg->append_node(iter->second);
-
-                     }
-
-                     rapidxml::print(std::back_inserter(sReportMsg), xml_reportMsg, 0);
-
+                   map<int,xml_node<>* >::iterator iter = xml_env_mapQualityMsg.begin();
+                   for(;iter!=xml_env_mapQualityMsg.end();++iter)
+                       pHeadMsg->append_node(iter->second);
+                   rapidxml::print(std::back_inserter(sReportMsg), xml_env_reportMsg, 0);
                }
 
                if(sReportMsg.empty()==false)
                    putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
-               xml_reportMsg.clear();
-               xml_mapQualityMsg.clear();
-               xml_mapDevMsg.clear();
+               xml_env_reportMsg.clear();
+               xml_env_mapQualityMsg.clear();
+               xml_env_mapDevMsg.clear();
            }else{
-               //添加数据
+               //添加数据,且检查该设备在时间段内是否已经添加过了
                Bohui_Protocol  bh_ptcl;
-               if(xml_mapDevMsg.find(sDevid) == xml_mapDevMsg.end()){
+               if(xml_env_mapDevMsg.find(sDevid) == xml_env_mapDevMsg.end()){
 
-                   bh_ptcl.appendPowerEnvReportBodyMsg(xml_reportMsg,xml_mapQualityMsg,sDevid,
+                   bh_ptcl.appendPowerEnvReportBodyMsg(xml_env_reportMsg,xml_env_mapQualityMsg,sDevid,
                                                        nDevType,curData,mapMonitorItem);
-                   xml_mapDevMsg[sDevid] = NULL;
+                   xml_env_mapDevMsg[sDevid] = NULL;
                }
 
            }
 
-      }else{
+      }else if(nDevType == DEVICE_TRANSMITTER){//发射机
+
+          boost::recursive_mutex::scoped_lock lock(http_tsmt_stream_mutex_);
+          if(is_need_report_data(tsmt_report_span_)){
+              //发送数据
+              string sReportMsg;
+              Bohui_Protocol  bh_ptcl;
+              xml_node<>* pHeadMsg=NULL;//消息头节点
+              if(bh_ptcl.createReportHeadMsg(xml_tsmt_reportMsg,pHeadMsg,BH_POTO_QualityRealtimeReport)) {
+                  if(xml_tsmt_mapDevMsg.find(sDevid)==xml_tsmt_mapDevMsg.end()){
+
+                      bh_ptcl.appendTransmitterReportBodyMsg(xml_tsmt_reportMsg,xml_tsmt_mapQualityMsg,sDevid,
+                                                          curData,mapMonitorItem);
+                  }
+                  map<string,xml_node<>* >::iterator iter = xml_tsmt_mapQualityMsg.begin();
+                  for(;iter!=xml_tsmt_mapQualityMsg.end();++iter)
+                      pHeadMsg->append_node(iter->second);
+                  rapidxml::print(std::back_inserter(sReportMsg), xml_tsmt_reportMsg, 0);
+              }
+
+              if(sReportMsg.empty()==false)
+                  putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+              xml_tsmt_reportMsg.clear();
+              xml_tsmt_mapQualityMsg.clear();
+              xml_tsmt_mapDevMsg.clear();
+          }else{
+              //添加数据,且检查该设备在时间段内是否已经添加过了
+              Bohui_Protocol  bh_ptcl;
+              if(xml_tsmt_mapDevMsg.find(sDevid) == xml_tsmt_mapDevMsg.end()){
+
+                  bh_ptcl.appendTransmitterReportBodyMsg(xml_tsmt_reportMsg,xml_tsmt_mapQualityMsg,sDevid,
+                                                      curData,mapMonitorItem);
+                  xml_tsmt_mapDevMsg[sDevid] = NULL;
+              }
+          }
+
+      }
+      else if(nDevType >= DEVICE_GS_RECIVE && nDevType <= DEVICE_ADAPTER){//链路设备
+          boost::recursive_mutex::scoped_lock lock(http_link_stream_mutex_);
+          if(is_need_report_data(link_report_span_)){
+
+              //发送数据
+              string sReportMsg;
+              Bohui_Protocol  bh_ptcl;
+              xml_node<>* pHeadMsg=NULL;//消息头节点
+              if(bh_ptcl.createReportHeadMsg(xml_link_reportMsg,pHeadMsg,BH_POTO_LinkDevQualityReport)) {
+                  if(xml_link_mapDevMsg.find(sDevid)==xml_link_mapDevMsg.end()){
+
+                      bh_ptcl.appendLinkReportBodyMsg(xml_link_reportMsg,xml_link_mapQualityMsg,sDevid,nDevType,
+                                                          curData,mapMonitorItem);
+                  }
+                  map<string,xml_node<>* >::iterator iter = xml_link_mapQualityMsg.begin();
+                  for(;iter!=xml_link_mapQualityMsg.end();++iter)
+                      pHeadMsg->append_node(iter->second);
+                  rapidxml::print(std::back_inserter(sReportMsg), xml_link_reportMsg, 0);
+              }
+
+              if(sReportMsg.empty()==false)
+                  putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+              xml_link_reportMsg.clear();
+              xml_link_mapQualityMsg.clear();
+              xml_link_mapDevMsg.clear();
+
+          }else{
+              //添加数据,且检查该设备在时间段内是否已经添加过了
+              Bohui_Protocol  bh_ptcl;
+              if(xml_link_mapDevMsg.find(sDevid) == xml_link_mapDevMsg.end()){
+
+                  bh_ptcl.appendLinkReportBodyMsg(xml_link_reportMsg,xml_link_mapQualityMsg,sDevid,nDevType,
+                                                      curData,mapMonitorItem);
+                  xml_link_mapDevMsg[sDevid] = NULL;
+              }
+          }
+      }
+      else{
           string sReportMsg;
           Bohui_Protocol  bh_ptcl;
           bh_ptcl.createReportDataMsg(-1,sDevid,nDevType,curData,mapMonitorItem,sReportMsg);

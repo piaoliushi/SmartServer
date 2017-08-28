@@ -122,6 +122,21 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             }else
                 return -1;
         }
+        case YISITE_EA66:
+        {
+            if(nDataLen < 3)
+                return -1;
+            if(data[0]==d_devInfo.iAddressCode && (data[1]==0x02 || data[1]==0x04))
+                return data[2]+2;
+            else
+                return -1;
+        }
+        case ACR_NET_EM:{
+            if(data[0]==d_devInfo.iAddressCode && data[1]==0x03)
+                return data[2]+2;
+            else
+                return -1;
+        }
         }
     }
         break;
@@ -166,6 +181,19 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
             //m_pSession->start_handler_data(iaddcode,d_curData_ptr);
             return iresult;
         }
+        case YISITE_EA66:
+        {
+            int iresult = decode_EA66(data,d_curData_ptr,nDataLen,iaddcode);
+            GetResultData(d_curData_ptr);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
+        case ACR_NET_EM:{
+            int iresult = decode_AcrNetEm(data,d_curData_ptr,nDataLen,iaddcode);
+            GetResultData(d_curData_ptr);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
         }
         break;
     }
@@ -187,6 +215,7 @@ bool Electric_message::IsStandardCommand()
         case KSTAR_UPS:
         case PAINUO_SPM33:
         case YINGJIA_EM400:
+        case YISITE_EA66:
             return true;
         case ABB_104:
             return true;
@@ -524,6 +553,47 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
         case ABB_104:{
             CommandUnit tmUnit;
             tmUnit.ackLen = 2;//IEC_APCI_LEN
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case YISITE_EA66:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 3;
+            tmUnit.commandLen = 8;
+            tmUnit.commandId[0] = d_devInfo.iAddressCode;
+            tmUnit.commandId[1] = 0x04;
+            tmUnit.commandId[2] = 0x00;
+            tmUnit.commandId[3] = 0x01;
+            tmUnit.commandId[4] = 0x00;
+            tmUnit.commandId[5] = 0x2D;
+            unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            tmUnit.commandId[1] = 0x02;
+            tmUnit.commandId[3] = 0x00;
+            tmUnit.commandId[5] = 0x3E;
+            uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case ACR_NET_EM:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 3;
+            tmUnit.commandLen = 8;
+            tmUnit.commandId[0] = d_devInfo.iAddressCode;
+            tmUnit.commandId[1] = 0x03;
+            tmUnit.commandId[2] = 0x00;
+            tmUnit.commandId[3] = 0x22;
+            tmUnit.commandId[4] = 0x00;
+            tmUnit.commandId[5] = 0x1D;
+            unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
@@ -878,6 +948,268 @@ int Electric_message::decode_EM400(unsigned char *data, DevMonitorDataPtr data_p
     return RE_SUCCESS;
 }
 
+int Electric_message::decode_EA66(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    int indexpos =0;
+    iaddcode = data[0];
+    DataInfo dainfo;
+    int cmdnum = data[1];
+    switch (cmdnum) {
+    case 0x04:
+    {
+        dainfo.bType = false;
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = (data[3+2*i]<<8)|data[4+2*i];
+            dainfo.sValue = (QString("%1V").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[9+2*i]<<8)|data[10+2*i])*0.1;
+            dainfo.sValue = (QString("%1Hz").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = (data[15+2*i]<<8)|data[16+2*i];
+            dainfo.sValue = (QString("%1V").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[21+2*i]<<8)|data[22+2*i])*0.1;
+            dainfo.sValue = (QString("%1Hz").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[27+2*i]<<8)|data[28+2*i])*0.1;
+            dainfo.sValue = (QString("%1V").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[33+2*i]<<8)|data[34+2*i])*0.1;
+            dainfo.sValue = (QString("%1A").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[39+2*i]<<8)|data[40+2*i])*0.1;
+            dainfo.sValue = (QString("%1Hz").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[45+2*i]<<8)|data[46+2*i]);
+            dainfo.sValue = (QString("%1Kw").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[51+2*i]<<8)|data[52+2*i]);
+            dainfo.sValue = (QString("%1KVA").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((data[57+2*i]<<8)|data[58+2*i]);
+            dainfo.sValue = (QString("%1%").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<2;++i)
+        {
+            dainfo.fValue = ((data[63+2*i]<<8)|data[64+2*i]);
+            dainfo.sValue = (QString("%1V").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        for(int i=0;i<2;++i)
+        {
+            dainfo.fValue = ((data[67+2*i]<<8)|data[68+2*i])*0.1;
+            dainfo.sValue = (QString("%1A").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        dainfo.fValue = ((data[71]<<8)|data[72])*0.1;
+   //     dainfo.sValue = (QString("%1℃").arg(dainfo.fValue)).toStdString();
+        data_ptr->mValues[indexpos++] = dainfo;
+        for(int i=0;i<2;++i)
+        {
+            dainfo.fValue = ((data[73+2*i]<<8)|data[74+2*i]);
+            dainfo.sValue = (QString("%1V").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        dainfo.fValue = ((data[77]<<8)|data[78]);
+        dainfo.sValue = (QString("%1%").arg(dainfo.fValue)).toStdString();
+        data_ptr->mValues[indexpos++] = dainfo;
+        dainfo.fValue = ((data[79]<<8)|data[80]);
+        dainfo.sValue = (QString("%1min").arg(dainfo.fValue)).toStdString();
+        data_ptr->mValues[indexpos++] = dainfo;
+        for(int i=0;i<4;++i)
+        {
+            dainfo.fValue = ((data[80+2*i]<<8)|data[81+2*i]);
+   //         dainfo.sValue = (QString("%1℃").arg(dainfo.fValue)).toStdString();
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        dainfo.fValue = ((data[89]<<8)|data[90])*0.1;
+   //     dainfo.sValue = (QString("%1℃").arg(dainfo.fValue)).toStdString();
+        data_ptr->mValues[indexpos++] = dainfo;
+        dainfo.fValue = ((data[91]<<8)|data[92]);
+       /* switch (data[92]) {
+        case 1:
+        {
+            dainfo.sValue = QString("待机模式").toStdString();
+        }
+            break;
+        case 2:
+        {
+            dainfo.sValue = QString("旁路模式").toStdString();
+        }
+            break;
+        case 3:
+        {
+            dainfo.sValue = QString("市电模式").toStdString();
+        }
+            break;
+        case 4:
+        {
+            dainfo.sValue = QString("电池模式").toStdString();
+        }
+            break;
+        case 5:
+        {
+            dainfo.sValue = QString("电池自检").toStdString();
+        }
+            break;
+        case 6:
+        {
+            dainfo.sValue = QString("故障模式").toStdString();
+        }
+            break;
+        case 7:
+        {
+            dainfo.sValue = QString("变频模式").toStdString();
+        }
+            break;
+        case 8:
+        {
+            dainfo.sValue = QString("紧急关机模式").toStdString();
+        }
+            break;
+        default:
+            break;
+        }*/
+        data_ptr->mValues[indexpos++] = dainfo;
+    }
+        break;
+    case 0x02:
+    {
+        indexpos = 45;
+       dainfo.bType = true;
+       for(int i=0;i<8;++i)
+       {
+           if(i==4)
+               continue;
+           dainfo.fValue = Getbit(data[3],i);
+           data_ptr->mValues[indexpos++] = dainfo;
+       }
+       for(int i=0;i<8;++i)
+       {
+           dainfo.fValue = Getbit(data[4],i);
+           data_ptr->mValues[indexpos++] = dainfo;
+       }
+       for(int i=0;i<8;++i)
+       {
+           if(i==4)
+               continue;
+           dainfo.fValue = Getbit(data[5],i);
+           data_ptr->mValues[indexpos++] = dainfo;
+       }
+       for(int i=0;i<8;++i)
+       {
+           dainfo.fValue = Getbit(data[6],i);
+           data_ptr->mValues[indexpos++] = dainfo;
+       }
+       for(int i=0;i<8;++i)
+       {
+           dainfo.fValue = Getbit(data[7],i);
+           data_ptr->mValues[indexpos++] = dainfo;
+       }
+       for(int i=0;i<8;++i)
+       {
+           dainfo.fValue = Getbit(data[8],i);
+           data_ptr->mValues[indexpos++] = dainfo;
+       }
+       for(int i=0;i<5;++i)
+       {
+           dainfo.fValue = Getbit(data[8],i);
+           data_ptr->mValues[indexpos++] = dainfo;
+       }
+       for(int i=0;i<8;++i)
+       {
+           if(i==5)
+               continue;
+           dainfo.fValue = Getbit(data[9],i);
+           data_ptr->mValues[indexpos++] = dainfo;
+       }
+       for(int i=0;i<6;++i)
+       {
+           dainfo.fValue = Getbit(data[10],i);
+           data_ptr->mValues[indexpos++] = dainfo;
+       }
+    }
+        break;
+    default:
+        break;
+    }
+    return RE_SUCCESS;
+}
+
+int Electric_message::decode_AcrNetEm(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    DataInfo dainfo;
+    dainfo.bType = true;
+    for(int i=0;i<6;++i)
+    {
+        dainfo.fValue = Getbit(data[3],i);
+        data_ptr->mValues[26+i] = dainfo;
+    }
+    dainfo.bType = false;
+    int nDpt = data[5];
+    int nDct = data[6];
+    int nDpq = data[7];
+    float Ubb = pow(10.00,nDpt-4);
+    float Ibb = pow(10.00,nDct-4);
+    float Pbb = pow(10.00,nDpq-4);
+    for(int i=0;i<6;++i)
+    {
+        dainfo.fValue = (data[9+2*i]*256+data[10+2*i])*Ubb;
+        data_ptr->mValues[i] = dainfo;
+    }
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = (data[21+2*i]*256+data[22+2*i])*Ibb;
+        data_ptr->mValues[6+i] = dainfo;
+    }
+    for(int i=0;i<8;++i)
+    {
+        dainfo.fValue = (data[27+2*i]*256+data[28+2*i])*Pbb;
+        data_ptr->mValues[9+i] = dainfo;
+    }
+    for(int i=0;i<4;++i)
+    {
+        dainfo.fValue = (data[43+2*i]*256+data[44+2*i])*0.001;
+        data_ptr->mValues[17+i] = dainfo;
+    }
+    for(int i=0;i<4;++i)
+    {
+        dainfo.fValue = (data[51+2*i]*256+data[52+2*i])*Pbb;
+        data_ptr->mValues[21+i] = dainfo;
+    }
+    dainfo.fValue = (data[59]*256+data[60])*0.01;
+    data_ptr->mValues[25] = dainfo;
+    return RE_SUCCESS;
+}
 
 
 //执行联动命令

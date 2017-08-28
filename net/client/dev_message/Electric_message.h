@@ -40,12 +40,14 @@ protected:
     int decode_SPM33(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int decode_KSTUPS(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int decode_EM400(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
+    int decode_EA66(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
+    int decode_AcrNetEm(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
 private:
     int              m_Subprotocol;//设备子协议号
-    int                          m_mainprotocol;//主协议编号
+    int              m_mainprotocol;//主协议编号
     session_ptr  m_pSession;//关联连接对象
     int      m_DevAddr;//设备地址
-    //bool  m_Register;
+
     boost::asio::deadline_timer     d_test_send_timer_;//连接定时器
     boost::asio::deadline_timer     d_interrogation_send_timer_;//总召唤定时发送定时器
     int      m_test_send_count;//测试帧发送计数

@@ -169,15 +169,14 @@ bool Bohui_Protocol::creatExcutResultReportMsg(int nReplyId,int nCmdType,string 
 }
 
 
-//创建动环消息头
-bool Bohui_Protocol::createPowerEnvReportHeadMsg(xml_document<> &xmlMsg,xml_node<>* &pHeadMsg)
+//创建上报消息头（合并多个同属性设备）
+bool Bohui_Protocol::createReportHeadMsg(xml_document<> &xmlMsg,xml_node<>* &pHeadMsg,int ReportType)
 {
     //本地MsgId暂时固定为2
-
     xml_node<> *msgRootNode = _createResponseXmlHeader(xmlMsg,2,-1);
     if(msgRootNode!=NULL)
     {
-        xml_node<> *xml_resps = xmlMsg.allocate_node(node_element,CONST_STR_BOHUI_TYPE[BH_POTO_EnvQualityRealtimeReport]);
+        xml_node<> *xml_resps = xmlMsg.allocate_node(node_element,CONST_STR_BOHUI_TYPE[ReportType]);
         msgRootNode->append_node(xml_resps);
         pHeadMsg = xml_resps;
 
@@ -186,7 +185,7 @@ bool Bohui_Protocol::createPowerEnvReportHeadMsg(xml_document<> &xmlMsg,xml_node
     return false;
 }
 
-//创建动环消息体
+//创建动环消息体（合并多个动环设备）
 bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,xml_node<>*> &mXml_Quality,string sDevId,int nDevType
                                                  ,DevMonitorDataPtr &curData,map<int,DeviceMonitorItem> &mapMonitorItem)
 {
@@ -224,7 +223,6 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
         break;
     case DEVICE_SMOKE://烟雾
     case DEVICE_WATER:{//水禁
-
         map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
         for(;cell_iter!=mapMonitorItem.end();++cell_iter){
 
@@ -278,26 +276,19 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
 
             xml_node<> *xml_Quality_Index = NULL;
             xml_Quality_Index = xmlMsg.allocate_node(node_element,mapTypeToStr[cell_iter->second.iTargetId].second.c_str());
-
             string  sValue ="0";
             if(curData->mValues[cell_iter->first].bType==true)
                 sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
-
             xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
+            xml_dev_node ->append_node(xml_Quality_Index);
 
-
-           xml_dev_node ->append_node(xml_Quality_Index);
-
-         }
-
-
+        }
     }
         return true;
     }
 
 
     xml_Quality->append_node(xml_dev_node);
-
 
      map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
      for(;cell_iter!=mapMonitorItem.end();++cell_iter){
@@ -325,10 +316,85 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
         xml_dev_node ->append_node(xml_Quality_Index);
      }
 
+    return true;
+}
 
+//创建发射机上报消息体（合并多个发射机设备）
+bool Bohui_Protocol::appendTransmitterReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,
+                                                    string sDevId,DevMonitorDataPtr &curData,map<int,DeviceMonitorItem> &mapMonitorItem)
+{
+     xml_node<> *xml_Quality = NULL;
+     string str_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString();
+     xml_Quality = xmlMsg.allocate_node(node_element,"Quality");
+     xml_Quality->append_attribute(xmlMsg.allocate_attribute("TransmitterID",xmlMsg.allocate_string(sDevId.c_str())));
+     xml_Quality->append_attribute(xmlMsg.allocate_attribute("CheckDateTime",xmlMsg.allocate_string(str_time.c_str())));
+
+     mXml_Quality[sDevId] = xml_Quality;
+
+     map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
+     for(;cell_iter!=mapMonitorItem.end();++cell_iter){
+
+         if(cell_iter->second.bUpload == false)
+            continue;
+         xml_node<> *xml_Quality_Index = xmlMsg.allocate_node(node_element,"QualityIndex ");
+         //string sType = boost::lexical_cast<std::string>(cell_iter->second.iTargetId);
+         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Type",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
+         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("ModuleType",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
+         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("ModuleID",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
+         //适应博汇发射功率为W的需求
+         float fCurValue = curData->mValues[cell_iter->first].fValue;
+         if(cell_iter->second.sUnit == "W" && cell_iter->first==0){
+             fCurValue *=1000;
+         }
+         string  sValue = str(boost::format("%.2f")%fCurValue);
+         if(curData->mValues[cell_iter->first].bType==true)
+             sValue = str(boost::format("%d")%fCurValue);
+         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
+         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
+         xml_Quality->append_node(xml_Quality_Index);
+
+     }
+
+     return true;
+}
+
+//创建链路设备上报消息体(合并多个链路设备)
+bool Bohui_Protocol::appendLinkReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,string sDevId,
+                                             int nDevType,DevMonitorDataPtr &curData,
+                                             map<int,DeviceMonitorItem> &mapMonitorItem)
+{
+    xml_node<> *xml_dev_node = NULL;
+    xml_dev_node = xmlMsg.allocate_node(node_element,"Dev");
+    xml_dev_node->append_attribute(xmlMsg.allocate_attribute("Type",xmlMsg.allocate_string(boost::lexical_cast<std::string>(nDevType).c_str())));
+    xml_dev_node->append_attribute(xmlMsg.allocate_attribute("ID",xmlMsg.allocate_string(sDevId.c_str())));
+    string strDevtype = GetInst(StationConfig).get_dictionary_value("DeviceType",nDevType);
+    xml_dev_node->append_attribute(xmlMsg.allocate_attribute("Desc",xmlMsg.allocate_string(strDevtype.c_str())));
+
+    mXml_Quality[sDevId] = xml_dev_node;
+
+    map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
+    for(;cell_iter!=mapMonitorItem.end();++cell_iter){
+        if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
+            continue;
+        if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
+            continue;
+        xml_node<> *xml_Quality_Index = NULL;
+        xml_Quality_Index = xmlMsg.allocate_node(node_element,"Quality");
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Type",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("QualitySrc",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("SrcIndex",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
+        string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
+        if(curData->mValues[cell_iter->first].bType==true)
+            sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
+        xml_dev_node->append_node(xml_Quality_Index);
+    }
 
     return true;
 }
+
+
 
 //创建上报数据消息
 bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType,DevMonitorDataPtr &curData,
@@ -424,7 +490,6 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
             case DEVICE_SWITCH://切换设备
             case DEVICE_GPS_TIME://GPS授时器
                 break;
-
             case DEVICE_GS_RECIVE://卫星接收机
             case DEVICE_MW://微波接收机
             case DEVICE_TR://光收发器
@@ -437,6 +502,8 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                 xml_dev_node = xml_reportMsg.allocate_node(node_element,"Dev");
                 xml_dev_node->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(nDevType).c_str())));
                 xml_dev_node->append_attribute(xml_reportMsg.allocate_attribute("ID",xml_reportMsg.allocate_string(sDevId.c_str())));
+                string strDevtype = GetInst(StationConfig).get_dictionary_value("DeviceType",nDevType);
+                xml_dev_node->append_attribute(xml_reportMsg.allocate_attribute("Desc",xml_reportMsg.allocate_string(strDevtype.c_str())));
                 xml_Quality = xml_resps;//接口统一,将上级LinkDevQualityReport节点的指针保存到Quality中
             }break;
             case DEVICE_ANTENNA://同轴开关
