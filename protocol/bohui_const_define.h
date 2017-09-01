@@ -53,18 +53,18 @@ const char DEVICE_TYPE_XML_DESC[][32]={"Transmitter","EnvMonDev","DevList"};
 //                                           // "总电流","模块电压","模块电流","调制度","模块温度","切换模式","激励器"};
 
 enum {
-    CMD_EXC_M_ON=0,
-    CMD_EXC_M_OFF=1,
-    CMD_EXC_A_ON=2,
-    CMD_EXC_A_OFF=3,
-    CMD_H_TO_B = 4,
-    CMD_B_TO_H = 5
+    CMD_EXC_M_ON  =0, //手动开
+    CMD_EXC_M_OFF =1, //手动关
+    CMD_EXC_A_ON  =2, //自动开
+    CMD_EXC_A_OFF =3, //自动关
+    CMD_H_TO_B    =4, //主到备
+    CMD_B_TO_H    =5  //备到主
 };
 
 enum {
-    CMD_EXC_SUCCESS=0,
-    CMD_EXC_FAILER=1,
-    CMD_EXC_GOING=2
+    CMD_EXC_SUCCESS =0,
+    CMD_EXC_FAILER  =1,
+    CMD_EXC_GOING   =2
 };
 
 //const char DEV_CMD_OPR_DESC[][64] = {"",""};//{"手动开机","手动关机","自动开机","自动关机","主到备切换","备到主切换"};

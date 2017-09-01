@@ -85,13 +85,6 @@ void device_session::init_session_config()
         //将配置文件中的自定义命令更新到command_;
         GetInst(LocalConfig).device_cmd((*iter).first,*tmpCommand);
 
-
-        //增加读配置文件获取命令回复长度...
-        //        if(dev_config_ptr->cmd_ack_length_by_id.size()>0)  {
-        //            for(int nCmdCount = 0;nCmdCount<tmpCommand->mapCommand[MSG_DEVICE_QUERY].size();++nCmdCount)
-        //                tmpCommand->mapCommand[MSG_DEVICE_QUERY][nCmdCount].ackLen = dev_config_ptr->cmd_ack_length_by_id[nCmdCount];
-        //        }
-
         dev_agent_and_com[iter->first]=pair<CommandAttrPtr,HMsgHandlePtr>(tmpCommand,pars_agent);
 
         //判断是否时http代理设置
@@ -1162,7 +1155,10 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
     time_t curTime = time(0);
     tm *pCurTime = localtime(&curTime);
 
+    static  char str_time[64];
+    strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
     unsigned long cur_tm = pCurTime->tm_hour*3600+pCurTime->tm_min*60+pCurTime->tm_sec;
+
     map<string,DeviceInfo>::iterator witer = modleInfos_.mapDevInfo.begin();
     for(;witer!=modleInfos_.mapDevInfo.end();++witer)
     {
@@ -1170,6 +1166,9 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
         vector<Command_Scheduler>::iterator cmd_iter = witer->second.vCommSch.begin();
         for(;cmd_iter!=witer->second.vCommSch.end();++cmd_iter)
         {
+
+
+
             //按天控制
             if((*cmd_iter).iDateType == RUN_TIME_DAY){
                 //在５秒内
@@ -1177,19 +1176,25 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                     e_ErrorCode eResult = EC_OBJECT_NULL;
                     bool bRslt =  start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
                     //通知客户端正在执行
-                    if(bRslt==true)
+                    if(bRslt==true){
                         notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
                                                      (*cmd_iter).iCommandType,pCurTime,true,eResult);
+                    }
                 }
             }
             //按星期控制
             if((*cmd_iter).iDateType == RUN_TIME_WEEK){
                 if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0)
                     continue;//超过运行图终止时间且终止时间不为0,则跳过
+
+                pCurTime = localtime(&curTime);
                 if((pCurTime->tm_wday)== (*cmd_iter).iWeek%7){
+
                     tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
                     unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
                     if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
+
+                        //cout<<"按星期 time:  "<<str_time<<"----week="<<pCurTime->tm_wday<<"-----now="<< (*cmd_iter).iWeek%7<<endl;
                         e_ErrorCode eResult = EC_OBJECT_NULL;
                         bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType);
                         //通知客户端正在执行
@@ -1201,10 +1206,11 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
             }
 
             //按月控制
-            if((*cmd_iter).iDateType == RUN_TIME_WEEK){
+            if((*cmd_iter).iDateType == RUN_TIME_MONTH){
                 if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0)
                     continue;//超过运行图终止时间且终止时间不为0,则跳过
-                if((pCurTime->tm_mon+1)== (*cmd_iter).iMonitorMonth ||  (*cmd_iter).iMonitorMonth==0){
+                pCurTime = localtime(&curTime);
+                if((pCurTime->tm_mon+1)== (*cmd_iter).iMonitorMonth || (*cmd_iter).iMonitorMonth==0){
                     tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
                     unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
                     if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
@@ -1229,9 +1235,7 @@ void device_session::notify_client_execute_result(string sDevId,string devName,s
     static  char str_time[64];
     strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
 
-
     //通知http服务器
-
     int cmdAckMsgType = cmdType;
     int cmdOpr=-1;
     int cmdRlt=-1;
@@ -1250,24 +1254,30 @@ void device_session::notify_client_execute_result(string sDevId,string devName,s
         cmdAckMsgType +=1;
         break;
     }
-    if(eResult == EC_OPR_ON_GOING)
-        cmdRlt = CMD_EXC_GOING;
-    else if(eResult == EC_OK)
-        cmdRlt = CMD_EXC_SUCCESS;
-    else if(eResult == EC_FAILED)
-        cmdRlt = CMD_EXC_FAILER;
+    //动环设备博汇要求收集发送(暂针对动环做单独收集处理...)
+    if(GetInst(LocalConfig).http_svc_use() == true){
+        if(eResult == EC_OPR_ON_GOING)
+            cmdRlt = CMD_EXC_GOING;
+        else if(eResult == EC_OK)
+            cmdRlt = CMD_EXC_SUCCESS;
+        else if(eResult == EC_FAILED)
+            cmdRlt = CMD_EXC_FAILER;
 
-    if(cmdRlt>-1 && cmdOpr>-1){
-        string sDesc = devName+DEV_CMD_OPR_DESC(cmdOpr);
-        sDesc+=DEV_CMD_RESULT_DESC(cmdRlt);
-        http_ptr_->send_http_excute_result_messge_to_platform(sDevId,str_time,cmdOpr,sDesc);
+        if(cmdRlt>-1 && cmdOpr>-1){
+            string sDesc = devName+DEV_CMD_OPR_DESC(cmdOpr);
+            sDesc+=DEV_CMD_RESULT_DESC(cmdRlt);
+            http_ptr_->send_http_excute_result_messge_to_platform(sDevId,str_time,cmdOpr,sDesc);
+        }
+
     }
-
-
     //发送给客户端
     if(bNtfFlash){
+
+
+
         send_command_execute_result_message(GetInst(LocalConfig).local_station_id(),sDevId,
-                                            DEVICE_TRANSMITTER,devName,user,(e_MsgType)cmdAckMsgType,(e_ErrorCode)eResult);
+                                            DEVICE_TRANSMITTER,devName,user,(e_MsgType)cmdAckMsgType,
+                                            (e_ErrorCode)eResult);
     }
 }
 
@@ -1286,6 +1296,11 @@ dev_opr_state  device_session::get_opr_state(string sdevId){
 bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType)
 {
 
+    static  char str_time[64];
+    time_t curTime = time(0);
+    tm *pCurTime = localtime(&curTime);
+    strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
+
     if(!is_connected() && short_connect_==false){
         opResult = EC_NET_ERROR;
         return false;
@@ -1296,8 +1311,12 @@ bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opR
         set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
     else{
         opResult = EC_OPR_ON_GOING;//正在执行控制命令
+
+        cout<<"start_exec_task-----user:"<<sUser<<"----cmdType:"<<cmdType<<"----datatime:"<<str_time<<endl;
         return false;//已经有任务正在执行
     }
+
+    cout<<"start_exec_task-----user:"<<sUser<<"----cmdType:"<<cmdType<<"----datatime:"<<str_time<<endl;
 
     //现在执行任务
     if(modleInfos_.netMode.inet_type == NET_MOD_SNMP){
@@ -1373,8 +1392,7 @@ bool device_session::is_monitor_time(string sDevId)
         for(;iter!=day_iter->second.end();++iter){
             if(!(*iter).bMonitorFlag)
                 continue;
-            //if((*iter).iChannelId != ichannel)//add by lk 2017-8-17(区分通道控制)
-            //    continue;
+
             if(curTime>=(*iter).tStartTime && curTime<(*iter).tEndTime && (*iter).bMonitorFlag){
                 return (*iter).bRunModeFlag;
             }

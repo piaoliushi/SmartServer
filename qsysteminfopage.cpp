@@ -149,7 +149,6 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
             else {
                 ethIp1->setText(entry.ip().toString());
             }
-
         }
     }*/
 
@@ -199,10 +198,8 @@ QSystemInfoPage::QSystemInfoPage(QWidget *parent)
     pAboutVlyt->addWidget(lbAboult);
     lbAboult = new QLabel(tr("Tel:0551-65319365 , 65314565"),this);
     lbAboult->setStyleSheet(tr("font: 10pt; color:#45c9d5;"));
-     pAboutVlyt->addWidget(lbAboult);
-
+    pAboutVlyt->addWidget(lbAboult);
     pAboutHlyt->addLayout(pAboutVlyt);
-
     pHMainLyt->addLayout(pAboutHlyt);
     setLayout(pHMainLyt);
 

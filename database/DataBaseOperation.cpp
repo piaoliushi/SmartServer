@@ -725,20 +725,20 @@ bool DataBaseOperation::GetItemAlarmConfig(QSqlDatabase &db, string strDevnum,in
             and b.devicenumber=a.DeviceNumber and b.alarmswitchtype=a.MonitoringIndex and a.alarmenable>0").arg(QString::fromStdString(strDevnum)).arg(iIndex);
             alarmconfigquery.prepare(strSql);
             if(alarmconfigquery.exec()){
-            while(alarmconfigquery.next()) {
-            Alarm_config acfig;
-            acfig.fLimitvalue = alarmconfigquery.value(0).toDouble();
-            acfig.iAlarmlevel = alarmconfigquery.value(1).toInt();
-            acfig.iLimittype = alarmconfigquery.value(2).toInt();
-            acfig.iLinkageEnable = alarmconfigquery.value(3).toInt();
-            if(acfig.iLinkageEnable>0)
-            GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
-            acfig.iDelaytime = alarmconfigquery.value(5).toInt();
-            acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
-            acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
-            acfig.iAlarmid = iThid;
-            acfig.iResumetime = alarmconfigquery.value(8).toInt();
-            vAlarmconfig.push_back(acfig);
+                while(alarmconfigquery.next()) {
+                Alarm_config acfig;
+                acfig.fLimitvalue = alarmconfigquery.value(0).toDouble();
+                acfig.iAlarmlevel = alarmconfigquery.value(1).toInt();
+                acfig.iLimittype = alarmconfigquery.value(2).toInt();
+                acfig.iLinkageEnable = alarmconfigquery.value(3).toInt();
+                if(acfig.iLinkageEnable>0)
+                GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
+                acfig.iDelaytime = alarmconfigquery.value(5).toInt();
+                acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
+                acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
+                acfig.iAlarmid = iThid;
+                acfig.iResumetime = alarmconfigquery.value(8).toInt();
+                vAlarmconfig.push_back(acfig);
 }
 } else {
             cout<<alarmconfigquery.lastError().text().toStdString()<<"GetItemAlarmConfig---alarmconfigquery---error!"<<endl;
@@ -1367,27 +1367,27 @@ bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& devi
     QSqlQuery devquery(db);
     QString strSql=QString("select a.DeviceNumber,a.ProtocolNumber \
                            from Device a,Device_Map_Protocol b where a.DeviceNumber='%1' and b.ProtocolNumber=a.ProtocolNumber").arg(QString::fromStdString(strDevnum));
-            devquery.prepare(strSql);
-            if(devquery.exec())   {
-            if(devquery.next())  {
+    devquery.prepare(strSql);
+    if(devquery.exec())   {
+        if(devquery.next())  {
             device.sDevNum = devquery.value(0).toString().toStdString();
             QString sprotoclnum = devquery.value(1).toString();
             if(GetDevMonItem(db,strDevnum,sprotoclnum,device.map_MonitorItem)==false){
-            ConnectionPool::closeConnection(db);
-            return false;
-}
+                ConnectionPool::closeConnection(db);
+                return false;
+            }
             if(GetAlarmConfig(db,strDevnum,device.map_AlarmConfig)==false){
-            ConnectionPool::closeConnection(db);
-            return false;
-}
-}
-}else {
-            std::cout<<devquery.lastError().text().toStdString()<<"GetUpdateDevAlarmInfo---query---error!"<<std::endl;
-            ConnectionPool::closeConnection(db);
-            return false;
-}
+                        ConnectionPool::closeConnection(db);
+                        return false;
+            }
+        }
+    }else {
+        std::cout<<devquery.lastError().text().toStdString()<<"GetUpdateDevAlarmInfo---query---error!"<<std::endl;
+        ConnectionPool::closeConnection(db);
+        return false;
+    }
 
-            ConnectionPool::closeConnection(db);
+    ConnectionPool::closeConnection(db);
     return true;
 }
 
