@@ -720,13 +720,11 @@ namespace hx_net
         }
     }
 
-    void Link_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode, bool bSnmp, Snmp *snmp, CTarget *target)
+    void Link_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode,int nChannel, bool bSnmp, Snmp *snmp, CTarget *target)
     {
         eErrCode = EC_UNKNOWN;
         switch (icmdType) {
         case MSG_ADJUST_TIME_SET_OPR:
-        {
-        }
             break;
         default:
             break;
@@ -983,10 +981,46 @@ namespace hx_net
         parse_DmpSwitch_data(pdu,target);
     }
 
-     void Link_message::parse_weile_avsp_decorder_data(Pdu &pdu, SnmpTarget &target)
-     {
-         parse_DmpSwitch_data(pdu,target);
-     }
+    void Link_message::parse_weile_avsp_decorder_data(Pdu &pdu, SnmpTarget &target)
+    {
+        if(d_curData_ptr == NULL)
+            return;
+        int pdu_error = pdu.get_error_status();
+        if (pdu_error)
+            return;
+        if (pdu.get_vb_count() == 0)
+            return;
+        int vbcount = pdu.get_vb_count();
+        for(int i=0;i<vbcount;++i)
+        {
+            DataInfo dainfo;
+            Vb nextVb;
+            pdu.get_vb(nextVb, i);
+            string cur_oid = nextVb.get_printable_oid();
+            string cur_value =nextVb.get_printable_value();
+            dainfo.sValue = cur_value;
+            map<string,int>::iterator iter = map_Oid.find(cur_oid);
+            dainfo.bType = false;
+            if(iter!=map_Oid.end())
+            {
+                if((*iter).second==13)
+                {
+                    dainfo.bType = true;
+                    dainfo.fValue = atof(cur_value.c_str());
+                }else if((*iter).second==14)
+                {
+                    dainfo.fValue = atof(cur_value.substr(0,cur_value.find('*')).c_str());
+                }
+                else
+                {
+                    dainfo.fValue = atof(cur_value.substr(0,cur_value.find(' ')).c_str());
+                }
+                d_curData_ptr->mValues[(*iter).second] = dainfo;
+            }
+        }
+
+        m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+    }
 
      void Link_message::GetResultData(DevMonitorDataPtr data_ptr)
      {

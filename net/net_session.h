@@ -66,7 +66,7 @@ namespace hx_net
 
         virtual void  set_last_hb_time(std::time_t t){}
 		virtual	bool  sendMessage(e_MsgType _type,googleMsgPtr gMsgPtr);
-        virtual bool sendRawMessage(unsigned char * data_,int nDatalen){return false;}
+        virtual bool  sendRawMessage(unsigned char * data_,int nDatalen){return false;}
 		//打包发送实时多媒体数据（汇鑫760音频）
         virtual void send_monitor_data_message(string sStationid,string sDevid,int devType,
                                                unchar_ptr curData,DeviceMonitorItem &mapMonitorItem);
@@ -120,7 +120,7 @@ namespace hx_net
         //发送命令到设备
         virtual void send_cmd_to_dev(string sDevId,int cmdType,int childId,e_ErrorCode &eErrCode){}
         virtual void send_cmd_to_dev(CommandUnit cmdUnit,e_ErrorCode &eErrCode){}
-        virtual bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType){return false;}
+        virtual bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,int nChannel=0){return false;}
 
         virtual void init_session_config(){}
         //更新运行图

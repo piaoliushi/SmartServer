@@ -37,7 +37,7 @@ namespace hx_net
         virtual int cur_dev_state(){return -1;}
 
         //执行命令
-        virtual void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
+        virtual void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel=0,
                                    bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL){}
         //执行通用命令
         virtual void exec_general_task(int icmdType,string sUser,devCommdMsgPtr lpParam,

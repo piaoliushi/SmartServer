@@ -45,7 +45,7 @@ namespace hx_net
 		void getRegisterCommand(CommandUnit &cmdUnit);
 
         int   cur_dev_state();
-        void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
+        void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel=0,
                            bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
 
         //执行通用指令

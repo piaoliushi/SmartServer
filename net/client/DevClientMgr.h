@@ -25,7 +25,7 @@ namespace hx_net
 		//通用命令执行
         e_ErrorCode excute_command(string sDevId,int cmdType,string sUser,devCommdMsgPtr lpParam);
         //下发控制指令
-        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType);
+        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType,int nChannel=0);
 
 		void RunNetListen();
 

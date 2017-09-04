@@ -1,3 +1,4 @@
+#include "./net/SvcMgr.h"
 #include "Electric_message.h"
 #include "./104/iec104_types.h"
 #include "./104/iec104.h"
@@ -7,7 +8,6 @@ namespace hx_net
 {
 Electric_message::Electric_message(session_ptr  pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
     :base_message()
-    ,m_pSession(pSession)
     ,d_devInfo(devInfo)
     ,d_test_send_timer_(io_service)
     ,d_interrogation_send_timer_(io_service)
@@ -21,6 +21,8 @@ Electric_message::Electric_message(session_ptr  pSession,boost::asio::io_service
     ,m_Ubb(1.0)//电压比
     ,m_Ibb(20.0)//电流比
 {
+    m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
+
     if(d_devInfo.map_DevProperty.find("VRANG")!=d_devInfo.map_DevProperty.end())
         m_Uo = atoi(d_devInfo.map_DevProperty["VRANG"].property_value.c_str());
     if(d_devInfo.map_DevProperty.find("ARANG")!=d_devInfo.map_DevProperty.end())
@@ -122,6 +124,22 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             }else
                 return -1;
         }
+        case HX_ELEC_CTR:{
+            if(data[0]==0x55 && data[2]==0xF3)
+            {
+                if(data[1]< 0x99 )
+                    return RE_SUCCESS;
+            }
+            else
+            {
+                unsigned char cDes[3]={0};
+                cDes[0]=0x55;
+                cDes[1] = 0x65;
+                cDes[2] = 0xF3;
+                return kmp(data,nDataLen,cDes,3);
+            }
+            break;
+        }
         case YISITE_EA66:
         {
             if(nDataLen < 3)
@@ -131,7 +149,9 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             else
                 return -1;
         }
-        case ACR_NET_EM:{
+        case ACR_NET_EM:
+        case ACR_PZ:
+        case ACR_ARD_2L:{
             if(data[0]==d_devInfo.iAddressCode && data[1]==0x03)
                 return data[2]+2;
             else
@@ -194,6 +214,23 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
             m_pSession->start_handler_data(iaddcode,d_curData_ptr);
             return iresult;
         }
+        case HX_ELEC_CTR:
+        {
+            int iresult = decode_Elecctr(data,d_curData_ptr,nDataLen,iaddcode);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
+        case ACR_PZ:{
+            int iresult = decode_Acr_PZ(data,d_curData_ptr,nDataLen,iaddcode);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
+        case ACR_ARD_2L:
+        {
+            int iresult = decode_Acr_Ard2L(data,d_curData_ptr,nDataLen,iaddcode);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
         }
         break;
     }
@@ -216,6 +253,9 @@ bool Electric_message::IsStandardCommand()
         case PAINUO_SPM33:
         case YINGJIA_EM400:
         case YISITE_EA66:
+        case ACR_NET_EM:
+        case ACR_PZ:
+        case ACR_ARD_2L:
             return true;
         case ABB_104:
             return true;
@@ -234,7 +274,6 @@ void Electric_message::getRegisterCommand(CommandUnit &cmdUnit)
         break;
     }
 }
-
 
 int Electric_message::parse_104_data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode)
 {
@@ -279,7 +318,6 @@ int Electric_message::start()
     iecsock_uframe_send(STARTACT);
     return 0;
 }
-
 
 int Electric_message::stop()
 {
@@ -597,9 +635,127 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
+        case ACR_PZ:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 3;
+            tmUnit.commandLen = 8;
+            tmUnit.commandId[0] = d_devInfo.iAddressCode;
+            tmUnit.commandId[1] = 0x03;
+            tmUnit.commandId[2] = 0x00;
+            tmUnit.commandId[3] = 0x00;
+            tmUnit.commandId[4] = 0x00;
+            tmUnit.commandId[5] = 0x04;
+            unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case ACR_ARD_2L:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 3;
+            tmUnit.commandLen = 8;
+            tmUnit.commandId[0] = d_devInfo.iAddressCode;
+            tmUnit.commandId[1] = 0x03;
+            tmUnit.commandId[2] = 0x00;
+            tmUnit.commandId[3] = 0x00;
+            tmUnit.commandId[4] = 0x00;
+            tmUnit.commandId[5] = 0x09;
+            unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case HX_ELEC_CTR:{
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 5;
+
+            tmUnit.ackLen = 104;
+            tmUnit.commandId[0]=0x55;
+            tmUnit.commandId[1]=0x02;
+            tmUnit.commandId[2]=0xF3;
+            tmUnit.commandId[3]=0xF3;
+            tmUnit.commandId[4]=0x00;
+            vector<CommandUnit> vtUnit;
+            vtUnit.push_back(tmUnit);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY] = vtUnit;
+        }
+            break;
         }
     }
         break;
+    }
+}
+
+void Electric_message::GetSignalCommand(devCommdMsgPtr lpParam, CommandUnit &cmdUnit)
+{
+    switch (d_devInfo.nSubProtocol) {
+    case HX_ELEC_CTR:
+    {
+        if(lpParam->cparams_size()<0)
+            break;
+        cmdUnit.commandLen = 7;
+        cmdUnit.ackLen = 0;
+        cmdUnit.commandId[0]=0x55;
+        cmdUnit.commandId[1]=0x03;
+        cmdUnit.commandId[2]=0xF2;
+        cmdUnit.commandId[3]=atoi(lpParam->cparams(0).sparamvalue().c_str());
+        cmdUnit.commandId[4]=0x01;
+        cmdUnit.commandId[5]=cmdUnit.commandId[2]^cmdUnit.commandId[3]^cmdUnit.commandId[4];
+        cmdUnit.commandId[6]=0x00;
+    }
+        break;
+    default:
+        break;
+    }
+}
+
+void Electric_message::GetSignalCommand(int nChannel, CommandUnit &cmdUnit)
+{
+    switch (d_devInfo.nSubProtocol) {
+    case HX_ELEC_CTR:
+    {
+        cmdUnit.commandLen = 7;
+        cmdUnit.ackLen = 0;
+        cmdUnit.commandId[0]=0x55;
+        cmdUnit.commandId[1]=0x03;
+        cmdUnit.commandId[2]=0xF2;
+        cmdUnit.commandId[3]=nChannel;
+        cmdUnit.commandId[4]=0x01;
+        cmdUnit.commandId[5]=cmdUnit.commandId[2]^cmdUnit.commandId[3]^cmdUnit.commandId[4];
+        cmdUnit.commandId[6]=0x00;
+    }
+        break;
+    default:
+        break;
+    }
+}
+
+void Electric_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode, int nChannel, bool bSnmp, Snmp *snmp, CTarget *target)
+{
+    CommandUnit cmdUnit;
+    cmdUnit.commandLen=0;
+    GetSignalCommand(nChannel,cmdUnit);
+    if(cmdUnit.commandLen>0)
+    {
+        eErrCode = EC_OK;
+        m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
+        m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
+    }
+}
+
+void Electric_message::exec_general_task(int icmdType, string sUser, devCommdMsgPtr lpParam, e_ErrorCode &eErrCode)
+{
+    CommandUnit cmdUnit;
+    cmdUnit.commandLen=0;
+    GetSignalCommand(lpParam,cmdUnit);
+    if(cmdUnit.commandLen>0)
+    {
+        eErrCode = EC_OK;
+        m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
     }
 }
 
@@ -640,8 +796,6 @@ void Electric_message::GetResultData(DevMonitorDataPtr data_ptr)
         }
     }
 }
-
-
 
 int Electric_message::decode_Eda9033A( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 {
@@ -862,7 +1016,6 @@ int Electric_message::decode_KSTUPS(unsigned char *data, DevMonitorDataPtr data_
     data_ptr->mValues[indexpos++] = dainfo;
     return RE_SUCCESS;
 }
-
 
 int Electric_message::decode_EM400(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen,int &iaddcode)
 {
@@ -1211,6 +1364,46 @@ int Electric_message::decode_AcrNetEm(unsigned char *data, DevMonitorDataPtr dat
     return RE_SUCCESS;
 }
 
+int Electric_message::decode_Elecctr(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    iaddcode = d_devInfo.iAddressCode;
+    DataInfo dainfo;
+    dainfo.bType = true;
+    dainfo.fValue = 1.0;
+    data_ptr->mValues[0] = dainfo;
+    return RE_SUCCESS;
+}
+
+int Electric_message::decode_Acr_PZ(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    iaddcode = data[0];
+    DataInfo dainfo;
+    dainfo.bType = false;
+    int digbit = (data[9]*256+data[10]);
+    float fbit = pow(10.00,digbit-3);
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = (data[3+2*i]*256+data[4+2*i])*fbit;
+        data_ptr->mValues[i] = dainfo;
+    }
+    return RE_SUCCESS;
+}
+
+int Electric_message::decode_Acr_Ard2L(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    iaddcode = data[0];
+    DataInfo dainfo;
+    dainfo.bType = false;
+    int digbit = (data[20]);
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = data[4+2*i]/float(digbit);
+        data_ptr->mValues[i*2] = dainfo;
+        dainfo.fValue = data[3+2*i]/float(digbit);
+        data_ptr->mValues[2*i+1] = dainfo;
+    }
+    return RE_SUCCESS;
+}
 
 //执行联动命令
 void Electric_message::exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,string sUser,e_ErrorCode &eErrCode)

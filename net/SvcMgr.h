@@ -68,7 +68,7 @@ namespace hx_net
 		//执行通用指令
         e_ErrorCode excute_command(string sDevId,int cmdType,string sUser,devCommdMsgPtr lpParam);
 
-        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType);
+        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType,int nChannel=0);
 
         //更新运行图
        e_ErrorCode update_monitor_time(string sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,

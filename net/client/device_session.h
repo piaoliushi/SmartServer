@@ -88,6 +88,9 @@ namespace hx_net
         //发送联动命令
         void send_action_conmmand(map<int,vector<ActionParam> > &param,string sUser,int actionType,e_ErrorCode &opResult);
 
+        void set_opr_state(string sdevId,dev_opr_state curState);
+        dev_opr_state get_opr_state(string sdevId);
+
     protected:
         void start_read_head(int msgLen);//开始接收头
         void start_read_body(int msgLen);//开始接收体
@@ -100,7 +103,7 @@ namespace hx_net
         void connect_timeout(const boost::system::error_code& error);
         void connect_time_event(const boost::system::error_code& error);
         void query_send_time_event(const boost::system::error_code& error);
-        void  handler_data(string sDevId,DevMonitorDataPtr curDataPtr);
+        void handler_data(string sDevId,DevMonitorDataPtr curDataPtr);
         void set_stop(bool bStop=true);
         bool is_stop();
         void close_all();
@@ -174,14 +177,13 @@ namespace hx_net
         void http_cmd_close_i();
 
         //开始执行任务
-        bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType);
+        bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,int nChannel=0);
 
 
 
         void notify_client_execute_result(string sDevId,string devName,string user,int cmdType,
                                           tm *pCurTime,bool bNtfFlash,int eResult);
-        void set_opr_state(string sdevId,dev_opr_state curState);
-        dev_opr_state get_opr_state(string sdevId);
+
     private:
         tcp::resolver                     resolver_;
         udp::resolver                    uresolver_;

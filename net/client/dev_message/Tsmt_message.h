@@ -25,7 +25,7 @@ public:
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     void GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit);
     int   cur_dev_state();
-    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
+    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel=0,
                        bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
     //启动定时控制
     void start_task_timeout_timer();

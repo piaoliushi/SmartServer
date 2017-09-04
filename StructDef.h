@@ -205,6 +205,9 @@ typedef enum EDAPROTOCOL
     YINGJIA_EM400        = 8,//广州盈嘉EM400电表
     YISITE_EA66          = 9,//易事特UPS
     ACR_NET_EM           = 10,//安科瑞网络电力仪表
+    HX_ELEC_CTR          = 11,//汇鑫电源控制
+    ACR_PZ               = 12,//安科瑞网络电力仪表
+    ACR_ARD_2L           = 13,//安科瑞网络电力仪表
     ABB_104              = 100,//ABB104电表
 
 }EdaSubProtocol;

@@ -154,14 +154,14 @@ bool DevClient::dev_base_info(string sStationId,DevBaseInfo& devInfo,string sDev
     return bRtValue;
 }
 
-e_ErrorCode DevClient::start_exec_task(string sDevId,string sUser,int cmdType)
+e_ErrorCode DevClient::start_exec_task(string sDevId,string sUser,int cmdType,int nChannel)
 {
     e_ErrorCode opr_rlt = EC_DEVICE_NOT_FOUND;
     boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
     std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
     for(;iter!=device_pool_.end();++iter){
             if(iter->second->is_contain_dev(sDevId)){
-                iter->second->start_exec_task(sDevId,sUser,opr_rlt,cmdType);
+                iter->second->start_exec_task(sDevId,sUser,opr_rlt,cmdType,nChannel);
                 return opr_rlt;
             }
     }

@@ -360,7 +360,7 @@ namespace hx_net
         }
     }
 
-    void Tsmt_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
+    void Tsmt_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel,
                                      bool bSnmp,Snmp *snmp,CTarget *target)
     {
 
