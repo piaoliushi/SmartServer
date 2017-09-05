@@ -20,4 +20,6 @@ void CharStr2HexStr(unsigned char const* pucCharStr, string &pszHexStr, int iSiz
 unsigned short CalcCRC16_KT(unsigned char *pdest, int len);
 unsigned short CalcCRC16_USB(unsigned char *pdest, int len);
 void StringTrim(string &s);
+unsigned int CRC32(unsigned char *pdest, int len);
+
 #endif // UTILITY_H

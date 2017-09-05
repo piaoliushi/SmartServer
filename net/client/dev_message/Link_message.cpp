@@ -169,59 +169,66 @@ namespace hx_net
         query_pdu += vbl;
     }
 
+
     void Link_message::init_weile_avsp_decoder_Oid(){
         Vb vbl;
+        //锁定状态
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.1"] = 0;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.1.0"));
+        query_pdu += vbl;
+        //误码率
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.2"] = 1;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.2.0"));
+        query_pdu += vbl;
+        //C/N载噪比
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.3"] = 2;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.3.0"));
+        query_pdu += vbl;
         //输入1总码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.4"] = 0;
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.4"] = 3;
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.4.0"));
         query_pdu += vbl;
         //输入1有效码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.5"] = 1;
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.5"] = 4;
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.5.0"));
         query_pdu += vbl;
-        //解码总码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.27"] = 2;
-        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.27.0"));
-        query_pdu += vbl;
-        //解码有效码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.28"] = 3;
-        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.28.0"));
-        query_pdu += vbl;
-//        //解码节目编号
-//        map_Oid["1.3.6.1.4.1.8201.5.7.1.29"] = 4;
-//        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.29.0"));
-//        query_pdu += vbl;
         //ASI1输出总码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.36"] = 4;
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.36"] = 5;
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.36.0"));
         query_pdu += vbl;
         //ASI1输出有效码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.37"] = 5;
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.37"] = 6;
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.37.0"));
         query_pdu += vbl;
         //ASI2输出总码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.38"] = 6;
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.38"] = 7;
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.38.0"));
         query_pdu += vbl;
         //ASI2输出有效码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.39"] = 7;
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.39"] = 8;
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.39.0"));
         query_pdu += vbl;
+
         //IP1输出总码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.40"] = 8;
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.40"] = 9;
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.40.0"));
         query_pdu += vbl;
         //IP1输出有效码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.41"] = 9;
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.41"] = 10;
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.41.0"));
         query_pdu += vbl;
         //IP2输出总码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.42"] = 10;
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.42"] = 11;
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.42.0"));
         query_pdu += vbl;
         //IP2输出有效码率
-        map_Oid["1.3.6.1.4.1.8201.5.7.1.43"] = 11;
+        map_Oid["1.3.6.1.4.1.8201.5.7.1.43"] = 12;
         vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.1.43.0"));
+        query_pdu += vbl;
+
+        //接收频率
+        map_Oid["1.3.6.1.4.1.8201.5.7.2.1.2.1.1"] = 13;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.2.1.2.1.1"));
         query_pdu += vbl;
     }
 
@@ -1003,11 +1010,11 @@ namespace hx_net
             dainfo.bType = false;
             if(iter!=map_Oid.end())
             {
-                if((*iter).second==13)
+                if((*iter).second==0)
                 {
                     dainfo.bType = true;
                     dainfo.fValue = atof(cur_value.c_str());
-                }else if((*iter).second==14)
+                }else if((*iter).second==1)
                 {
                     dainfo.fValue = atof(cur_value.substr(0,cur_value.find('*')).c_str());
                 }
@@ -1021,6 +1028,7 @@ namespace hx_net
 
         m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
     }
+
 
      void Link_message::GetResultData(DevMonitorDataPtr data_ptr)
      {
@@ -1043,8 +1051,6 @@ namespace hx_net
              }
          }
      }
-
-
 
     int  Link_message::parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
     {
