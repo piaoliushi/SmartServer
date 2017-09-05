@@ -189,18 +189,18 @@ namespace hx_net{
             {
                 paramindex=data[0];
                 datalen = data[1];
-                if(paramindex==0x31)
+                if(paramindex==0x32)
                 {
                    // data_ptr->mValues
                     dtinfo.bType = false;
-                    dtinfo.fValue = ((data[3]<<8)|data[2])*0.001;
+                    dtinfo.fValue = ((data[2]<<8)|data[3])*0.001;
                     npower=((data[3]<<8)|data[2]);
                     dtinfo.sValue=(QString("%1").arg(dtinfo.fValue)).toStdString();
                     data_ptr->mValues[0]=dtinfo;
                 }
-                else if(paramindex==0x32){
+                else if(paramindex==0x31){
                     dtinfo.bType = false;
-                    dtinfo.fValue = ((data[3]<<8)|data[2]);
+                    dtinfo.fValue = ((data[2]<<8)|data[3]);
                     dtinfo.sValue=(QString("%1").arg(dtinfo.fValue)).toStdString();
                     rfpower=((data[3]<<8)|data[2]);
                     data_ptr->mValues[1]=dtinfo;
