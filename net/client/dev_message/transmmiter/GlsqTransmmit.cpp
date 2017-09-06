@@ -131,7 +131,7 @@ namespace hx_net{
             tmUnit.commandId[8]=0x01;
             tmUnit.commandId[9]=0x01;
             tmUnit.commandId[1]=((0x00-(tmUnit.commandId[3]+
-                                  tmUnit.commandId[4]+
+                                  tmUnit.commandId[4]+tmUnit.commandId[5]+
                                  tmUnit.commandId[6]+tmUnit.commandId[7]+
                     tmUnit.commandId[8]+tmUnit.commandId[9]))&0xFF);
             vector<CommandUnit> vtHTurnOnUnit;
@@ -139,7 +139,7 @@ namespace hx_net{
             cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR] = vtHTurnOnUnit;
             tmUnit.commandId[9]=0x00;
             tmUnit.commandId[1]=((0x00-(tmUnit.commandId[3]+
-                                  tmUnit.commandId[4]+
+                                  tmUnit.commandId[4]+tmUnit.commandId[5]+
                                  tmUnit.commandId[6]+tmUnit.commandId[7]+
                     tmUnit.commandId[8]+tmUnit.commandId[9]))&0xFF);
             vector<CommandUnit> vtTurnOffUnit;
@@ -153,7 +153,7 @@ namespace hx_net{
             tmUnit.commandId[10]=0xAA;
             tmUnit.commandId[11]=0x0D;
             tmUnit.commandId[1]=((0x00-(tmUnit.commandId[3]+tmUnit.commandId[11]+
-                                  tmUnit.commandId[4]+tmUnit.commandId[10]+
+                                  tmUnit.commandId[4]+tmUnit.commandId[10]+tmUnit.commandId[5]+
                                  tmUnit.commandId[6]+tmUnit.commandId[7]+
                     tmUnit.commandId[8]+tmUnit.commandId[9]))&0xFF);
             //MSG_DEV_RESET_OPR
@@ -237,8 +237,10 @@ namespace hx_net{
         case 0x05:{
             return GetPowerampData(data,data_ptr,nDataLen,3);
         }
+        default:
+            return RE_CMDACK;
         }
-        return 0;
+        return RE_SUCCESS;
     }
 
     int GlsqTransmmit::GetExcitData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int excitnum)
