@@ -697,8 +697,11 @@ namespace hx_net
             return;
         }
 
-        if (cd)
-          ((Link_message*)cd)->Link_Callback(reason, session, pdu, target);
+        if (cd){
+
+            cout << "Succeed to issue SNMP aysnc_callback!!";
+            ((Link_message*)cd)->Link_Callback(reason, session, pdu, target);
+        }
     }
 
 
@@ -993,10 +996,14 @@ namespace hx_net
         if(d_curData_ptr == NULL)
             return;
         int pdu_error = pdu.get_error_status();
-        if (pdu_error)
+        if (pdu_error){
+             cout << "parse_weile_avsp_decorder_data-----status---"<<pdu_error<<endl;
             return;
-        if (pdu.get_vb_count() == 0)
+        }
+        if (pdu.get_vb_count() == 0){
+            cout << "parse_weile_avsp_decorder_data-----get_vb_count=0---"<<endl;
             return;
+        }
         int vbcount = pdu.get_vb_count();
         for(int i=0;i<vbcount;++i)
         {
@@ -1026,6 +1033,7 @@ namespace hx_net
             }
         }
 
+        cout << "parse_weile_avsp_decorder_data-----ok---"<<endl;
         m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
     }
 
