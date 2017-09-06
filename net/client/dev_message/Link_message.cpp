@@ -228,7 +228,7 @@ namespace hx_net
 
         //接收频率
         map_Oid["1.3.6.1.4.1.8201.5.7.2.1.2.1.1"] = 13;
-        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.2.1.2.1.1"));
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.7.2.1.2.1.1.0"));
         query_pdu += vbl;
     }
 
@@ -699,7 +699,7 @@ namespace hx_net
 
         if (cd){
 
-            cout << "Succeed to issue SNMP aysnc_callback!!";
+            //cout << "Succeed to issue SNMP aysnc_callback!!";
             ((Link_message*)cd)->Link_Callback(reason, session, pdu, target);
         }
     }
@@ -1033,7 +1033,7 @@ namespace hx_net
             }
         }
 
-        cout << "parse_weile_avsp_decorder_data-----ok---"<<endl;
+        //cout << "parse_weile_avsp_decorder_data-----ok---"<<endl;
         m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
     }
 
