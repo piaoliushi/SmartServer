@@ -562,18 +562,47 @@ namespace hx_net
 	}
 
 	//移出连接,清理登陆信息
+//    int LocalServer::remove_connection_handler(session_ptr ch_ptr)
+//	{
+//		boost::recursive_mutex::scoped_lock lock(mutex_);
+//		std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.find(ch_ptr);
+//		if(iter!=session_pool_.end())
+//		{
+//			string curUsr = (*iter).second.usr_;
+//			string curPsw = (*iter).second.psw_;
+//			string curUsrId = (*iter).second.usr_number_;
+//			tcp::endpoint remote_add = (*iter).second.endPoint_;
+//			GetInst(SvcMgr).get_notify()->OnClientOffline(remote_add.address().to_string(),remote_add.port());
+//			(*iter).first->close_i();
+//            std::map<string,vector<session_ptr> >::iterator itersession = devToUser_.begin();
+//            for(;itersession!=devToUser_.end();++itersession)
+//            {
+//                vector<session_ptr>::iterator itervect= (*itersession).second.begin();
+//                for(;itervect!=(*itersession).second.end();++itervect){
+//                    if((*itervect) == iter->first){
+//                        (*itersession).second.erase(itervect);
+//                        break;
+//                    }
+//                }
+//            }
+//			session_pool_.erase(iter);
+//			return 0;
+//		}
+//		return -1;
+//	}
+
     int LocalServer::remove_connection_handler(session_ptr ch_ptr)
-	{
-		boost::recursive_mutex::scoped_lock lock(mutex_);
-		std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.find(ch_ptr);
-		if(iter!=session_pool_.end())
-		{
-			string curUsr = (*iter).second.usr_;
-			string curPsw = (*iter).second.psw_;
-			string curUsrId = (*iter).second.usr_number_;
-			tcp::endpoint remote_add = (*iter).second.endPoint_;
-			GetInst(SvcMgr).get_notify()->OnClientOffline(remote_add.address().to_string(),remote_add.port());
-			(*iter).first->close_i();
+    {
+        boost::recursive_mutex::scoped_lock lock(mutex_);
+        std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.find(ch_ptr);
+        if(iter!=session_pool_.end())
+        {
+            string curUsr = (*iter).second.usr_;
+            string curPsw = (*iter).second.psw_;
+            string curUsrId = (*iter).second.usr_number_;
+            tcp::endpoint remote_add = (*iter).second.endPoint_;
+            GetInst(SvcMgr).get_notify()->OnClientOffline(remote_add.address().to_string(),remote_add.port());
+            (*iter).first->close_i();
             std::map<string,vector<session_ptr> >::iterator itersession = devToUser_.begin();
             for(;itersession!=devToUser_.end();++itersession)
             {
@@ -585,11 +614,21 @@ namespace hx_net
                     }
                 }
             }
-			session_pool_.erase(iter);
-			return 0;
-		}
-		return -1;
-	}
+            map<session_ptr,HandlerKey>::iterator useriter = session_pool_.find(ch_ptr);
+            if(useriter!=session_pool_.end())
+            {
+                time_t curTm=time(0);
+                e_ErrorCode errorCode;
+                UserInformation sUserInfo;
+                GetInst(DataBaseOperation).GetUserInfo((*useriter).second.usr_,sUserInfo);
+                handSignInAndOut(ch_ptr,false,curTm,sUserInfo,errorCode);
+            }
+            session_pool_.erase(iter);
+            return 0;
+        }
+        return -1;
+    }
+
 
     int LocalServer::remove_all()
 	{

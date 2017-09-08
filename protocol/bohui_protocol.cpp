@@ -77,7 +77,7 @@ bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody,string
     {
         //cout<<strMsg<<endl;
         //xml载入异常，replyID=-100(暂定，待修改),vlaue=10(xml解析错误),
-         createResponseMsg(nMsgId,10,CONST_STR_BOHUI_TYPE[BH_POTO_XmlParseError],responseBody);
+        createResponseMsg(nMsgId,10,CONST_STR_BOHUI_TYPE[BH_POTO_XmlParseError],responseBody);
     }
 
     return true;
@@ -125,7 +125,7 @@ bool Bohui_Protocol::createResponseMsg(int nReplyId,int nValue,const char* nCmdT
         xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Type",nCmdType));//CONST_STR_BOHUI_TYPE[nCmdType]
         if(nValue==0)
         {
-           // int rsltValue = 0;
+
             if(strcmp(nCmdType,CONST_STR_BOHUI_TYPE[0])==0)
                 _execTsmtQueryCmd(xml_responseMsg,msgRootNode,nValue);//查询发射机信息
             else if(strcmp(nCmdType,CONST_STR_BOHUI_TYPE[1])==0)

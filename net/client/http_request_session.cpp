@@ -135,7 +135,7 @@ http_request_session::~http_request_session(void)
                                                               map<int,DeviceMonitorItem> &mapMonitorItem)
  {
      //动环数据收集发送
-      if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){//动环设备
+      if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
 
            boost::recursive_mutex::scoped_lock lock(http_env_stream_mutex_);
            if(is_need_report_data(env_report_span_)){
