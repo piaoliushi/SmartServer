@@ -45,10 +45,10 @@ protected:
     void  schedules_task_time_out(const boost::system::error_code& error);
     //检测运行状态
     void  detect_run_state(DevMonitorDataPtr curDataPtr);
-    void  exec_trunon_task_(int nType,e_ErrorCode &eErrCode);
-    void  exec_trunoff_task_(e_ErrorCode &eErrCode);
+    void  exec_trunon_task_(int nType,e_ErrorCode &eErrCode,int &nExcutResult);
+    void  exec_trunoff_task_(e_ErrorCode &eErrCode,int &nExcutResult);
     void  exec_other_task_(e_ErrorCode &eErrCode);
-    void  excute_task_cmd(e_ErrorCode &eErrCode);
+    void  excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult);
     void  GetResultData(DevMonitorDataPtr data_ptr);
     void  CreateObject();
     bool  cmd_excute_is_ok();
@@ -72,13 +72,12 @@ private:
     bool                   d_relate_Agent_;//主机代理标志
     bool                   d_antenna_Agent_;//天线代理标志
     time_t                 d_OprStartTime;//提交控制命令开始时间
-    Transmmiter           *m_ptransmmit;
+    Transmmiter           *d_ptransmmit;
     DevMonitorDataPtr      d_curData_ptr;
     Snmp                  *d_cur_snmp;
     bool                   d_bUse_snmp;
     CTarget               *d_cur_target;
 
-    //map<int,time_t>        d_tmLastSaveTime;//数据保存时间
 };
 typedef boost::shared_ptr<hx_net::Tsmt_message>  Tsmt_message_ptr;
 typedef boost::weak_ptr<hx_net::Tsmt_message>    Tsmt_message_weak_ptr;

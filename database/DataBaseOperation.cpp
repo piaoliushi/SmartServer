@@ -128,8 +128,8 @@ bool DataBaseOperation::GetDeviceDataDictionary(map<string,map<int,string> >& ma
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery query(db);
-    QString strSql=QString("select type,code,name,remark from data_dictionary where type in('DeviceType','s_tsmt_target_desc','s_sh_tsmt_rf_mod','s_sh_tsmt_gps_s',\
-                           's_sh_tsmt_cpilot','s_sh_tsmt_chpn','s_rsps_result_desc','s_dtmb_mod','s_dtmb_base','s_cmd_result_desc','s_cmd_opr_desc','s_base','s_alarm_event') order by type,code");
+    QString strSql=QString("select type,code,name,remark from data_dictionary where type in('DeviceType','CommandType','s_tsmt_target_desc','s_sh_tsmt_rf_mod','s_sh_tsmt_gps_s',\
+                           's_sh_tsmt_cpilot','s_sh_tsmt_chpn','s_rsps_result_desc','s_dtmb_mod','s_dtmb_base','s_cmd_result_desc','s_cmd_opr_desc','s_base','s_alarm_event','s_cmd_excute_mode') order by type,code");
             query.prepare(strSql);
     if(!query.exec()){
         cout<<query.lastError().text().toStdString()<<"GetDataDictionary---query---error!"<<endl;
@@ -218,8 +218,8 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
     QString strSql=QString("select NetType,IpAddress,LocalPort,PeerPort,ConnectType,CommTypeNumber from Net_Communication_Mode where CommTypeNumber in\
                            (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=5)").arg(QString::fromStdString(sStationId));
                            netquery.prepare(strSql);
-            if(netquery.exec()){
-            while(netquery.next()){
+    if(netquery.exec()){
+        while(netquery.next()){
             ModleInfo info;
             info.iCommunicationMode = 1;
             info.netMode.inet_type = netquery.value(0).toInt();
@@ -233,59 +233,59 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
             QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
             QSqlQuery net1query(db);
             if(net1query.exec(strQdev)) {
-            while(net1query.next()) {
-            DeviceInfo dev;
-            //获得设备配置信息,且判断该设备是否授权
-            GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
-            if(dev.sDevNum.length()>0)
-            info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
-}
-}
+                while(net1query.next()) {
+                    DeviceInfo dev;
+                    //获得设备配置信息,且判断该设备是否授权
+                    GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
+                    if(dev.sDevNum.length()>0)
+                    info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
+                }
+            }
 
             if(net1query.size()>0 && info.mapDevInfo.size()>0)
             v_Linkinfo.push_back(info);
-}
-}
-else {
-cout<<netquery.lastError().text().toStdString()<<"GetAllDevInfo---netquery---error!"<<endl;
-}
-QSqlQuery comquery(db);
-strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode where CommTypeNumber in\
-               (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=4)").arg(QString::fromStdString(sStationId));
-               comquery.prepare(strSql);
-        if(comquery.exec()){
+        }
+    }
+    else {
+        cout<<netquery.lastError().text().toStdString()<<"GetAllDevInfo---netquery---error!"<<endl;
+    }
+    QSqlQuery comquery(db);
+    strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode where CommTypeNumber in\
+                   (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=4)").arg(QString::fromStdString(sStationId));
+    comquery.prepare(strSql);
+    if(comquery.exec()){
         while(comquery.next()) {
-        ModleInfo info;
-        info.iCommunicationMode = 0;
-        info.comMode.icomport = comquery.value(0).toInt();
-        info.comMode.irate = comquery.value(1).toInt();
-        info.comMode.idata_bit = comquery.value(2).toInt();
-        info.comMode.istop_bit = comquery.value(3).toInt();
-        info.comMode.iparity_bit = comquery.value(4).toInt();
+            ModleInfo info;
+            info.iCommunicationMode = 0;
+            info.comMode.icomport = comquery.value(0).toInt();
+            info.comMode.irate = comquery.value(1).toInt();
+            info.comMode.idata_bit = comquery.value(2).toInt();
+            info.comMode.istop_bit = comquery.value(3).toInt();
+            info.comMode.iparity_bit = comquery.value(4).toInt();
 
-        QString qtrNum = comquery.value(5).toString();
-        info.sModleNumber = qtrNum.toStdString();
-        QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
-        QSqlQuery net1query(db);
-        if(net1query.exec(strQdev)) {
-        while(net1query.next()){
-        DeviceInfo dev;
-        GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
-        if(dev.sDevNum.length()>0)
-        info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
+            QString qtrNum = comquery.value(5).toString();
+            info.sModleNumber = qtrNum.toStdString();
+            QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
+            QSqlQuery net1query(db);
+            if(net1query.exec(strQdev)) {
+                while(net1query.next()){
+                    DeviceInfo dev;
+                    GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
+                    if(dev.sDevNum.length()>0)
+                        info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
+                }
+            }
+
+            if(net1query.size()>0 && info.mapDevInfo.size()>0)
+            v_Linkinfo.push_back(info);
         }
-        }
-
-        if(net1query.size()>0 && info.mapDevInfo.size()>0)
-        v_Linkinfo.push_back(info);
-        }
-        }else{
-cout<<comquery.lastError().text().toStdString()<<"GetAllDevInfo---comquery---error!"<<endl;
-}
+    }else{
+        cout<<comquery.lastError().text().toStdString()<<"GetAllDevInfo---comquery---error!"<<endl;
+    }
 
 
-ConnectionPool::closeConnection(db);
-return true;
+    ConnectionPool::closeConnection(db);
+    return true;
 }
 
 //获取设备监控运行图
@@ -473,8 +473,7 @@ return true;
 //获取设备属性信息
 bool DataBaseOperation::GetDevProperty(QSqlDatabase &db, string strDevnum,map<string,DevProperty>& map_property )
 {
-    //QSqlDatabase db = ConnectionPool::openConnection();
-    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+    if(!db.isOpen() || !db.isValid()) {
         std::cout<<"GetDevProperty is error -------------------------------- the database is interrupt"<<std::endl;
         return false;
     }
@@ -482,21 +481,21 @@ bool DataBaseOperation::GetDevProperty(QSqlDatabase &db, string strDevnum,map<st
     QSqlQuery itemschquery(db);
     QString strSql=QString("select a.BasePropertyNumber,a.PropertyValueType,a.PropertyValue,b.PropertyName from Device_Property_Role_Bind a,Base_Property b \
                            where a.DeviceNumber='%1' and b.BasePropertyNumber=a.BasePropertyNumber").arg(QString::fromStdString(strDevnum));
-            itemschquery.prepare(strSql);
-            if(itemschquery.exec()) {
+    itemschquery.prepare(strSql);
+        if(itemschquery.exec()) {
             while(itemschquery.next()) {
-            DevProperty dp;
-            dp.property_num = itemschquery.value(0).toString().toStdString();
-            dp.property_type = itemschquery.value(1).toInt();
-            dp.property_value = itemschquery.value(2).toString().toStdString();
-            dp.property_name = itemschquery.value(3).toString().toStdString();
-            map_property[dp.property_name] = dp;
-}
-}  else{
-cout<<itemschquery.lastError().text().toStdString()<<"GetDevProperty---itemschquery---error!"<<endl;
-return false;
-}
-return true;
+                DevProperty dp;
+                dp.property_num = itemschquery.value(0).toString().toStdString();
+                dp.property_type = itemschquery.value(1).toInt();
+                dp.property_value = itemschquery.value(2).toString().toStdString();
+                dp.property_name = itemschquery.value(3).toString().toStdString();
+                map_property[dp.property_name] = dp;
+            }
+        }else{
+            cout<<itemschquery.lastError().text().toStdString()<<"GetDevProperty---itemschquery---error!"<<endl;
+            return false;
+        }
+    return true;
 }
 
 //获取网络配置属性
@@ -1738,6 +1737,47 @@ bool DataBaseOperation::AddSignout(const string sSignerNumber, const time_t tint
     }
     ConnectionPool::closeConnection(db);
     return true;
+}
+
+//添加命令执行日志
+bool DataBaseOperation::AddExcuteCommandLog(const string sDevNum,int nCommandType,
+                                            const string sResult,const string sUser)
+{
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {//IsOpen()
+        std::cout<<"AddExcuteCommandLog error  ------ the database is interrupt"<<std::endl;
+        return false;
+    }
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    time_t tmTime = time(0);
+
+    QSqlQuery insertquery(db);
+    QString strSql;
+
+    int  nMode = 0;
+    if(sUser == "timer")
+        nMode = 1;
+    else if(sUser == "auto")
+        nMode = 2;
+
+    strSql = QString("insert into device_operation_record(devicenumber,operation,operationtime,"
+                     "operationresult,operationuser,operationcommand) values(:devid,:opermod,:opertm,:operrslt,:operuser,:opercmmd)");
+    insertquery.prepare(strSql);
+    insertquery.bindValue(":devid",QString::fromStdString(sDevNum));
+    insertquery.bindValue(":opermod",nMode);
+    insertquery.bindValue(":opertm",QDateTime::fromTime_t(tmTime));
+    insertquery.bindValue(":operrslt",QString::fromStdString(sResult));
+    insertquery.bindValue(":operuser",QString::fromStdString(sUser));
+    insertquery.bindValue(":opercmmd",nCommandType);
+    if(!insertquery.exec()){
+        cout<<insertquery.lastError().text().toStdString()<<"AddExcuteCommandLog---inquery---error!"<<endl;
+        ConnectionPool::closeConnection(db);
+        return false;
+    }
+
+    ConnectionPool::closeConnection(db);
+    return true;
+
 }
 
 }

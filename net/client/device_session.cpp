@@ -1172,13 +1172,12 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                 //在５秒内
                 if(curTime>=(*cmd_iter).tExecuteTime && curTime<(*cmd_iter).tExecuteTime+5){
 
-
                     e_ErrorCode eResult = EC_OBJECT_NULL;
                     bool bRslt =  start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType,
                                                   (*cmd_iter).iChannelId);
                     //通知客户端正在执行
                     if(bRslt==true){
-                        notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
+                        notify_client_execute_result(witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
                                                      (*cmd_iter).iCommandType,pCurTime,true,eResult);
                     }
                 }
@@ -1195,13 +1194,12 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                     unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
                     if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
 
-                        //cout<<"按星期 time:  "<<str_time<<"----week="<<pCurTime->tm_wday<<"-----now="<< (*cmd_iter).iWeek%7<<endl;
                         e_ErrorCode eResult = EC_OBJECT_NULL;
                         bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType
                                                      ,(*cmd_iter).iChannelId);
                         //通知客户端正在执行
                         if(bRslt==true)
-                            notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
+                            notify_client_execute_result(witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
                                                          (*cmd_iter).iCommandType,pCurTime,true,eResult);
                     }
                 }
@@ -1221,7 +1219,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                                                      (*cmd_iter).iChannelId);
                         //通知客户端正在执行
                         if(bRslt==true)
-                            notify_client_execute_result(witer->first,witer->second.sDevName,"timer",
+                            notify_client_execute_result(witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
                                                          (*cmd_iter).iCommandType,pCurTime,true,eResult);
                     }
                 }
@@ -1232,7 +1230,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
     start_task_schedules_timer();
 }
 
-void device_session::notify_client_execute_result(string sDevId,string devName,string user,int cmdType, tm *pCurTime,
+void device_session::notify_client_execute_result(string sDevId,string devName,int devType,string user,int cmdType, tm *pCurTime,
                                                   bool bNtfFlash,int eResult)
 {
     static  char str_time[64];
@@ -1253,6 +1251,14 @@ void device_session::notify_client_execute_result(string sDevId,string devName,s
         cmdOpr = (user=="timer")?CMD_EXC_A_OFF:CMD_EXC_M_OFF;
         cmdAckMsgType +=1;
     }break;
+    case MSG_ANTENNA_HTOB_OPR:{
+        cmdOpr = CMD_H_TO_B;
+        cmdAckMsgType +=1;
+    }break;
+    case MSG_ANTENNA_BTOH_OPR:{
+        cmdOpr = CMD_B_TO_H;
+        cmdAckMsgType +=1;
+    }
     default:
         cmdAckMsgType +=1;
         break;
@@ -1276,11 +1282,9 @@ void device_session::notify_client_execute_result(string sDevId,string devName,s
     //发送给客户端
     if(bNtfFlash){
 
-
-
         send_command_execute_result_message(GetInst(LocalConfig).local_station_id(),sDevId,
-                                            DEVICE_TRANSMITTER,devName,user,(e_MsgType)cmdAckMsgType,
-                                            (e_ErrorCode)eResult);
+                                            devType,devName,user,(e_MsgType)cmdAckMsgType,
+                                            (e_ErrorCode)eResult);//DEVICE_TRANSMITTER
     }
 }
 
@@ -1314,16 +1318,14 @@ bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opR
         set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
     else{
         opResult = EC_OPR_ON_GOING;//正在执行控制命令
-
-        cout<<"start_exec_task-----user:"<<sUser<<"----cmdType:"<<cmdType<<"----datatime:"<<str_time<<endl;
         return false;//已经有任务正在执行
     }
 
-    cout<<"start_exec_task-----user:"<<sUser<<"----cmdType:"<<cmdType<<"----datatime:"<<str_time<<endl;
 
     //现在执行任务
     if(modleInfos_.netMode.inet_type == NET_MOD_SNMP){
-        dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,nChannel,true,snmp_ptr_,target_ptr_);
+        dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,nChannel,
+                                                        true,snmp_ptr_,target_ptr_);
     }
     else
         dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,nChannel);

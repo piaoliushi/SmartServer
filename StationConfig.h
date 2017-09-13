@@ -11,10 +11,13 @@ using namespace std;
 #define GET_CONST_STR(X,Y)  GetInst(StationConfig).get_dictionary_value(X,Y)
 #define CONST_STR_RESPONSE_VALUE_DESC(Y)  GetInst(StationConfig).get_dictionary_value("s_rsps_result_desc",Y)
 #define DEV_CMD_OPR_DESC(Y)    GetInst(StationConfig).get_dictionary_value("s_cmd_opr_desc",Y)
+#define DEV_CMD_OPR_MODE(Y)    GetInst(StationConfig).get_dictionary_value("s_cmd_excute_mode",Y)
 #define DEV_CMD_RESULT_DESC(Y)      GetInst(StationConfig).get_dictionary_value("s_cmd_result_desc",Y)
 #define CONST_STR_ALARM_CONTENT(Y)  GetInst(StationConfig).get_dictionary_value("s_alarm_event",Y)
 #define GLOBAL_STR(Y)  GetInst(StationConfig).get_dictionary_value("s_base",Y)
 #define GET_POWER_STR(Y)   GetInst(StationConfig).get_dictionary_value("s_power_base",Y)
+
+#define DEV_CMD_OPR_TYPE(Y)    GetInst(StationConfig).get_dictionary_value("CommandType",Y)
 
 
 class StationConfig
