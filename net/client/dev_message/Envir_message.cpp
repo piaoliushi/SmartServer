@@ -4,9 +4,10 @@
 namespace hx_net
 {
 
-    Envir_message::Envir_message(session_ptr pSession,DeviceInfo &devInfo)
+    Envir_message::Envir_message(session_ptr pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
 		:m_pSession(pSession)
         ,d_devInfo(devInfo)
+        ,io_service_(io_service)
 	{
         if(IsStandardCommand())
             d_curData_ptr = DevMonitorDataPtr(new Data);
@@ -794,6 +795,8 @@ namespace hx_net
 
                 if(param.size()>=2){
                     int param_2 = atoi(param[1][0].strParamValue.c_str());
+                    boost::asio::deadline_timer delay_send_timer(io_service_, boost::posix_time::milliseconds(20));
+                    delay_send_timer.wait();
                     m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNON_OPR,param_2,eErrCode);
                 }
             }

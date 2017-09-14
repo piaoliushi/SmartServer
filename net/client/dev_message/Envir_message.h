@@ -7,7 +7,7 @@ namespace hx_net
 class Envir_message:public base_message
 {
 public:
-    Envir_message(session_ptr pSession,DeviceInfo &devInfo);
+    Envir_message(session_ptr pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo);
     ~Envir_message(void);
 public:
     int  check_msg_header(unsigned char *data,int nDataLen,CmdType cmdType,int number);
@@ -42,5 +42,6 @@ private:
     DeviceInfo           &d_devInfo;//设备信息
     DevMonitorDataPtr     d_curData_ptr;
     time_t                d_OprStartTime;//提交控制命令开始时间
+    boost::asio::io_service&                   io_service_;
 };
 }

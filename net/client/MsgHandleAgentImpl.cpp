@@ -34,7 +34,7 @@ namespace hx_net
         case DEVICE_SMOKE:
         case DEVICE_WATER:
         case DEVICE_AIR:
-            m_pbaseMsg = new Envir_message(m_pSessionPtr,m_devInfo);
+            m_pbaseMsg = new Envir_message(m_pSessionPtr,m_io_service,m_devInfo);
 			break;
         case DEVICE_GPS:
             m_pbaseMsg = new Timer_message(m_pSessionPtr,m_devInfo);
