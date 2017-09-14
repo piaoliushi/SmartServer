@@ -1323,7 +1323,7 @@ bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opR
 
 
     //现在执行任务
-    if(modleInfos_.netMode.inet_type == NET_MOD_SNMP){
+    if(modleInfos_.iCommunicationMode==CON_MOD_NET && modleInfos_.netMode.inet_type == NET_MOD_SNMP){
         dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,nChannel,
                                                         true,snmp_ptr_,target_ptr_);
     }
@@ -2071,11 +2071,10 @@ bool device_session::excute_command(int cmdType,string sUser,devCommdMsgPtr lpPa
     }
 
     //现在执行任务
-    if(modleInfos_.netMode.inet_type == NET_MOD_SNMP){
+    if(modleInfos_.iCommunicationMode==CON_MOD_NET && modleInfos_.netMode.inet_type == NET_MOD_SNMP){
         //dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,true,snmp_ptr_,target_ptr_);
     }
     else{
-
         dev_agent_and_com[sDevId].second->exec_general_task(cmdType,sUser,lpParam,opResult);
     }
     return true;

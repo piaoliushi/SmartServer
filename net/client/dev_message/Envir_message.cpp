@@ -770,11 +770,13 @@ namespace hx_net
     //执行通用命令
     void Envir_message::exec_general_task(int icmdType,string sUser,devCommdMsgPtr lpParam,e_ErrorCode &eErrCode)
     {
+         cout<<"exec_general_task ==inter= "<<endl;
         switch (icmdType) {
         case MSG_DEV_TURNOFF_OPR:{
             if(m_pSession!=NULL){
                 eErrCode = EC_OK;
                 int param_2 = atoi(lpParam->cparams(0).sparamvalue().c_str());
+                cout<<"send MSG_DEV_TURNOFF_OPR---"<<"param:"<<param_2<<endl;
                 m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,param_2,eErrCode);
             }
         }

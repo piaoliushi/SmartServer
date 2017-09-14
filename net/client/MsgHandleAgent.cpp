@@ -187,8 +187,10 @@ namespace hx_net
     //执行通用指令
     void MsgHandleAgent::exec_general_task(int icmdType,string sUser,devCommdMsgPtr lpParam,
                                            e_ErrorCode &eErrCode){
+
         if(m_msgImpl==NULL)
             return ;
+
         return m_msgImpl->exec_general_task(icmdType,sUser,lpParam,eErrCode);
     }
 
