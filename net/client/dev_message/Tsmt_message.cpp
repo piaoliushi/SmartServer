@@ -50,9 +50,9 @@ namespace hx_net
                 DeviceInfo *curDev =  GetInst(StationConfig).get_devinfo_by_id((*dev_iter).sAstNum);
                 if(curDev==NULL)
                     continue;
-                if(curDev->iDevType == DEVICE_TRANSMITTER)
+                if(curDev->iDevType == DEVICE_TRANSMITTER && (*dev_iter).iAssType == DEV_TO_DEV)
                     d_relate_tsmt_ptr_ = curDev;
-                if(curDev->iDevType == DEVICE_ANTENNA)
+                if(curDev->iDevType == DEVICE_ANTENNA && (*dev_iter).iAssType == TSMT_TO_ATTENA)
                     d_relate_antenna_ptr_ = curDev;
             }
         }

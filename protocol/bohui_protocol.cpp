@@ -507,7 +507,7 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                 xml_Quality = xml_resps;//接口统一,将上级LinkDevQualityReport节点的指针保存到Quality中
             }break;
             case DEVICE_ANTENNA://同轴开关
-                break;
+                return false;
             }
             xml_Quality->append_node(xml_dev_node);
 

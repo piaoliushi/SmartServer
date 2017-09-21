@@ -1,6 +1,7 @@
 #include "antenna_message.h"
 #include "./net/SvcMgr.h"
 #include "../../../StationConfig.h"
+#include "../../../LocalConfig.h"
 #include "../../../database/DataBaseOperation.h"
 using namespace db;
 namespace hx_net {
@@ -179,13 +180,11 @@ void Antenna_message::set_run_state(int curState)
     {
         dev_run_state_=curState;
         GetInst(SvcMgr).get_notify()->OnDevStatus(d_devInfo.sDevNum,dev_run_state_+1);
-        //广播设备状态到在线客户端
-        //m_pSession->send_work_state_message(GetInst(LocalConfig).local_station_id(),d_devInfo.sDevNum
-        //                                    ,d_devInfo.sDevName,DEVICE_TRANSMITTER,(dev_run_state)dev_run_state_);
+        m_pSession->send_work_state_message(GetInst(LocalConfig).local_station_id(),d_devInfo.sDevNum
+                                            ,d_devInfo.sDevName,DEVICE_ANTENNA,(dev_run_state)dev_run_state_);
     }
 }
 
-//主机，或正在运行
 bool Antenna_message::is_running()
 {
     return (get_run_state()==antenna_host)?true:false;
@@ -203,24 +202,30 @@ bool Antenna_message::is_detecting()
     return (get_run_state()==dev_detecting)?true:false;
 }
 
+ void Antenna_message::reset_run_state()
+ {
+     boost::recursive_mutex::scoped_lock llock(run_state_mutex_);
+     dev_run_state_=dev_unknown;
+ }
+
 int Antenna_message::parse_HX_981(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
 {
     iaddcode = d_devInfo.iAddressCode;
     DataInfo dainfo;
     dainfo.bType = true;
     if(data[3]==0x00 && data[4]==0x01){
-        dainfo.fValue = 1;
-        set_run_state(antenna_backup);//1:备机
+        dainfo.fValue = 0;
+        set_run_state(antenna_backup);
     }
     else if(data[3]==0x01 && data[4]==0x00){
-        dainfo.fValue = 0;
-        set_run_state(antenna_host);//0:主机
+        dainfo.fValue = 1;
+        set_run_state(antenna_host);
     }else if(data[3]==0x00 && data[4]==0x00){
          dainfo.fValue = -1;
-         set_run_state(dev_detecting);//-1:正在移动
+         set_run_state(dev_detecting);
     }else{
         dainfo.fValue = -1;
-        set_run_state(dev_unknown);//-1:未知
+        set_run_state(dev_unknown);
     }
 
     data_ptr->mValues[0] = dainfo;
@@ -232,11 +237,11 @@ bool  Antenna_message::cmd_excute_is_ok()
 {
      bool  bCmdExcComplet = false;
      switch (d_cur_task_) {
-     case MSG_ANTENNA_HTOB_OPR:{//主机->备机，判断是否已经是备机状态
+     case MSG_ANTENNA_HTOB_OPR:{
          if(is_shut_down())
              bCmdExcComplet = true;
      } break;
-     case MSG_ANTENNA_BTOH_OPR:{//备机->主机，判断是否已经是主机状态
+     case MSG_ANTENNA_BTOH_OPR:{
          if(is_running())
              bCmdExcComplet = true;
          } break;

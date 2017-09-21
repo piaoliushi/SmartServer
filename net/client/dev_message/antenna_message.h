@@ -18,7 +18,7 @@ public:
     bool is_shut_down();
     bool is_detecting();
     int  get_run_state();
-
+    void reset_run_state();
     void excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult);
     //执行命令
     void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel=0,
