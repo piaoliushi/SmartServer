@@ -47,6 +47,10 @@ namespace hx_net
             break;
         case LINK_WEILE_AVSP_DECODER:
             init_weile_avsp_decoder_Oid();
+            break;
+        case LINK_WEILE_AVSP_ADAPTER:
+           init_avsApt_Oid();
+           break;
         default:
             break;
         }
@@ -169,6 +173,25 @@ namespace hx_net
         query_pdu += vbl;
     }
 
+    void Link_message::init_avsApt_Oid()
+    {
+        Vb vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.1.3"] = 0;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.1.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.1.4"] = 0;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.1.4.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.2.3"] = 0;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.2.3.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.2.4"] = 0;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.2.4.0"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.8201.5.11.1.1.4.3"] = 0;
+        vbl.set_oid(Oid("1.3.6.1.4.1.8201.5.11.1.1.4.3.0"));
+        query_pdu += vbl;
+    }
 
     void Link_message::init_weile_avsp_decoder_Oid(){
         Vb vbl;
@@ -563,6 +586,7 @@ namespace hx_net
                  case LINK_DMP_SWITCH: 
                  case LINK_ASI_ADAPTER:
                  case LINK_WEILE_AVSP_DECODER:
+                 case LINK_WEILE_AVSP_ADAPTER:
                      return parse_SingAptReceive_data(snmp,d_curData_ptr,target);
                  default:
                      return RE_NOPROTOCOL;
@@ -727,6 +751,8 @@ namespace hx_net
             return parse_AsiApt_data(pdu,target);
         case LINK_WEILE_AVSP_DECODER:
             return parse_weile_avsp_decorder_data(pdu,target);
+        case LINK_WEILE_AVSP_ADAPTER:
+            return parse_weile_avsp_apt_data(pdu,target);
         }
     }
 
@@ -1037,8 +1063,7 @@ namespace hx_net
         m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
     }
 
-
-     void Link_message::GetResultData(DevMonitorDataPtr data_ptr)
+    void Link_message::GetResultData(DevMonitorDataPtr data_ptr)
      {
          map<int,DeviceMonitorItem>::iterator iter = d_devInfo.map_MonitorItem.begin();
          for(;iter!=d_devInfo.map_MonitorItem.end();++iter)
@@ -1087,4 +1112,33 @@ namespace hx_net
 
     }
 
+    void Link_message::parse_weile_avsp_apt_data(Pdu &pdu, SnmpTarget &target)
+    {
+        if(d_curData_ptr == NULL)
+            return;
+        int pdu_error = pdu.get_error_status();
+        if (pdu_error)
+            return;
+        if (pdu.get_vb_count() == 0)
+            return;
+        int vbcount = pdu.get_vb_count();
+        for(int i=0;i<vbcount;++i)
+        {
+            DataInfo dainfo;
+            Vb nextVb;
+            pdu.get_vb(nextVb, i);
+            string cur_oid = nextVb.get_printable_oid();
+            string cur_value =nextVb.get_printable_value();
+            dainfo.bType = false;
+            dainfo.fValue = atof(cur_value.c_str());
+            dainfo.sValue = str(boost::format("%.2f Mbps")%dainfo.fValue);
+            map<string,int>::iterator iter = map_Oid.find(cur_oid);
+            if(iter!=map_Oid.end())
+            {
+                d_curData_ptr->mValues[(*iter).second] = dainfo;
+            }
+        }
+
+        m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
+    }
 }

@@ -157,6 +157,7 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             else
                 return -1;
         }
+
         }
     }
         break;
@@ -1318,50 +1319,52 @@ int Electric_message::decode_EA66(unsigned char *data, DevMonitorDataPtr data_pt
     return RE_SUCCESS;
 }
 
+
 int Electric_message::decode_AcrNetEm(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
 {
-    DataInfo dainfo;
-    dainfo.bType = true;
-    for(int i=0;i<6;++i)
-    {
-        dainfo.fValue = Getbit(data[3],i);
-        data_ptr->mValues[26+i] = dainfo;
-    }
-    dainfo.bType = false;
-    int nDpt = data[5];
-    int nDct = data[6];
-    int nDpq = data[7];
-    float Ubb = pow(10.00,nDpt-4);
-    float Ibb = pow(10.00,nDct-4);
-    float Pbb = pow(10.00,nDpq-4);
-    for(int i=0;i<6;++i)
-    {
-        dainfo.fValue = (data[9+2*i]*256+data[10+2*i])*Ubb;
-        data_ptr->mValues[i] = dainfo;
-    }
-    for(int i=0;i<3;++i)
-    {
-        dainfo.fValue = (data[21+2*i]*256+data[22+2*i])*Ibb;
-        data_ptr->mValues[6+i] = dainfo;
-    }
-    for(int i=0;i<8;++i)
-    {
-        dainfo.fValue = (data[27+2*i]*256+data[28+2*i])*Pbb;
-        data_ptr->mValues[9+i] = dainfo;
-    }
-    for(int i=0;i<4;++i)
-    {
-        dainfo.fValue = (data[43+2*i]*256+data[44+2*i])*0.001;
-        data_ptr->mValues[17+i] = dainfo;
-    }
-    for(int i=0;i<4;++i)
-    {
-        dainfo.fValue = (data[51+2*i]*256+data[52+2*i])*Pbb;
-        data_ptr->mValues[21+i] = dainfo;
-    }
-    dainfo.fValue = (data[59]*256+data[60])*0.01;
-    data_ptr->mValues[25] = dainfo;
-    return RE_SUCCESS;
+   iaddcode = data[0];
+   DataInfo dainfo;
+   dainfo.bType = true;
+   for(int i=0;i<6;++i)
+   {
+       dainfo.fValue = Getbit(data[3],i);
+       data_ptr->mValues[26+i] = dainfo;
+   }
+   dainfo.bType = false;
+   int nDpt = data[5];
+   int nDct = data[6];
+   int nDpq = data[7];
+   float Ubb = pow(10.00,nDpt-4);
+   float Ibb = pow(10.00,nDct-4);
+   float Pbb = pow(10.00,nDpq-4);
+   for(int i=0;i<6;++i)
+   {
+       dainfo.fValue = (data[9+2*i]*256+data[10+2*i])*Ubb;
+       data_ptr->mValues[i] = dainfo;
+   }
+   for(int i=0;i<3;++i)
+   {
+       dainfo.fValue = (data[21+2*i]*256+data[22+2*i])*Ibb;
+       data_ptr->mValues[6+i] = dainfo;
+   }
+   for(int i=0;i<8;++i)
+   {
+       dainfo.fValue = (data[27+2*i]*256+data[28+2*i])*Pbb;
+       data_ptr->mValues[9+i] = dainfo;
+   }
+   for(int i=0;i<4;++i)
+   {
+       dainfo.fValue = (data[43+2*i]*256+data[44+2*i])*0.001;
+       data_ptr->mValues[17+i] = dainfo;
+   }
+   for(int i=0;i<4;++i)
+   {
+       dainfo.fValue = (data[51+2*i]*256+data[52+2*i])*Pbb;
+       data_ptr->mValues[21+i] = dainfo;
+   }
+   dainfo.fValue = (data[59]*256+data[60])*0.01;
+   data_ptr->mValues[25] = dainfo;
+   return RE_SUCCESS;
 }
 
 int Electric_message::decode_Elecctr(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)

@@ -315,10 +315,10 @@ namespace hx_net{
 			switch (iparamtype)
 			{
             case 0x0041:{
-					if(ivalue==0x01)
-                        runstate = 0;
-					else
-						runstate = 1;
+                    //if(ivalue==0x01)
+                    //    runstate = 0;
+                    //else
+                    //	runstate = 1;
 				}
 				break;
             case 0x0501:{

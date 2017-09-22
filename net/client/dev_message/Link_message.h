@@ -36,6 +36,7 @@ protected:
     void parse_DmpSwitch_data(Pdu &pdu, SnmpTarget &target);
     void parse_AsiApt_data(Pdu &pdu, SnmpTarget &target);
     void parse_weile_avsp_decorder_data(Pdu &pdu, SnmpTarget &target);
+    void parse_weile_avsp_apt_data(Pdu &pdu, SnmpTarget &target);
 
     void  GetResultData(DevMonitorDataPtr data_ptr);
 
@@ -44,6 +45,7 @@ protected:
     void init_Dmp_Oid();
     void init_AsiApt_Oid();
     void init_weile_avsp_decoder_Oid();
+    void init_avsApt_Oid();
 
     int decode_0401AV(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_0401DA(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);

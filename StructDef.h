@@ -272,10 +272,11 @@ typedef enum LINK_DEVICE
     LINK_SING_NET_ADAPTER = 4, //
     LINK_DMP_SWITCH = 5, //dmp切换器
     LINK_ASI_ADAPTER = 8,//asi适配器
-    LINK_WEILE_AVSP_DECODER = 9,//伟乐avs+解码器
+    LINK_WEILE_AVSP_DECODER = 9,//伟乐avs+接收解码器
     LINK_HX_0401_AV = 10,//汇鑫0401AV+切换器
     LINK_HX_0401_DA = 11,//汇鑫0401DA切换器
     LINK_HX_0401_DABS = 12,//汇鑫0401DABS切换器
+    LINK_WEILE_AVSP_ADAPTER = 13,//伟乐avs+适配器
 }LinkDeviceSubProtocol;
 
 typedef enum SHANGHAIPROTOCL
