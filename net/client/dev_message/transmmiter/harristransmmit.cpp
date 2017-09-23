@@ -154,7 +154,7 @@ namespace hx_net{
                  }
 
                  cmdpdu+=vbl;
-                 OctetStr community("private");
+                 OctetStr community("public");
                  target->set_writecommunity(community);
                  int iresult =snmp->set(cmdpdu,*target);
                  if(iresult!=SNMP_CLASS_SUCCESS)

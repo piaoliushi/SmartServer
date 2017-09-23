@@ -65,7 +65,7 @@ void device_session::init_session_config()
     //获得网络协议转换器相关配置
     moxa_config_ptr = GetInst(LocalConfig).moxa_property_ex(modleInfos_.sModleNumber);
     map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.begin();
-    bool bIsTransmitter = false;
+    bool bIsRunTaskTimer = false;
     for(;iter!=modleInfos_.mapDevInfo.end();++iter)
     {
         if(iter->second.bUsed)
@@ -102,8 +102,8 @@ void device_session::init_session_config()
         //定时数据发送时间
         tmLastSendHttpTime.insert(std::make_pair(iter->first,time(0)));
         //目前只有发射机类型设备才启用定时任务(定时开关机)
-        if(iter->second.iDevType == DEVICE_TRANSMITTER)
-            bIsTransmitter=true;
+        if(iter->second.iDevType == DEVICE_TRANSMITTER || iter->second.iDevType == DEVICE_ELEC)
+            bIsRunTaskTimer=true;
         //创建和分析关联设备信息
         parse_ass_dev_ptr  ass_dev_ptr(new Parse_Ass_Device(iter->second));
         map_dev_ass_parse_ptr_[iter->first] = ass_dev_ptr;
@@ -112,7 +112,7 @@ void device_session::init_session_config()
     cur_dev_id_ = dev_agent_and_com.begin()->first;
     netAlarm.nAlarmId = -1;//默认值
     //启动发射机任务定时器
-    if(bIsTransmitter==true)
+    if(bIsRunTaskTimer==true)
         start_task_schedules_timer();
 }
 
