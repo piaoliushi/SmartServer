@@ -1628,7 +1628,7 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
             DevMonitorDataPtr curData_ptr(new Data);
             int iaddcode=-1;
             int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
-            if(nResult==0)//查询数据解析正确
+            if(nResult == RE_SUCCESS)//查询数据解析正确
             {
                 query_timeout_count_ = 0;
                 string sdevid = get_devid_by_addcode(iaddcode);
@@ -1642,10 +1642,6 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
             }
         }
         start_read_head(bytes_transferred);
-
-
-        //cout<< "接收长度---"<<bytes_transferred << std::endl;
-
     }
     else{
         cout<< error.message() << std::endl;
@@ -1738,8 +1734,8 @@ void device_session::handle_read_body(const boost::system::error_code& error, si
             }
             start_read_head(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
         }
-        //else if(nResult>0)//跳过数据(针对数据管理器等设备的非查询指令回复)
-        //    start_read_head(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
+        else if(nResult>RE_SUCCESS)
+            start_read_body(nResult);
         else{
             close_all();
             start_connect_timer(moxa_config_ptr->connect_timer_interval);
