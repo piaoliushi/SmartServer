@@ -43,8 +43,7 @@ namespace hx_net
         {
             data_.resize(data_.size()+nResult-space()+1);//重新扩充消息长度
         }
-        if(nResult>0)
-            move_r_ptr(nResult);
+
         return nResult;
     }
 
