@@ -36,7 +36,8 @@ namespace hx_net
                 return RE_HEADERROR;
             else
             {
-                return int((data[5]<<8)|data[6]);
+                int bodylen = int((data[5]<<8)|data[6]);
+                return bodylen;
             }
 
         }
@@ -45,7 +46,7 @@ namespace hx_net
                 return RE_HEADERROR;
             else
             {
-                return int((data[3]<<8)|data[2])-3;
+                return RE_SUCCESS;//int((data[3]<<8)|data[2])-3;
             }
         }
         case MD_760BD_IV:{
@@ -53,7 +54,7 @@ namespace hx_net
                 return RE_HEADERROR;
             else
             {
-                return int((data[3]<<8)|data[2])-3;
+                return RE_SUCCESS;//int((data[3]<<8)|data[2])-3;
             }
         }
         case DTMB_BD:{
@@ -61,7 +62,8 @@ namespace hx_net
                 return RE_HEADERROR;
             else
             {
-                return data[2];
+                int bodylen = data[2];
+                return bodylen;
             }
         }
         }
@@ -72,19 +74,54 @@ namespace hx_net
 	{
         if(data_ptr!=NULL)
             d_curData_ptr = data_ptr;
+        int idecresult = RE_UNKNOWDEV;
         switch (d_devInfo.nSubProtocol)
         {
         case MD_740P:
-            return Md740PData(data,data_ptr,nDataLen,iaddcode);
+            idecresult = Md740PData(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
         case MD_740BD_II:
-            return Md740BDData(data,data_ptr,nDataLen,iaddcode);
+            idecresult = Md740BDData(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
         case MD_760BD_IV:
-            return Md760BDData(data,data_ptr,nDataLen,iaddcode);
+            idecresult = Md760BDData(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
         case DTMB_BD:
-            return DtmbBDData(data,data_ptr,nDataLen,iaddcode);
+            idecresult =  DtmbBDData(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
         }
-		return RE_UNKNOWDEV;
+
+        if(idecresult == RE_SUCCESS ) {
+            GetResultData(d_curData_ptr);
+            if(IsStandardCommand()){
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            }
+        }
+
+        return idecresult;
 	}
+
+    void Media_message::GetResultData(DevMonitorDataPtr data_ptr)
+     {
+         map<int,DeviceMonitorItem>::iterator iter = d_devInfo.map_MonitorItem.begin();
+         for(;iter!=d_devInfo.map_MonitorItem.end();++iter)
+         {
+             map<int,DataInfo>::iterator diter = data_ptr->mValues.find((*iter).first);
+             if(diter!=data_ptr->mValues.end())
+             {
+
+                 if((*iter).second.iItemType == 0){
+                     data_ptr->mValues[(*iter).first].fValue *= (*iter).second.dRatio;
+                     if(data_ptr->mValues[(*iter).first].sValue.empty())
+                         data_ptr->mValues[(*iter).first].sValue = QString::number(data_ptr->mValues[(*iter).first].fValue,'g',2).toStdString();
+                 }
+                 else {
+                     if((*iter).second.dRatio==0)
+                         data_ptr->mValues[(*iter).first].fValue = data_ptr->mValues[(*iter).first].fValue==1.0f ? 0:1;
+                 }
+             }
+         }
+     }
 
     bool Media_message::IsStandardCommand()
 	{
@@ -92,8 +129,8 @@ namespace hx_net
 		{
         case MEDIA_DTMB:
         case MD_740P:
-        case MD_740BD_II:
-        case MD_760BD_IV:
+        //case MD_740BD_II:
+        //case MD_760BD_IV:
         case DTMB_BD:
 			return true;
 		}
@@ -271,24 +308,24 @@ namespace hx_net
         for(int i=0;i<2;i++)
         {
             dtinfo.bType = false;
-            dtinfo.fValue = data[8*i+8];
-            data_ptr->mValues[index++] = dtinfo;
-            dtinfo.bType = true;
-            dtinfo.fValue = data[8*i+9];
-            data_ptr->mValues[index++] = dtinfo;
-            dtinfo.bType = false;
             dtinfo.fValue = data[8*i+10];
             data_ptr->mValues[index++] = dtinfo;
+            dtinfo.bType = true;
             dtinfo.fValue = data[8*i+11];
             data_ptr->mValues[index++] = dtinfo;
-            dtinfo.bType = true;
+            dtinfo.bType = false;
             dtinfo.fValue = data[8*i+12];
             data_ptr->mValues[index++] = dtinfo;
-            dtinfo.bType = false;
             dtinfo.fValue = data[8*i+13];
             data_ptr->mValues[index++] = dtinfo;
             dtinfo.bType = true;
             dtinfo.fValue = data[8*i+14];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.bType = false;
+            dtinfo.fValue = data[8*i+15];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.bType = true;
+            dtinfo.fValue = data[8*i+16];
             data_ptr->mValues[index++] = dtinfo;
         }
         return RE_SUCCESS;
@@ -296,7 +333,7 @@ namespace hx_net
 
     int Media_message::Md760BDData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
     {
-        if(data[1]!=0x11)
+        if(data[1]!=0x22)
             return RE_CMDACK;
         int index = 0;
         iaddcode = data[6]*256+data[5];
@@ -344,6 +381,8 @@ namespace hx_net
                 data_ptr->mValues[index++] = dtinfo;
             }
         }
+
+        return RE_SUCCESS;
     }
 
     int Media_message::DtmbBDData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
@@ -387,6 +426,8 @@ namespace hx_net
             dtinfo.fValue = ber;
             data_ptr->mValues[index++] = dtinfo;
         }
+
+         return RE_SUCCESS;
     }
 
     //添加数据(http消息)

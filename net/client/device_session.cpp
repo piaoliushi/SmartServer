@@ -1622,22 +1622,15 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
     if (!error || error == boost::asio::error::message_size)
     {
         int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,bytes_transferred,CMD_QUERY,cur_msg_q_id_);
-
         if(nResult == RE_SUCCESS || nResult == RE_CMDACK)
         {
             DevMonitorDataPtr curData_ptr(new Data);
             int iaddcode=-1;
-            int nResult = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
-            if(nResult == RE_SUCCESS)//查询数据解析正确
+            int nMsg_Decode_Result = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
+            if(nMsg_Decode_Result == RE_SUCCESS)
             {
                 query_timeout_count_ = 0;
                 string sdevid = get_devid_by_addcode(iaddcode);
-                //                if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
-                //                        .schedule(boost::bind(&device_session::handler_data,this,sdevid,curData_ptr)))
-                //                {
-                //                    task_count_increase();
-                //                }
-
                 handler_data(sdevid,curData_ptr);
             }
         }

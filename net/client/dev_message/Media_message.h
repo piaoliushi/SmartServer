@@ -21,7 +21,8 @@ public:
     //添加媒体设备指标数据
     bool  add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData);
 protected:
-    void record_alarm_and_notify(string &prgName,int nMod,CurItemAlarmInfo &curAlarm);
+    void  record_alarm_and_notify(string &prgName,int nMod,CurItemAlarmInfo &curAlarm);
+     void GetResultData(DevMonitorDataPtr data_ptr);
 private:
     int Md740PData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
     int Md740BDData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
