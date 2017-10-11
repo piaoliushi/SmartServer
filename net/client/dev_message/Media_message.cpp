@@ -395,7 +395,7 @@ namespace hx_net
         for(int i=0;i<4;i++)
         {
             dtinfo.bType = false;
-            dtinfo.fValue = (data[4+i*5]+data[5+i*5]*256+data[6+i*5]*256*256+data[7+i*5]*256*256*256)*0.01;
+            dtinfo.fValue = (data[4+i*5]+data[5+i*5]*256+data[6+i*5]*256*256+data[7+i*5]*256*256*256)*0.001;
             data_ptr->mValues[index++] = dtinfo;
             dtinfo.bType = true;
             dtinfo.fValue = data[8+i*5];
@@ -426,8 +426,23 @@ namespace hx_net
             dtinfo.fValue = ber;
             data_ptr->mValues[index++] = dtinfo;
         }
+        dtinfo.bType = false;
+        for(int i=0;i<4;++i)
+        {
 
-         return RE_SUCCESS;
+            double mer;
+            *(((char*)(&mer) + 0)) = data[72+8*i];
+            *(((char*)(&mer) + 1)) = data[73+8*i];
+            *(((char*)(&mer) + 2)) = data[74+8*i];
+            *(((char*)(&mer) + 3)) = data[75+8*i];
+            *(((char*)(&mer) + 4)) = data[76+8*i];
+            *(((char*)(&mer) + 5)) = data[77+8*i];
+            *(((char*)(&mer) + 6)) = data[78+8*i];
+            *(((char*)(&mer) + 7)) = data[79+8*i];
+            dtinfo.fValue = mer;
+            data_ptr->mValues[index++] = dtinfo;
+        }
+        return RE_SUCCESS;
     }
 
     //添加数据(http消息)
