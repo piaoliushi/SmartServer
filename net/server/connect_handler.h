@@ -68,7 +68,7 @@ namespace hx_net
 		std::time_t                     last_hb_time_;
         boost::recursive_mutex                    state_mutex_;
 		usr_state                       usr_state_;
-#ifdef USE_STRAND
+#ifdef USE_CLIENT_STRAND
 		boost::asio::io_service::strand strand_;           //消息头与消息体同步
 #endif 
     };

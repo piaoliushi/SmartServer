@@ -31,7 +31,7 @@ namespace hx_net
         int  decode_http_msg(const string &data,DevMonitorDataPtr data_ptr,CmdType cmdType,int number);
 
 		void input_params(const vector<string> &vParam);
-        int   PreHandleMsg();
+        int  PreHandleMsg();
 		bool IsStandardCommand();
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
         void GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit);

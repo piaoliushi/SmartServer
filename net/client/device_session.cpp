@@ -19,7 +19,7 @@ namespace hx_net
 device_session::device_session(boost::asio::io_service& io_service,
                                ModleInfo & modinfo,http_request_session_ptr &httpPtr)
     :net_session(io_service)
-    #ifdef USE_CLIENT_STRAND
+    #ifdef USE_STRAND
     , strand_(io_service)
     #endif
     ,resolver_(io_service)
@@ -612,15 +612,15 @@ void device_session::start_read(int msgLen)
 
             udp::endpoint sender_endpoint;
             usocket().async_receive_from(boost::asio::buffer(receive_msg_ptr_->w_ptr(),receive_msg_ptr_->space()),sender_endpoint,//msgLen
-                             #ifdef USE_STRAND
-                                         strand_.wrap(
-                                 #endif
+                             //#ifdef USE_STRAND
+                                //         strand_.wrap(
+                                 //#endif
                                              boost::bind(&device_session::handle_udp_read,this,
                                                          boost::asio::placeholders::error,
                                                          boost::asio::placeholders::bytes_transferred)
-                                 #ifdef USE_STRAND
-                                             )
-                             #endif
+                                 //#ifdef USE_STRAND
+                                 //            )
+                             //#endif
                                          );
         }
     }else if(modleInfos_.iCommunicationMode==CON_MOD_COM){
@@ -663,15 +663,15 @@ void device_session::start_read_head(int msgLen)
         else if(modleInfos_.netMode.inet_type == NET_MOD_UDP){
             udp::endpoint sender_endpoint;
             usocket().async_receive_from(boost::asio::buffer(receive_msg_ptr_->w_ptr(),receive_msg_ptr_->space()),sender_endpoint,//msgLen
-                             #ifdef USE_STRAND
-                                         strand_.wrap(
-                                 #endif
+                             //#ifdef USE_STRAND
+                             //            strand_.wrap(
+                             //    #endif
                                              boost::bind(&device_session::handle_udp_read,this,
                                                          boost::asio::placeholders::error,
                                                          boost::asio::placeholders::bytes_transferred)
-                                 #ifdef USE_STRAND
-                                             )
-                             #endif
+                             //    #ifdef USE_STRAND
+                             //                )
+                             //#endif
                                          );
         }
     }else if(modleInfos_.iCommunicationMode==CON_MOD_COM){
@@ -1621,6 +1621,7 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
         return;
     if (!error || error == boost::asio::error::message_size)
     {
+
         int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,bytes_transferred,CMD_QUERY,cur_msg_q_id_);
         if(nResult == RE_SUCCESS || nResult == RE_CMDACK)
         {
@@ -1633,8 +1634,15 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
                 string sdevid = get_devid_by_addcode(iaddcode);
                 handler_data(sdevid,curData_ptr);
             }
+
+
+        }
+        else if(nResult == RE_HEADERROR){
+            cout<< error.message() << std::endl;
+            receive_msg_ptr_->reset();
         }
         start_read_head(bytes_transferred);
+
     }
     else{
         cout<< error.message() << std::endl;

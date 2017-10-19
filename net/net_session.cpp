@@ -192,21 +192,6 @@ namespace hx_net
             cell->set_scellvalue(sValue);
         }
 
-
-        /*map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
-        for(;cell_iter!=mapMonitorItem.end();++cell_iter){
-			int cellId = (*cell_iter).first;			
-			//未更新的监测量
-            if(curData->mValues[cellId].bUpdate==false)
-                continue;
-			DevDataNotify_eCellMsg *cell = dev_cur_data_ptr->add_ccelldata();
-            cell->set_ecelltype((e_CellType)(*cell_iter).second.iItemType);
-            cell->set_scellid((*cell_iter).second.iItemIndex);
-            cell->set_scellname((*cell_iter).second.sItemName);
-            string  sValue = str(boost::format("%.2f")%curData->mValues[cellId].fValue);
-			cell->set_scellvalue(sValue);
-          }*/
-
         GetInst(SvcMgr).send_monitor_data_to_client(sStationid,sDevid,dev_cur_data_ptr);
 
 	}

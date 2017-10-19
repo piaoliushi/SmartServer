@@ -46,7 +46,7 @@ namespace hx_net
                 return RE_HEADERROR;
             else
             {
-                return RE_SUCCESS;//int((data[3]<<8)|data[2])-3;
+                return int((data[3]<<8)|data[2])-3;
             }
         }
         case MD_760BD_IV:{
@@ -54,7 +54,7 @@ namespace hx_net
                 return RE_HEADERROR;
             else
             {
-                return RE_SUCCESS;//int((data[3]<<8)|data[2])-3;
+                return int((data[3]<<8)|data[2])-3;
             }
         }
         case DTMB_BD:{
@@ -129,8 +129,8 @@ namespace hx_net
 		{
         case MEDIA_DTMB:
         case MD_740P:
-        //case MD_740BD_II:
-        //case MD_760BD_IV:
+        case MD_740BD_II:
+        case MD_760BD_IV:
         case DTMB_BD:
 			return true;
 		}
@@ -302,6 +302,8 @@ namespace hx_net
     {
         if(data[1]!=0x11)
             return RE_CMDACK;
+        if(nDataLen<25)
+            return RE_NOPROTOCOL;
         int index = 0;
         iaddcode = data[6]*256+data[5];
         DataInfo dtinfo;
@@ -335,6 +337,8 @@ namespace hx_net
     {
         if(data[1]!=0x22)
             return RE_CMDACK;
+        if(nDataLen<54)
+            return RE_NOPROTOCOL;
         int index = 0;
         iaddcode = data[6]*256+data[5];
         DataInfo dtinfo;
