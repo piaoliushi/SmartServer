@@ -45,8 +45,14 @@ namespace hx_net{
         }
 		case CHENGDU_XINGUANG_247:
 			{
-				if(data[0]!=0x01 || data[1] != 0x03)
+                if(data[0]!=0x01 || data[1] != 0x03){
+
                     return RE_HEADERROR;
+                }
+                else if(data[2]==0x07)
+                {
+                    return 125;
+                }
 				return (((data[3]<<8)|data[4])+2);
 			}
         case CHENGDU_KT_DIG:
@@ -294,7 +300,7 @@ namespace hx_net{
 	{
 		if(data[2]!=0x03)
 		{
-			return 0;
+            return RE_CMDACK;
 		}
 		int curpos=5;
 		int iparamtype=0;
