@@ -101,12 +101,13 @@ namespace hx_net{
 
     void GsbrTransmmit::gsbr_Callback(int reason, Snmp *session, Pdu &pdu, SnmpTarget &target)
     {
-        int pdu_error = pdu.get_error_status();
-        if (pdu_error!= SNMP_CLASS_ASYNC_RESPONSE){
+
+        if(reason != SNMP_CLASS_ASYNC_RESPONSE){
             cout << "Failed to issue SNMP aysnc_callback: (" << reason  << ") "
                    << session->error_msg(reason) << endl;
             return;
         }
+
         if (pdu.get_vb_count() == 0)
             return;
         int vbcount = pdu.get_vb_count();

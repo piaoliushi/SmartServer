@@ -287,7 +287,6 @@ namespace hx_net{
              std::cout<<"harris_decode"<<endl;
              if (pdu_error)
              {
-
                  std::cout<<"ERROR"<<endl;
                  return;
              }
