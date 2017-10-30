@@ -49,10 +49,10 @@ namespace hx_net{
 
                     return RE_HEADERROR;
                 }
-                else if(data[2]==0x07)
-                {
-                    return 125;
-                }
+//                else if(data[2]==0x07)
+//                {
+//                    return 125;
+//                }
 				return (((data[3]<<8)|data[4])+2);
 			}
         case CHENGDU_KT_DIG:

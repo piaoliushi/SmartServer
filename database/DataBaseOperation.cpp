@@ -21,7 +21,9 @@ DataBaseOperation::~DataBaseOperation()
 
 }
 
-bool DataBaseOperation::OpenDb( const std::string& serveraddress, const std::string& database, const std::string& uid, const std::string& pwd, int timeout, std::string link_driver,std::string driverName/*="SQL Native Client"*/ )
+bool DataBaseOperation::OpenDb( const std::string& serveraddress, const std::string& database,
+                                const std::string& uid, const std::string& pwd, int timeout,
+                                std::string link_driver,std::string driverName/*="SQL Native Client"*/ )
 {
 
     ConnectionPool::initDb(QString::fromStdString(serveraddress),QString::fromStdString(database)
