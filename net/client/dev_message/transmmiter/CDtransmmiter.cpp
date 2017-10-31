@@ -305,6 +305,7 @@ namespace hx_net{
 		int curpos=5;
 		int iparamtype=0;
 		int iparamlen = 0;
+
 		
 		while((curpos+2)<nDataLen)
 		{

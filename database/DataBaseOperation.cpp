@@ -1026,17 +1026,21 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
             inquery.prepare(strSql);
     QString qstrNum = QString::fromStdString(strDevnum);
     inquery.bindValue(":devicenumber",qstrNum);
+
     map<int,DataInfo>::iterator iter = pdata->mValues.begin();
     QSqlDatabase::database().transaction();
     for(;iter!=pdata->mValues.end();++iter){
+
         if(mapMonitorItem.find(iter->first)==mapMonitorItem.end())
             continue;
+
         inquery.bindValue(":monitoringindex",(*iter).first);
         QDateTime qdt;
         tm *ltime = localtime(&savetime);
         qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
         qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
         inquery.bindValue(":monitoringtime",qdt);
+
         inquery.bindValue(":monitoringvalue",(*iter).second.fValue);
         if(!inquery.exec()){
             cout<<inquery.lastError().text().toStdString()<<"AddItemMonitorRecord---inquery---error!"<<endl;

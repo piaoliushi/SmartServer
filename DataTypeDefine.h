@@ -289,6 +289,7 @@ typedef struct
 
 typedef struct DATA_INFO_TAG
 {
+
     bool       bType;//数据类型: false表示模拟量，true表示状态量
     float      fValue;//当bType为true表示状态量时，dValue == 1.0，界面亮绿灯，反之红灯。
     string     sValue;

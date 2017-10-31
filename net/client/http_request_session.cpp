@@ -74,7 +74,7 @@ http_request_session::~http_request_session(void)
                http_stream_.set_ignore_return_content(true);
               try
               {
-                  cout<<task_.second<<endl;
+                  //cout<<task_.second<<endl;
                   if(asycFlag_==true){
                         http_stream_.async_open(task_.first,boost::bind(&http_request_session::open_handler,
                                                                          this,boost::asio::placeholders::error));

@@ -1343,7 +1343,7 @@ void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curData
     time(&tmCurTime);
     double ninterval = difftime(tmCurTime,tmLastSaveTime[sDevId]);
 
-    if(ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
+    if(ninterval<60)//run_config_ptr[sDevId]->data_save_interval间隔保存时间 need amend;
         return ;
     GetInst(DataBaseOperation).AddItemMonitorRecord(sDevId,tmCurTime,curDataPtr,mapMonitorItem);
     //amend by lk at 2017-7-12 无论是否记录成功都更新保存时间
@@ -1505,28 +1505,19 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     //动环设备博汇要求收集发送(暂针对动环做单独收集处理...)
     if(GetInst(LocalConfig).http_svc_use() == true){
 
-        //if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
-
-            string sDesDevId = sDevId;
-            map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
-            http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
-                                                         curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
-        //}else if(is_need_report_data(sDevId)){
-//            string sDesDevId = sDevId;
-//            //用来适应模块隶属于设备的问题
-//            map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
-//            http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
-//                                                         curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
-//        }
+        string sDesDevId = sDevId;
+        map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
+        http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
+                                                     curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     }
-
-
 
     //检测当前报警状态
     check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
+
     //如果在监测时间段则保存当前记录
     if(bIsMonitorTime)
         save_monitor_record(sDevId,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+
 
     //任务数递减
     //task_count_decrease();
@@ -2009,8 +2000,11 @@ void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPt
     bool bTmpAlarmNow = false;
     map<int,DeviceMonitorItem>::iterator iterItem = iter->second.map_MonitorItem.begin();
     for(;iterItem!=iter->second.map_MonitorItem.end();++iterItem){
-        double dbValue =curDataPtr->mValues[iterItem->first].fValue;
-        parse_item_alarm(sDevId,dbValue,iterItem->second,bTmpAlarmNow);
+        map<int,DataInfo>::iterator findIter = curDataPtr->mValues.find(iterItem->first);
+        if(findIter!=curDataPtr->mValues.end()){
+            double dbValue =curDataPtr->mValues[iterItem->first].fValue;
+            parse_item_alarm(sDevId,dbValue,iterItem->second,bTmpAlarmNow);
+        }
     }
     //如果有新告警产生,则立刻发送一次监控数据
     if(bTmpAlarmNow==true && GetInst(LocalConfig).report_use()){
