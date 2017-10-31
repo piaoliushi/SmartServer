@@ -176,10 +176,8 @@ QSqlDatabase ConnectionPool::openConnection() {
             if(ersId!=-1)
                 pool.data->usedConnectionNames.remove(ersId); // 无效连接删除
             ConnectionPoolPrivate::mutex.unlock();
-
             pool.data->semaphore->release(); // 没有消耗连接
         }
-
 
         return db;
     } else {
