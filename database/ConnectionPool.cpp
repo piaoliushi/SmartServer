@@ -55,7 +55,7 @@ ConnectionPoolPrivate::ConnectionPoolPrivate() {
     testOnBorrow = true;
     testOnBorrowSql = "SELECT 1";
     maxWaitTime     = 5000;
-    maxConnectionCount = 5;
+    maxConnectionCount = 50;
 
     semaphore = new QSemaphore(maxConnectionCount);
 }
@@ -86,7 +86,7 @@ QSqlDatabase ConnectionPoolPrivate::createConnection(const QString &connectionNa
             QSqlQuery query(testOnBorrowSql, db1);
 
             if (query.lastError().type() != QSqlError::NoError && !db1.open()) {
-                qDebug() << "Open datatabase error:" << db1.lastError().text();
+                qDebug() << "testOnBorrow Sql Open datatabase error:" << db1.lastError().text();
                 return QSqlDatabase();
             }
         }
@@ -167,7 +167,6 @@ QSqlDatabase ConnectionPool::openConnection() {
                     QString("C%1").arg(++ConnectionPoolPrivate::lastKey);
         pool.data->usedConnectionNames.push_back(connectionName);
         ConnectionPoolPrivate::mutex.unlock();
-
         // 创建连接。因为创建连接很耗时，所以不放在 lock 的范围内，提高并发效率
         QSqlDatabase db = pool.data->createConnection(connectionName);
 
@@ -180,6 +179,7 @@ QSqlDatabase ConnectionPool::openConnection() {
 
             pool.data->semaphore->release(); // 没有消耗连接
         }
+
 
         return db;
     } else {
