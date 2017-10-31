@@ -1014,6 +1014,9 @@ bool DataBaseOperation::AddItemEndAlarmRecord( time_t endTime,unsigned long long
 //添加抄表记录
 bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,DevMonitorDataPtr pdata,const map<int,DeviceMonitorItem> &mapMonitorItem)
 {
+    QTime startTime = QTime::currentTime();
+
+    cout<<"AddItemMonitorRecord  enter deviceid = "<<strDevnum<<endl;
     QSqlDatabase db = ConnectionPool::openConnection();
     if(!db.isOpen() || !db.isValid()) {
         std::cout<<"AddItemMonitorRecord is error  ------------ the database is interrupt"<<std::endl;
@@ -1026,6 +1029,10 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
             inquery.prepare(strSql);
     QString qstrNum = QString::fromStdString(strDevnum);
     inquery.bindValue(":devicenumber",qstrNum);
+    QDateTime qdt;
+    tm *ltime = localtime(&savetime);
+    qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
+    qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
 
     map<int,DataInfo>::iterator iter = pdata->mValues.begin();
     QSqlDatabase::database().transaction();
@@ -1035,10 +1042,7 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
             continue;
 
         inquery.bindValue(":monitoringindex",(*iter).first);
-        QDateTime qdt;
-        tm *ltime = localtime(&savetime);
-        qdt.setDate(QDate(ltime->tm_year+1900,ltime->tm_mon+1,ltime->tm_mday));
-        qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
+
         inquery.bindValue(":monitoringtime",qdt);
 
         inquery.bindValue(":monitoringvalue",(*iter).second.fValue);
@@ -1051,6 +1055,9 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
     }
     QSqlDatabase::database().commit();
     ConnectionPool::closeConnection(db);
+    QTime stopTime = QTime::currentTime();
+    int elapsed = startTime.msecsTo(stopTime);
+    cout<<"AddItemMonitorRecord  leave deviceid = "<<strDevnum<<"--used time="<<elapsed<<"ms"<<endl;
     return true;
 }
 
@@ -1393,6 +1400,7 @@ bool DataBaseOperation::GetUpdateDevAlarmInfo( string strDevnum,DeviceInfo& devi
     }
 
     ConnectionPool::closeConnection(db);
+
     return true;
 }
 

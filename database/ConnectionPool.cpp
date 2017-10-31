@@ -54,7 +54,7 @@ ConnectionPoolPrivate::ConnectionPoolPrivate() {
     port         = 0;//3306
     testOnBorrow = true;
     testOnBorrowSql = "SELECT 1";
-    maxWaitTime     = 5000;
+    maxWaitTime     = 10000;
     maxConnectionCount = 50;
 
     semaphore = new QSemaphore(maxConnectionCount);
