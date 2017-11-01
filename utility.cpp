@@ -342,3 +342,28 @@ unsigned int CRC32(unsigned char *pdest, int len)
     return crc^0xFFFFFFFF;
 }
 
+
+int BCD2OCT(unsigned char src)
+{
+    return (((src&0xF0)>>4)*10+(src&0x0F));
+}
+
+
+unsigned char AsciiToInt(unsigned char src)
+{
+    if(src>0x40 && src<0x47)
+    {
+        return (src-55);
+    }
+    else if(src>0x29 && src<0x3a)
+    {
+        return (src-48);
+    }
+    else if(src>0x60 && src<0x67)
+    {
+        return (src-87);
+    }
+    else
+        return 0;
+}
+

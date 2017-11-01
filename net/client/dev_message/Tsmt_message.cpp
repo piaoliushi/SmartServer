@@ -13,6 +13,7 @@
 #include "./transmmiter/zctransmmit.h"
 #include "./transmmiter/ckangtetransmmit.h"
 #include "./transmmiter/harristransmmit.h"
+#include "./transmmiter/sgtransmmit.h"
 
 #include "../../../database/DataBaseOperation.h"
 using namespace db;
@@ -317,6 +318,7 @@ namespace hx_net
             d_ptransmmit = new CDtransmmiter(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case SHANGUANG:
+            d_ptransmmit = new SgTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case SHANGHAI_ALL_BAND:
             d_ptransmmit = new ShTransmmit(m_pSession,d_devInfo.nSubProtocol,d_devInfo.iAddressCode);

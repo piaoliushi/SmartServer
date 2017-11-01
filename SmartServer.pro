@@ -83,7 +83,8 @@ SOURCES += main.cpp\
     sms/gsms.cpp \
     net/client/dev_message/transmmiter/ckangtetransmmit.cpp \
     net/client/dev_message/transmmiter/zctransmmit.cpp \
-    net/client/dev_message/transmmiter/harristransmmit.cpp
+    net/client/dev_message/transmmiter/harristransmmit.cpp \
+    net/client/dev_message/transmmiter/sgtransmmit.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -163,7 +164,8 @@ HEADERS  += \
     sms/gsms.h \
     net/client/dev_message/transmmiter/ckangtetransmmit.h \
     net/client/dev_message/transmmiter/zctransmmit.h \
-    net/client/dev_message/transmmiter/harristransmmit.h
+    net/client/dev_message/transmmiter/harristransmmit.h \
+    net/client/dev_message/transmmiter/sgtransmmit.h
 
 FORMS    += mainwindow.ui
 

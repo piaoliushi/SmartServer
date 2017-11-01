@@ -125,8 +125,8 @@ protected:
     bool GetCmd(QSqlDatabase &db,string strDevnum,vector<Command_Scheduler>& vcmdsch);
     bool GetDevMonItem(QSqlDatabase &db,string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item);
     bool GetDevProperty(QSqlDatabase &db,string strDevnum,map<string,DevProperty>& map_property);
-    bool GetNetProperty(QSqlDatabase &db,string strConTypeNumber,NetCommunicationMode& nmode);
-    bool GetComProperty(QSqlDatabase &db,string strConTypeNumber,ComCommunicationMode& cmode);
+    //bool GetNetProperty(QSqlDatabase &db,string strConTypeNumber,NetCommunicationMode& nmode);
+    //bool GetComProperty(QSqlDatabase &db,string strConTypeNumber,ComCommunicationMode& cmode);
     bool GetLinkActionParam(QSqlDatabase &db, string strParamnum,map<int,vector<ActionParam> >& map_Params);
     bool GetLinkAction(QSqlDatabase &db,string strLinkRolenum,vector<LinkAction>& vLinkAction);
     bool GetAlarmConfig(QSqlDatabase &db,string strDevnum,map<int,Alarm_config>& map_Alarmconfig);

@@ -22,4 +22,7 @@ unsigned short CalcCRC16_USB(unsigned char *pdest, int len);
 void StringTrim(string &s);
 unsigned int CRC32(unsigned char *pdest, int len);
 
+int BCD2OCT(unsigned char src);
+unsigned char AsciiToInt(unsigned char src);
+
 #endif // UTILITY_H

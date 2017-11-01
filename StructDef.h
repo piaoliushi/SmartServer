@@ -148,7 +148,8 @@ typedef enum SGPROTOCOL
 	SHANGUANG_FM_300W     = 2,//陕西广播100/300W
 	SHANGUANG_AM_50KW     = 3,//陕广中波50kw
 	SHANXI_CD_3_5KW       = 4,//陕西762 3/5KW川大协议
-    SHANXI_AM_10KW        = 5 //中波10Kw
+    SHANXI_AM_10KW        = 5,//中波10Kw
+    SHANXI_3KW_PDM        = 6 //如意3KwPDM
 }SgSubProtocol;
 typedef enum HGPROTOCOL
 {
@@ -310,6 +311,7 @@ typedef enum ZHC_TAG
 {
     ZHC_618F = 0,
     ZHC_10KWTV = 1,
+    ZHC_3KWFM  = 2
 }ZhcSybProtocol;
 
 #endif
