@@ -852,7 +852,7 @@ bool DataBaseOperation::UpdateMonitorItems( string strDevnum,vector<DeviceMonito
             qquery.prepare(strSql);
 
             vector<DeviceMonitorItem>::iterator iter = v_ditem.begin();
-    QSqlDatabase::database().transaction();
+    db.transaction();
     for(;iter!=v_ditem.end();++iter){
         qquery.bindValue(":MonitoringName",QString::fromStdString((*iter).sItemName));
         qquery.bindValue(":Ratio",(*iter).dRatio);
@@ -865,13 +865,13 @@ bool DataBaseOperation::UpdateMonitorItems( string strDevnum,vector<DeviceMonito
         qquery.bindValue(":MonitoringIndex",(*iter).iItemIndex);
         if(!qquery.exec()) {
             cout<<qquery.lastError().text().toStdString()<<"UpdateMonitorItems---qquery---error!"<<endl;
-            QSqlDatabase::database().rollback();
+            db.rollback();
             ConnectionPool::closeConnection(db);
             return false;
         }
     }
 
-    QSqlDatabase::database().commit();
+    db.commit();
     ConnectionPool::closeConnection(db);
     return true;
 }
@@ -919,7 +919,7 @@ bool DataBaseOperation::UpdateItemAlarmConfigs( string strDevnum,map<int,Alarm_c
                            LinkageRoleNumber=:LinkageRoleNumber where DeviceNumber=:DeviceNumber and MonitoringIndex=:MonitoringIndex");
             qquery.prepare(strSql);
             map<int,Alarm_config>::iterator iter = mapAlarmConfig.begin();
-    QSqlDatabase::database().transaction();
+    db.transaction();
     for(;iter!=mapAlarmConfig.end();++iter){
         qquery.bindValue(":LimitValue",(*iter).second.fLimitvalue);
         qquery.bindValue(":AlarmLevel",(*iter).second.iAlarmlevel);
@@ -930,12 +930,12 @@ bool DataBaseOperation::UpdateItemAlarmConfigs( string strDevnum,map<int,Alarm_c
         qquery.bindValue(":MonitoringIndex",(*iter).first);
         if(!qquery.exec()){
             cout<<qquery.lastError().text().toStdString()<<"UpdateItemAlarmConfigs---qquery---error!"<<endl;
-            QSqlDatabase::database().rollback();
+            db.rollback();
             ConnectionPool::closeConnection(db);
             return false;
         }
     }
-    QSqlDatabase::database().commit();
+    db.commit();
     ConnectionPool::closeConnection(db);
     return true;
 }
@@ -1015,8 +1015,8 @@ bool DataBaseOperation::AddItemEndAlarmRecord( time_t endTime,unsigned long long
 bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,DevMonitorDataPtr pdata,const map<int,DeviceMonitorItem> &mapMonitorItem)
 {
     QTime startTime = QTime::currentTime();
-
-    cout<<"AddItemMonitorRecord  enter deviceid = "<<strDevnum<<endl;
+    string stempTm = startTime.toString("hh:mm:ss").toStdString();
+    cout<<stempTm<<"-------AddItemMonitorRecord  enter deviceid = "<<strDevnum<<endl;
     QSqlDatabase db = ConnectionPool::openConnection();
     if(!db.isOpen() || !db.isValid()) {
         std::cout<<"AddItemMonitorRecord is error  ------------ the database is interrupt"<<std::endl;
@@ -1035,7 +1035,8 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
     qdt.setTime(QTime(ltime->tm_hour,ltime->tm_min,ltime->tm_sec));
 
     map<int,DataInfo>::iterator iter = pdata->mValues.begin();
-    QSqlDatabase::database().transaction();
+    db.transaction();
+
     for(;iter!=pdata->mValues.end();++iter){
 
         if(mapMonitorItem.find(iter->first)==mapMonitorItem.end())
@@ -1048,16 +1049,18 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
         inquery.bindValue(":monitoringvalue",(*iter).second.fValue);
         if(!inquery.exec()){
             cout<<inquery.lastError().text().toStdString()<<"AddItemMonitorRecord---inquery---error!"<<endl;
-            QSqlDatabase::database().rollback();
+            db.rollback();
             ConnectionPool::closeConnection(db);
             return false;
         }
     }
-    QSqlDatabase::database().commit();
+    db.commit();
     ConnectionPool::closeConnection(db);
     QTime stopTime = QTime::currentTime();
+    stempTm = stopTime.toString("hh:mm:ss").toStdString();
     int elapsed = startTime.msecsTo(stopTime);
-    cout<<"AddItemMonitorRecord  leave deviceid = "<<strDevnum<<"--used time="<<elapsed<<"ms"<<endl;
+
+    cout<<stempTm<<"+++++++AddItemMonitorRecord  leave deviceid = "<<strDevnum<<"--used time="<<elapsed<<"ms"<<endl;
     return true;
 }
 
@@ -1075,12 +1078,12 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
     for(;iter!=mapAlarmSwitchSet.end();++iter){
 
         QString qsTransNum = QString::fromStdString(iter->first);
-        QSqlDatabase::database().transaction();
+        db.transaction();
         QString strDel = QString("delete from device_alarm_switch where devicenumber='%1'").arg(qsTransNum);
         QSqlQuery qsDel(db);
         if(!qsDel.exec(strDel)) {//qsDel.lastError().text().toStdString()<<
             cout<<"SetEnableAlarm---qsDel---error!"<<endl;
-            QSqlDatabase::database().rollback();
+            db.rollback();
             resValue = 3;
             ConnectionPool::closeConnection(db);
             return false;
@@ -1101,7 +1104,7 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
             {
                 //<<qsIect.lastError().text().toStdString()
                 cout<<"SetEnableAlarm---qsInsert3---error!-----itype="<<itype<<endl;
-                QSqlDatabase::database().rollback();
+                db.rollback();
                 resValue = 3;
                 ConnectionPool::closeConnection(db);
                 return false;
@@ -1116,7 +1119,7 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
                 if(iter->second[i].sDes.empty()==false)
                     qsInsert.bindValue(":description",iter->second[i].sDes.empty());
                 if(!qsInsert.exec()) {
-                    QSqlDatabase::database().rollback();
+                    db.rollback();
                     resValue = 3;
                     ConnectionPool::closeConnection(db);
                     return false;
@@ -1125,7 +1128,7 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
             }
 
         }
-        QSqlDatabase::database().commit();
+        db.commit();
     }
 
 
@@ -1146,14 +1149,14 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
     map<string,vector<Alarm_config> >::iterator iter=mapAlarmSet.begin();
     for(;iter!=mapAlarmSet.end();++iter) {
         QString qsTransNum = QString::fromStdString(iter->first);
-        QSqlDatabase::database().transaction();
+        db.transaction();
         QSqlQuery qsDel(db);
         QString strSql=QString("delete from alarm_item_config where devicenumber=:devicenumber");
         qsDel.prepare(strSql);
         qsDel.bindValue(":devicenumber",qsTransNum);
         if(!qsDel.exec()) {
             cout<<qsDel.lastError().text().toStdString()<<"SetEnableAlarm---qsDel2---error!"<<endl;
-            QSqlDatabase::database().rollback();
+            db.rollback();
             resValue = 3;
             ConnectionPool::closeConnection(db);
             return false;
@@ -1176,7 +1179,7 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
             if(!qsIect.exec())
             {
                 cout<<qsIect.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
-                QSqlDatabase::database().rollback();
+                db.rollback();
                 resValue = 3;
                 ConnectionPool::closeConnection(db);
                 return false;
@@ -1209,7 +1212,7 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
 
                 if(!qsInsert.exec())  {
                     cout<<qsInsert.lastError().text().toStdString()<<"SetEnableAlarm---qsInsert3---error!"<<endl;
-                    QSqlDatabase::database().rollback();
+                    db.rollback();
                     resValue = 3;
                     ConnectionPool::closeConnection(db);
                     return false;
@@ -1217,7 +1220,7 @@ bool DataBaseOperation::SetAlarmLimit(map<string,vector<Alarm_config> > &mapAlar
             }
 
         }
-        QSqlDatabase::database().commit();
+        db.commit();
     }
     resValue = 0;
     ConnectionPool::closeConnection(db);
@@ -1234,7 +1237,7 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
         return false;
     }
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
-    QSqlDatabase::database().transaction();
+    db.transaction();
     map<string,vector<Monitoring_Scheduler> >::iterator iter= mapSch.begin();
     for(;iter!=mapSch.end();++iter){
         QString sDevNum = QString::fromStdString(iter->first);
@@ -1244,7 +1247,7 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
         qsDel.bindValue(":objectnumber",sDevNum);
         if(!qsDel.exec()){
             cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel---error!"<<endl;
-            QSqlDatabase::database().rollback();
+            db.rollback();
             resValue = 3;
             ConnectionPool::closeConnection(db);
             return false;
@@ -1255,7 +1258,7 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
         qsDel.bindValue(":objectnumber",sDevNum);
         if(!qsDel.exec()) {
             cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel2---error!"<<endl;
-            QSqlDatabase::database().rollback();
+            db.rollback();
             resValue = 3;
             ConnectionPool::closeConnection(db);
             return false;
@@ -1270,8 +1273,8 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
 
         QString strCmd = QString("insert into command_scheduler(objectnumber,paramnumber,enable,weekday,starttime,commandtype,hasparam,datetype,month,day,commandendtime) \
                                  values(:objectnumber,'',1,:weekday,:starttime,:commandtype,0,:datetype,:month,:day,:commandendtime)");
-                                 QSqlQuery insertCmdopenQuery(db);
-                insertCmdopenQuery.prepare(strCmd);
+        QSqlQuery insertCmdopenQuery(db);
+        insertCmdopenQuery.prepare(strCmd);
         insertCmdopenQuery.bindValue(":objectnumber",sDevNum);
         insertCmdopenQuery.bindValue(":commandtype",15);
         QSqlQuery insertCmdcloseQuery(db);
@@ -1325,21 +1328,21 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
 
             if(!insertQuery.exec())  {
                 cout<<insertQuery.lastError().text().toStdString()<<"SetAlarmTime---insertQuery---error!"<<endl;
-                QSqlDatabase::database().rollback();
+                db.rollback();
                 resValue = 3;
                 ConnectionPool::closeConnection(db);
                 return false;
             }
             if(!insertCmdopenQuery.exec()) {
                 cout<<insertCmdopenQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdopenQuery---error!"<<endl;
-                QSqlDatabase::database().rollback();
+                db.rollback();
                 resValue = 3;
                 ConnectionPool::closeConnection(db);
                 return false;
             }
             if(!insertCmdcloseQuery.exec()) {
                 cout<<insertCmdcloseQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdcloseQuery---error!"<<endl;
-                QSqlDatabase::database().rollback();
+                db.rollback();
                 resValue = 3;
                 ConnectionPool::closeConnection(db);
                 return false;
@@ -1347,7 +1350,7 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
         }
 
     }
-    QSqlDatabase::database().commit();
+    db.commit();
     ConnectionPool::closeConnection(db);
     return true;
 }
