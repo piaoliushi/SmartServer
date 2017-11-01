@@ -1343,7 +1343,7 @@ void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curData
     time(&tmCurTime);
     double ninterval = difftime(tmCurTime,tmLastSaveTime[sDevId]);
 
-    if(ninterval<60)//run_config_ptr[sDevId]->data_save_interval间隔保存时间 need amend;
+    if(ninterval<120)//run_config_ptr[sDevId]->data_save_interval间隔保存时间 need amend;
         return ;
     GetInst(DataBaseOperation).AddItemMonitorRecord(sDevId,tmCurTime,curDataPtr,mapMonitorItem);
 

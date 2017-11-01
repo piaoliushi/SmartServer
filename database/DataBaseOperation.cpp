@@ -1017,12 +1017,16 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
     QTime startTime = QTime::currentTime();
     string stempTm = startTime.toString("hh:mm:ss").toStdString();
     cout<<stempTm<<"-------AddItemMonitorRecord  enter deviceid = "<<strDevnum<<endl;
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlDatabase db = ConnectionPool::openConnection();
     if(!db.isOpen() || !db.isValid()) {
         std::cout<<"AddItemMonitorRecord is error  ------------ the database is interrupt"<<std::endl;
         return false;
     }
-    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+
+    cout<<stempTm<<"%%%%%%%  get db object ok------------deviceid = "<<strDevnum<<endl;
+
+
     QSqlQuery inquery(db);
     QString strSql=QString("insert into device_monitoring_record(devicenumber,monitoringindex,monitoringtime,monitoringvalue) values(:devicenumber,:monitoringindex,\
                            :monitoringtime,:monitoringvalue)");
@@ -1054,6 +1058,7 @@ bool DataBaseOperation::AddItemMonitorRecord( string strDevnum,time_t savetime,D
             return false;
         }
     }
+     cout<<stempTm<<"^^^^^^^  start commit------------deviceid = "<<strDevnum<<endl;
     db.commit();
     ConnectionPool::closeConnection(db);
     QTime stopTime = QTime::currentTime();
