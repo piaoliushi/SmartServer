@@ -119,7 +119,7 @@ namespace hx_net{
           }
               break;
           case SHANXI_3KW_PDM:{
-              if(data[0]==0xCA && data[1]==m_addresscode && data[2]==0x10)
+              if(data[0]==0xCA && data[1]==m_addresscode)
               {
                   return data[3]+2;
               }
@@ -317,6 +317,8 @@ namespace hx_net{
 
       int SgTransmmit::RY_3KwPdmData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
       {
+          if(data[2]!=0x10)
+              return RE_CMDACK;
           DataInfo dainfo;
           int nbase=4;
           char data1=AsciiToInt(data[nbase+6]);
@@ -378,7 +380,7 @@ namespace hx_net{
               data1=AsciiToInt(data[nbase+56+k]);
               for(int i=0;i<4;++i)
               {
-                  dainfo.fValue = Getbit(data1,i);
+                  dainfo.fValue = (Getbit(data1,i)==0 ? 1:0);
                   data_ptr->mValues[11+k*4+i] = dainfo;
               }
           }
