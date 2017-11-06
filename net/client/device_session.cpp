@@ -1488,13 +1488,24 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 
     //打包发送http消息到上级平台
     int nDevType = modleInfos_.mapDevInfo[sDevId].iDevType;
-    if(nDevType == DEVICE_TRANSMITTER){//博汇发射机需要上报开关机状态
+    //博汇发射机需要上报开关机状态
+    if(nDevType == DEVICE_TRANSMITTER){
         //插入一条编号为500的运行状态指标
         int runState = (get_run_state(sDevId)==dev_running)?1:0;
         DataInfo  tmInfo;
         tmInfo.bType=1;
         tmInfo.fValue = runState;
         curDataPtr->mValues[500] = tmInfo;
+        //插入一条编号为501的频率填充指标
+        map<string,DevProperty>::iterator iter = modleInfos_.mapDevInfo[sDevId].map_DevProperty.find("Freq");
+        tmInfo.bType = 0;
+        if(iter!=modleInfos_.mapDevInfo[sDevId].map_DevProperty.end()){
+            tmInfo.sValue = iter->second.property_value;
+        }
+        else{
+            tmInfo.sValue = "0";
+        }
+        curDataPtr->mValues[501] =tmInfo;
     }
 
     //打包发送客户端

@@ -412,30 +412,29 @@ bool DataBaseOperation::GetDevMonItem(QSqlDatabase &db, string strDevnum,QString
             where a.DeviceNumber='%1'").arg(QString::fromStdString(strDevnum));
             itemschquery.prepare(strSql);
             if(itemschquery.exec()) {
-            while(itemschquery.next()) {
-            DeviceMonitorItem item;
-            item.iItemIndex = itemschquery.value(0).toInt();
-            item.sItemName = itemschquery.value(1).toString().toStdString();
-            item.dRatio = itemschquery.value(2).toDouble();
-            item.iItemType = itemschquery.value(3).toInt();
-            item.iItemvalueType = itemschquery.value(4).toInt();
-            item.bAlarmEnable = itemschquery.value(5).toBool();
-            item.bUpload = itemschquery.value(6).toBool();
-            item.sUnit = itemschquery.value(7).toString().toStdString();
-            int iAlarmid = itemschquery.value(8).toInt();
-            GetItemAlarmConfig(db,strDevnum,item.iItemIndex,iAlarmid,item.vItemAlarm);
+                while(itemschquery.next()) {
+                    DeviceMonitorItem item;
+                    item.iItemIndex = itemschquery.value(0).toInt();
+                    item.sItemName = itemschquery.value(1).toString().toStdString();
+                    item.dRatio = itemschquery.value(2).toDouble();
+                    item.iItemType = itemschquery.value(3).toInt();
+                    item.iItemvalueType = itemschquery.value(4).toInt();
+                    item.bAlarmEnable = itemschquery.value(5).toBool();
+                    item.bUpload = itemschquery.value(6).toBool();
+                    item.sUnit = itemschquery.value(7).toString().toStdString();
+                    int iAlarmid = itemschquery.value(8).toInt();
+                    GetItemAlarmConfig(db,strDevnum,item.iItemIndex,iAlarmid,item.vItemAlarm);
 
-            item.iTargetId = itemschquery.value(9).toInt();
-            item.iModTypeId = itemschquery.value(10).toInt();
-            item.iModDevId = itemschquery.value(11).toInt();
-            map_item[item.iItemIndex] = item;
-}
-} else{
-cout<<itemschquery.lastError().text().toStdString()<<"GetDevMonItem---itemschquery---error!"<<endl;
-return false;
-}
-return true;
-
+                    item.iTargetId = itemschquery.value(9).toInt();
+                    item.iModTypeId = itemschquery.value(10).toInt();
+                    item.iModDevId = itemschquery.value(11).toInt();
+                    map_item[item.iItemIndex] = item;
+             }
+        } else{
+                cout<<itemschquery.lastError().text().toStdString()<<"GetDevMonItem---itemschquery---error!"<<endl;
+                return false;
+        }
+        return true;
 }
 
 //获取设备属性信息
