@@ -909,7 +909,7 @@ namespace hx_net{
                     }
                 }
                 if(!bFind)
-                    return RE_HEADERROR;;
+                   break;
             }
             switch(iModType)
             {
@@ -1082,7 +1082,7 @@ namespace hx_net{
                     }
                 }
                 if(!bFind)
-                    return RE_HEADERROR;;
+                    break;
             }
             switch(iModType)
             {
