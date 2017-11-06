@@ -61,27 +61,18 @@ namespace hx_net{
 
 				if(nDataLen<2)
                     return RE_HEADERROR;
-				if(data[0]==0xEA && data[1]==0x02)
+                if(data[0]==0xEA)
 				{//整机功率，则计算数据体长度
 					int niDataLen, HiByte,LoByte;
 					HiByte=data[2];
 					LoByte=data[3];
 					niDataLen=HiByte<<8|LoByte;
-					if(nDataLen==nDataLen+5)
-                        return RE_SUCCESS;
-					return (niDataLen+5-nDataLen);
+
+                    return (niDataLen+1);
 				}
 				else
 				{
-					unsigned char cDes[2]={0};
-					//cDes[0]= m_DevAddr;
-					cDes[0]=0xEA;
-					cDes[1]=0x02;
-					int nPos = kmp(data,nDataLen,cDes,3);
-					if(nPos>0)
-						return nPos-1;
-					else
-						return nPos;
+                    return RE_HEADERROR;
 				}
 
 			}
@@ -100,6 +91,12 @@ namespace hx_net{
             return GmeSIMData(data,data_ptr,nDataLen,runstate);
         case GME_SIMTV1014A:
             return GmeSIM1014AData(data,data_ptr,nDataLen,runstate);
+        case GME_1F33E:
+            return Gme1F33E(data,data_ptr,nDataLen,runstate);
+        case GME_DIGTV:
+            return GmeDigtv(data,data_ptr,nDataLen,runstate);
+        case GME_DIGTV_6:
+            return GmeDigtv6(data,data_ptr,nDataLen,runstate);
         }
         return RE_NOPROTOCOL;
 	}
@@ -178,7 +175,7 @@ namespace hx_net{
 
 				tmUnit.commandId[1] = 0x85;
 				tmUnit.commandId[4] = 0x85;
-				tmUnit.ackLen = 5;
+                tmUnit.ackLen = 4;
 				vector<CommandUnit> vtTurnOnUnit;
 				vtTurnOnUnit.push_back(tmUnit);
 				cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR] = vtTurnOnUnit;
@@ -354,7 +351,7 @@ namespace hx_net{
 			dtinfo.fValue = (float)((tmp == 0) ? 1:0);
 			data_ptr->mValues[indexpos++] = dtinfo;
 		}
-		return 0;
+        return RE_SUCCESS;
 	}
 
 	int GmeTransmmit::GmeSIMData( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate )
@@ -464,7 +461,7 @@ namespace hx_net{
 			dtinfo.fValue = (float)tmp;
 			data_ptr->mValues[indexpos++] = dtinfo;
 		}
-        return 0;
+        return RE_SUCCESS;
     }
 
     int GmeTransmmit::GmeSIM1014AData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
@@ -574,6 +571,670 @@ namespace hx_net{
             dtinfo.fValue = tmp;
             data_ptr->mValues[indexpos++] = dtinfo;
         }
-        return 0;
+        return RE_SUCCESS;
+    }
+
+    int GmeTransmmit::Gme1F33E(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+    {
+        if(data[1]!=0x02)
+            return RE_CMDACK;
+        int iLastNum = nDataLen-4;
+        data+=4;
+        int iModType;
+        DataInfo dtinfo;
+        dtinfo.bType = false;
+        while(iLastNum>4){
+            if(data[0]==0xFC)
+                iModType = data[1];
+            else
+            {
+                bool bFind=false;
+                for(int i=0;i<(iLastNum-4);i++)
+                {
+                    if(data[i]==0xFC)
+                    {
+                        iModType = data[i+1];
+                        data+=i;
+                        bFind = true;
+                        break;
+                    }
+                }
+                if(!bFind)
+                    return RE_HEADERROR;
+            }
+            switch(iModType){
+            case 0x02:
+            {
+
+                dtinfo.fValue = float(((data[4]<<8)|data[5])*0.001);
+                data_ptr->mValues[0] = dtinfo;
+                dtinfo.fValue = float((data[6]<<8)|data[7]);
+                data_ptr->mValues[1] = dtinfo;
+                dtinfo.fValue = float(((data[8]<<8)|data[9])*0.01);
+                data_ptr->mValues[2] = dtinfo;
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            case 0x03:
+            {
+                dtinfo.bType = true;
+                if(data[4]==0x21){
+                    dtinfo.fValue=0;//通电
+                    runstate = 0;
+                }
+                else{
+                    dtinfo.fValue=1;
+                    runstate = 1;
+                }
+                data_ptr->mValues[3] = dtinfo;
+                dtinfo.bType = false;
+                dtinfo.fValue = float(((data[4]<<8)|data[5])*0.1);
+                data_ptr->mValues[4] = dtinfo;
+                dtinfo.fValue = float(((data[6]<<8)|data[7])*0.1);
+                data_ptr->mValues[5] = dtinfo;
+                dtinfo.fValue = float(((data[8]<<8)|data[9])*0.1);
+                data_ptr->mValues[6] = dtinfo;
+                dtinfo.fValue = 0;
+                data_ptr->mValues[7] = dtinfo;
+                data+=(data[3]+2);//实际长度少了2个字节，应该是9个字节，实际只有7个字节
+                iLastNum-=(data[3]+2);
+            }
+                break;
+            case 0x04://激励数据
+            {
+                if(data[2]==0x01)//激励1数据
+                {
+                    dtinfo.fValue = float(((data[4]<<8)|data[5])*0.1);
+                    data_ptr->mValues[8] = dtinfo;
+                    dtinfo.fValue = float(((data[7]<<8)|data[8])*0.1);
+                    data_ptr->mValues[9] = dtinfo;
+                    dtinfo.bType = true;
+                    dtinfo.fValue = data[9];
+                    data_ptr->mValues[10] = dtinfo;
+                    dtinfo.bType = false;
+                    dtinfo.fValue = float(data[10]+data[11]*0.01+data[12]*0.001);
+                    data_ptr->mValues[11] = dtinfo;
+                    dtinfo.fValue = float(data[13]+data[14]*0.1);
+                    data_ptr->mValues[12] = dtinfo;
+                    dtinfo.fValue = float(data[15]+data[16]*0.1);
+                    data_ptr->mValues[13] = dtinfo;
+                    int iMinus;//数据符号
+                    iMinus = data[18]>>7;
+                    if(iMinus==0)
+                        dtinfo.fValue = float((data[18]&0x7F)*0.5);
+                    else
+                        dtinfo.fValue = float(-1*(data[18]&0x7F)*0.5);
+                    data_ptr->mValues[14] = dtinfo;
+                    iMinus = data[19]>>7;
+                    if(iMinus==0)
+                        dtinfo.fValue = float((data[19]&0x7F)*0.5);
+                    else
+                        dtinfo.fValue = float(-1*(data[19]&0x7F)*0.5);
+                    data_ptr->mValues[15] = dtinfo;
+                    dtinfo.bType = true;
+                    dtinfo.fValue = data[28];
+                    data_ptr->mValues[16] = dtinfo;
+                    dtinfo.bType = false;
+                    if(data[29]==0x00)
+                        dtinfo.fValue = 0x00;
+                    else if(data[29]==0x02)
+                        dtinfo.fValue = 50;
+                    else if(data[29]==0x03)
+                        dtinfo.fValue = 75;
+                    data_ptr->mValues[17] = dtinfo;
+                    dtinfo.bType = true;
+                    dtinfo.fValue = (data[30]==0x01 ? 0:1);
+                    data_ptr->mValues[18] = dtinfo;
+                    dtinfo.bType = false;
+                    iMinus = data[31]>>7;
+                    if(iMinus==0)
+                        dtinfo.fValue = float((data[31]&0x7F)*0.2);
+                    else
+                        dtinfo.fValue = float(-1*(data[31]&0x7F)*0.2);
+                    data_ptr->mValues[19] = dtinfo;
+
+                    iMinus = data[32]>>7;
+                    if(iMinus==0)
+                        dtinfo.fValue = float((data[32]&0x7F)*0.2);
+                    else
+                        dtinfo.fValue = float(-1*(data[32]&0x7F)*0.2);
+                    data_ptr->mValues[20] = dtinfo;
+                    iMinus = data[33]>>7;
+                    if(iMinus==0)
+                        dtinfo.fValue = float((data[33]&0x7F)*0.2);
+                    else
+                        dtinfo.fValue = float(-1*(data[33]&0x7F)*0.2);
+                    data_ptr->mValues[21] = dtinfo;
+                    dtinfo.bType = true;
+                    dtinfo.fValue = data[34];
+                    data_ptr->mValues[22] = dtinfo;
+                    dtinfo.bType = false;
+                    dtinfo.fValue = float((data[39]<<8)|data[40]);
+                    data_ptr->mValues[23] = dtinfo;
+                    dtinfo.fValue = float(data[43]+data[44]*0.001);
+                    data_ptr->mValues[24] = dtinfo;
+                    dtinfo.fValue = float(data[50]+data[51]*0.001);
+                    data_ptr->mValues[25] = dtinfo;
+                    dtinfo.fValue = float(data[52]+data[53]*0.001);
+                    data_ptr->mValues[26] = dtinfo;
+                    dtinfo.bType = true;
+                    iMinus = data[54]&0x01;
+                    dtinfo.fValue=(iMinus==0x01 ? 0:1);//b0
+                    data_ptr->mValues[27] = dtinfo;
+                    dtinfo.fValue = ((data[54]&0x02)>>1);//b1
+                    data_ptr->mValues[28] = dtinfo;
+                    dtinfo.fValue = ((data[54]&0x04)>>2);//b2
+                    data_ptr->mValues[29] = dtinfo;
+                    dtinfo.fValue = ((data[54]&0x10)>>4);//b4
+                    data_ptr->mValues[30] = dtinfo;
+                    dtinfo.fValue = ((data[54]&0x20)>>5);//b5
+                    data_ptr->mValues[31] = dtinfo;
+                    dtinfo.fValue = ((data[54]&0x80)>>7);//b7
+                    data_ptr->mValues[32] = dtinfo;
+                    //	data+=(data[3]+4);
+                    //	iLastNum-=(data[3]+4);
+                }
+                else if(data[2]==0x02)//激励2
+                {
+                    dtinfo.fValue = float(((data[4]<<8)|data[5])*0.1);
+                    data_ptr->mValues[33] = dtinfo;
+                    dtinfo.fValue = float(((data[7]<<8)|data[8])*0.1);
+                    data_ptr->mValues[34] = dtinfo;
+                    dtinfo.bType = true;
+                    dtinfo.fValue = data[9];
+                    data_ptr->mValues[35] = dtinfo;
+                    dtinfo.bType = false;
+                    dtinfo.fValue = float(data[10]+data[11]*0.01+data[12]*0.001);
+                    data_ptr->mValues[36] = dtinfo;
+                    dtinfo.fValue = float(data[13]+data[14]*0.1);
+                    data_ptr->mValues[37] = dtinfo;
+                    dtinfo.fValue = float(data[15]+data[16]*0.1);
+                    data_ptr->mValues[38] = dtinfo;
+                    int iMinus;//数据符号
+                    iMinus = data[18]>>7;
+                    if(iMinus==0)
+                        dtinfo.fValue = float((data[18]&0x7F)*0.5);
+                    else
+                        dtinfo.fValue = float(-1*(data[18]&0x7F)*0.5);
+                    data_ptr->mValues[39] = dtinfo;
+                    iMinus = data[19]>>7;
+                    if(iMinus==0)
+                        dtinfo.fValue = float((data[19]&0x7F)*0.5);
+                    else
+                        dtinfo.fValue = float(-1*(data[19]&0x7F)*0.5);
+                    data_ptr->mValues[40] = dtinfo;
+                    dtinfo.bType = true;
+                    dtinfo.fValue = data[28];
+                    data_ptr->mValues[41] = dtinfo;
+                    dtinfo.bType = false;
+                    if(data[29]==0x00)
+                        dtinfo.fValue = 0x00;
+                    else if(data[29]==0x02)
+                        dtinfo.fValue = 50;
+                    else if(data[29]==0x03)
+                        dtinfo.fValue = 75;
+                    data_ptr->mValues[42] = dtinfo;
+                    dtinfo.bType = true;
+                    dtinfo.fValue = (data[30]==0x01 ? 0:1);
+                    data_ptr->mValues[43] = dtinfo;
+                    dtinfo.bType = false;
+                    iMinus = data[31]>>7;
+                    if(iMinus==0)
+                        dtinfo.fValue = float((data[31]&0x7F)*0.2);
+                    else
+                        dtinfo.fValue = float(-1*(data[31]&0x7F)*0.2);
+                    data_ptr->mValues[44] = dtinfo;
+
+                    iMinus = data[32]>>7;
+                    if(iMinus==0)
+                        dtinfo.fValue = float((data[32]&0x7F)*0.2);
+                    else
+                        dtinfo.fValue = float(-1*(data[32]&0x7F)*0.2);
+                    data_ptr->mValues[45] = dtinfo;
+                    iMinus = data[33]>>7;
+                    if(iMinus==0)
+                        dtinfo.fValue = float((data[33]&0x7F)*0.2);
+                    else
+                        dtinfo.fValue = float(-1*(data[33]&0x7F)*0.2);
+                    data_ptr->mValues[46] = dtinfo;
+                    dtinfo.bType = true;
+                    dtinfo.fValue = data[34];
+                    data_ptr->mValues[47] = dtinfo;
+                    dtinfo.bType = false;
+                    dtinfo.fValue = float((data[39]<<8)|data[40]);
+                    data_ptr->mValues[48] = dtinfo;
+                    dtinfo.fValue = float(data[43]+data[44]*0.001);
+                    data_ptr->mValues[49] = dtinfo;
+                    dtinfo.fValue = float(data[50]+data[51]*0.001);
+                    data_ptr->mValues[50] = dtinfo;
+                    dtinfo.fValue = float(data[52]+data[53]*0.001);
+                    data_ptr->mValues[51] = dtinfo;
+                    dtinfo.bType = true;
+                    iMinus = data[54]&0x01;
+                    dtinfo.fValue=(iMinus==0x01 ? 0:1);//b0
+                    data_ptr->mValues[52] = dtinfo;
+                    dtinfo.fValue = ((data[54]&0x02)>>1);//b1
+                    data_ptr->mValues[53] = dtinfo;
+                    dtinfo.fValue = ((data[54]&0x04)>>2);//b2
+                    data_ptr->mValues[54] = dtinfo;
+                    dtinfo.fValue = ((data[54]&0x10)>>4);//b4
+                    data_ptr->mValues[55] = dtinfo;
+                    dtinfo.fValue = ((data[54]&0x20)>>5);//b5
+                    data_ptr->mValues[56] = dtinfo;
+                    dtinfo.fValue = ((data[54]&0x80)>>7);//b7
+                    data_ptr->mValues[57] = dtinfo;
+
+                }
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+
+                break;
+            case 0x07://功放数据
+            {
+                if(data[2]==0x01)//功放1
+                {
+                    dtinfo.bType = false;
+                    dtinfo.fValue = float(((data[4]<<8)|data[5])*0.1);
+                    data_ptr->mValues[58] = dtinfo;
+                    dtinfo.fValue = float(((data[6]<<8)|data[7])*0.1);
+                    data_ptr->mValues[59] = dtinfo;
+                    dtinfo.fValue = float(((data[8]<<8)|data[9])*0.1);
+                    data_ptr->mValues[60] = dtinfo;
+                    dtinfo.fValue = float(((data[18]<<8)|data[19]));
+                    data_ptr->mValues[61] = dtinfo;
+                    dtinfo.bType = true;
+                    dtinfo.fValue = float((data[23]&0x02)>>1);
+                    data_ptr->mValues[62] = dtinfo;
+                    dtinfo.fValue = float((data[23]&0x04)>>2);
+                    data_ptr->mValues[63] = dtinfo;
+                    dtinfo.fValue = float((data[23]&0x10)>>4);
+                    data_ptr->mValues[64] = dtinfo;
+                }
+                else if(data[2]==0x02)//功放2
+                {
+                    dtinfo.bType = false;
+                    dtinfo.fValue = float(((data[4]<<8)|data[5])*0.1);
+                    data_ptr->mValues[65] = dtinfo;
+                    dtinfo.fValue = float(((data[6]<<8)|data[7])*0.1);
+                    data_ptr->mValues[66] = dtinfo;
+                    dtinfo.fValue = float(((data[8]<<8)|data[9])*0.1);
+                    data_ptr->mValues[67] = dtinfo;
+                    dtinfo.fValue = float(((data[18]<<8)|data[19]));
+                    data_ptr->mValues[68] = dtinfo;
+                    dtinfo.bType = true;
+                    dtinfo.fValue = float((data[23]&0x02)>>1);
+                    data_ptr->mValues[69] = dtinfo;
+                    dtinfo.fValue = float((data[23]&0x04)>>2);
+                    data_ptr->mValues[70] = dtinfo;
+                    dtinfo.fValue = float((data[23]&0x10)>>4);
+                    data_ptr->mValues[71] = dtinfo;
+                }
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            default:
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+                break;
+            }
+        }
+        return RE_SUCCESS;
+    }
+
+    int GmeTransmmit::GmeDigtv(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+    {
+        int iLastNum = nDataLen-4;//剩余解析字节数
+        data+=4;
+        int iModType;//数据模块类型
+        DataInfo dtinfo;
+        dtinfo.bType = false;
+        while(iLastNum>4)
+        {
+            if(data[0]==0xFC)
+                iModType = data[1];
+            else
+            {
+                bool bFind=false;
+                for(int i=0;i<(iLastNum-4);i++)
+                {
+                    if(data[i]==0xFC)
+                    {
+                        iModType = data[i+1];
+                        data+=i;
+                        bFind = true;
+                        break;
+                    }
+                }
+                if(!bFind)
+                    return RE_HEADERROR;;
+            }
+            switch(iModType)
+            {
+            case 0x02:
+            {
+                dtinfo.fValue = float(((data[4]<<8)|data[5])*0.001);
+                data_ptr->mValues[0] = dtinfo;
+                dtinfo.fValue = float((data[6]<<8)|data[7]);
+                data_ptr->mValues[1] = dtinfo;
+                dtinfo.fValue = float(((data[8]<<8)|data[9])*0.01);
+                data_ptr->mValues[2] = dtinfo;
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            case 0x03:
+            {
+                dtinfo.bType = true;
+                if(data[4]==0x21){
+                    dtinfo.fValue=0;//通电
+                    runstate = 0;
+                }
+                else{
+                    dtinfo.fValue=1;
+                    runstate = 1;
+                }
+                data_ptr->mValues[3] = dtinfo;
+                data+=5;//实际长度少了2个字节，应该是9个字节，实际只有7个字节
+                iLastNum-=5;
+            }
+                break;
+            case 0x04://激励数据
+            {
+                int index = -1;
+                if(data[2]==0x01)//激励1数据
+                {
+                    index = 4;
+                }
+                else if(data[2]==0x02)//激励2
+                {
+                    index = 38;
+                }
+                if(index<=0)
+                {
+                    data+=(data[3]+4);
+                    iLastNum-=(data[3]+4);
+                    break;
+                }
+                for(int i=0;i<8;++i)
+                {
+                    dtinfo.bType = true;
+                    dtinfo.fValue = Getbit(data[4],i);
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                dtinfo.bType = false;
+                dtinfo.fValue = (data[5]<<8|data[6])*0.1;
+                data_ptr->mValues[index++] = dtinfo;
+                for(int i=3;i<8;++i)
+                {
+                    dtinfo.bType = true;
+                    dtinfo.fValue = Getbit(data[7],i);
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                dtinfo.bType = false;
+                dtinfo.fValue = (data[11]<<8|data[12])*0.001;
+                data_ptr->mValues[index++] = dtinfo;
+                dtinfo.bType = false;
+                dtinfo.fValue = (data[13]<<8|data[14])*0.001;
+                data_ptr->mValues[index++] = dtinfo;
+                for(int i=0;i<6;++i)
+                {
+                    dtinfo.fValue = (data[15+i*2]<<8|data[16+i*2])*0.001;
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                dtinfo.bType = true;
+                for(int i=0;i<8;++i)
+                {
+                    dtinfo.fValue = Getbit(data[61],i);
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                for(int i=4;i<8;++i)
+                {
+                    dtinfo.fValue = Getbit(data[62],i);
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                iLastNum-=(data[3]+4);
+                data+=(data[3]+4);
+            }
+
+                break;
+            case 0x07://功放数据
+            {
+                int index = -1;
+                switch(data[2])
+                {
+                case 0x01:
+                    index = 72;
+                    break;
+                case 0x02:
+                    index = 87;
+                    break;
+                case 0x03:
+                    index = 102;
+                    break;
+                case 0x04:
+                    index = 117;
+                    break;
+                default:
+                    break;
+                }
+                if(index>71)
+                {
+                    dtinfo.bType = false;
+                    for(int i=0;i<9;++i)
+                    {
+                        dtinfo.fValue = (data[4+i*2]<<8|data[5+i*2])*0.1;
+                        data_ptr->mValues[index++] = dtinfo;
+                    }
+                    dtinfo.bType = true;
+                    for(int i=5;i>1;--i)
+                    {
+                        dtinfo.fValue = Getbit(data[22],i);
+                        data_ptr->mValues[index++] = dtinfo;
+                    }
+                    dtinfo.fValue = ((data[22]<<8|data[23])>>5&0x1F);
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.fValue = (data[23]&0x1F);
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                iLastNum-=(data[3]+8);
+                data+=(data[3]+8);
+            }
+                break;
+            default:
+                iLastNum-=(data[3]+4);
+                data+=(data[3]+4);
+                break;
+            }
+        }
+        if(data_ptr->mValues[3].fValue==1)
+        {
+            data_ptr->mValues[0].fValue = 0;
+            data_ptr->mValues[1].fValue = 0;
+        }
+        return RE_SUCCESS;
+    }
+
+    int GmeTransmmit::GmeDigtv6(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+    {
+        int iLastNum = nDataLen-4;//剩余解析字节数
+        data+=4;
+        int iModType;//数据模块类型
+        DataInfo dtinfo;
+        dtinfo.bType = false;
+        while(iLastNum>4)
+        {
+            if(data[0]==0xFC)
+                iModType = data[1];
+            else
+            {
+                bool bFind=false;
+                for(int i=0;i<(iLastNum-4);i++)
+                {
+                    if(data[i]==0xFC)
+                    {
+                        iModType = data[i+1];
+                        data+=i;
+                        bFind = true;
+                        break;
+                    }
+                }
+                if(!bFind)
+                    return RE_HEADERROR;;
+            }
+            switch(iModType)
+            {
+            case 0x02:
+            {
+                dtinfo.fValue = float(((data[4]<<8)|data[5])*0.001);
+                data_ptr->mValues[0] = dtinfo;
+                dtinfo.fValue = float((data[6]<<8)|data[7]);
+                data_ptr->mValues[1] = dtinfo;
+                dtinfo.fValue = float(((data[8]<<8)|data[9])*0.01);
+                data_ptr->mValues[2] = dtinfo;
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            case 0x03:
+            {
+                dtinfo.bType = true;
+                if(data[4]==0x21){
+                    dtinfo.fValue=0;//通电
+                    runstate = 0;
+                }
+                else{
+                    dtinfo.fValue=1;
+                    runstate = 1;
+                }
+                data_ptr->mValues[3] = dtinfo;
+                data+=5;//实际长度少了2个字节，应该是9个字节，实际只有7个字节
+                iLastNum-=5;
+            }
+                break;
+            case 0x04://激励数据
+            {
+                int index = -1;
+                if(data[2]==0x01)//激励1数据
+                {
+                    index = 4;
+                }
+                else if(data[2]==0x02)//激励2
+                {
+                    index = 38;
+                }
+                if(index<=0)
+                {
+                    data+=(data[3]+4);
+                    iLastNum-=(data[3]+4);
+                    break;
+                }
+                for(int i=0;i<8;++i)
+                {
+                    dtinfo.bType = true;
+                    dtinfo.fValue = Getbit(data[4],i);
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                dtinfo.bType = false;
+                dtinfo.fValue = (data[5]<<8|data[6])*0.1;
+                data_ptr->mValues[index++] = dtinfo;
+                for(int i=3;i<8;++i)
+                {
+                    dtinfo.bType = true;
+                    dtinfo.fValue = Getbit(data[7],i);
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                dtinfo.bType = false;
+                dtinfo.fValue = (data[11]<<8|data[12])*0.001;
+                data_ptr->mValues[index++] = dtinfo;
+                dtinfo.bType = false;
+                dtinfo.fValue = (data[13]<<8|data[14])*0.001;
+                data_ptr->mValues[index++] = dtinfo;
+                for(int i=0;i<6;++i)
+                {
+                    dtinfo.fValue = (data[15+i*2]<<8|data[16+i*2])*0.001;
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                dtinfo.bType = true;
+                for(int i=0;i<8;++i)
+                {
+                    dtinfo.fValue = Getbit(data[61],i);
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                for(int i=4;i<8;++i)
+                {
+                    dtinfo.fValue = Getbit(data[62],i);
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                iLastNum-=(data[3]+4);
+                data+=(data[3]+4);
+            }
+
+                break;
+            case 0x07://功放数据
+            {
+                int index = -1;
+                switch(data[2])
+                {
+                case 0x01:
+                    index = 72;
+                    break;
+                case 0x02:
+                    index = 88;
+                    break;
+                case 0x03:
+                    index = 104;
+                    break;
+                case 0x04:
+                    index = 120;
+                    break;
+                default:
+                    break;
+                }
+                if(index>71)
+                {
+                    dtinfo.bType = false;
+                    for(int i=0;i<6;++i)
+                    {
+                        dtinfo.fValue = (data[4+i*2]<<8|data[5+i*2])*0.1;
+                        data_ptr->mValues[index++] = dtinfo;
+                    }
+                    dtinfo.fValue = (data[18]<<8|data[19])*0.1;
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.fValue = (data[20]<<8|data[21]);
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.fValue = (data[22]<<8|data[23])*0.1;
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.fValue = (data[24]<<8|data[25])*0.1;
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.bType = true;
+                    for(int i=5;i>1;--i)
+                    {
+                        dtinfo.fValue = Getbit(data[26],i);
+                        data_ptr->mValues[index++] = dtinfo;
+                    }
+                    dtinfo.fValue = ((data[26]<<8|data[27])>>5&0x1F);
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.fValue = (data[28]&0x1F);
+                    data_ptr->mValues[index++] = dtinfo;
+                }
+                iLastNum-=(data[3]+8);
+                data+=(data[3]+8);
+            }
+                break;
+            default:
+                iLastNum-=(data[3]+4);
+                data+=(data[3]+4);
+                break;
+            }
+        }
+        if(data_ptr->mValues[3].fValue==1)
+        {
+            data_ptr->mValues[0].fValue = 0;
+            data_ptr->mValues[1].fValue = 0;
+        }
+        return RE_SUCCESS;
     }
 }

@@ -337,7 +337,6 @@ bool Bohui_Protocol::appendTransmitterReportBodyMsg(xml_document<> &xmlMsg,map<s
          if(cell_iter->second.bUpload == false)
             continue;
          xml_node<> *xml_Quality_Index = xmlMsg.allocate_node(node_element,"QualityIndex ");
-         //string sType = boost::lexical_cast<std::string>(cell_iter->second.iTargetId);
          xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Type",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
          xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("ModuleType",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
          xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("ModuleID",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
@@ -1070,13 +1069,15 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
                 curConf.iAlarmid = itype;
                 rapidxml::xml_attribute<>* atDuration=NULL;
                 atDuration = alswNode->first_attribute("Duration");
-                if(atDuration==NULL)
-                    return false;
-                curConf.iDelaytime = atoi(atDuration->value());
+                if(atDuration==NULL){
+                    curConf.iDelaytime = 1;
+                }else
+                    curConf.iDelaytime = atoi(atDuration->value());
                 atDuration = alswNode->first_attribute("ResumeDuration");
                 if(atDuration==NULL)
-                    return false;
-                curConf.iResumetime = atoi(atDuration->value());
+                    curConf.iResumetime = 1;
+                else
+                    curConf.iResumetime = atoi(atDuration->value());
                 int nFind = 0;
                 rapidxml::xml_attribute<>* atTP = alswNode->first_attribute("DownThreshold");
                 if(atTP!=NULL){
@@ -1085,7 +1086,6 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
                     if(slmt.empty()==false){
                         curConf.iLimittype = 1;
                         curConf.fLimitvalue = atof(atTP->value());
-                        //vAlarmConf.push_back(curConf);
                         mapAlarmSet[qsTransNum].push_back(curConf);
                     }
                 }else{
@@ -1098,7 +1098,6 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
                     if(slmt.empty()==false){
                         curConf.iLimittype = 0;
                         curConf.fLimitvalue = atof(atTP->value());
-                        //vAlarmConf.push_back(curConf);
                         mapAlarmSet[qsTransNum].push_back(curConf);
                     }
                 }else{
@@ -1107,20 +1106,16 @@ bool Bohui_Protocol::_parse_alarm_param_set(xml_node<> *root_node,int &nValue,ma
 
                 if(nFind==2)
                 {
-                    if(itype==(511) || itype==(512)||itype==(612)||itype==(633)||itype ==(634)||itype ==(703))
+                    if(itype==(511) || itype==(512)|| itype==(513)||itype==(612)||itype==(633)||itype ==(634)||itype ==(703))
                     {
                         curConf.fLimitvalue =1;
                         curConf.iLimittype = 4;
-                        //vAlarmConf.push_back(curConf);
-                        //mapAlarmSet[qsTransNum].push_back(curConf);
+                        //check is repeated
                         _checkAndAppendAlarmLimit(mapAlarmSet[qsTransNum],curConf);
                     }
                 }
             }
         }
-        //mapAlarmSet[qsTransNum] = vAlarmConf;
-
-
     }
     nValue = 0;
     return true;
