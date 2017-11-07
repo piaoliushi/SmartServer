@@ -1197,7 +1197,7 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
     //clear run time scheduler
     if(mapSch.size()<=0){
 
-        QString strGetTsmt=QString("select devicenumber from device where devcivetype=0");
+        QString strGetTsmt=QString("select devicenumber from device where devicetype=0");
         QSqlQuery sqlGetTsmt(db);
         if(!sqlGetTsmt.exec(strGetTsmt)) {
             cout<<sqlGetTsmt.lastError().text().toStdString()<<"SetAlarmTime---sqlGetTsmt---error!"<<endl;
