@@ -1009,17 +1009,36 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
         db.transaction();
         QString strDel = QString("delete from device_alarm_switch where devicenumber='%1'").arg(qsTransNum);
         QSqlQuery qsDel(db);
-        if(!qsDel.exec(strDel)) {//qsDel.lastError().text().toStdString()<<
+        if(!qsDel.exec(strDel)) {
             cout<<"SetEnableAlarm---qsDel---error!"<<endl;
             db.rollback();
             resValue = 3;
             ConnectionPool::closeConnection(db);
             return false;
         }
+        QString strResetItemAlarmEnable = QString("update monitoring_device_item set alarmenable=0 where devicenumber='%1'").arg(qsTransNum);
+        QSqlQuery qsResetItem(db);
+        if(!qsResetItem.exec(strResetItemAlarmEnable)) {
+            cout<<"SetEnableAlarm---qsResetItem---error!"<<endl;
+            db.rollback();
+            resValue = 3;
+            ConnectionPool::closeConnection(db);
+            return false;
+        }
+
+
         QSqlQuery qsInsert(db);
         QString strSql = QString("insert into device_alarm_switch(devicenumber,alarmswitchtype,alarmenable,description) values(:devicenumber,:alarmswitchtype,:alarmenable,:description)");
         qsInsert.prepare(strSql);
         qsInsert.bindValue(":devicenumber",qsTransNum);
+
+
+        QString strSetItemAlarmEnable = QString("update monitoring_device_item set alarmenable=:alarmenable where devicenumber='%1'and monitoringindex=:monitoringindex").arg(qsTransNum);
+        QSqlQuery qsSetItem(db);
+        qsSetItem.prepare(strSetItemAlarmEnable);
+
+
+
 
         for(int i=0;i<iter->second.size();++i){
             QSqlQuery qsIect(db);
@@ -1030,7 +1049,6 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
             qsIect.bindValue(":alarmtype",itype);
             if(!qsIect.exec())
             {
-                //<<qsIect.lastError().text().toStdString()
                 cout<<"SetEnableAlarm---qsInsert3---error!-----itype="<<itype<<endl;
                 db.rollback();
                 resValue = 3;
@@ -1038,7 +1056,6 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
                 return false;
             }
 
-            cout<<"qslect----exec---ok"<<iter->first<<endl;
             while(qsIect.next())
             {
                 itype = qsIect.value(0).toInt();
@@ -1047,6 +1064,15 @@ bool DataBaseOperation::SetEnableAlarm(map<string,vector<Alarm_Switch_Set> > &ma
                 if(iter->second[i].sDes.empty()==false)
                     qsInsert.bindValue(":description",iter->second[i].sDes.empty());
                 if(!qsInsert.exec()) {
+                    db.rollback();
+                    resValue = 3;
+                    ConnectionPool::closeConnection(db);
+                    return false;
+                }
+
+                qsSetItem.bindValue(":alarmenable",iter->second[i].iSwtich);
+                qsSetItem.bindValue(":monitoringindex",itype);
+                if(!qsSetItem.exec()) {
                     db.rollback();
                     resValue = 3;
                     ConnectionPool::closeConnection(db);

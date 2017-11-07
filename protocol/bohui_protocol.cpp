@@ -1012,7 +1012,7 @@ void Bohui_Protocol::_setAlarmParam(int nDevType,xml_node<> *rootNode,int &nValu
         cout<<"_parse_alarm_param_set----error!"<<endl;
         return;
     }
-   if (GetInst(DataBaseOperation).SetAlarmLimit(mapAlarmSet,nValue)==true)//nDevType,
+   if (GetInst(DataBaseOperation).SetAlarmLimit(mapAlarmSet,nValue)==true)
     {
         nValue=0;
         // 通知设备服务......
