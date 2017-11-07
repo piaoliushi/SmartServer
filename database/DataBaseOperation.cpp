@@ -1194,6 +1194,56 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
     }
 
     db.transaction();
+    //clear run time scheduler
+    if(mapSch.size()<=0){
+
+        QString strGetTsmt=QString("select devicenumber from device where devcivetype=0");
+        QSqlQuery sqlGetTsmt(db);
+        if(!sqlGetTsmt.exec(strGetTsmt)) {
+            cout<<sqlGetTsmt.lastError().text().toStdString()<<"SetAlarmTime---sqlGetTsmt---error!"<<endl;
+            db.rollback();
+            resValue = 3;
+            ConnectionPool::closeConnection(db);
+            return false;
+        }
+
+        while(sqlGetTsmt.next())
+        {
+            vector<Monitoring_Scheduler> vecSch;
+            QString sDevNum = sqlGetTsmt.value(0).toString();
+            QSqlQuery qsDel(db);
+            QString strSql=QString("delete from monitoring_scheduler where objectnumber=:objectnumber");
+            qsDel.prepare(strSql);
+            qsDel.bindValue(":objectnumber",sDevNum);
+            if(!qsDel.exec()){
+                cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel---error!"<<endl;
+                db.rollback();
+                resValue = 3;
+                ConnectionPool::closeConnection(db);
+                return false;
+            }
+
+            strSql = QString("delete from command_scheduler where objectnumber=:objectnumber and (commandtype=15 or commandtype=19)");
+            qsDel.prepare(strSql);
+            qsDel.bindValue(":objectnumber",sDevNum);
+            if(!qsDel.exec()) {
+                cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel2---error!"<<endl;
+                db.rollback();
+                resValue = 3;
+                ConnectionPool::closeConnection(db);
+                return false;
+            }
+
+
+
+            mapSch[sDevNum.toStdString()] = vecSch;
+        }
+
+        db.commit();
+        ConnectionPool::closeConnection(db);
+        return true;
+    }
+
     map<string,vector<Monitoring_Scheduler> >::iterator iter= mapSch.begin();
     for(;iter!=mapSch.end();++iter){
         QString sDevNum = QString::fromStdString(iter->first);

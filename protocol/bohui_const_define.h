@@ -35,6 +35,13 @@ typedef enum
 
 } BH_MSG_ID_DEF;
 
+typedef enum {
+    BH_NO_ERROR     =  0,
+    BH_ERROR        =  1,
+    BH_NO_TSMT_NODE =  2,//运行图无发射机节点
+
+}BH_ERROR_CODE;
+
 const char CONST_STR_BOHUI_TYPE[][32] = { "TransmitterQuery","EnvMonDevQuery","LinkDevQuery",
                                                                     "ManualPowerControl","AlarmTimeSet","AlarmSwitchSet",
                                           "AlarmParamSet","AlarmSwitchSetE","AlarmParamSetE","AlarmSwitchSetD",

@@ -62,7 +62,7 @@ protected:
     void _execLinkDevQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue);
 
     //设置告警运行图
-    bool _parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<string,vector<Monitoring_Scheduler> > &mapMonSch);
+    int _parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<string,vector<Monitoring_Scheduler> > &mapMonSch);
     void _setAlarmTime(xml_node<> *rootNode,int &nValue);
 
     //设置告警门限

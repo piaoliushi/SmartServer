@@ -888,7 +888,8 @@ void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
 {
     nValue = 11;
     map<string,vector<Monitoring_Scheduler> > mapSrcMontSch;
-    if(_parse_alarm_run_time(rootNode,nValue,mapSrcMontSch)==false)
+    int nRslt = _parse_alarm_run_time(rootNode,nValue,mapSrcMontSch);
+    if(nRslt==BH_ERROR)
         return;
     if (GetInst(DataBaseOperation).SetAlarmTime(mapSrcMontSch,nValue)==true)
     {
@@ -896,6 +897,7 @@ void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
         // 通知设备服务......
         map<string,vector<Monitoring_Scheduler> >::iterator iter = mapSrcMontSch.begin();
         for(;iter!=mapSrcMontSch.end();++iter){
+
             map<int,vector<Monitoring_Scheduler> > monitorScheduler;
             vector<Command_Scheduler> cmmdScheduler;
 
@@ -907,12 +909,12 @@ void Bohui_Protocol::_setAlarmTime(xml_node<> *rootNode,int &nValue)
 }
 
 //分析运行图消息
-bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<string,vector<Monitoring_Scheduler> > &mapMonSch)
+int Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<string,vector<Monitoring_Scheduler> > &mapMonSch)
 {
     nValue = 11;
     rapidxml::xml_node<>* tranNode = root_node->first_node("TranInfo");
     if(tranNode==NULL)
-        return false;
+        return BH_NO_TSMT_NODE;
 
     for(;tranNode!=NULL;tranNode=tranNode->next_sibling()){
         vector<Monitoring_Scheduler> vecSch;
@@ -922,7 +924,7 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
         string qsTransNum = attr->value();
         rapidxml::xml_node<>* setnode = tranNode->first_node();
         if(setnode==NULL)
-            return false;
+            return BH_ERROR;
         while(setnode){
             Monitoring_Scheduler tmSch;
             string name=setnode->name();
@@ -931,7 +933,7 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
                 continue;
             }
             if(name!="MonthTime" && name!="WeeklyTime" && name!="DayTime" )
-                return false;
+                return BH_ERROR;
             int shutype=0;//按星期
             if(name=="MonthTime")
                 shutype = 1;//按月
@@ -940,7 +942,7 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
             tmSch.iMonitorType = shutype;
             rapidxml::xml_attribute<char> * attrType = setnode->first_attribute("Type");
             if(attrType==NULL)
-                return false;
+                return BH_ERROR;
             tmSch.bMonitorFlag = true;
             tmSch.bRunModeFlag = atoi(attrType->value());//监测标志0:停播
             //开始时间
@@ -949,7 +951,7 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
             if(attrStarttime==NULL){
                 attrStarttime = setnode->first_attribute("StartDateTime");
                 if(attrStarttime==NULL)
-                    return false;
+                    return BH_ERROR;
                 else
                     qdt=QDateTime::fromString(attrStarttime->value(),"yyyy-MM-dd hh:mm:ss");
             }else{
@@ -959,13 +961,13 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
             if(qdt.isValid())
                 tmSch.tStartTime = qdt.toTime_t();
             else
-                return false;
+                return BH_ERROR;
             //结束时间
             rapidxml::xml_attribute<char> * attrEndtime = setnode->first_attribute("EndTime");
             if(attrEndtime==NULL){
                 attrEndtime = setnode->first_attribute("EndDateTime");
                 if(attrEndtime==NULL)
-                    return false;
+                    return BH_ERROR;
                 else
                     qdt=QDateTime::fromString(attrEndtime->value(),"yyyy-MM-dd hh:mm:ss");
             }else{
@@ -975,7 +977,7 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
             if(qdt.isValid())
                 tmSch.tEndTime = qdt.toTime_t();
             else
-                return false;
+                return BH_ERROR;
              rapidxml::xml_attribute<char> * attrMotn = setnode->first_attribute("Month");
              if(attrMotn!=NULL)
                     tmSch.iMonitorMonth = atoi(attrMotn->value());
@@ -991,7 +993,7 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
                     if(qdt.isValid())
                         tmSch.tAlarmEndTime = qdt.toTime_t();
                     else if(shutype!=2)
-                        return false;
+                        return BH_ERROR;
                }
              vecSch.push_back(tmSch);
              setnode = setnode->next_sibling();
@@ -1000,7 +1002,7 @@ bool Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map
         mapMonSch[qsTransNum] = vecSch;
     }
     nValue = 0;
-    return true;
+    return BH_NO_ERROR;
 }
 
 //设置告警门限
