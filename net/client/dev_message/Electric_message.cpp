@@ -157,7 +157,16 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             else
                 return -1;
         }
-
+        case ST_UPS_C6_20:{
+            if(data[0] == 0x28)
+                return 0;
+            else
+            {
+                unsigned char cDes[1]={0};
+                cDes[0]=0x28;
+                return kmp(data,nDataLen,cDes,1);
+            }
+        }
         }
     }
         break;
@@ -232,6 +241,8 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
             m_pSession->start_handler_data(iaddcode,d_curData_ptr);
             return iresult;
         }
+        case ST_UPS_C6_20:
+             return decode_ST_C6_20Ks(data,d_curData_ptr,nDataLen,iaddcode);
         }
         break;
     }
@@ -685,6 +696,31 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             cmdAll.mapCommand[MSG_DEVICE_QUERY] = vtUnit;
         }
             break;
+        case ST_UPS_C6_20:{
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 3;
+
+            tmUnit.ackLen = 110;
+            tmUnit.commandId[0]=0x51;
+            tmUnit.commandId[1]=0x36;
+            tmUnit.commandId[2]=0x0D;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            tmUnit.ackLen = 80;
+            tmUnit.commandId[0]=0x57;
+            tmUnit.commandId[1]=0x41;
+            tmUnit.commandId[2]=0x0D;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+
+            tmUnit.commandLen = 4;
+            tmUnit.ackLen = 0;
+            tmUnit.commandId[0]=0x53;
+            tmUnit.commandId[1]=0x2E;
+            tmUnit.commandId[2]=0x32;
+            tmUnit.commandId[3]=0x0D;
+            cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
+
+        }
+            break;
         }
     }
         break;
@@ -709,6 +745,16 @@ void Electric_message::GetSignalCommand(devCommdMsgPtr lpParam, CommandUnit &cmd
         cmdUnit.commandId[6]=0x00;
     }
         break;
+    case ST_UPS_C6_20:{
+        cmdUnit.commandLen = 4;
+        cmdUnit.ackLen = 0;
+
+        cmdUnit.commandId[0]=0x53;
+        cmdUnit.commandId[1]=0x2E;
+        cmdUnit.commandId[2]=0x32;
+        cmdUnit.commandId[3]=0x0D;
+    }
+        break;
     default:
         break;
     }
@@ -728,6 +774,16 @@ void Electric_message::GetSignalCommand(int nChannel, CommandUnit &cmdUnit)
         cmdUnit.commandId[4]=0x01;
         cmdUnit.commandId[5]=cmdUnit.commandId[2]^cmdUnit.commandId[3]^cmdUnit.commandId[4];
         cmdUnit.commandId[6]=0x00;
+    }
+        break;
+    case ST_UPS_C6_20:{
+        cmdUnit.commandLen = 4;
+        cmdUnit.ackLen = 0;
+
+        cmdUnit.commandId[0]=0x53;
+        cmdUnit.commandId[1]=0x2E;
+        cmdUnit.commandId[2]=0x32;
+        cmdUnit.commandId[3]=0x0D;
     }
         break;
     default:
@@ -1409,9 +1465,106 @@ int Electric_message::decode_Acr_Ard2L(unsigned char *data, DevMonitorDataPtr da
 }
 
 //执行联动命令
-void Electric_message::exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,string sUser,e_ErrorCode &eErrCode)
+void Electric_message::exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,
+                                            string sUser,e_ErrorCode &eErrCode)
 {
+    switch(actionType)
+    {
+    case ACTP_CLOSE_DEVICE:{
+        if(m_pSession!=NULL){
+            eErrCode = EC_OK;
+            if(param.size()>=2){
+                int param_2 = atoi(param[1][0].strParamValue.c_str());
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,param_2,eErrCode);
+            }
+            else
+            {
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,0,eErrCode);
+            }
+        }
+    }
+        break;
+    }
 
 
+}
+
+int Electric_message::decode_ST_C6_20Ks(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    int indexpos =0,iReadNum=1,iLastNum=(nDataLen-1);
+    char cNum[10]={0};
+    iaddcode = m_DevAddr;
+    DataInfo dainfo;
+    dainfo.bType = false;
+    for(int i=0;i<16;++i)//解析前16个模拟量
+    {
+        for(int jpos=0;iLastNum>0 && jpos<10;++jpos) //读取每个模拟量有效数值
+        {
+            if(data[iReadNum]!=0x20)
+            {
+                cNum[jpos] = data[iReadNum];
+                ++iReadNum;
+                --iLastNum;
+            }
+            else
+            {
+                ++iReadNum;
+                --iLastNum;
+                break;
+            }
+        }
+        if(cNum[0]==0x2D)
+            dainfo.fValue = 0;
+        else
+            dainfo.fValue = float(atof(cNum));
+        data_ptr->mValues[i] = dainfo;
+        memset(&cNum,0,10);
+    }
+    //查找下个命令数据头
+    unsigned char cDes[1]={0};
+    cDes[0]=0x28;
+    cDes[1]=d_devInfo.iAddressCode;
+    indexpos = kmp(&data[iReadNum],iLastNum,cDes,1);
+    if(indexpos>=0)
+    {
+        iReadNum = iReadNum+indexpos+1;
+        iLastNum = iLastNum-(indexpos+1);
+        for(int i=0;i<12;++i)
+        {
+            for(int jpos=0;iLastNum>0 && jpos<10;++jpos) //读取每个模拟量有效数值
+            {
+                if(data[iReadNum]!=0x20)
+                {
+                    cNum[jpos] = data[iReadNum];
+                    ++iReadNum;
+                    --iLastNum;
+                }
+                else
+                {
+                    ++iReadNum;
+                    --iLastNum;
+                    break;
+                }
+            }
+            if(cNum[0]==0x2D)
+                dainfo.fValue = 0;
+            else
+                dainfo.fValue = float(atof(cNum));
+            data_ptr->mValues[i+16] = dainfo;
+            memset(&cNum,0,10);
+        }
+        char cState;
+        dainfo.bType = true;
+        for(int i=0;i<5;++i){
+            cState = data[iReadNum++];
+            if(cState=='0')
+                dainfo.fValue = 1;
+            else
+                dainfo.fValue = 0;
+            data_ptr->mValues[i+28] = dainfo;
+            --iLastNum;
+        }
+    }
+    return RE_SUCCESS;
 }
 }

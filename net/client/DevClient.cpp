@@ -197,6 +197,7 @@ e_ErrorCode DevClient::update_monitor_time(string sDevId,map<int,vector<Monitori
     }
     return opr_rlt;
 }
+
 //更新告警配置
 e_ErrorCode DevClient::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo)
 {

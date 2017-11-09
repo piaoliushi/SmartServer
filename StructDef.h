@@ -209,6 +209,7 @@ typedef enum EDAPROTOCOL
     HX_ELEC_CTR          = 11,//汇鑫电源控制
     ACR_PZ               = 12,//安科瑞网络电力仪表
     ACR_ARD_2L           = 13,//安科瑞网络电力仪表
+    ST_UPS_C6_20         = 14,//山特c6
     ABB_104              = 100,//ABB104电表
 
 }EdaSubProtocol;

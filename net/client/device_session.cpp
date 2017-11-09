@@ -2175,11 +2175,8 @@ void device_session::doAction(LinkAction &action, string sStationid, string sDev
     case ACTP_SEND_CLIENT://通知客户端
         break;
     case ACTP_OPEN_DEVICE://开设备
-        break;
     case ACTP_CLOSE_DEVICE://关设备
-        break;
     case ACTP_SWITCH_ANTTEN://天线切换
-        break;
     case ACTP_SOUND_LIGHT_ALARM:{//声光告警
         if(action.iIshaveParam && action.map_Params.size()>0){
 

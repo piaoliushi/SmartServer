@@ -53,6 +53,7 @@ protected:
     int decode_Elecctr(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_Acr_PZ(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_Acr_Ard2L(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
+    int decode_ST_C6_20Ks(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
 private:
     int              m_Subprotocol;//设备子协议号
     int              m_mainprotocol;//主协议编号
