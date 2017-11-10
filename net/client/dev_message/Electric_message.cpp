@@ -1493,7 +1493,7 @@ int Electric_message::decode_ST_C6_20Ks(unsigned char *data, DevMonitorDataPtr d
 {
     int indexpos =0,iReadNum=1,iLastNum=(nDataLen-1);
     char cNum[10]={0};
-    iaddcode = m_DevAddr;
+    iaddcode = d_devInfo.iAddressCode;
     DataInfo dainfo;
     dainfo.bType = false;
     for(int i=0;i<16;++i)//解析前16个模拟量
