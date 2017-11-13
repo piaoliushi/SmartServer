@@ -14,6 +14,8 @@
 #include "./transmmiter/ckangtetransmmit.h"
 #include "./transmmiter/harristransmmit.h"
 #include "./transmmiter/sgtransmmit.h"
+#include "./transmmiter/hgtransmmitr.h"
+#include "./transmmiter/bgtransmmiter.h"
 
 #include "../../../database/DataBaseOperation.h"
 using namespace db;
@@ -313,6 +315,7 @@ namespace hx_net
             d_ptransmmit = new GmeTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case BEIJING_BEIGUANG:
+            d_ptransmmit = new BgTransmmiter(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case CHENGDU_KT_CG:
             d_ptransmmit = new CDtransmmiter(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
@@ -327,6 +330,7 @@ namespace hx_net
             d_ptransmmit = new AhhxTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case HAGUANG:
+            d_ptransmmit = new HgTransmmitr(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case ANSHAN:
             break;

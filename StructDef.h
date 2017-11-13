@@ -155,6 +155,8 @@ typedef enum HGPROTOCOL
 {
 	HAERBIN_HG_50kw       = 0,//哈尔滨50KW
 	HAERBIN_HG_100kw      = 1,//哈尔滨100KW
+    HAERBIN_HG_10kw       = 2,//哈尔滨10KW
+    HAERBIN_HGEX_10kw     = 3,//哈尔滨10KW 扩展
 }HgSubProtocol;
 typedef enum ASPROTOCOL
 {
