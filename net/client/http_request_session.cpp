@@ -132,13 +132,13 @@ http_request_session::~http_request_session(void)
 
  //上报http消息到上级平台(数据)
  void http_request_session::send_http_data_messge_to_platform(string sDevid,int nDevType,DevMonitorDataPtr &curData,
-                                                              map<int,DeviceMonitorItem> &mapMonitorItem)
+                                                              map<int,DeviceMonitorItem> &mapMonitorItem,bool bImmediately)
  {
      //动环数据收集发送
-      if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
+      if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE && nDevType!=DEVICE_UPS){
 
            boost::recursive_mutex::scoped_lock lock(http_env_stream_mutex_);
-           if(is_need_report_data(env_report_span_)){
+           if(is_need_report_data(env_report_span_) || bImmediately==true){
                //发送数据
                string sReportMsg;
                Bohui_Protocol  bh_ptcl;
@@ -176,7 +176,7 @@ http_request_session::~http_request_session(void)
       }else if(nDevType == DEVICE_TRANSMITTER){//发射机
 
           boost::recursive_mutex::scoped_lock lock(http_tsmt_stream_mutex_);
-          if(is_need_report_data(tsmt_report_span_)){
+          if(is_need_report_data(tsmt_report_span_)|| bImmediately==true){
               //发送数据
               string sReportMsg;
               Bohui_Protocol  bh_ptcl;
@@ -212,7 +212,7 @@ http_request_session::~http_request_session(void)
       }
       else if(nDevType >= DEVICE_GS_RECIVE && nDevType <= DEVICE_ADAPTER){//链路设备
           boost::recursive_mutex::scoped_lock lock(http_link_stream_mutex_);
-          if(is_need_report_data(link_report_span_)){
+          if(is_need_report_data(link_report_span_)|| bImmediately==true){
 
               //发送数据
               string sReportMsg;
@@ -247,13 +247,13 @@ http_request_session::~http_request_session(void)
               }
           }
       }
-      else{
-          string sReportMsg;
-          Bohui_Protocol  bh_ptcl;
-          bh_ptcl.createReportDataMsg(-1,sDevid,nDevType,curData,mapMonitorItem,sReportMsg);
-          if(sReportMsg.empty()==false)
-              putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
-      }
+//      else{
+//          string sReportMsg;
+//          Bohui_Protocol  bh_ptcl;
+//          bh_ptcl.createReportDataMsg(-1,sDevid,nDevType,curData,mapMonitorItem,sReportMsg);
+//          if(sReportMsg.empty()==false)
+//              putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+//      }
  }
 
  //上报http消息到上级平台(告警)
@@ -263,7 +263,7 @@ http_request_session::~http_request_session(void)
      Bohui_Protocol  bh_ptcl;
      //类型分类判断
      int temType = -1;
-     if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE)
+     if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE && nDevType!=DEVICE_UPS)
          temType = BH_POTO_EnvAlarmReport;//动环设备
      else if(nDevType>=DEVICE_GS_RECIVE)
          temType = BH_POTO_LinkDevAlarmReport;//链路设备

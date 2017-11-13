@@ -23,7 +23,7 @@ public:
     void openUrl();
     //上报http消息到上级平台(数据)
     void send_http_data_messge_to_platform(string sDevid,int nDevType,DevMonitorDataPtr &curData,
-                                           map<int,DeviceMonitorItem> &mapMonitorItem);
+                                           map<int,DeviceMonitorItem> &mapMonitorItem,bool bImmediately=false);
     //上报http消息到上级平台(执行结果)
     void send_http_excute_result_messge_to_platform(string sDevid,string sTime,int ndevState,const string &desc);
     //上报http消息到上级平台(告警)

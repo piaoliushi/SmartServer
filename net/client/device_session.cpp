@@ -2023,7 +2023,7 @@ void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPt
         string sDesDevId = sDevId;
         map_dev_ass_parse_ptr_[sDesDevId]->get_parent_device_id(sDesDevId);
         http_ptr_->send_http_data_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[sDevId].iDevType,
-                                                     curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+                                                     curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem,true);
     }
 }
 

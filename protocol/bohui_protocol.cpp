@@ -408,7 +408,7 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
     string str_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString();
     //类型分类判断
     int nCmdType = -1;
-    if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE)
+    if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE && nDevType!=DEVICE_UPS)
         nCmdType = BH_POTO_EnvQualityRealtimeReport;//动环设备
     else if(nDevType>=DEVICE_GS_RECIVE)
         nCmdType = BH_POTO_LinkDevQualityReport;//链路设备
@@ -698,7 +698,7 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
             xml_device=NULL;
             //类型分类判断
             int temType=(*iter).second.iDevType;
-            if(temType>DEVICE_TRANSMITTER && temType<DEVICE_GS_RECIVE)
+            if(temType>DEVICE_TRANSMITTER && temType<DEVICE_GS_RECIVE && temType!=DEVICE_UPS)
                 temType = BH_POTO_EnvMonDevQuery;//动环设备
             else if(temType>=DEVICE_GS_RECIVE && temType<DEVICE_ANTENNA )
                 temType = BH_POTO_LinkDevQuery;     //链路设备
