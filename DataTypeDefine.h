@@ -18,6 +18,7 @@ enum DEVType
     DEVICE_GPS               = 6,  //gps
     DEVICE_SWITCH            = 7,  //切换设备
     DEVICE_GPS_TIME          = 8,  //GPS授时器
+    DEVICE_UPS               = 20, //UPS
     DEVICE_GS_RECIVE         =100, //卫星接收机
     DEVICE_MW                =101, //微波接收机
     DEVICE_TR                =102, //光收发器

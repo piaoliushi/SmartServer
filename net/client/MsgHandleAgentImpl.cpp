@@ -52,6 +52,7 @@ namespace hx_net
                 m_pbaseMsg = new Media_message(m_pSessionPtr,m_io_service,m_devInfo,devProperty);
 			}
 			break;
+        case DEVICE_UPS:
         case DEVICE_ELEC:{
                 m_pbaseMsg = new Electric_message(m_pSessionPtr,m_io_service,m_devInfo);
             } break;
