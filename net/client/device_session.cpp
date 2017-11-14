@@ -730,7 +730,7 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             }
         }
         else{
-
+            cout<<"no data returned , query timeout !!!!"<<endl;
             if(modleInfos_.mapDevInfo.size()<=1){
                 close_all();
                 start_connect_timer(moxa_config_ptr->connect_timer_interval);
