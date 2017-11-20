@@ -31,13 +31,14 @@ namespace hx_net
            if(nDataLen<2)
                return -1;
            if(data[0] == m_addresscode && data[1] == 0x3e)
-               return 0;
+               return data[2]-1;
            else
            {
-               unsigned char cDes[2]={0};
-               cDes[0]=m_addresscode;
-               cDes[1]=0x3e;
-               return kmp(data,nDataLen,cDes,2);
+//               unsigned char cDes[2]={0};
+//               cDes[0]=m_addresscode;
+//               cDes[1]=0x3e;
+//               return kmp(data,nDataLen,cDes,2);
+               return RE_HEADERROR;
            }
        }
        case BEIGUANG_TV_1KW:
@@ -117,12 +118,16 @@ namespace hx_net
        {
        }
        case BEIGUANG_FM_3KW:
-       {}
+       {
+           return BeiGuangFm3KWData(data,data_ptr,nDataLen,runstate);
+       }
        case BEIGUANG_FM_5KW:
-       {}
+       {
+           return BeiGuangFm5KWData(data,data_ptr,nDataLen,runstate);
+       }
        case BEIGUANG_FM_10KW:
        {
-
+           return BeiGuangFm10KWData(data,data_ptr,nDataLen,runstate);
        }
        case BEIGUANG_TV_1KW:
        {
@@ -150,8 +155,10 @@ namespace hx_net
    {
        switch(m_subprotocol)
        {
-     //  case BEIGUANG_FM_1KW:
-     //      return true;
+       case BEIGUANG_FM_3KW:
+       case BEIGUANG_FM_5KW:
+       case BEIGUANG_FM_10KW:
+           return true;
        default:
            break;
        }
@@ -196,7 +203,7 @@ namespace hx_net
        case BEIGUANG_FM_10KW:
        {
            tmUnit.commandLen = 7;
-           tmUnit.ackLen = 178;
+           tmUnit.ackLen = 3;
            tmUnit.commandId[0] = m_addresscode;
            tmUnit.commandId[1] = 0x3C;
            tmUnit.commandId[2] = 0x05;
@@ -425,6 +432,162 @@ namespace hx_net
        }
        dtinfo.fValue = Getbit(data[4],4)==1 ? 0:1;
        data_ptr->mValues[indexpos++] = dtinfo;
+       return RE_SUCCESS;
+   }
+
+   int BgTransmmiter::BeiGuangFm3KWData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+   {
+       if(nDataLen<110)
+           return RE_HEADERROR;
+       DataInfo dtinfo;
+       dtinfo.bType = false;
+       int indexpos = 0;
+       int outptpower = data[8]*256+data[7];
+       dtinfo.fValue = outptpower*0.001;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       int refpower = data[10]*256+data[9];
+       dtinfo.fValue = refpower;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       if(outptpower>refpower)
+       {
+           dtinfo.fValue = sqrt((data_ptr->mValues[0].fValue*1000+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue));
+       }
+       else
+           dtinfo.fValue = 0;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = data[12]*256+data[11];
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[14]*256+data[13])*0.01;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[16]*256+data[15])*0.1;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[18]*256+data[17])*0.1;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.bType = true;
+       for(int i=0;i<4;++i)
+       {
+           if(i!=2)
+           {
+               dtinfo.fValue = Getbit(data[19],i);
+               data_ptr->mValues[indexpos++] = dtinfo;
+           }
+       }
+       dtinfo.bType = false;
+       dtinfo.fValue = (data[64]*256+data[63])*0.01;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[66]*256+data[65])*0.01;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       for(int i=0;i<3;++i)
+       {
+           dtinfo.fValue = (data[72+17*i]*256+data[71+17*i]);
+           data_ptr->mValues[indexpos++] = dtinfo;
+           dtinfo.fValue = (data[74+17*i]*256+data[73+17*i])*0.1;
+           data_ptr->mValues[indexpos++] = dtinfo;
+       }
+       return RE_SUCCESS;
+   }
+
+   int BgTransmmiter::BeiGuangFm5KWData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+   {
+       if(nDataLen<143)
+           return RE_HEADERROR;
+       DataInfo dtinfo;
+       dtinfo.bType = false;
+       int indexpos = 0;
+       int outptpower = data[8]*256+data[7];
+       dtinfo.fValue = outptpower*0.001;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       int refpower = data[10]*256+data[9];
+       dtinfo.fValue = refpower;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       if(outptpower>refpower)
+       {
+           dtinfo.fValue = sqrt((data_ptr->mValues[0].fValue*1000+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue));
+       }
+       else
+           dtinfo.fValue = 0;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = data[12]*256+data[11];
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[14]*256+data[13])*0.01;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[16]*256+data[15])*0.1;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[18]*256+data[17])*0.1;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.bType = true;
+       for(int i=0;i<4;++i)
+       {
+           if(i!=2)
+           {
+               dtinfo.fValue = Getbit(data[19],i);
+               data_ptr->mValues[indexpos++] = dtinfo;
+           }
+       }
+       dtinfo.bType = false;
+       dtinfo.fValue = (data[64]*256+data[63])*0.01;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[66]*256+data[65])*0.01;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       for(int i=0;i<5;++i)
+       {
+           dtinfo.fValue = (data[72+17*i]*256+data[71+17*i]);
+           data_ptr->mValues[indexpos++] = dtinfo;
+           dtinfo.fValue = (data[74+17*i]*256+data[73+17*i])*0.1;
+           data_ptr->mValues[indexpos++] = dtinfo;
+       }
+       return RE_SUCCESS;
+   }
+
+   int BgTransmmiter::BeiGuangFm10KWData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+   {
+       if(nDataLen<228)
+           return RE_HEADERROR;
+       DataInfo dtinfo;
+       dtinfo.bType = false;
+       int indexpos = 0;
+       int outptpower = data[8]*256+data[7];
+       dtinfo.fValue = outptpower*0.001;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       int refpower = data[10]*256+data[9];
+       dtinfo.fValue = refpower;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       if(outptpower>refpower)
+       {
+           dtinfo.fValue = sqrt((data_ptr->mValues[0].fValue*1000+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue));
+       }
+       else
+           dtinfo.fValue = 0;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = data[12]*256+data[11];
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[14]*256+data[13])*0.01;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[16]*256+data[15])*0.1;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[18]*256+data[17])*0.1;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.bType = true;
+       for(int i=0;i<4;++i)
+       {
+           if(i!=2)
+           {
+               dtinfo.fValue = Getbit(data[19],i);
+               data_ptr->mValues[indexpos++] = dtinfo;
+           }
+       }
+       dtinfo.bType = false;
+       dtinfo.fValue = (data[64]*256+data[63])*0.01;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = (data[66]*256+data[65])*0.01;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       for(int i=0;i<10;++i)
+       {
+           dtinfo.fValue = (data[72+17*i]*256+data[71+17*i]);
+           data_ptr->mValues[indexpos++] = dtinfo;
+           dtinfo.fValue = (data[74+17*i]*256+data[73+17*i])*0.1;
+           data_ptr->mValues[indexpos++] = dtinfo;
+       }
        return RE_SUCCESS;
    }
 }
