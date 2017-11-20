@@ -17,6 +17,7 @@ namespace hx_net{
       private:
           int SX762_5KWData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
           int RY_3KwPdmData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+          int ShanGuangFM1_300W(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate);
       private:
           int m_subprotocol;
           int m_addresscode;

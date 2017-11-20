@@ -141,6 +141,7 @@ namespace hx_net{
           case SHANXI_762_10KW:
               break;
           case SHANGUANG_FM_300W:
+              return ShanGuangFM1_300W(data,data_ptr,nDataLen,runstate);
               break;
           case SHANGUANG_AM_50KW:
               break;
@@ -208,14 +209,14 @@ namespace hx_net{
               break;
           case SHANGUANG_FM_300W:{
               CommandUnit tmUnit;
-              tmUnit.commandId[0] = 0x01;
+              tmUnit.commandId[0] = m_addresscode;
               tmUnit.commandId[1] = 0x41;
               tmUnit.commandId[2] = 0x00;
               tmUnit.commandId[3] = 0x00;
               tmUnit.commandId[4] = 0x00;
-              tmUnit.commandId[5] = 0x40;
+              tmUnit.commandId[5] = tmUnit.commandId[0]^tmUnit.commandId[1];
               tmUnit.commandLen = 6;
-              tmUnit.ackLen = 0;
+              tmUnit.ackLen = 19;
               cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
           }
               break;
@@ -386,4 +387,33 @@ namespace hx_net{
           }
           return RE_SUCCESS;
       }
+      int SgTransmmit::ShanGuangFM1_300W(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+      {
+          DataInfo dainfo;
+          dainfo.bType = false;
+          int pwr = data[7]*256+data[6];
+          dainfo.fValue = pwr*0.001;
+          data_ptr->mValues[0] = dainfo;
+          dainfo.fValue = data[11]*256+data[10];
+          data_ptr->mValues[1] = dainfo;
+          if(pwr>data_ptr->mValues[0].fValue)
+              dainfo.fValue = sqrt((pwr+data_ptr->mValues[0].fValue)/(pwr-data_ptr->mValues[0].fValue));
+          else
+              dainfo.fValue = 0;
+          data_ptr->mValues[2] = dainfo;
+          dainfo.fValue = (data[3]*256+data[2])*0.01;
+          data_ptr->mValues[3] = dainfo;
+          dainfo.fValue = data[5]*256+data[4];
+          data_ptr->mValues[4] = dainfo;
+          dainfo.fValue = data[9]*256+data[8];
+          data_ptr->mValues[5] = dainfo;
+          dainfo.fValue = (data[13]*256+data[12])*0.1;
+          data_ptr->mValues[6] = dainfo;
+          dainfo.fValue = (data[15]*256+data[14]);
+          data_ptr->mValues[7] = dainfo;
+          dainfo.fValue = (data[17]*256+data[16]);
+          data_ptr->mValues[8] = dainfo;
+          return RE_SUCCESS;
+      }
+
 }

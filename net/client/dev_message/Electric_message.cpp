@@ -1558,9 +1558,9 @@ int Electric_message::decode_ST_C6_20Ks(unsigned char *data, DevMonitorDataPtr d
         for(int i=0;i<5;++i){
             cState = data[iReadNum++];
             if(cState=='0')
-                dainfo.fValue = 1;
-            else
                 dainfo.fValue = 0;
+            else
+                dainfo.fValue = 1;
             data_ptr->mValues[i+28] = dainfo;
             --iLastNum;
         }
