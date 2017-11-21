@@ -16,6 +16,7 @@
 #include "./transmmiter/sgtransmmit.h"
 #include "./transmmiter/hgtransmmitr.h"
 #include "./transmmiter/bgtransmmiter.h"
+#include "./transmmiter/hctransmmiter.h"
 
 #include "../../../database/DataBaseOperation.h"
 using namespace db;
@@ -335,6 +336,7 @@ namespace hx_net
         case ANSHAN:
             break;
         case HANGCHUN:
+            d_ptransmmit = new HcTransmmiter(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case ITALY_TECHNO:
             break;

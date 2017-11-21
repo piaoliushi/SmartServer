@@ -166,6 +166,10 @@ typedef enum ASPROTOCOL
 typedef enum HCPROTOCOL
 {
 	HangChun_HCF5KW       = 0,//杭州杭醇5KW
+    HC_CDR_100_300W       = 1,//杭州杭醇CDR100/300W
+    HC_CDR_1KW            = 2,//杭州杭醇CDR1Kw
+    HC_CDR_3KW            = 3,//杭州杭醇CDR3Kw
+    HC_CDR_10KW           = 4,//杭州杭醇CDR10Kw
 }HcSubProtocol;
 typedef enum HXPROTOCOL
 {

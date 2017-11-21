@@ -297,20 +297,10 @@ void   device_session::open_com()
 
                 pSerialPort_ptr_->set_option(serial_port::baud_rate(modleInfos_.comMode.irate),ec);
                 pSerialPort_ptr_->set_option(serial_port::flow_control(serial_port::flow_control::none),ec);
-
-                if(modleInfos_.comMode.iparity_bit == 0)//none
-                    pSerialPort_ptr_->set_option(serial_port::parity(serial_port::parity::none),ec);
-                else if(modleInfos_.comMode.iparity_bit == 1)//odd
-                    pSerialPort_ptr_->set_option(serial_port::parity(serial_port::parity::odd),ec);
-                else if(modleInfos_.comMode.iparity_bit == 2)//even
-                    pSerialPort_ptr_->set_option(serial_port::parity(serial_port::parity::even),ec);
-
-                if(modleInfos_.comMode.istop_bit == 0)//one
-                    pSerialPort_ptr_->set_option(serial_port::stop_bits(serial_port::stop_bits::one),ec);
-                else if(modleInfos_.comMode.istop_bit == 1)//onepointfive
-                    pSerialPort_ptr_->set_option(serial_port::stop_bits(serial_port::stop_bits::onepointfive),ec);
-                else if(modleInfos_.comMode.istop_bit == 2)//two
-                    pSerialPort_ptr_->set_option(serial_port::stop_bits(serial_port::stop_bits::two),ec);
+                //0:none,1:odd,2:even
+                pSerialPort_ptr_->set_option(serial_port::parity(serial_port::parity::type(modleInfos_.comMode.iparity_bit)),ec);
+                //0:one,1:onepointfive,2:two
+                pSerialPort_ptr_->set_option(serial_port::stop_bits(serial_port::stop_bits::type(modleInfos_.comMode.istop_bit)),ec);
 
                 if(modleInfos_.comMode.idata_bit>0)
                     pSerialPort_ptr_->set_option(serial_port::character_size(modleInfos_.comMode.idata_bit),ec);
