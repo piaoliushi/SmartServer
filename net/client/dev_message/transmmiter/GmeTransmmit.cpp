@@ -1348,7 +1348,10 @@ namespace hx_net{
                     iLastNum-=(data[3]+4);
                 }
                     break;
-
+                default:
+                    iLastNum-=(data[3]+4);
+                    data+=(data[3]+4);
+                    break;
                 }
             }
             if(data_ptr->mValues[3].fValue==1)
