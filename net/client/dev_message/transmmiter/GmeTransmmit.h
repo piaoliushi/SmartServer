@@ -18,6 +18,7 @@ namespace hx_net{
         int Gme1F33E(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
         int GmeDigtv(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
         int GmeDigtv6(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+        int GmeCDR1Kw(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate);
 	private:
 		int m_subprotocol;
 		int m_addresscode;

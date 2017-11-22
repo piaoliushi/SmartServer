@@ -116,6 +116,7 @@ typedef enum GMEPROTOCOL
 	GME_SIMTV             = 8,//吉兆模拟电视取全部数据
 	GME_DIGTV             = 9, //吉兆数字国标
 	GME_DIGTV_6           = 10,
+    GME_CDR_1KW           = 11,//cdr1kw
 }GmeSubProtocol,*pGmeSubProtocol;
 typedef enum BGPROTOCOL
 {
