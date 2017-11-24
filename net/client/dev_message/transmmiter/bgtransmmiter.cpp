@@ -380,7 +380,7 @@ namespace hx_net
        DataInfo dtinfo;
        dtinfo.bType = false;
        if(data[5] >= 204 && data[5] <255)
-           dtinfo.fValue = data[5]*data[4]*0.0225*0.001;
+           dtinfo.fValue = data[5]*data[5]*0.0225*0.001;
        else if(data[5] >= 178 && data[5] <204)
            dtinfo.fValue = data[5]*data[5]*0.0235*0.001;
        else if(data[5] >= 153 && data[5] <178)
