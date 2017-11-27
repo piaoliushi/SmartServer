@@ -22,6 +22,7 @@ namespace hx_net{
         int KaiTengData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
         int KT_1Kw_813_Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
         void amp_813_data(unsigned char *data,DevMonitorDataPtr data_ptr,int ampnum);
+        int Kt_50WAmp(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate);
 	private:
 		int m_subprotocol;
 		int m_addresscode;

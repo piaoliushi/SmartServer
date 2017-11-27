@@ -56,6 +56,7 @@ namespace hx_net{
 				return (((data[3]<<8)|data[4])+2);
 			}
         case CHENGDU_KT_DIG:
+        case CHENGDU_KAITENG_50W_AMP:
         {
             if(data[0]==0xAA && data[1]==0xFF && data[2]==m_addresscode)
                 return RE_SUCCESS;
@@ -125,6 +126,8 @@ namespace hx_net{
             return OnCG_dig1KwData(data,data_ptr,nDataLen,runstate);
         case CHENGDU_KAITENG_KFS_II:
             return KT_1Kw_813_Data(data,data_ptr,nDataLen,runstate);
+        case CHENGDU_KAITENG_50W_AMP:
+            return Kt_50WAmp(data,data_ptr,nDataLen,runstate);
 		}
         return RE_NOPROTOCOL;
 	}
@@ -189,9 +192,10 @@ namespace hx_net{
 			break;
 		case CHENGDU_CHENGGUANG:
 			break;
+        case CHENGDU_KAITENG_50W_AMP:
         case CHENGDU_KT_DIG:{
             CommandUnit tmUnit;
-            tmUnit.ackLen = 705;
+            tmUnit.ackLen = 471;
             tmUnit.commandLen=10;
             tmUnit.commandId[0] = 0xAA;
             tmUnit.commandId[1] = 0xFF;
@@ -1041,4 +1045,65 @@ namespace hx_net{
             data_ptr->mValues[54+i+17*ampnum] = dainfo;
         }
     }
+
+    int CDtransmmiter::Kt_50WAmp(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+   {
+       unsigned char dataType;
+       int  dataLen;
+       int indexpos;
+       bool bhavedata=true;
+       do{
+           dataType = data[3];
+           dataLen = (data[5]<<8)|data[4];
+           DataInfo dainfo;
+           switch(dataType){
+           case 0x05:
+           {
+               dainfo.bType = true;
+               dainfo.fValue = data[9];
+               data_ptr->mValues[3] = dainfo;
+               dainfo.fValue = data[12];
+               data_ptr->mValues[4] = dainfo;
+               dainfo.bType = false;
+               dainfo.fValue = data[16]*256+data[15];
+               data_ptr->mValues[0] = dainfo;
+               dainfo.fValue = data[20]*256+data[19];
+               data_ptr->mValues[1] = dainfo;
+               if(data_ptr->mValues[0].fValue>data_ptr->mValues[1].fValue)
+               {
+                   dainfo.fValue = sqrt((data_ptr->mValues[0].fValue+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue-data_ptr->mValues[1].fValue));
+               }
+               else
+               {
+                   dainfo.fValue = 0;
+               }
+               data_ptr->mValues[2] = dainfo;
+               dainfo.fValue = data[24]*256+data[23];
+               data_ptr->mValues[5] = dainfo;
+               for(int i=0;i<10;++i)
+               {
+                   dainfo.fValue = (data[28+4*i]*256+data[27+4*i])*0.1;
+                   data_ptr->mValues[6+i] = dainfo;
+               }
+           }
+               break;
+           case 0x04:
+           {
+               dainfo.bType = true;
+               dainfo.fValue = data[9];
+               data_ptr->mValues[16] = dainfo;
+               dainfo.bType = false;
+               dainfo.fValue = (data[34]*256+data[33])*0.1;
+               data_ptr->mValues[17] = dainfo;
+           }
+               break;
+           default:
+               break;
+           }
+           data=data+dataLen;
+           if(data[0]!=0xAA && data[1]!=0xFF)
+               bhavedata=FALSE;
+       }while (bhavedata);
+       return RE_SUCCESS;
+   }
 }

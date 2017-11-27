@@ -141,6 +141,8 @@ typedef enum CDPROTOCOL
     CHENGDU_XINGUANG_247   = 6,
     CHENGDU_CHENGGUANG_DIG = 7,//成广1Kw数字
     CHENGDU_KAITENG_KFS_II = 8,//凯腾KFS-II-813 1Kw
+    CHENGDU_KAITENG_50W_AMP = 9,//50W功放直放站
+
 }CdSubProtocol;
 typedef enum SGPROTOCOL
 {
