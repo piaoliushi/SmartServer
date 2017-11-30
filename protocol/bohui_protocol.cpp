@@ -874,6 +874,10 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
             iter_propty =  (*iter).second.map_DevProperty.find("Desc");
             if(iter_propty!= (*iter).second.map_DevProperty.end())
                 xml_device->append_attribute(xml_doc.allocate_attribute("Desc",(*iter_propty).second.property_value.c_str()));
+            //生产厂家
+            iter_propty =  (*iter).second.map_DevProperty.find("Factory");
+            if(iter_propty!= (*iter).second.map_DevProperty.end())
+                xml_device->append_attribute(xml_doc.allocate_attribute("Factory",(*iter_propty).second.property_value.c_str()));
             //设备备注
             iter_propty =  (*iter).second.map_DevProperty.find("Remark");
             if(iter_propty!= (*iter).second.map_DevProperty.end())
