@@ -135,7 +135,7 @@ http_request_session::~http_request_session(void)
                                                               map<int,DeviceMonitorItem> &mapMonitorItem,bool bImmediately)
  {
      //动环数据收集发送
-      if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE && nDevType!=DEVICE_UPS){
+      if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE){
 
            boost::recursive_mutex::scoped_lock lock(http_env_stream_mutex_);
            if(is_need_report_data(env_report_span_) || bImmediately==true){
@@ -263,7 +263,7 @@ http_request_session::~http_request_session(void)
      Bohui_Protocol  bh_ptcl;
      //类型分类判断
      int temType = -1;
-     if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE && nDevType!=DEVICE_UPS)
+     if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE)
          temType = BH_POTO_EnvAlarmReport;//动环设备
      else if(nDevType>=DEVICE_GS_RECIVE)
          temType = BH_POTO_LinkDevAlarmReport;//链路设备

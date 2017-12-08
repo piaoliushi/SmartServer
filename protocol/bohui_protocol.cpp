@@ -408,7 +408,7 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
     string str_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString();
     //类型分类判断
     int nCmdType = -1;
-    if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE && nDevType!=DEVICE_UPS)
+    if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE)
         nCmdType = BH_POTO_EnvQualityRealtimeReport;//动环设备
     else if(nDevType>=DEVICE_GS_RECIVE)
         nCmdType = BH_POTO_LinkDevQualityReport;//链路设备
@@ -494,7 +494,7 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
             case DEVICE_AIR://空调
             case DEVICE_GPS://GPS传感器
             case DEVICE_SWITCH://切换设备
-            case DEVICE_GPS_TIME://GPS授时器
+            //case DEVICE_GPS_TIME://GPS授时器
                 break;
             case DEVICE_GS_RECIVE://卫星接收机
             case DEVICE_MW://微波接收机
@@ -526,14 +526,14 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
 
 
                  xml_node<> *xml_Quality_Index = NULL;
-                 if(nDevType>DEVICE_GPS_TIME)
+                 if(nDevType>DEVICE_UPS)
                      xml_Quality_Index = xml_reportMsg.allocate_node(node_element,"Quality");
                  else
                      xml_Quality_Index = xml_reportMsg.allocate_node(node_element,mapTypeToStr[cell_iter->second.iTargetId].second.c_str());
                  //烟感，水浸，配电设备，温湿度，没有Type属性
                  if(nDevType < DEVICE_ELEC || nDevType >= DEVICE_GPS)
                     xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Type",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
-                  if(nDevType>DEVICE_GPS_TIME){
+                  if(nDevType>DEVICE_UPS){
                       //链路设备通道划分与发射机的模块及块内id共用配置字段
                       xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("QualitySrc",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
                       xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("SrcIndex",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
@@ -698,7 +698,7 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
             xml_device=NULL;
             //类型分类判断
             int temType=(*iter).second.iDevType;
-            if(temType>DEVICE_TRANSMITTER && temType<DEVICE_GS_RECIVE && temType!=DEVICE_UPS)
+            if(temType>DEVICE_TRANSMITTER && temType<DEVICE_GS_RECIVE)
                 temType = BH_POTO_EnvMonDevQuery;//动环设备
             else if(temType>=DEVICE_GS_RECIVE && temType<DEVICE_ANTENNA )
                 temType = BH_POTO_LinkDevQuery;     //链路设备

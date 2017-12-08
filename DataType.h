@@ -485,7 +485,7 @@ typedef struct
 	DeviceEncoderInfo  devForEncoderInfo;//760，730+对应编码器配置
 }MediaDeviceParamInfo;
 
-//const char CONST_STR_ALARM_CONTENT[][32] = {"超过上限","低于下限","报警","恢复正常"};
+
 const char CONST_STR_ITEM_UNIT[][8] = {"W","Kw","Mw"};
 
 enum ActionType
