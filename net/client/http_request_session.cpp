@@ -143,31 +143,58 @@ http_request_session::~http_request_session(void)
                string sReportMsg;
                Bohui_Protocol  bh_ptcl;
                xml_node<>* pHeadMsg=NULL;//消息头节点
-               if(bh_ptcl.createReportHeadMsg(xml_env_reportMsg,pHeadMsg,BH_POTO_EnvQualityRealtimeReport)) {
+               int bh_xml_root_name = BH_POTO_EnvQualityRealtimeReport;
+               if(nDevType==DEVICE_UPS)
+                   bh_xml_root_name = BH_POTO_EnvQualityReport;
+               if(bh_ptcl.createReportHeadMsg(xml_env_reportMsg,pHeadMsg,bh_xml_root_name)) {
+
                    if(xml_env_mapDevMsg.find(sDevid)==xml_env_mapDevMsg.end()){
 
-                       bh_ptcl.appendPowerEnvReportBodyMsg(xml_env_reportMsg,xml_env_mapQualityMsg,sDevid,
-                                                           nDevType,curData,mapMonitorItem);
+                       if(nDevType==DEVICE_UPS){
+                           bh_ptcl.appendUpsReportBodyMsg(xml_env_reportMsg,xml_env_mapQualityMsgEx,sDevid,
+                                                               nDevType,curData,mapMonitorItem);
+                       }else{
+                           bh_ptcl.appendPowerEnvReportBodyMsg(xml_env_reportMsg,xml_env_mapQualityMsg,sDevid,
+                                                               nDevType,curData,mapMonitorItem);
+                       }
+
                        xml_env_mapDevMsg[sDevid] = pHeadMsg;
                    }
-                   map<int,xml_node<>* >::iterator iter = xml_env_mapQualityMsg.begin();
-                   for(;iter!=xml_env_mapQualityMsg.end();++iter)
-                       pHeadMsg->append_node(iter->second);
+                    if(nDevType==DEVICE_UPS){
+                        map<string,xml_node<>* >::iterator iter = xml_env_mapQualityMsgEx.begin();
+                        for(;iter!=xml_env_mapQualityMsgEx.end();++iter)
+                            pHeadMsg->append_node(iter->second);
+                    }else{
+                        map<int,xml_node<>* >::iterator iter = xml_env_mapQualityMsg.begin();
+                        for(;iter!=xml_env_mapQualityMsg.end();++iter)
+                            pHeadMsg->append_node(iter->second);
+                    }
+
+
                    rapidxml::print(std::back_inserter(sReportMsg), xml_env_reportMsg, 0);
                }
 
                if(sReportMsg.empty()==false)
                    putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
                xml_env_reportMsg.clear();
-               xml_env_mapQualityMsg.clear();
+               if(nDevType==DEVICE_UPS)
+                    xml_env_mapQualityMsgEx.clear();
+               else
+                    xml_env_mapQualityMsg.clear();
                xml_env_mapDevMsg.clear();
            }else{
                //添加数据,且检查该设备在时间段内是否已经添加过了
                Bohui_Protocol  bh_ptcl;
                if(xml_env_mapDevMsg.find(sDevid) == xml_env_mapDevMsg.end()){
 
-                   bh_ptcl.appendPowerEnvReportBodyMsg(xml_env_reportMsg,xml_env_mapQualityMsg,sDevid,
-                                                       nDevType,curData,mapMonitorItem);
+                    if(nDevType==DEVICE_UPS){
+                        bh_ptcl.appendUpsReportBodyMsg(xml_env_reportMsg,xml_env_mapQualityMsgEx,sDevid,
+                                                            nDevType,curData,mapMonitorItem);
+                    }else{
+                        bh_ptcl.appendPowerEnvReportBodyMsg(xml_env_reportMsg,xml_env_mapQualityMsg,sDevid,
+                                                            nDevType,curData,mapMonitorItem);
+                    }
+
                    xml_env_mapDevMsg[sDevid] = NULL;
                }
 

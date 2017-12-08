@@ -185,6 +185,40 @@ bool Bohui_Protocol::createReportHeadMsg(xml_document<> &xmlMsg,xml_node<>* &pHe
     return false;
 }
 
+//创建动环ups消息
+bool Bohui_Protocol::appendUpsReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,string sDevId,int nDevType
+                                            ,DevMonitorDataPtr &curData,map<int,DeviceMonitorItem> &mapMonitorItem)
+{
+    xml_node<> *xml_Quality = NULL;
+    string str_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString();
+    xml_Quality = xmlMsg.allocate_node(node_element,"Dev");
+    xml_Quality->append_attribute(xmlMsg.allocate_attribute("ID",xmlMsg.allocate_string(sDevId.c_str())));
+    xml_Quality->append_attribute(xmlMsg.allocate_attribute("Type",xmlMsg.allocate_string(boost::lexical_cast<std::string>(nDevType).c_str())));
+    string strDevtype = GetInst(StationConfig).get_dictionary_value("DeviceType",nDevType);
+    xml_Quality->append_attribute(xmlMsg.allocate_attribute("Desc",xmlMsg.allocate_string(strDevtype.c_str())));
+    xml_Quality->append_attribute(xmlMsg.allocate_attribute("CheckDateTime",xmlMsg.allocate_string(str_time.c_str())));
+
+    mXml_Quality[sDevId] = xml_Quality;
+
+    map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
+    for(;cell_iter!=mapMonitorItem.end();++cell_iter){
+        if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
+            continue;
+        if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
+            continue;
+        xml_node<> *xml_Quality_Index = NULL;
+        xml_Quality_Index = xmlMsg.allocate_node(node_element,"Quality");
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Type",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
+        string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
+        if(curData->mValues[cell_iter->first].bType==true)
+            sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
+        xml_Quality->append_node(xml_Quality_Index);
+    }
+    return true;
+}
+
 //创建动环消息体（合并多个动环设备）
 bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,xml_node<>*> &mXml_Quality,string sDevId,int nDevType
                                                  ,DevMonitorDataPtr &curData,map<int,DeviceMonitorItem> &mapMonitorItem)

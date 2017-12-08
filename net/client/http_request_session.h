@@ -55,6 +55,7 @@ private:
     time_t                         env_report_span_;       //动环上报时间统计
     xml_document<>                 xml_env_reportMsg;      //动环临时缓存上报数据
     map<int,xml_node<>* >          xml_env_mapQualityMsg;  //动环缓存设备节点
+    map<string,xml_node<>*>        xml_env_mapQualityMsgEx;//动环缓存设备节点
     map<string,xml_node<>*>        xml_env_mapDevMsg;      //动环缓存设备记录
 
     boost::recursive_mutex         http_tsmt_stream_mutex_;//发射机上报对象互斥量

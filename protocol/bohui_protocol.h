@@ -33,6 +33,10 @@ public:
     //创建动环消息头
     bool createReportHeadMsg(xml_document<> &xmlMsg,xml_node<>* &pHeadMsg,int ReportType);
 
+    //创建动环ups消息
+    bool appendUpsReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,string sDevId,int nDevType
+                                                ,DevMonitorDataPtr &curData,map<int,DeviceMonitorItem> &mapMonitorItem);
+
     //创建动环消息体（合并多个动环设备）
     bool appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,xml_node<>*> &mXml_Quality,string sDevId,int nDevType
                                                      ,DevMonitorDataPtr &curData,map<int,DeviceMonitorItem> &mapMonitorItem);
