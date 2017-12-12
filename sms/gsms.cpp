@@ -233,12 +233,15 @@ void Gsms::SmThread()
             break;
         case stSendMessageResponse:
            {
-            time(&tmNow);
+             time(&tmNow);
              boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
-             if(n_cmdresult_==0)
+             if(n_cmdresult_==0){
+                 cout<<"Send sms error------GSM_OK----stSendMessageResponse----n_cmdresult_="<<n_cmdresult_<<endl;
                  nState = stBeginRest;
-             else if(n_cmdresult_==1)
+             }
+             else if(n_cmdresult_==1){
                  nState = stSendMessageWaitIdle;
+             }
              else
              {
                  double ninterval = difftime(tmNow,tmOrg);
@@ -277,11 +280,11 @@ void Gsms::SmThread()
                     }
                     break;
                 case GSM_ERR:
-                    cout<<"send sms error------GSM_ERR----stReadMessageResponse"<<endl;
+                    cout<<"Read sms error------GSM_ERR----stReadMessageResponse"<<endl;
                     nState = stBeginRest;
                     break;
                 default:{
-                    cout<<"send sms error----stReadMessageResponse----nRslt="<<nRslt<<endl;
+                    cout<<"Read sms error----stReadMessageResponse----nRslt="<<nRslt<<endl;
                     double ninterval = difftime(tmNow,tmOrg);
                     if (ninterval >= 15)		// 15秒超时
                         nState = stBeginRest;
@@ -460,21 +463,21 @@ void Gsms::get_Response_cmd_ack()
     {
         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
         n_cmdresult_ = 0;
-        //cout<<"result:"<<n_cmdresult_<<endl;
+        cout<<"result(0):-----readString==="<<qarray.constData()<<endl;
         emit S_state(3,true);
     }
     else if (strstr(qarray.constData(), "+CMS ERROR") != NULL)
-       {
-        boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
-        n_cmdresult_ = 1;
-         //cout<<"result:"<<n_cmdresult_<<endl;
+    {
+         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
+         n_cmdresult_ = 1;
+         cout<<"result(1):-----readString==="<<qarray.constData()<<endl;
          emit S_state(3,false);
     }
     else
     {
         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
         n_cmdresult_ = -1;
-         //cout<<"result:"<<n_cmdresult_<<endl;
+        cout<<"result(-1):-----readString==="<<qarray.constData()<<endl;
     }
 }
 
