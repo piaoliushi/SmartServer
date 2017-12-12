@@ -218,18 +218,14 @@ void Gsms::SmThread()
             break;
         case stContinueRest:
         {
-            time(&tmNow);
-            double ninterval=difftime(tmNow,tmOrg);
+
             if (GetSendMessage(&param[0]))
-                nState = stSendMessageRequest;	// 有待发短消息，就不休息了
-    //        else if(ninterval>=5)//else if (tmNow - tmOrg >= 5)		// 待发短消息队列空，休息5秒
-     //           nState = stReadMessageRequest;	// 转到读取短消息状态
+                nState = stSendMessageRequest;
         }
             break;
         case stSendMessageRequest:
             time(&tmOrg);
             gsmSendMessage(&param[0]);
-
             memset(&buff, 0, sizeof(SM_BUFF));
             time(&tmOrg);
             nState = stSendMessageResponse;
@@ -263,11 +259,12 @@ void Gsms::SmThread()
             time(&tmOrg);
             nState = stReadMessageResponse;
             break;
-        case stReadMessageResponse:
+        case stReadMessageResponse:{
             time(&tmNow);
-            switch (gsmGetResponse(&buff))
+            int nRslt = gsmGetResponse(&buff);
+            switch (nRslt)
             {
-                case GSM_OK:
+                case GSM_OK:{
                     nMsg = gsmParseMessageList(param, &buff);
                     if (nMsg > 0)
                     {
@@ -276,21 +273,22 @@ void Gsms::SmThread()
                         nState = stDeleteMessageRequest;
                     }
                     else
-                    {
                         nState = stBeginRest;
                     }
                     break;
                 case GSM_ERR:
+                    cout<<"send sms error------GSM_ERR----stReadMessageResponse"<<endl;
                     nState = stBeginRest;
                     break;
-                default:
+                default:{
+                    cout<<"send sms error----stReadMessageResponse----nRslt="<<nRslt<<endl;
                     double ninterval = difftime(tmNow,tmOrg);
                     if (ninterval >= 15)		// 15秒超时
-                    {
                         nState = stBeginRest;
                     }
                     break;
             }
+        }
             break;
         case stDeleteMessageRequest:
             if (nDelete < nMsg)

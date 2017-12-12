@@ -2210,6 +2210,7 @@ void device_session::Action_sendsms(LinkAction &action, string sendcontent)
             }
         }
     }
+    cout<<"start send sms --------Action_sendsms"<<endl;
     GetInst(SvcMgr).SendSMSContent(phonelist,sendcontent);
 }
 
