@@ -377,7 +377,7 @@ bool Bohui_Protocol::appendTransmitterReportBodyMsg(xml_document<> &xmlMsg,map<s
          //适应博汇发射功率为W的需求
          float fCurValue = curData->mValues[cell_iter->first].fValue;
          string sCurValue = curData->mValues[cell_iter->first].sValue;
-         if(cell_iter->second.sUnit == "W" && cell_iter->first==0){
+         if( cell_iter->first==0){
              fCurValue *=1000;
          }
          string  sValue = str(boost::format("%.2f")%fCurValue);

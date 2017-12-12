@@ -245,8 +245,7 @@ void Gsms::SmThread()
              else
              {
                  double ninterval = difftime(tmNow,tmOrg);
-                 if(ninterval>=20)
-                 {
+                 if(ninterval>=20){
                      nState = stSendMessageWaitIdle;
                  }
              }
@@ -280,11 +279,9 @@ void Gsms::SmThread()
                     }
                     break;
                 case GSM_ERR:
-                    cout<<"Read sms error------GSM_ERR----stReadMessageResponse"<<endl;
                     nState = stBeginRest;
                     break;
                 default:{
-                    cout<<"Read sms error----stReadMessageResponse----nRslt="<<nRslt<<endl;
                     double ninterval = difftime(tmNow,tmOrg);
                     if (ninterval >= 15)		// 15秒超时
                         nState = stBeginRest;
@@ -394,7 +391,7 @@ int Gsms::gsmGetResponse(SM_BUFF *pBuff)
 
     // 从串口读数据，追加到缓冲区尾部
     if(pQSerialport_ptr_->waitForReadyRead(5000))
-     nLength = ReadComm(&pBuff->data[pBuff->len], 128);
+            nLength = ReadComm(&pBuff->data[pBuff->len], 128);
     pBuff->len += nLength;
 
     // 确定GSM MODEM的应答状态
@@ -404,8 +401,6 @@ int Gsms::gsmGetResponse(SM_BUFF *pBuff)
         if (strncmp(&pBuff->data[pBuff->len - 4], "OK\r\n", 4) == 0)  nState = GSM_OK;
         else if (strstr(pBuff->data, "+CMS ERROR") != NULL) nState = GSM_ERR;
     }
- //cout<<"gsmGetResponse state:"<<nState<<endl;
- //memset(pBuff, 0, sizeof(SM_BUFF));
     return nState;
 }
 
@@ -441,10 +436,12 @@ int Gsms::gsmParseMessageList(SM_PARAM *pMsg, SM_BUFF *pBuff)
 
 void Gsms::get_sendmsg_cmd_ack()
 {
+    cach_receive_.clear();
+
     QByteArray qarray = pQSerialport_ptr_->readAll();
+
     if(qarray.size()==4 && strncmp(qarray.constData(),"\r\n> ",4)==0)
     {
-        //cout<<"send message"<<endl;
         boost::recursive_mutex::scoped_lock lock(data_mutex);
         nstate=stSendMessageResponse;
         WriteComm(pdu, strlen(pdu));		// 得到肯定回答，继续输出PDU串
@@ -459,25 +456,26 @@ void Gsms::get_sendmsg_cmd_ack()
 void Gsms::get_Response_cmd_ack()
 {
     QByteArray qarray = pQSerialport_ptr_->readAll();
-    if (strstr(qarray.constData(), "OK\r\n") != NULL)
+    cach_receive_.append(qarray);
+    cout<<"get_Response_cmd_ack:-----readAll===size="<<cach_receive_.size()<<"---value="<<cach_receive_.constData()<<endl;
+    if (strstr(cach_receive_.constData(), "OK\r\n") != NULL)
     {
+        cach_receive_.clear();
         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
         n_cmdresult_ = 0;
-        cout<<"result(0):-----readString==="<<qarray.constData()<<endl;
         emit S_state(3,true);
     }
-    else if (strstr(qarray.constData(), "+CMS ERROR") != NULL)
+    else if (strstr(cach_receive_.constData(), "ERROR") != NULL)
     {
+         cach_receive_.clear();
          boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
          n_cmdresult_ = 1;
-         cout<<"result(1):-----readString==="<<qarray.constData()<<endl;
          emit S_state(3,false);
     }
     else
     {
         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
         n_cmdresult_ = -1;
-        cout<<"result(-1):-----readString==="<<qarray.constData()<<endl;
     }
 }
 
@@ -508,8 +506,6 @@ void Gsms::get_CSCA_cmd_ack()
                 {
                     str_SCA = string(charpos);
                     str_SCA = str_SCA.substr(0,str_SCA.find("\""));
-                    //cout<<str_SCA<<endl;
-                    //cout<<"CSCA length:"<<str_SCA.length()<<endl;
                     cach_receive_.clear();
                     Run();
                     emit S_state(2,true);
