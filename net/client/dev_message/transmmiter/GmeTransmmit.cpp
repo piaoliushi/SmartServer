@@ -57,6 +57,8 @@ namespace hx_net{
 		case GME_DIGTV:
 		case GME_DIGTV_6:
         case GME_CDR_1KW:
+        case GME_CDR_10KW:
+        case GME_GB_300W:
 			{
 
 
@@ -100,6 +102,10 @@ namespace hx_net{
             return GmeDigtv6(data,data_ptr,nDataLen,runstate);
         case GME_CDR_1KW:
             return GmeCDR1Kw(data,data_ptr,nDataLen,runstate);
+        case GME_CDR_10KW:
+            return GmeCDR10Kw(data,data_ptr,nDataLen,runstate);
+        case GME_GB_300W:
+            return Gme300W(data,data_ptr,nDataLen,runstate);
         }
         return RE_NOPROTOCOL;
 	}
@@ -112,6 +118,8 @@ namespace hx_net{
 		case GME_DIGTV:
 		case GME_DIGTV_6:
         case GME_CDR_1KW:
+        case GME_CDR_10KW:
+        case GME_GB_300W:
 			return true;
 		}
 		return false;
@@ -165,6 +173,8 @@ namespace hx_net{
 		case GME_DIGTV:
 		case GME_DIGTV_6:
         case GME_CDR_1KW:
+        case GME_CDR_10KW:
+        case GME_GB_300W:
 			{
 				CommandUnit tmUnit;
 				tmUnit.commandId[0] = 0xD5;
@@ -1244,121 +1254,379 @@ namespace hx_net{
     }
 
     int GmeTransmmit::GmeCDR1Kw(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+    {
+        int iLastNum = nDataLen-4;//剩余解析字节数
+        data+=4;
+        int iModType;//数据模块类型
+        DataInfo dtinfo;
+        dtinfo.bType = false;
+        while(iLastNum>4)
         {
-            int iLastNum = nDataLen-4;//剩余解析字节数
-            data+=4;
-            int iModType;//数据模块类型
-            DataInfo dtinfo;
-            dtinfo.bType = false;
-            while(iLastNum>4)
+            if(data[0]==0xFC)
+                iModType = data[1];
+            else
             {
-                if(data[0]==0xFC)
-                    iModType = data[1];
-                else
+                bool bFind=false;
+                for(int i=0;i<(iLastNum-4);i++)
                 {
-                    bool bFind=false;
-                    for(int i=0;i<(iLastNum-4);i++)
+                    if(data[i]==0xFC)
                     {
-                        if(data[i]==0xFC)
-                        {
-                            iModType = data[i+1];
-                            data+=i;
-                            bFind = true;
-                            break;
-                        }
-                    }
-                    if(!bFind)
+                        iModType = data[i+1];
+                        data+=i;
+                        bFind = true;
                         break;
+                    }
                 }
-                switch(iModType){
-                case 0x02:
-                {
+                if(!bFind)
+                    break;
+            }
+            switch(iModType){
+            case 0x02:
+            {
 
-                    dtinfo.fValue = float(((data[4]<<8)|data[5])*0.001);
-                    data_ptr->mValues[0] = dtinfo;
-                    dtinfo.fValue = float((data[6]<<8)|data[7]);
-                    data_ptr->mValues[1] = dtinfo;
-                    dtinfo.fValue = float(((data[8]<<8)|data[9])*0.01);
-                    data_ptr->mValues[2] = dtinfo;
-                    data+=(data[3]+4);
-                    iLastNum-=(data[3]+4);
+                dtinfo.fValue = float(((data[4]<<8)|data[5])*0.001);
+                data_ptr->mValues[0] = dtinfo;
+                dtinfo.fValue = float((data[6]<<8)|data[7]);
+                data_ptr->mValues[1] = dtinfo;
+                dtinfo.fValue = float(((data[8]<<8)|data[9])*0.01);
+                data_ptr->mValues[2] = dtinfo;
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            case 0x03:
+            {
+                dtinfo.bType = true;
+                if(data[4]==0x21){
+                    dtinfo.fValue=0;//通电
+                    runstate = 0;
                 }
-                    break;
-                case 0x03:
+                else{
+                    dtinfo.fValue=1;
+                    runstate = 1;
+                }
+                data_ptr->mValues[3] = dtinfo;
+                dtinfo.bType = false;
+                dtinfo.fValue = float(((data[5]<<8)|data[6])*0.1);
+                data_ptr->mValues[4] = dtinfo;
+                dtinfo.fValue = float(((data[7]<<8)|data[8])*0.1);
+                data_ptr->mValues[5] = dtinfo;
+                dtinfo.fValue = float(((data[9]<<8)|data[10])*0.1);
+                data_ptr->mValues[6] = dtinfo;
+                dtinfo.fValue = dtinfo.fValue = float(((data[11]<<8)|data[12])*0.1);;
+                data_ptr->mValues[7] = dtinfo;
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            case 0x07://功放数据
+            {
+                int index = -1;
+                switch(data[2])
                 {
-                    dtinfo.bType = true;
-                    if(data[4]==0x21){
-                        dtinfo.fValue=0;//通电
-                        runstate = 0;
-                    }
-                    else{
-                        dtinfo.fValue=1;
-                        runstate = 1;
-                    }
-                    data_ptr->mValues[3] = dtinfo;
-                    dtinfo.bType = false;
-                    dtinfo.fValue = float(((data[5]<<8)|data[6])*0.1);
-                    data_ptr->mValues[4] = dtinfo;
-                    dtinfo.fValue = float(((data[7]<<8)|data[8])*0.1);
-                    data_ptr->mValues[5] = dtinfo;
-                    dtinfo.fValue = float(((data[9]<<8)|data[10])*0.1);
-                    data_ptr->mValues[6] = dtinfo;
-                    dtinfo.fValue = dtinfo.fValue = float(((data[11]<<8)|data[12])*0.1);;
-                    data_ptr->mValues[7] = dtinfo;
-                    data+=(data[3]+4);
-                    iLastNum-=(data[3]+4);
-                }
+                case 0x01:
+                    index = 8;
                     break;
-                case 0x07://功放数据
-                {
-                    int index = -1;
-                    switch(data[2])
-                    {
-                    case 0x01:
-                        index = 8;
-                        break;
-                    case 0x02:
-                        index = 20;
-                        break;
-                    default:
-                        break;
-                    }
-                    if(index>=8)
-                    {
-                        dtinfo.bType = false;
-                        for(int i=0;i<6;++i)
-                        {
-                            dtinfo.fValue = float((data[4+2*i]*256+data[5+2*i])*0.1);
-                            data_ptr->mValues[index++] = dtinfo;
-                        }
-                        dtinfo.fValue = float((data[16]*256+data[17]));
-                        data_ptr->mValues[index++] = dtinfo;
-                        dtinfo.fValue = float((data[18]*256+data[19]));
-                        data_ptr->mValues[index++] = dtinfo;
-                        dtinfo.fValue = float((data[20]*256+data[21])*0.1);
-                        data_ptr->mValues[index++] = dtinfo;
-                        dtinfo.bType = true;
-                        for(int i=0;i<3;++i)
-                        {
-                            dtinfo.fValue = Getbit(data[22],i);
-                            data_ptr->mValues[index++] = dtinfo;
-                        }
-                    }
-                    data+=(data[3]+4);
-                    iLastNum-=(data[3]+4);
-                }
+                case 0x02:
+                    index = 20;
                     break;
                 default:
-                    iLastNum-=(data[3]+4);
-                    data+=(data[3]+4);
                     break;
                 }
+                if(index>=8)
+                {
+                    dtinfo.bType = false;
+                    for(int i=0;i<6;++i)
+                    {
+                        dtinfo.fValue = float((data[4+2*i]*256+data[5+2*i])*0.1);
+                        data_ptr->mValues[index++] = dtinfo;
+                    }
+                    dtinfo.fValue = float((data[16]*256+data[17]));
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.fValue = float((data[18]*256+data[19]));
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.fValue = float((data[20]*256+data[21])*0.1);
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.bType = true;
+                    for(int i=0;i<3;++i)
+                    {
+                        dtinfo.fValue = Getbit(data[22],i);
+                        data_ptr->mValues[index++] = dtinfo;
+                    }
+                }
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
             }
-            if(data_ptr->mValues[3].fValue==1)
-            {
-                data_ptr->mValues[0].fValue = 0;
-                data_ptr->mValues[1].fValue = 0;
+                break;
+            default:
+                iLastNum-=(data[3]+4);
+                data+=(data[3]+4);
+                break;
             }
-            return RE_SUCCESS;
         }
+        if(data_ptr->mValues[3].fValue==1)
+        {
+            data_ptr->mValues[0].fValue = 0;
+            data_ptr->mValues[1].fValue = 0;
+        }
+        return RE_SUCCESS;
+    }
+
+    int GmeTransmmit::Gme300W(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+    {
+        int iLastNum = nDataLen-4;//剩余解析字节数
+        data+=4;
+        int iModType;//数据模块类型
+        DataInfo dtinfo;
+        dtinfo.bType = false;
+        while(iLastNum>4)
+        {
+            if(data[0]==0xFC)
+                iModType = data[1];
+            else
+            {
+                bool bFind=false;
+                for(int i=0;i<(iLastNum-4);i++)
+                {
+                    if(data[i]==0xFC)
+                    {
+                        iModType = data[i+1];
+                        data+=i;
+                        bFind = true;
+                        break;
+                    }
+                }
+                if(!bFind)
+                    break;
+            }
+            switch(iModType){
+            case 0x02:
+            {
+
+                dtinfo.fValue = float(((data[4]<<8)|data[5])*0.0001);
+                data_ptr->mValues[0] = dtinfo;
+                dtinfo.fValue = float((data[6]<<8)|data[7]);
+                data_ptr->mValues[1] = dtinfo;
+                dtinfo.fValue = float(((data[8]<<8)|data[9])*0.01);
+                data_ptr->mValues[2] = dtinfo;
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            case 0x07://功放数据
+            {
+                dtinfo.bType = false;
+                dtinfo.fValue = float(((data[4]<<8)|data[5])*0.1);
+                data_ptr->mValues[3] = dtinfo;
+                dtinfo.fValue = float(((data[6]<<8)|data[7]));
+                data_ptr->mValues[4] = dtinfo;
+                dtinfo.fValue = float(((data[8]<<8)|data[9]));
+                data_ptr->mValues[5] = dtinfo;
+                dtinfo.fValue = float(((data[10]<<8)|data[11]));
+                data_ptr->mValues[6] = dtinfo;
+                for(int i=0;i<5;++i)
+                {
+                    dtinfo.fValue = float(((data[14+2*i]<<8)|data[15+2*i])*0.1);
+                    data_ptr->mValues[7+i] = dtinfo;
+                }
+                dtinfo.fValue = float(((data[24]<<8)|data[25])*0.01);
+                data_ptr->mValues[12] = dtinfo;
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            default:
+                iLastNum-=(data[3]+4);
+                data+=(data[3]+4);
+                break;
+            }
+        }
+        return RE_SUCCESS;
+    }
+
+    int GmeTransmmit::GmeCDR10Kw(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+    {
+        int iLastNum = nDataLen-4;//剩余解析字节数
+        data+=4;
+        int iModType;//数据模块类型
+        DataInfo dtinfo;
+        dtinfo.bType = false;
+        while(iLastNum>4)
+        {
+            if(data[0]==0xFC)
+                iModType = data[1];
+            else
+            {
+                bool bFind=false;
+                for(int i=0;i<(iLastNum-4);i++)
+                {
+                    if(data[i]==0xFC)
+                    {
+                        iModType = data[i+1];
+                        data+=i;
+                        bFind = true;
+                        break;
+                    }
+                }
+                if(!bFind)
+                    break;
+            }
+            switch(iModType){
+            case 0x02:
+            {
+
+                dtinfo.fValue = float(((data[4]<<8)|data[5])*0.001);
+                data_ptr->mValues[0] = dtinfo;
+                dtinfo.fValue = float((data[6]<<8)|data[7]);
+                data_ptr->mValues[1] = dtinfo;
+                dtinfo.fValue = float(((data[8]<<8)|data[9])*0.01);
+                data_ptr->mValues[2] = dtinfo;
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            case 0x03:
+            {
+                dtinfo.bType = true;
+                if(data[4]==0x21){
+                    dtinfo.fValue=0;//通电
+                    runstate = 0;
+                }
+                else{
+                    dtinfo.fValue=1;
+                    runstate = 1;
+                }
+                data_ptr->mValues[3] = dtinfo;
+                dtinfo.bType = false;
+                dtinfo.fValue = float(((data[5]<<8)|data[6])*0.1);
+                data_ptr->mValues[4] = dtinfo;
+                dtinfo.fValue = float(((data[7]<<8)|data[8])*0.1);
+                data_ptr->mValues[5] = dtinfo;
+                dtinfo.fValue = float(((data[9]<<8)|data[10])*0.1);
+                data_ptr->mValues[6] = dtinfo;
+                dtinfo.fValue = dtinfo.fValue = float(((data[11]<<8)|data[12])*0.1);;
+                data_ptr->mValues[7] = dtinfo;
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            case 0x04:
+            {
+                int index=-1;
+                switch(data[2])
+                {
+
+                case 0x01:
+                    index = 8;
+                    break;
+                case 0x02:
+                    index = 15;
+                    break;
+                default:
+                    break;
+                }
+                dtinfo.bType = true;
+                dtinfo.fValue = Getbit(data[14],3);
+                data_ptr->mValues[index++] = dtinfo;
+                dtinfo.fValue = Getbit(data[17],6);
+                data_ptr->mValues[index++] = dtinfo;
+                dtinfo.bType = false;
+                dtinfo.fValue = ((data[18]<<24)|(data[19]<<16)|(data[20]<<8)|data[21])&0x7FFFFFF;
+                data_ptr->mValues[index++] = dtinfo;
+                dtinfo.fValue = data[23];
+                data_ptr->mValues[index++] = dtinfo;
+                dtinfo.fValue = data[25];
+                data_ptr->mValues[index++] = dtinfo;
+                dtinfo.bType = true;
+                dtinfo.fValue = data[28]&0x0F;
+                data_ptr->mValues[index++] = dtinfo;
+                dtinfo.bType = false;
+                dtinfo.fValue = (data[29]*256+data[30])*0.001;
+                data_ptr->mValues[index++] = dtinfo;
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            case 0x07://功放数据
+            {
+                int index = -1;
+                switch(data[2])
+                {
+                case 0x01:
+                    index = 22;
+                    break;
+                case 0x02:
+                    index = 34;
+                    break;
+                case 0x03:
+                    index = 46;
+                    break;
+                case 0x04:
+                    index = 58;
+                    break;
+                case 0x05:
+                    index = 70;
+                    break;
+                case 0x06:
+                    index = 82;
+                    break;
+                case 0x07:
+                    index = 94;
+                    break;
+                case 0x08:
+                    index = 106;
+                    break;
+                case 0x09:
+                    index = 118;
+                    break;
+                case 0x0A:
+                    index = 130;
+                    break;
+                case 0x0B:
+                    index = 142;
+                    break;
+                case 0x0C:
+                    index = 154;
+                    break;
+                default:
+                    break;
+                }
+                if(index>=22)
+                {
+                    dtinfo.bType = false;
+                    for(int i=0;i<6;++i)
+                    {
+                        dtinfo.fValue = float((data[4+2*i]*256+data[5+2*i])*0.1);
+                        data_ptr->mValues[index++] = dtinfo;
+                    }
+                    dtinfo.fValue = float((data[16]*256+data[17]));
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.fValue = float((data[18]*256+data[19]));
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.fValue = float((data[20]*256+data[21])*0.1);
+                    data_ptr->mValues[index++] = dtinfo;
+                    dtinfo.bType = true;
+                    for(int i=0;i<3;++i)
+                    {
+                        dtinfo.fValue = Getbit(data[22],i);
+                        data_ptr->mValues[index++] = dtinfo;
+                    }
+                }
+                data+=(data[3]+4);
+                iLastNum-=(data[3]+4);
+            }
+                break;
+            default:
+                iLastNum-=(data[3]+4);
+                data+=(data[3]+4);
+                break;
+            }
+        }
+        if(data_ptr->mValues[3].fValue==1)
+        {
+            data_ptr->mValues[0].fValue = 0;
+            data_ptr->mValues[1].fValue = 0;
+        }
+        return RE_SUCCESS;
+    }
 }
