@@ -140,7 +140,7 @@ bool Bohui_Protocol::createResponseMsg(int nReplyId,int nValue,const char* nCmdT
             xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Value",xml_responseMsg.allocate_string(boost::lexical_cast<std::string>(nValue).c_str())));
 
 
-        xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Desc",CONST_STR_RESPONSE_VALUE_DESC(nValue).c_str()));
+        xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Desc",xml_responseMsg.allocate_string(CONST_STR_RESPONSE_VALUE_DESC(nValue).c_str())));
         xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Comment",""));
     }
 

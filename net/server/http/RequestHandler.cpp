@@ -75,18 +75,25 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
         if(bohui_protocol_.parseDataFromStr(content_,d_response_body,d_sUrl,sClientIp))
         {
             connection->set_status(hx_http_server::connection::ok);
-            common_headers[2].value = boost::lexical_cast<std::string>(1);//response_body.size()
+            common_headers[2].value = boost::lexical_cast<std::string>(d_response_body.size());//1
             connection->set_headers(boost::make_iterator_range(common_headers, common_headers + 3));
-            string sResp=" ";
-            connection->write(sResp, boost::bind(&request_handler::write_callback, this, _1));//response_body
+            string sResp= d_response_body;//" ";
+            connection->write(sResp, boost::bind(&request_handler::write_callback, this, _1));
         }
-        else
-            connection->write(bad_request, boost::bind(&request_handler::write_callback, this, _1));
+        else{
+            string sResp= d_response_body;//" ";
+
+            //connection->set_status(hx_http_server::connection::bad_request);
+            connection->set_status(hx_http_server::connection::ok);
+            common_headers[2].value = boost::lexical_cast<std::string>(sResp.size());
+            connection->set_headers(boost::make_iterator_range(common_headers, common_headers+3));
+            connection->write(sResp, boost::bind(&request_handler::write_callback, this, _1));
+        }
 	}
 	else
 	{
-		connection->set_status(hx_http_server::connection::bad_request);
-        connection->set_status(hx_http_server::connection::ok);
+        connection->set_status(hx_http_server::connection::bad_request);
+        //connection->set_status(hx_http_server::connection::ok);
         common_headers[2].value = boost::lexical_cast<std::string>(bad_request.size());
 		connection->set_headers(boost::make_iterator_range(common_headers, common_headers+3));
         connection->write(bad_request, boost::bind(&request_handler::write_callback, this, _1));
