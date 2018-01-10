@@ -19,16 +19,17 @@ public:
     bool is_detecting();
     int  get_run_state();
     void reset_run_state();
+    void set_run_state(int curState);
     void excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult);
     //执行命令
     void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel=0,
                                bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
 
     void switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult);
+    //设置天线位置，只有
 
 private:
     int   parse_HX_981(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
-    void  set_run_state(int curState);
     bool  cmd_excute_is_ok();
 private:
     dev_session_ptr  m_pSession;//关联连接对象

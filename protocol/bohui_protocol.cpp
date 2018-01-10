@@ -56,6 +56,7 @@ bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody,string
                 else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_ManualPowerControl])
                     _controlDeviceCommand(BH_POTO_ManualPowerControl,requestNode,nRsltValue);//发射机控制
 
+
                 createResponseMsg(nMsgId,nRsltValue,cmdType.c_str(),responseBody);
             }else {
                 //dtmb 专用 ，暂时为使用...
@@ -132,6 +133,14 @@ bool Bohui_Protocol::createResponseMsg(int nReplyId,int nValue,const char* nCmdT
                 _execEnvMonQueryCmd(xml_responseMsg,msgRootNode,nValue);//查询动环设备信息
             else if(strcmp(nCmdType,CONST_STR_BOHUI_TYPE[2])==0)
                 _execLinkDevQueryCmd(xml_responseMsg,msgRootNode,nValue);//查询链路设备信息
+            else if(strcmp(nCmdType,CONST_STR_BOHUI_TYPE[HX_POTO_LocalConfigQuery])==0){//服务器本地配置信息
+                //_execGetLocalConfigQueryCmd(xml_responseMsg,msgRootNode,nValue);
+                file<>   fdoc("ServerLocalConfig.xml");
+                xml_document<> xml_doc;
+                xml_doc.parse<0>(fdoc.data());
+                rapidxml::print(std::back_inserter(responseBody), xml_doc, 0);
+                return true;
+            }
 
             xml_resps->append_attribute(xml_responseMsg.allocate_attribute("Value",xml_responseMsg.allocate_string(boost::lexical_cast<std::string>(nValue).c_str())));
 
@@ -709,6 +718,17 @@ void Bohui_Protocol::_execLinkDevQueryCmd(xml_document<> &xml_doc,xml_node<> *ro
 {
     nValue = 13;
    _query_devinfo_from_config(xml_doc,BH_POTO_LinkDevQuery,rootNode,nValue);
+}
+
+//查询服务器本地配置信息
+void Bohui_Protocol::_execGetLocalConfigQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue)
+{
+    nValue = 13;
+
+    file<>   fdoc("ServerLocalConfig.xml");
+    xml_doc.parse<0>(fdoc.data());
+
+
 }
 
 //从配置数据中获得查询信息

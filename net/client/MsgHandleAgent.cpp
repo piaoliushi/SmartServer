@@ -217,11 +217,27 @@ namespace hx_net
         return m_msgImpl->get_run_state();
     }
 
+    //设置运行状态
+    void MsgHandleAgent::set_run_state(int curState)
+    {
+        if(m_msgImpl==NULL)
+            return;
+        return m_msgImpl->set_run_state(curState);
+    }
+
      void MsgHandleAgent::reset_run_state()
      {
          if(m_msgImpl==NULL)
              return;
          return m_msgImpl->reset_run_state();
+     }
+
+     //是否需要清除告警
+     bool  MsgHandleAgent::is_need_clear_alarm()
+     {
+         if(m_msgImpl==NULL)
+             return false;
+         return m_msgImpl->is_need_clear_alarm();
      }
 
      //添加新告警

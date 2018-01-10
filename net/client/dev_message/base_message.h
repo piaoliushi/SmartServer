@@ -49,7 +49,12 @@ namespace hx_net
         virtual void start_task_timeout_timer(){}
         //获得运行状态
         virtual int  get_run_state(){return dev_unknown;}
+        //设置运行状态
+        virtual void set_run_state(int curState){}
         virtual void reset_run_state(){}
+
+        //是否需要清除告警
+        virtual bool  is_need_clear_alarm(){return false;}
 
         //添加新告警
         virtual bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime){return false;}

@@ -42,12 +42,26 @@ void DevClient::connect_all()
             if(device_pool_.find(DevKey(sLocalStationId,(*modle_iter).sModleNumber))==device_pool_.end())
             {
 
-                session_ptr new_session(new device_session(io_service_pool_.get_io_service(),(*modle_iter),http_report_session_ptr_));
+                session_ptr new_session(new device_session(io_service_pool_.get_io_service(),
+                                                           (*modle_iter),http_report_session_ptr_));
                 device_pool_[DevKey(sLocalStationId,(*modle_iter).sModleNumber)]=new_session;
                 new_session->init_session_config();
+
+                //单一设备且为代理设置，则不进行网络连接
+                int nDevSize = (*modle_iter).mapDevInfo.size();
+                if(nDevSize <= 1){
+                    map<string,DeviceInfo>::iterator iter = (*modle_iter).mapDevInfo.begin();
+                    if(iter!= (*modle_iter).mapDevInfo.end()){
+                        map<string,DevProperty>::iterator iterPrpty = iter->second.map_DevProperty.find("Agent");
+                        if(iterPrpty != iter->second.map_DevProperty.end())
+                            continue;
+                    }
+                }
                 new_session->connect();
             }
         }
+
+
     }
     //连接下级服务
     {
@@ -121,7 +135,23 @@ dev_run_state DevClient::get_dev_run_state(string sStationId,string sDevid)
 
     return dev_unknown;
 }
-//获得设备运行状态
+
+//设置设备运行状态
+void DevClient::set_dev_run_state(string sStationId,string sDevid,int nState)
+{
+    boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
+    std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
+    for(;iter!=device_pool_.end();++iter)
+    {
+        if(iter->first.stationId == sStationId)
+        {
+            if(iter->second->is_contain_dev(sDevid))
+                return iter->second->set_run_state(sDevid,nState);
+         }
+    }
+}
+
+//获得设备告警状态
 void DevClient::get_dev_alarm_state(string sStationId,string sDevid,map<int,map<int,CurItemAlarmInfo> >& cellAlarm)
 {
     boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);

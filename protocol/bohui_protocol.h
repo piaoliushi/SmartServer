@@ -65,6 +65,9 @@ protected:
     //查询链路设备信息
     void _execLinkDevQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue);
 
+    //查询服务器本地配置信息
+    void _execGetLocalConfigQueryCmd(xml_document<> &xml_doc,xml_node<> *rootNode,int  &nValue);
+
     //设置告警运行图
     int _parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<string,vector<Monitoring_Scheduler> > &mapMonSch);
     void _setAlarmTime(xml_node<> *rootNode,int &nValue);

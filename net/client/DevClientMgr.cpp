@@ -79,6 +79,13 @@ namespace hx_net
 			_devclientptr->get_dev_alarm_state(sStationId,sDevid,cellAlarm);
 	}
 
+    //设置设备运行状态
+    void DevClientMgr::set_dev_run_state(string sStationId,string sDevid,int nState)
+    {
+        if (_devclientptr)
+            _devclientptr->set_dev_run_state(sStationId,sDevid,nState);
+    }
+
 	//获得设备基本信息
 	bool DevClientMgr::dev_base_info(string sStationId,DevBaseInfo& devInfo,string sdevId)
 	{

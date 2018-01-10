@@ -59,7 +59,13 @@ namespace hx_net
         //获得运行状态
         int get_run_state();
         //设置运行状态
+        void set_run_state(int curState);
+        //复位运行状态
         void reset_run_state();
+
+        //是否需要清除告警
+        bool  is_need_clear_alarm();//{return false;}
+
         //添加新告警
         bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime);
         bool  add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData);

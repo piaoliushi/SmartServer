@@ -125,6 +125,14 @@ namespace hx_net
 			return m_pDevMgrPtr->get_dev_run_state(sStationId,sDevid);
 		return dev_unknown;
 	}
+
+    //设置设备运行状态
+    void SvcMgr::set_dev_run_state(string sStationId,string sDevid,int nState)
+    {
+        if(m_pDevMgrPtr)
+            return m_pDevMgrPtr->set_dev_run_state(sStationId,sDevid,nState);
+    }
+
 	//获得设备运行状态
     void SvcMgr::get_dev_alarm_state(string sStationId,string sDevid,map<int,map<int,CurItemAlarmInfo> >& cellAlarm)
 	{

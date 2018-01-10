@@ -40,6 +40,9 @@ public:
     void reset_run_state();
     void aysnc_data(DevMonitorDataPtr curDataPtr);
 
+    //是否需要清除告警
+    bool  is_need_clear_alarm();
+
 protected:
     //任务超时回调
     void  schedules_task_time_out(const boost::system::error_code& error);

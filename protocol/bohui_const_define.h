@@ -33,7 +33,8 @@ typedef enum
     BH_POTO_XmlParseError=19,           //xml解析出错
     BH_POTO_XmlContentError=20,         //xml内容错误
 
-    BH_POTO_EnvQualityReport=21         //动环扩展指标上报（ups专用）
+    BH_POTO_EnvQualityReport=21,        //动环扩展指标上报（ups专用）
+    HX_POTO_LocalConfigQuery=22         //服务器本地配置xml文件
 
 } BH_MSG_ID_DEF;
 
@@ -49,7 +50,7 @@ const char CONST_STR_BOHUI_TYPE[][32] = { "TransmitterQuery","EnvMonDevQuery","L
                                           "AlarmParamSet","AlarmSwitchSetE","AlarmParamSetE","AlarmSwitchSetD",
                                           "AlarmParamSetD","CmdStatusReport","QualityRealtimeReport","QualityAlarmReport",
                                           "CommunicationReport","EnvQualityRealtimeReport","EnvAlarmReport","LinkDevQualityReport",
-                                          "LinkDevAlarmReport","XmlParseError","XmlContentError","EnvQualityReport"};
+                                          "LinkDevAlarmReport","XmlParseError","XmlContentError","EnvQualityReport","LocalConfigData"};
 
 
 

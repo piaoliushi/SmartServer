@@ -57,6 +57,7 @@ namespace hx_net
         con_state       get_con_state();
         //获得设备运行状态（默认连接正常则运行正常）
         dev_run_state   get_run_state(string sDevId);
+        void            set_run_state(string sDevId,int nState);
         //获得报警状态
         void get_alarm_state(string sDevId,map<int,map<int,CurItemAlarmInfo> >& cellAlarm);
         //执行通用指令
@@ -145,7 +146,7 @@ namespace hx_net
         void send_device_data_state_notify(string sDevId,bool bHaveData);
 
         //打开串口
-        void   open_com();
+        void open_com();
         //返回连接模式
         int  con_mod();
 

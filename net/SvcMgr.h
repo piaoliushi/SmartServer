@@ -49,6 +49,8 @@ namespace hx_net
 		con_state get_dev_net_state(string sStationId,string sDevid);
 		//获得设备运行状态
 		dev_run_state get_dev_run_state(string sStationId,string sDevid);
+        //设置设备运行状态
+        void set_dev_run_state(string sStationId,string sDevid,int nState);
 		//获得设备运行状态
         void get_dev_alarm_state(string sStationId,string sDevid,map<int,map<int,CurItemAlarmInfo> >& cellAlarm);
 		

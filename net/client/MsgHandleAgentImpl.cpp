@@ -45,6 +45,7 @@ namespace hx_net
         case DEVICE_ENCODER://编码器
         case DEVICE_MUX://复用器
         case DEVICE_MO://调制器
+        case DEVICE_SWITCH://切换器
         case DEVICE_ADAPTER://适配器
             m_pbaseMsg = new Link_message(m_pSessionPtr,m_devInfo);
             break;
@@ -261,11 +262,27 @@ namespace hx_net
         return m_pbaseMsg->get_run_state();
     }
 
+    //设置运行状态
+    void MsgHandleAgentImpl::set_run_state(int curState)
+    {
+        if(m_pbaseMsg==NULL)
+            return;
+        return m_pbaseMsg->set_run_state(curState);
+    }
+
     void MsgHandleAgentImpl::reset_run_state()
     {
         if(m_pbaseMsg==NULL)
             return;
         return m_pbaseMsg->reset_run_state();
+    }
+
+    //是否需要清除告警
+    bool  MsgHandleAgentImpl::is_need_clear_alarm()
+    {
+        if(m_pbaseMsg==NULL)
+            return false;
+        return m_pbaseMsg->is_need_clear_alarm();
     }
 
     //添加新告警

@@ -139,8 +139,10 @@ string device_session::next_dev_id()
 {
     map<string,pair<CommandAttrPtr,HMsgHandlePtr> >::iterator iter = dev_agent_and_com.find(cur_dev_id_);
     ++iter;
+
     if(iter==dev_agent_and_com.end())
         iter = dev_agent_and_com.begin();
+
     return iter->first;
 }
 
@@ -168,6 +170,12 @@ dev_run_state device_session::get_run_state(string sDevId)
 
     return dev_unknown;
 
+}
+
+void device_session::set_run_state(string sDevId,int nState)
+{
+    if(dev_agent_and_com.find(sDevId)!=dev_agent_and_com.end())
+        dev_agent_and_com[sDevId].second->set_run_state(nState);
 }
 
 void device_session::set_con_state(con_state curState)
@@ -843,6 +851,7 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId,e_Err
             if(iter->second.size()>childId){
 
                 eErrCode = EC_CMD_SEND_SUCCEED;
+
                 if(cmdType != MSG_DEVICE_QUERY)
                     http_send_task(iter->second[childId].sCommandId);
                 else
@@ -1117,9 +1126,11 @@ void device_session::close_all()
     timeout_timer_.cancel();
     query_timer_.cancel();
     if(modleInfos_.iCommunicationMode==CON_MOD_COM){
-        boost::system::error_code    ec;
-        pSerialPort_ptr_->close(ec);
-        cout<<"close_all----close--com"<<ec<<endl;
+         if (pSerialPort_ptr_ !=NULL){
+             boost::system::error_code    ec;
+             pSerialPort_ptr_->close(ec);
+             cout<<"close_all----close--com"<<ec<<endl;
+         }
     }
     else
         close_i();   //关闭socket
@@ -2005,10 +2016,18 @@ void device_session::clear_all_alarm()
 void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,bool bMonitor)
 {
     //非检测时间段不进行报警检测,同时清除当前告警
+    //存在主备关系的设备，清空非运行设备告警-----add by lk for 2018-1-4
     if(bMonitor!=true){
         clear_dev_alarm(sDevId);
         return;
     }
+
+    //判断发射机关联关系
+    if(dev_agent_and_com[sDevId].second->is_need_clear_alarm()){
+        clear_dev_alarm(sDevId);
+        return;
+    }
+
     map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.find(sDevId);
     if(iter== modleInfos_.mapDevInfo.end())
         return;

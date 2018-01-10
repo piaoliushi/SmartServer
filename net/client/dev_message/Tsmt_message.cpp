@@ -62,18 +62,18 @@ namespace hx_net
         }
         map<string,DevProperty>::iterator iter = d_devInfo.map_DevProperty.find("Standby");
         if(iter!=d_devInfo.map_DevProperty.end())
-            d_Host_= (iter->second.property_value == "0")?1:0;//0->主机，1->备机
+            d_Host_= (iter->second.property_value == "0")?0:1;//0->主机，1->备机
 
         if(d_relate_tsmt_ptr_!=NULL){
-        iter = d_relate_tsmt_ptr_->map_DevProperty.find("Agent");
-        if(iter!=d_relate_tsmt_ptr_->map_DevProperty.end())
-             d_relate_Agent_= true;
+            iter = d_relate_tsmt_ptr_->map_DevProperty.find("Agent");
+            if(iter!=d_relate_tsmt_ptr_->map_DevProperty.end())
+                 d_relate_Agent_= true;
         }
 
         if(d_relate_antenna_ptr_!=NULL){
-        iter = d_relate_antenna_ptr_->map_DevProperty.find("Agent");
-        if(iter!=d_relate_antenna_ptr_->map_DevProperty.end())
-             d_antenna_Agent_= true;
+            iter = d_relate_antenna_ptr_->map_DevProperty.find("Agent");
+            if(iter!=d_relate_antenna_ptr_->map_DevProperty.end())
+                 d_antenna_Agent_= true;
         }
 
 
@@ -174,6 +174,16 @@ namespace hx_net
             //广播设备状态到在线客户端
             m_pSession->send_work_state_message(GetInst(LocalConfig).local_station_id(),d_devInfo.sDevNum
                                                 ,d_devInfo.sDevName,DEVICE_TRANSMITTER,(dev_run_state)dev_run_state_);
+            //如果天线是代理，且当前机器在运行，则设置当前天线状态为当前设备
+            if(d_relate_antenna_ptr_!=NULL){
+                if(dev_run_state_ == dev_running && d_antenna_Agent_){
+
+                    int nAtennaS = (d_Host_ == 1)?antenna_backup:antenna_host;
+                    GetInst(SvcMgr).set_dev_run_state(GetInst(LocalConfig).local_station_id(),
+                                                      d_relate_antenna_ptr_->sDevNum,nAtennaS);
+                }
+            }
+
         }
     }
 
@@ -607,5 +617,22 @@ namespace hx_net
             d_ptransmmit->exec_cmd(d_cur_snmp,d_cur_task_,d_cur_target);
 
         return;
+    }
+
+
+    //是否需要清除告警
+    bool  Tsmt_message::is_need_clear_alarm()
+    {
+        if(d_relate_tsmt_ptr_ == NULL || d_relate_antenna_ptr_== NULL)
+            return false;
+        //如果天线不在位，则清除告警
+        int nAtennaS = GetInst(SvcMgr).get_dev_run_state(GetInst(LocalConfig).local_station_id(),
+                                          d_relate_antenna_ptr_->sDevNum);
+
+        if(nAtennaS == antenna_backup && d_Host_==0)
+            return true;
+        if(nAtennaS == antenna_host && d_Host_==1)
+            return true;
+        return false;
     }
 }

@@ -180,7 +180,8 @@ void Antenna_message::set_run_state(int curState)
     {
         dev_run_state_=curState;
         GetInst(SvcMgr).get_notify()->OnDevStatus(d_devInfo.sDevNum,dev_run_state_+1);
-        m_pSession->send_work_state_message(GetInst(LocalConfig).local_station_id(),d_devInfo.sDevNum
+        if(m_pSession!=NULL)
+            m_pSession->send_work_state_message(GetInst(LocalConfig).local_station_id(),d_devInfo.sDevNum
                                             ,d_devInfo.sDevName,DEVICE_ANTENNA,(dev_run_state)dev_run_state_);
     }
 }
@@ -285,6 +286,9 @@ void Antenna_message::excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult)
 void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel,
                            bool bSnmp,Snmp *snmp,CTarget *target)
 {
+    eErrCode = EC_UNKNOWN;
+     if(m_pSession ==NULL)
+         return;
     d_cur_task_ = icmdType;
     d_cur_user_ = sUser;
     if(cmd_excute_is_ok()){
@@ -292,8 +296,6 @@ void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrC
         m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
         return;
     }
-
-    eErrCode = EC_UNKNOWN;
 
     int nResult = 2;
     excute_task_cmd(eErrCode,nResult);
