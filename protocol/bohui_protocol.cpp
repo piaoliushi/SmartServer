@@ -22,15 +22,30 @@ Bohui_Protocol::Bohui_Protocol()
 }
 
 //分析http请求数据(包括发射机,动环,链路告警门限,运行图,告警开关设置)
-bool Bohui_Protocol::parseDataFromStr(string &strMsg,string &responseBody,string &srcUrl,string sIp)
+bool Bohui_Protocol::parseDataFromStr(const string &strMsg,string &responseBody,string &srcUrl,string sIp)
 {
+
     int nMsgId=-100;
     int nPriority=0;
     try
     {
         xml_document<>   xml_doc;
         xml_doc.parse<0>(const_cast<char*>(strMsg.c_str()));
-        xml_node<> *rootNode = xml_doc.first_node("Msg");
+        xml_node<> *rootNode = xml_doc.first_node("Msg");//bohui消息root
+        if(rootNode == NULL){
+            rootNode = xml_doc.first_node("service");
+            if(rootNode!=NULL){
+                //保存服务本地配置xml
+                std::ofstream xml_out("ServerLocalConfig.xml");
+                string xml_body;
+                rapidxml::print(std::back_inserter(xml_body), xml_doc, 0);
+                xml_out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+                xml_out << xml_body;
+                return true;
+            }
+
+        }
+
         //检查xml头
         if(_checkXmlHeader(xml_doc,nMsgId,nPriority,srcUrl,rootNode)==true)
         {
@@ -93,8 +108,8 @@ bool Bohui_Protocol::_checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &pri
         {
             string sVer;
             xml_attribute<char> *ver = rootNode->first_attribute("Version");
-            if(ver!=NULL)
-                sVer = ver->value();
+            //if(ver!=NULL)
+            //    sVer = ver->value();
             msgId = strtol(rootNode->first_attribute("MsgID")->value(),NULL,10);
             // xml_attribute<char> *prity =  rootNode->first_attribute("Priority");
             // if(prity!=NULL)
@@ -103,7 +118,7 @@ bool Bohui_Protocol::_checkXmlHeader(xml_document<>  &xmlMsg,int &msgId,int &pri
             if(srcUrl!=NULL)
                  desUrl =  rootNode->first_attribute("SrcURL")->value();
             //if(!desUrl.empty())// && priority>=0
-                return true;
+            return true;
         }
     }
     catch(...)
@@ -1257,7 +1272,7 @@ bool Bohui_Protocol::_parse_alarm_switch_set(xml_node<> *root_node,int &nValue,m
 void Bohui_Protocol::_checkAndAppendAlarmSwitch(vector<Alarm_Switch_Set> &vConfig,Alarm_Switch_Set &curConfig)
 {
     vector<Alarm_Switch_Set>::iterator iter = vConfig.begin();
-    bool bfind = false;
+    //bool bfind = false;
     for(;iter!=vConfig.end();++iter){
         if((*iter).iAlarmid == curConfig.iAlarmid)
             return;
@@ -1269,7 +1284,7 @@ void Bohui_Protocol::_checkAndAppendAlarmSwitch(vector<Alarm_Switch_Set> &vConfi
 void Bohui_Protocol::_checkAndAppendAlarmLimit(vector<Alarm_config> &vConfig, Alarm_config &curConfig)
 {
     vector<Alarm_config>::iterator iter = vConfig.begin();
-    bool bfind = false;
+    //bool bfind = false;
     for(;iter!=vConfig.end();++iter){
         if((*iter).iAlarmid == curConfig.iAlarmid)
             return;

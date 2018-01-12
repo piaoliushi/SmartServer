@@ -636,7 +636,7 @@ namespace hx_net{
                 }
                 dainfo.bType = true;
                 for(int i=0;i<8;++i){
-                    dainfo.fValue = data[9+i*3]==0 ? 1:0;
+                    dainfo.fValue = data[9+i*3]==0 ? 0:1;
                     data_ptr->mValues[indexpos++] = dainfo;
                 }
                 data_ptr.get()->mValues[0].fValue = data_ptr.get()->mValues[0].fValue*0.001;
@@ -646,7 +646,7 @@ namespace hx_net{
                 indexpos = 27;
                 dainfo.bType = true;
                 for(int i=0;i<8;++i){
-                    dainfo.fValue = data[9+i*3]==0 ? 1:0;
+                    dainfo.fValue = data[9+i*3]==0 ? 0:1;
                     data_ptr->mValues[indexpos++] = dainfo;
                 }
                 dainfo.bType = false;
@@ -659,15 +659,15 @@ namespace hx_net{
               case 0x02:{
                 indexpos=51;
                 dainfo.bType = true;
-                dainfo.fValue = data[33]==0? 1:0;
+                dainfo.fValue = data[33]==0? 0:1;
                 data_ptr->mValues[indexpos++] = dainfo;
-                dainfo.fValue = data[39]==0? 1:0;
+                dainfo.fValue = data[39]==0? 0:1;
                 data_ptr->mValues[indexpos++] = dainfo;
-                dainfo.fValue = data[42]==0? 1:0;
+                dainfo.fValue = data[42]==0? 0:1;
                 data_ptr->mValues[indexpos++] = dainfo;
-                dainfo.fValue = data[45]==0? 1:0;
+                dainfo.fValue = data[45]==0? 0:1;
                 data_ptr->mValues[indexpos++] = dainfo;
-                dainfo.fValue = data[48]==0? 1:0;
+                dainfo.fValue = data[48]==0? 0:1;
                 data_ptr->mValues[indexpos++] = dainfo;
                 dainfo.bType = false;
                 dainfo.fValue = data[51];
@@ -687,9 +687,9 @@ namespace hx_net{
               case 0x05:{
                 indexpos=63;
                 dainfo.bType = true;
-                dainfo.fValue = data[9]==0? 1:0;
+                dainfo.fValue = data[9]==0? 0:1;
                 data_ptr->mValues[indexpos++] = dainfo;
-                dainfo.fValue = data[12]==0? 1:0;
+                dainfo.fValue = data[12]==0? 0:1;
                 data_ptr->mValues[indexpos++] = dainfo;
                 dainfo.bType = false;
                 for(int i=0;i<13;++i){

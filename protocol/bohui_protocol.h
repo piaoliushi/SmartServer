@@ -14,7 +14,7 @@ class Bohui_Protocol
 public:
     Bohui_Protocol();
     //分析xml数据是否符合协议
-    bool  parseDataFromStr(string &strMsg,string &responseBody,string &srcUrl,string sIp="");
+    bool  parseDataFromStr(const string &strMsg,string &responseBody,string &srcUrl,string sIp="");
     //创建回复消息
     bool createResponseMsg(int nReplyId,int nValue,const char* nCmdType,string &responseBody);
     //创建上报数据消息
