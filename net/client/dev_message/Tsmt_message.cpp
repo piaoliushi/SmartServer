@@ -562,7 +562,7 @@ namespace hx_net
             }
 
             //计算目标天线位置
-            e_MsgType nAntennaPos = (d_Host_==1)?MSG_ANTENNA_BTOH_OPR:MSG_ANTENNA_HTOB_OPR;
+            e_MsgType nAntennaPos = (d_Host_== 0)?MSG_ANTENNA_BTOH_OPR:MSG_ANTENNA_HTOB_OPR;
 
             //验证并切换天线
             if(d_antenna_Agent_ == false){//如果天线是代理，不进行倒天线动作
