@@ -34,8 +34,8 @@ namespace hx_net
         case HC_CDR_3KW:
         case HC_CDR_10KW:
         {
-            if(data[0]==0x7E && data[1]==0xE7 && data[2] == m_addresscode)
-                return data[4]+5;
+            if(data[0]==0x7E && data[1]==0xE7 )//&& data[2] == m_addresscode)
+                return data[4]+13-nDataLen;
             else
                 return RE_HEADERROR;
         }

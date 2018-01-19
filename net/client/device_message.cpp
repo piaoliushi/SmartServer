@@ -63,8 +63,8 @@ namespace hx_net
         if(msgLen>0)
             move_w_ptr(msgLen);
         int nResult = agentPtr->decode_msg_body(r_ptr(),data_ptr,valid_msg_len(),iaddcode);
-		
-		reset();
+        if(nResult<=0)
+            reset();
 		return nResult;
 	}
 

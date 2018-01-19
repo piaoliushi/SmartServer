@@ -674,15 +674,15 @@ void device_session::start_read_head(int msgLen)
         else if(modleInfos_.netMode.inet_type == NET_MOD_UDP){
             udp::endpoint sender_endpoint;
             usocket().async_receive_from(boost::asio::buffer(receive_msg_ptr_->w_ptr(),receive_msg_ptr_->space()),sender_endpoint,//msgLen
-                             //#ifdef USE_STRAND
-                             //            strand_.wrap(
-                             //    #endif
+                             #ifdef USE_STRAND
+                                         strand_.wrap(
+                                 #endif
                                              boost::bind(&device_session::handle_udp_read,this,
                                                          boost::asio::placeholders::error,
                                                          boost::asio::placeholders::bytes_transferred)
-                             //    #ifdef USE_STRAND
-                             //                )
-                             //#endif
+                                 #ifdef USE_STRAND
+                                             )
+                             #endif
                                          );
         }
     }else if(modleInfos_.iCommunicationMode==CON_MOD_COM){
