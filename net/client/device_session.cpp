@@ -124,6 +124,7 @@ void device_session::dev_base_info(DevBaseInfo& devInfo,string iId)
         devInfo.mapMonitorItem = find_iter->second.map_MonitorItem;
         devInfo.nDevType = find_iter->second.iDevType;
         devInfo.sDevName = find_iter->second.sDevName;
+        devInfo.sStationNumber = find_iter->second.sStationNum;
     }
 }
 
@@ -192,8 +193,8 @@ void device_session::set_con_state(con_state curState)
         map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.begin();
         for(;iter!=modleInfos_.mapDevInfo.end();++iter)
         {
-            //广播设备状态到在线客户端
-            send_net_state_message(GetInst(LocalConfig).local_station_id(),(*iter).first
+            //广播设备状态到在线客户端GetInst(LocalConfig).local_station_id()
+            send_net_state_message((*iter).second.sStationNum,(*iter).first
                                    ,(*iter).second.sDevName,(*iter).second.iDevType
                                    ,othdev_con_state_);
             if(othdev_con_state_== con_connected)
@@ -1191,7 +1192,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                                                   (*cmd_iter).iChannelId);
                     //通知客户端正在执行
                     if(bRslt==true){
-                        notify_client_execute_result(witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
+                        notify_client_execute_result(witer->second.sStationNum,witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
                                                      (*cmd_iter).iCommandType,pCurTime,true,eResult);
                     }
                 }
@@ -1213,7 +1214,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                                                      ,(*cmd_iter).iChannelId);
                         //通知客户端正在执行
                         if(bRslt==true)
-                            notify_client_execute_result(witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
+                            notify_client_execute_result(witer->second.sStationNum,witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
                                                          (*cmd_iter).iCommandType,pCurTime,true,eResult);
                     }
                 }
@@ -1233,7 +1234,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                                                      (*cmd_iter).iChannelId);
                         //通知客户端正在执行
                         if(bRslt==true)
-                            notify_client_execute_result(witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
+                            notify_client_execute_result(witer->second.sStationNum,witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
                                                          (*cmd_iter).iCommandType,pCurTime,true,eResult);
                     }
                 }
@@ -1244,8 +1245,8 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
     start_task_schedules_timer();
 }
 
-void device_session::notify_client_execute_result(string sDevId,string devName,int devType,string user,int cmdType, tm *pCurTime,
-                                                  bool bNtfFlash,int eResult)
+void device_session::notify_client_execute_result(string sStationId,string sDevId,string devName,int devType,
+                                                  string user,int cmdType, tm *pCurTime,bool bNtfFlash,int eResult)
 {
     static  char str_time[64];
     strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
@@ -1295,8 +1296,8 @@ void device_session::notify_client_execute_result(string sDevId,string devName,i
     }
     //发送给客户端
     if(bNtfFlash){
-
-        send_command_execute_result_message(GetInst(LocalConfig).local_station_id(),sDevId,
+        //GetInst(LocalConfig).local_station_id()
+        send_command_execute_result_message(sStationId,sDevId,
                                             devType,devName,user,(e_MsgType)cmdAckMsgType,
                                             (e_ErrorCode)eResult);//DEVICE_TRANSMITTER
     }
@@ -1522,8 +1523,8 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
         curDataPtr->mValues[501] =tmInfo;
     }
 
-    //打包发送客户端
-    send_monitor_data_message(GetInst(LocalConfig).local_station_id(),sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
+    //打包发送客户端GetInst(LocalConfig).local_station_id()
+    send_monitor_data_message(modleInfos_.mapDevInfo[sDevId].sStationNum,sDevId,modleInfos_.mapDevInfo[sDevId].iDevType
                               ,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
 
 
@@ -1583,7 +1584,7 @@ void device_session::handle_connected(const boost::system::error_code& error)
             start_read(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
 
         if(modleInfos_.netMode.inet_type == NET_MOD_TCP || modleInfos_.netMode.inet_type == NET_MOD_HTTP ||
-                modleInfos_.iCommunicationMode==CON_MOD_COM)
+                modleInfos_.iCommunicationMode==CON_MOD_COM || modleInfos_.netMode.inet_type == NET_MOD_UDP)
         {
             if(dev_agent_and_com[cur_dev_id_].second->is_auto_run()==false)
                 start_query_timer(moxa_config_ptr->query_interval);
@@ -1642,27 +1643,47 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
         int nResult = receive_msg_ptr_->check_normal_msg_header(dev_agent_and_com[cur_dev_id_].second,bytes_transferred,CMD_QUERY,cur_msg_q_id_);
         if(nResult == RE_SUCCESS || nResult == RE_CMDACK)
         {
-            DevMonitorDataPtr curData_ptr(new Data);
-            int iaddcode=-1;
-            int nMsg_Decode_Result = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
-            if(nMsg_Decode_Result == RE_SUCCESS)
+            if(dev_agent_and_com[cur_dev_id_].second->IsStandardCommand()==true)
             {
-                query_timeout_count_ = 0;
-                string sdevid = get_devid_by_addcode(iaddcode);
-                handler_data(sdevid,curData_ptr);
+                DevMonitorDataPtr curData_ptr;
+                int iaddcode=-1;
+                int nMsg_Decode_Result = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
+                if(nMsg_Decode_Result == RE_SUCCESS)
+                {
+                    query_timeout_count_ = 0;
+                }
             }
-
+           else
+            {
+                DevMonitorDataPtr curData_ptr(new Data);
+                int iaddcode=-1;
+                int nMsg_Decode_Result = receive_msg_ptr_->decode_msg_body(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
+                if(nMsg_Decode_Result == RE_SUCCESS)
+                {
+                    query_timeout_count_ = 0;
+                    string sdevid = get_devid_by_addcode(iaddcode);
+                    handler_data(sdevid,curData_ptr);
+                }
+            }
+            if(cur_msg_q_id_<dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY].size()-1)
+            {
+                ++cur_msg_q_id_;
+            }
+            else{
+                cur_dev_id_ = next_dev_id();//切换到下一个设备
+                cur_msg_q_id_=0;
+            }
 
         }
         else if(nResult == RE_HEADERROR){
-            cout<< error.message() << std::endl;
+            cout<< error.message() <<"RE_HEADERROR"<< std::endl;
             receive_msg_ptr_->reset();
         }
         start_read_head(bytes_transferred);
 
     }
     else{
-        cout<< error.message() << std::endl;
+        cout<< error.message() <<"---handle_udp_read"<< std::endl;
         close_all();
         start_connect_timer(moxa_config_ptr->connect_timer_interval);
     }
@@ -1863,8 +1884,8 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
                 http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,
                                                               bMod,curAlarm,curAlarm.sReason);
             }
-            //发送监控量报警到客户端
-            send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
+            //发送监控量报警到客户端GetInst(LocalConfig).local_station_id()
+            send_alarm_state_message(modleInfos_.mapDevInfo[devId].sStationNum,devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
                                      ,modleInfos_.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
 
 
@@ -1887,8 +1908,8 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
                 http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,nDevType,bMod,curAlarm,curAlarm.sReason);
             }
 
-            //发送监控量报警到客户端
-            send_alarm_state_message(GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
+            //发送监控量报警到客户端GetInst(LocalConfig).local_station_id()
+            send_alarm_state_message(modleInfos_.mapDevInfo[devId].sStationNum,devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
                                      ,modleInfos_.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
             // 联动.....
         }
@@ -2202,7 +2223,7 @@ void device_session::doAction(LinkAction &action, string sStationid, string sDev
     case ACTP_SOUND_LIGHT_ALARM:{//声光告警
         if(action.iIshaveParam && action.map_Params.size()>0){
 
-            GetInst(SvcMgr).SendActionCommand(action.map_Params,"action",action.iActionType);
+            GetInst(SvcMgr).SendActionCommand(action.map_Params,"auto",action.iActionType);
         }
     }
         break;
@@ -2240,8 +2261,8 @@ void device_session::paser_action(vector<LinkAction> &vaction,string &devId,Devi
     tm *local_time = localtime(&curAlarm.startTime);
     strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
     vector<LinkAction>::iterator vaciter = vaction.begin();
-    for(;vaciter!=vaction.end();++vaciter){
-        doAction((*vaciter),GetInst(LocalConfig).local_station_id(),devId,modleInfos_.mapDevInfo[devId].sDevName,
+    for(;vaciter!=vaction.end();++vaciter){//GetInst(LocalConfig).local_station_id()
+        doAction((*vaciter),modleInfos_.mapDevInfo[devId].sStationNum,devId,modleInfos_.mapDevInfo[devId].sDevName,
                  modleInfos_.mapDevInfo[devId].iDevType, ItemInfo,str_time,curAlarm.sReason);
     }
 

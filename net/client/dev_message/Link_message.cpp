@@ -49,8 +49,14 @@ namespace hx_net
             init_weile_avsp_decoder_Oid();
             break;
         case LINK_WEILE_AVSP_ADAPTER:
-           init_avsApt_Oid();
-           break;
+            init_avsApt_Oid();
+            break;
+        case LINK_SMSX_ASI_ADAPTER:
+            init_smsx_asi_Oid();
+            break;
+        case LINK_SMSX_ASI_ENCODER:
+            init_smsx_asi_decoder_Oid();
+            break;
         default:
             break;
         }
@@ -489,6 +495,101 @@ namespace hx_net
         }
     }
 
+    void Link_message::GetSwitchCmdByChannel(int channelId, CommandUnit &cmdUnit)
+    {
+        switch (d_devInfo.nSubProtocol){
+        case LINK_HX_0401_AV:{
+            cmdUnit.commandLen = 13;
+            cmdUnit.ackLen = 0;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x41;
+            cmdUnit.commandId[2] = 0x22;
+            cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x06;
+            cmdUnit.commandId[7] = channelId;
+            cmdUnit.commandId[8] = 0x00;
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = channelId;
+            cmdUnit.commandId[12] = 0x55;
+        }
+            break;
+        case LINK_HX_0401_DA:
+        case LINK_HX_0401_DABS:
+        {
+            cmdUnit.commandLen = 14;
+            cmdUnit.ackLen = 7;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x45;
+            cmdUnit.commandId[2] = 0x22;
+            cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x07;
+            cmdUnit.commandId[7] = channelId;
+            cmdUnit.commandId[8] = 0x00;
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = 0x00;
+            cmdUnit.commandId[12] = channelId;
+            cmdUnit.commandId[13] = 0x55;
+        }
+            break;
+        default:
+            break;
+        }
+    }
+
+    void Link_message::GetControlModCmdByModId(int modId, CommandUnit &cmdUnit)
+    {
+        switch (d_devInfo.nSubProtocol){
+        case LINK_HX_0401_AV:
+        {
+            cmdUnit.commandLen = 13;
+            cmdUnit.ackLen = 0;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x41;
+            cmdUnit.commandId[2] = 0x66;
+            cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x06;
+            cmdUnit.commandId[7] = 0x00;
+            cmdUnit.commandId[8] = modId;
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = modId;
+            cmdUnit.commandId[12] = 0x55;
+        }
+            break;
+        case LINK_HX_0401_DA:
+        case LINK_HX_0401_DABS:
+        {
+            cmdUnit.commandLen = 14;
+            cmdUnit.ackLen = 0;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x45;
+            cmdUnit.commandId[2] = 0x66;
+            cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x07;
+            cmdUnit.commandId[7] = 0x00;
+            cmdUnit.commandId[8] = modId;
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = 0x00;
+            cmdUnit.commandId[12] = modId;
+            cmdUnit.commandId[13] = 0x55;
+        }
+            break;
+        default:
+            break;
+        }
+    }
+
     void Link_message::GetControlModCmd(devCommdMsgPtr lpParam, CommandUnit &cmdUnit)
     {
         switch (d_devInfo.nSubProtocol){
@@ -587,6 +688,8 @@ namespace hx_net
                  case LINK_ASI_ADAPTER:
                  case LINK_WEILE_AVSP_DECODER:
                  case LINK_WEILE_AVSP_ADAPTER:
+                 case LINK_SMSX_ASI_ADAPTER:
+                 case LINK_SMSX_ASI_ENCODER:
                      return parse_SingAptReceive_data(snmp,d_curData_ptr,target);
                  default:
                      return RE_NOPROTOCOL;
@@ -752,6 +855,8 @@ namespace hx_net
         case LINK_WEILE_AVSP_DECODER:
             return parse_weile_avsp_decorder_data(pdu,target);
         case LINK_WEILE_AVSP_ADAPTER:
+        case LINK_SMSX_ASI_ADAPTER:
+        case LINK_SMSX_ASI_ENCODER:
             return parse_weile_avsp_apt_data(pdu,target);
         }
     }
@@ -759,11 +864,26 @@ namespace hx_net
     void Link_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode,int nChannel, bool bSnmp, Snmp *snmp, CTarget *target)
     {
         eErrCode = EC_UNKNOWN;
+        CommandUnit cmdUnit;
+        cmdUnit.commandLen = 0;
+
         switch (icmdType) {
         case MSG_ADJUST_TIME_SET_OPR:
             break;
+        case MSG_CONTROL_MOD_SWITCH_OPR:
+            GetControlModCmdByModId(nChannel,cmdUnit);
+            break;
+        case MSG_0401_SWITCH_OPR://通道切换
+            GetSwitchCmdByChannel(nChannel,cmdUnit);
+            break;
         default:
             break;
+        }
+
+        if(cmdUnit.commandLen>0)
+        {
+            eErrCode = EC_OK;
+            m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
         }
     }
 
@@ -1141,4 +1261,72 @@ namespace hx_net
 
         m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
     }
+
+
+   void Link_message::init_smsx_asi_Oid()
+   {
+       Vb vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4022.200.1.6.7.1.1"] = 0;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4022.200.1.6.7.1.1"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4022.200.1.5.7.1.1"] = 1;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4022.200.1.5.7.1.1"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4022.200.1.6.7.2.1"] = 2;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4022.200.1.6.7.2.1"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4022.200.1.5.7.2.1"] = 3;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4022.200.1.5.7.2.1"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.300.1.8.1.2"] = 4;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.300.1.8.1.2"));
+       query_pdu += vbl;
+
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.300.1.9.1.2"] = 5;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.300.1.9.1.2"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.300.1.8.1.3"] = 6;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.300.1.8.1.3"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.300.1.9.1.3"] = 7;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.300.1.9.1.3"));
+       query_pdu += vbl;
+   }
+
+   void Link_message::init_smsx_asi_decoder_Oid()
+   {
+       Vb vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.200.1.14.1.2"] = 0;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.200.1.14.1.2"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.200.1.14.1.3"] = 1;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.200.1.14.1.3"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.200.1.14.1.4"] = 2;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.200.1.14.1.4"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.200.1.14.1.5"] = 3;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.200.1.14.1.5"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.200.1.15.1.2"] = 4;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.200.1.15.1.2"));
+       query_pdu += vbl;
+
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.200.1.15.1.3"] = 5;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.200.1.15.1.3"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.200.1.15.1.4"] = 6;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.200.1.15.1.4"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.200.1.15.1.5"] = 7;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.200.1.15.1.5"));
+       query_pdu += vbl;
+
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.300.1.8.1.1"] = 8;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.300.1.8.1.1"));
+       query_pdu += vbl;
+       map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.300.1.9.1.1"] = 9;
+       vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.300.1.9.1.1"));
+       query_pdu += vbl;
+   }
 }

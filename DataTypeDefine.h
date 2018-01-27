@@ -221,8 +221,9 @@ typedef struct
 
 typedef struct
 {
-    string  sDevNum;
-    string  sDevName;
+    string  sStationNum;  //设备实际所属台站
+    string  sDevNum;      //设备编号
+    string  sDevName;     //设备名称
     int     iDevType;     //设备类型（0：发射机,1:天线，2：环境，3：电力，4：链路设备）
     bool    bAst;         //是否关联
     bool    bUsed;        //是否启用
@@ -254,6 +255,7 @@ typedef struct
 
 typedef struct
 {
+    string    sStationNum;       //所属实际台站id
     string    sModleNumber;
     int       iCommunicationMode;//连接类型0:网口,1:串口
     NetCommunicationMode      netMode;

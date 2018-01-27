@@ -269,7 +269,7 @@ typedef enum DxPROTOCOL
 
 //typedef enum ElECTRICPROTOCOL
 //{
-//    ELEC_ABB_104     = 0,
+//  ELEC_ABB_104     = 0,
 //	ELECTRIC_101     = 1,
 //}ElectricSubProtocol,*pElectricSubProtocol;
 
@@ -280,21 +280,23 @@ typedef enum TIMEROTOCOL
 
 typedef enum LINK_DEVICE
 {
-    LINK_STATELITE_RECEVIE = 0,//卫星接收机
-    LINK_TEST_RECEVIE      = 3,//SNMP测试
-    LINK_SING_NET_ADAPTER = 4, //
-    LINK_DMP_SWITCH = 5, //dmp切换器
-    LINK_ASI_ADAPTER = 8,//asi适配器
+    LINK_STATELITE_RECEVIE  = 0,//卫星接收机
+    LINK_TEST_RECEVIE       = 3,//SNMP测试
+    LINK_SING_NET_ADAPTER   = 4,//网络适配器
+    LINK_DMP_SWITCH         = 5,//dmp切换器
+    LINK_ASI_ADAPTER        = 8,//asi适配器
     LINK_WEILE_AVSP_DECODER = 9,//伟乐avs+接收解码器
-    LINK_HX_0401_AV = 10,//汇鑫0401AV+切换器
-    LINK_HX_0401_DA = 11,//汇鑫0401DA切换器
-    LINK_HX_0401_DABS = 12,//汇鑫0401DABS切换器
+    LINK_HX_0401_AV         = 10,//汇鑫0401AV+切换器
+    LINK_HX_0401_DA         = 11,//汇鑫0401DA切换器
+    LINK_HX_0401_DABS       = 12,//汇鑫0401DABS切换器
     LINK_WEILE_AVSP_ADAPTER = 13,//伟乐avs+适配器
+    LINK_SMSX_ASI_ADAPTER   = 14,//数码视讯ASI复用器
+    LINK_SMSX_ASI_ENCODER   = 15,//数码视讯ASI编码码器
 }LinkDeviceSubProtocol;
 
 typedef enum SHANGHAIPROTOCL
 {
-    All_Band_Pa = 0,
+    All_Band_Pa  = 0,
     All_Band_Exc = 1,
 }ShSubProtocol;
 

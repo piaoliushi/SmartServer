@@ -205,7 +205,8 @@ int kmp( const unsigned char *matcher, int mlen, const unsigned char *pattern, i
     kmp_init(pattern, plen,pi);  // prefix-function
 
     int i=0, j=0;
-    while(i < mlen && j < plen)  // don't increase i and j at this level
+    int rLen = mlen-plen+1;
+    while(i <rLen  && j < plen)  // don't increase i and j at this level
     {
         if(matcher[i+j] == pattern[j])
             j++;

@@ -455,6 +455,7 @@ namespace hx_net
                 dtinfo.fValue = (data[baseindex]*256+data[baseindex+1])*0.1;
                 data_ptr->mValues[indexpos++] = dtinfo;
                 dtinfo.fValue = (data[baseindex+2]*256+data[baseindex+3])*0.1;
+                data_ptr->mValues[indexpos++] = dtinfo;
                 int isign=0.1;
                 if(Getbit(data[baseindex+4],7)==1)
                     isign = -0.1;
@@ -464,6 +465,7 @@ namespace hx_net
                     dtinfo.fValue =  (data[baseindex+6]&0x7F)*(-1);
                 else
                     dtinfo.fValue =  data[baseindex+6];
+                data_ptr->mValues[indexpos++] = dtinfo;
                 for(int i=0;i<8;++i)
                 {
                     dtinfo.fValue = (data[baseindex+7+2*i]*256+data[baseindex+8+2*i])*0.1;
@@ -486,9 +488,9 @@ namespace hx_net
             int indexpos =0;
             DataInfo dtinfo;
             dtinfo.bType = false;
-            dtinfo.fValue = (data[baseindex]*256+data[baseindex+1])*0.0001;
+            dtinfo.fValue = (data[baseindex]*256+data[baseindex+1])*0.001;
             data_ptr->mValues[indexpos++] = dtinfo;
-            dtinfo.fValue = (data[baseindex+2]*256+data[baseindex+3])*0.1;
+            dtinfo.fValue = (data[baseindex+2]*256+data[baseindex+3]);
             data_ptr->mValues[indexpos++] = dtinfo;
             if(data_ptr->mValues[0].fValue*1000>data_ptr->mValues[1].fValue)
             {
@@ -523,6 +525,7 @@ namespace hx_net
                 dtinfo.fValue = (data[baseindex]*256+data[baseindex+1])*0.1;
                 data_ptr->mValues[indexpos++] = dtinfo;
                 dtinfo.fValue = (data[baseindex+2]*256+data[baseindex+3])*0.1;
+                data_ptr->mValues[indexpos++] = dtinfo;
                 int isign=0.1;
                 if(Getbit(data[baseindex+4],7)==1)
                     isign = -0.1;
@@ -532,6 +535,7 @@ namespace hx_net
                     dtinfo.fValue =  (data[baseindex+6]&0x7F)*(-1);
                 else
                     dtinfo.fValue =  data[baseindex+6];
+                data_ptr->mValues[indexpos++] = dtinfo;
                 for(int i=0;i<8;++i)
                 {
                     dtinfo.fValue = (data[baseindex+7+2*i]*256+data[baseindex+8+2*i])*0.1;

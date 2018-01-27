@@ -183,7 +183,7 @@ namespace hx_net
 
 
 
-        void notify_client_execute_result(string sDevId,string devName,int devType,string user,int cmdType,
+        void notify_client_execute_result(string sStationId,string sDevId,string devName,int devType,string user,int cmdType,
                                           tm *pCurTime,bool bNtfFlash,int eResult);
 
     private:

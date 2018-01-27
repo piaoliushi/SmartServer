@@ -171,15 +171,15 @@ namespace hx_net
         {
             dev_run_state_=curState;
             GetInst(SvcMgr).get_notify()->OnDevStatus(d_devInfo.sDevNum,dev_run_state_+1);
-            //广播设备状态到在线客户端
-            m_pSession->send_work_state_message(GetInst(LocalConfig).local_station_id(),d_devInfo.sDevNum
+            //广播设备状态到在线客户端GetInst(LocalConfig).local_station_id()
+            m_pSession->send_work_state_message(d_devInfo.sStationNum,d_devInfo.sDevNum
                                                 ,d_devInfo.sDevName,DEVICE_TRANSMITTER,(dev_run_state)dev_run_state_);
             //如果天线是代理，且当前机器在运行，则设置当前天线状态为当前设备
             if(d_relate_antenna_ptr_!=NULL){
                 if(dev_run_state_ == dev_running && d_antenna_Agent_){
 
-                    int nAtennaS = (d_Host_ == 1)?antenna_backup:antenna_host;
-                    GetInst(SvcMgr).set_dev_run_state(GetInst(LocalConfig).local_station_id(),
+                    int nAtennaS = (d_Host_ == 1)?antenna_backup:antenna_host;//GetInst(LocalConfig).local_station_id()
+                    GetInst(SvcMgr).set_dev_run_state(d_devInfo.sStationNum,
                                                       d_relate_antenna_ptr_->sDevNum,nAtennaS);
                 }
             }
@@ -381,6 +381,24 @@ namespace hx_net
         }
     }
 
+
+    //执行联动命令
+    void Tsmt_message::exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,
+                                                string sUser,e_ErrorCode &eErrCode)
+    {
+        switch(actionType)
+        {
+        case ACTP_OPEN_DEVICE:
+            exec_task_now(MSG_TRANSMITTER_TURNON_OPR,sUser,eErrCode);
+            break;
+        case ACTP_CLOSE_DEVICE:
+            exec_task_now(MSG_TRANSMITTER_TURNOFF_OPR,sUser,eErrCode);
+            break;
+        }
+
+
+    }
+
     void Tsmt_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel,
                                      bool bSnmp,Snmp *snmp,CTarget *target)
     {
@@ -408,7 +426,7 @@ namespace hx_net
 
         std::time(&d_OprStartTime);//循环执行计时开始
         tm *pCurTime = localtime(&d_OprStartTime);
-        m_pSession-> notify_client_execute_result(d_devInfo.sDevNum,d_devInfo.sDevName,d_devInfo.iDevType,sUser,
+        m_pSession-> notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,d_devInfo.sDevName,d_devInfo.iDevType,sUser,
                                   d_cur_task_,pCurTime,false,eErrCode);
         //目前只有发射机的开关机进行循环发送（）
         if(icmdType >=MSG_TRANSMITTER_TURNON_OPR &&  icmdType < MSG_TRANSMITTER_RISE_POWER_OPR){
@@ -500,7 +518,7 @@ namespace hx_net
                  string  sResult = DEV_CMD_RESULT_DESC(0);//0：成功
                  GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
                 //通知到客户端...
-                m_pSession->notify_client_execute_result(d_devInfo.sDevNum,d_devInfo.sDevName,d_devInfo.iDevType,d_cur_user_,
+                m_pSession->notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,d_devInfo.sDevName,d_devInfo.iDevType,d_cur_user_,
                                           d_cur_task_,pCurTime,true,EC_OK);
 
 
@@ -515,7 +533,7 @@ namespace hx_net
                     string  sResult = DEV_CMD_RESULT_DESC(4);//4：失败（超时）
                     GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
                     //通知到客户端...
-                    m_pSession->notify_client_execute_result(d_devInfo.sDevNum,d_devInfo.sDevName,d_devInfo.iDevType,d_cur_user_,
+                    m_pSession->notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,d_devInfo.sDevName,d_devInfo.iDevType,d_cur_user_,
                                               d_cur_task_,pCurTime,true,EC_FAILED);
                     m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
                     d_cur_user_.clear();
@@ -545,8 +563,8 @@ namespace hx_net
         if(d_relate_tsmt_ptr_!=NULL && d_relate_antenna_ptr_!=NULL){
             //非定时开关机，且关联机在使用
             if(d_cur_user_!="timer" && d_relate_tsmt_ptr_->bUsed==true){
-                //当前主机在运行且天线不是代理则返回，不进行单步开机动作
-                if(GetInst(SvcMgr).get_dev_run_state(GetInst(LocalConfig).local_station_id(),
+                //当前主机在运行且天线不是代理则返回，不进行单步开机动作GetInst(LocalConfig).local_station_id()
+                if(GetInst(SvcMgr).get_dev_run_state(d_relate_tsmt_ptr_->sStationNum,
                        d_relate_tsmt_ptr_->sDevNum)==dev_running  && d_antenna_Agent_==false) {
                     nExcutResult = 6;
                     return;
@@ -625,8 +643,8 @@ namespace hx_net
     {
         if(d_relate_tsmt_ptr_ == NULL || d_relate_antenna_ptr_== NULL)
             return false;
-        //如果天线不在位，则清除告警
-        int nAtennaS = GetInst(SvcMgr).get_dev_run_state(GetInst(LocalConfig).local_station_id(),
+        //如果天线不在位，则清除告警GetInst(LocalConfig).local_station_id()
+        int nAtennaS = GetInst(SvcMgr).get_dev_run_state(d_relate_antenna_ptr_->sStationNum,
                                           d_relate_antenna_ptr_->sDevNum);
 
         if(nAtennaS == antenna_backup && d_Host_==0)

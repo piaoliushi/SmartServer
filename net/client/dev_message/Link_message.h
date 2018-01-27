@@ -44,8 +44,10 @@ protected:
     void init_SingApt_Oid();
     void init_Dmp_Oid();
     void init_AsiApt_Oid();
+    void init_smsx_asi_decoder_Oid();
     void init_weile_avsp_decoder_Oid();
     void init_avsApt_Oid();
+    void init_smsx_asi_Oid();
 
     int decode_0401AV(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_0401DA(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
@@ -53,6 +55,8 @@ protected:
 private:
     void GetSwitchCmd(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     void GetControlModCmd(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
+    void GetControlModCmdByModId(int modId, CommandUnit &cmdUnit);
+    void GetSwitchCmdByChannel(int channelId, CommandUnit &cmdUnit);
 private:
     Pdu query_pdu;
     session_ptr m_pSession;//关联连接对象

@@ -175,37 +175,39 @@ bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo
             (select c.objectnumber from platform_server_purview c where c.servernumber='%2' and c.objecttype=0 )").arg(QString::fromStdString(strDevnum) ).arg(QString::fromStdString(sServerNumber) );
             devquery.prepare(strSql);
             if(devquery.exec())   {
-            if(devquery.next())  {
-            device.sDevNum = devquery.value(0).toString().toStdString();
-            device.sDevName = devquery.value(2).toString().toStdString();
-            device.iDevType = devquery.value(3).toInt();
-            device.bAst = devquery.value(4).toBool();
-            device.bMulChannel = devquery.value(5).toBool();
-            device.iChanSize = devquery.value(6).toInt();
-            device.bUsed = devquery.value(7).toBool();
-            device.iAddressCode = devquery.value(8).toInt();
-            device.nDevProtocol = devquery.value(9).toInt();
-            device.nSubProtocol = devquery.value(10).toInt();
-            QString sprotoclnum = devquery.value(11).toString();
-            //获得监控量信息
-            GetDevMonItem(db,strDevnum,sprotoclnum,device.map_MonitorItem);
-            //获得运行图信息
-            GetDevMonitorSch(db,strDevnum,device.vMonitorSch);
-            //获得命令图信息
-            GetCmd(db,strDevnum,device.vCommSch);
-            //获得设备属性信息
-            GetDevProperty(db,strDevnum,device.map_DevProperty);
-            //获得告警配置
-            GetAlarmConfig(db,strDevnum,device.map_AlarmConfig);
-            //获得关联配置
-            GetAssDevChan(db,QString::fromStdString(strDevnum),device.map_AssDevChan);
+                    if(devquery.next())  {
+                    device.sDevNum = devquery.value(0).toString().toStdString();
+                    device.sDevName = devquery.value(2).toString().toStdString();
+                    device.iDevType = devquery.value(3).toInt();
+                    device.bAst = devquery.value(4).toBool();
+                    device.bMulChannel = devquery.value(5).toBool();
+                    device.iChanSize = devquery.value(6).toInt();
+                    device.bUsed = devquery.value(7).toBool();
+                    device.iAddressCode = devquery.value(8).toInt();
+                    device.nDevProtocol = devquery.value(9).toInt();
+                    device.nSubProtocol = devquery.value(10).toInt();
+                    QString sprotoclnum = devquery.value(11).toString();
+                    //根据设备id填充台站编号
+                    GetObjOwnerStationNum(db,strDevnum,device.sStationNum);
+                    //获得监控量信息
+                    GetDevMonItem(db,strDevnum,sprotoclnum,device.map_MonitorItem);
+                    //获得运行图信息
+                    GetDevMonitorSch(db,strDevnum,device.vMonitorSch);
+                    //获得命令图信息
+                    GetCmd(db,strDevnum,device.vCommSch);
+                    //获得设备属性信息
+                    GetDevProperty(db,strDevnum,device.map_DevProperty);
+                    //获得告警配置
+                    GetAlarmConfig(db,strDevnum,device.map_AlarmConfig);
+                    //获得关联配置
+                    GetAssDevChan(db,strDevnum,device.map_AssDevChan);
 
-}
-}else {
+                }
+        }else {
             std::cout<<devquery.lastError().text().toStdString()<<"GetDevInfo---query---error!"<<std::endl;
             return false;
-    }
-            return true;
+         }
+        return true;
 }
 
 //获取所有设备信息
@@ -219,9 +221,12 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
     }
 
     QSqlQuery netquery(db);
+    //QString strSql=QString("select NetType,IpAddress,LocalPort,PeerPort,ConnectType,CommTypeNumber from Net_Communication_Mode where CommTypeNumber in\
+    //                       (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=5)").arg(QString::fromStdString(sStationId));
+
     QString strSql=QString("select NetType,IpAddress,LocalPort,PeerPort,ConnectType,CommTypeNumber from Net_Communication_Mode where CommTypeNumber in\
-                           (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=5)").arg(QString::fromStdString(sStationId));
-                           netquery.prepare(strSql);
+                           (select objectnumber from station_bind_object where objecttype=5)");
+    netquery.prepare(strSql);
     if(netquery.exec()){
         while(netquery.next()){
             ModleInfo info;
@@ -234,6 +239,9 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
 
             QString qtrNum = netquery.value(5).toString();
             info.sModleNumber = qtrNum.toStdString();
+            //获取model所属台站
+            GetObjOwnerStationNum(db,info.sModleNumber,info.sStationNum);
+
             QString strQdev = QString("select DeviceNumber from Device_Bind_Comm where CommTypeNumber='%1'").arg(qtrNum);
             QSqlQuery net1query(db);
             if(net1query.exec(strQdev)) {
@@ -254,8 +262,10 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
         cout<<netquery.lastError().text().toStdString()<<"GetAllDevInfo---netquery---error!"<<endl;
     }
     QSqlQuery comquery(db);
+    //strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode where CommTypeNumber in\
+    //               (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=4)").arg(QString::fromStdString(sStationId));
     strSql=QString("select Com,Baudrate,Databit,Stopbit,Parity,CommTypeNumber from Com_Communication_Mode where CommTypeNumber in\
-                   (select objectnumber from station_bind_object where stationnumber='%1' and objecttype=4)").arg(QString::fromStdString(sStationId));
+                    (select objectnumber from station_bind_object where objecttype=4)");
     comquery.prepare(strSql);
     if(comquery.exec()){
         while(comquery.next()) {
@@ -396,7 +406,26 @@ bool DataBaseOperation::GetCmd(QSqlDatabase &db, string strDevnum,vector<Command
 }
             return true;
 }
+//根据设备id填充台站编号
+bool DataBaseOperation::GetObjOwnerStationNum(QSqlDatabase &db,string strObjnum,string &sDevOwnerStationId)
+{
+    if(!db.isOpen() || !db.isValid()) {
+        std::cout<<"GetObjOwnerStationNum is error --------------------------------the database is interrupt"<<std::endl;
+        return false;
+    }
 
+    QSqlQuery stationIdquery(db);
+    QString strSql=QString("select distinct stationnumber from station_bind_object where objectnumber='%1'").arg(QString::fromStdString(strObjnum));
+    if(stationIdquery.exec(strSql)) {
+        if(stationIdquery.next()) {
+           sDevOwnerStationId = stationIdquery.value(0).toString().toStdString();
+        }
+    }else{
+        cout<<stationIdquery.lastError().text().toStdString()<<"GetObjOwnerStationNum---stationIdquery---error!"<<endl;
+        return false;
+    }
+    return true;
+}
 //设备设备监控量
 bool DataBaseOperation::GetDevMonItem(QSqlDatabase &db, string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item )
 {
@@ -591,7 +620,7 @@ bool DataBaseOperation::GetLinkAction(QSqlDatabase &db, string strLinkRolenum,ve
 }
 
 //获得关联设备信息
-bool DataBaseOperation::GetAssDevChan(QSqlDatabase &db, QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev )
+bool DataBaseOperation::GetAssDevChan(QSqlDatabase &db, string strDevNum,map<int,vector<AssDevChan> >& mapAssDev )
 {
     //boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     if(!db.isOpen() || !db.isValid()) {
@@ -600,7 +629,7 @@ bool DataBaseOperation::GetAssDevChan(QSqlDatabase &db, QString strDevNum,map<in
     }
 
     QSqlQuery itemschquery(db);
-    QString strSql=QString("select objectnumberb,channelnumberb,associatetype,channelnumbera from associate_object  where objectnumbera='%1'").arg(strDevNum);
+    QString strSql=QString("select objectnumberb,channelnumberb,associatetype,channelnumbera from associate_object  where objectnumbera='%1'").arg(QString::fromStdString(strDevNum));
     itemschquery.prepare(strSql);
     if(itemschquery.exec()){
         while(itemschquery.next()){
@@ -1792,6 +1821,7 @@ bool DataBaseOperation::AddExcuteCommandLog(const string sDevNum,int nCommandTyp
         nMode = 1;
     else if(sUser == "auto")
         nMode = 2;
+
 
     strSql = QString("insert into device_operation_record(devicenumber,operation,operationtime,"
                      "operationresult,operationuser,operationcommand) values(:devid,:opermod,:opertm,:operrslt,:operuser,:opercmmd)");

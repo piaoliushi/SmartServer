@@ -114,14 +114,28 @@ namespace hx_net{
             vtUnit.push_back(tmUnit);
             cmdAll.mapCommand[MSG_DEVICE_QUERY] = vtUnit;
 
-            tmUnit.commandLen = 7;
-            tmUnit.commandId[0]=0x55;
+
+
+
+            tmUnit.commandLen = 6;
+            /*tmUnit.commandId[0]=0x55;
             tmUnit.commandId[1]=0x03;
             tmUnit.commandId[2]=0xF2;
             tmUnit.commandId[3]=0x00;
             tmUnit.commandId[4]=0x01;
             tmUnit.commandId[5]=0xF3;
-            tmUnit.commandId[6]=0x00;
+            tmUnit.commandId[6]=0x00;*/
+
+            tmUnit.commandId[0]=0x55;
+            tmUnit.commandId[1]=0x02;
+            tmUnit.commandId[2]=0xFA;
+            tmUnit.commandId[3]=0x01;
+            tmUnit.commandId[4]=0xFB;
+            tmUnit.commandId[5]=0x00;
+
+
+            //tmUnit.commandId[6]=0x00;
+
             vector<CommandUnit> vtHTurnOnUnit;
             vtHTurnOnUnit.push_back(tmUnit);
             cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR] = vtHTurnOnUnit;
@@ -135,8 +149,16 @@ namespace hx_net{
             vector<CommandUnit> vtLTurnOnUnit;
             vtLTurnOnUnit.push_back(tmUnit);
             cmdAll.mapCommand[MSG_TRANSMITTER_LOW_POWER_TURNON_OPR] = vtLTurnOnUnit;
-            tmUnit.commandId[3]=0x01;
-            tmUnit.commandId[5]=0xF2;
+
+            //0x55,0x03,0xFA,0x00,0xFA,0x00
+            tmUnit.commandId[1]=0x03;
+            tmUnit.commandId[2]=0xFA;
+            tmUnit.commandId[3]=0x00;
+            tmUnit.commandId[4]=0xFA;
+            tmUnit.commandId[5]=0x00;
+
+            //tmUnit.commandId[3]=0x01;
+            //tmUnit.commandId[5]=0xF2;
             vector<CommandUnit> vtTurnOffUnit;
             vtTurnOffUnit.push_back(tmUnit);
             cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR] = vtTurnOffUnit;

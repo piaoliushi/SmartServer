@@ -86,10 +86,6 @@ void websocket_server::on_message(connection_hdl hdl, ws_server::message_ptr msg
                 commandmsg_->CopyFrom(curWebPtr->msgcommandreq());
                 string sUsr = commandmsg_->soperuser();
                 string sDevId = commandmsg_->sdevid();
-                //string sUsr = curWebPtr->msgcommandreq().soperuser();
-                //string sDevId = curWebPtr->msgcommandreq().sdevid();
-                //string sName  = curWebPtr->msgcommandreq().cparams(0).sparamname();
-                //string sValue  = curWebPtr->msgcommandreq().cparams(0).sparamvalue();
 
                 e_ErrorCode nReult = GetInst(SvcMgr).excute_command(sDevId,msgType,sUsr,commandmsg_);
 
@@ -244,18 +240,23 @@ bool websocket_server::_user_login(string sUser,string sPassword,LoginAck &login
                     map<int,map<int,CurItemAlarmInfo> > curAlarm;
                     con_state  netState = GetInst(SvcMgr).get_dev_net_state(sstationid,*itersNum);
                     dev_run_state   runState = GetInst(SvcMgr).get_dev_run_state(sstationid,*itersNum);
-
                     GetInst(SvcMgr).get_dev_alarm_state(sstationid,*itersNum,curAlarm);
+
+                    //con_state  netState = GetInst(SvcMgr).get_dev_net_state(devBaseInfo.sStationNumber,*itersNum);
+                    //dev_run_state   runState = GetInst(SvcMgr).get_dev_run_state(devBaseInfo.sStationNumber,*itersNum);
+                    //GetInst(SvcMgr).get_dev_alarm_state(devBaseInfo.sStationNumber,*itersNum,curAlarm);
+
+
                     //收集设备连接信息
                     DevNetStatus *dev_n_s = loginAck.add_cdevcurnetstatus();
-                    dev_n_s->set_sstationid(sstationid);
+                    dev_n_s->set_sstationid(devBaseInfo.sStationNumber);//sstationid
                     dev_n_s->set_sdevid(*itersNum);
                     dev_n_s->set_sdevname(devBaseInfo.sDevName.c_str());
                     dev_n_s->set_edevtype(devBaseInfo.nDevType);
                     dev_n_s->set_enetstatus((DevNetStatus_e_NetStatus)netState);
                     //收集设备运行信息
                     DevWorkStatus *dev_run_s = loginAck.add_cdevcurworkstatus();
-                    dev_run_s->set_sstationid(sstationid);
+                    dev_run_s->set_sstationid(devBaseInfo.sStationNumber);//sstationid
                     dev_run_s->set_sdevid(*itersNum);
                     dev_run_s->set_edevtype(devBaseInfo.nDevType);
                     dev_run_s->set_sdevname(devBaseInfo.sDevName.c_str());
@@ -265,7 +266,7 @@ bool websocket_server::_user_login(string sUser,string sPassword,LoginAck &login
                     if(iter!=curAlarm.end())
                     {
                         DevAlarmStatus *dev_alarm_s = loginAck.add_cdevcuralarmstatus();
-                        dev_alarm_s->set_sstationid(sstationid);
+                        dev_alarm_s->set_sstationid(devBaseInfo.sStationNumber);//sstationid
                         dev_alarm_s->set_sdevid(*itersNum);
                         dev_alarm_s->set_sdevname(devBaseInfo.sDevName.c_str());
                         dev_alarm_s->set_edevtype(devBaseInfo.nDevType);

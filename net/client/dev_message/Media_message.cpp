@@ -261,8 +261,8 @@ namespace hx_net
          bool bRslt = GetInst(DataBaseOperation).AddProgramSignalAlarmRecord(d_devInfo.sDevNum,frqName,curAlarm.startTime,
                                                                              curAlarm.nLimitId,curAlarm.nType,curAlarm.nAlarmId);
          if(bRslt==true){
-             //发送监控量报警到客户端(用频点名称填充设备名称,cellId填充告警类型)
-           m_pSession->send_alarm_state_message(GetInst(LocalConfig).local_station_id(),d_devInfo.sDevNum,frqName,curAlarm.nType
+             //发送监控量报警到客户端(用频点名称填充设备名称,cellId填充告警类型)GetInst(LocalConfig).local_station_id()
+           m_pSession->send_alarm_state_message(d_devInfo.sStationNum,d_devInfo.sDevNum,frqName,curAlarm.nType
                                       ,d_devInfo.iDevType,curAlarm.nLimitId,str_time,mapProgramAlarm[frqName].size(),curAlarm.sReason);
          }
 
@@ -452,8 +452,8 @@ namespace hx_net
     //添加数据(http消息)
     bool  Media_message::add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData)
     {
-
-        m_pSession->send_monitor_data_message(GetInst(LocalConfig).local_station_id(),d_devInfo.sDevNum,
+        //GetInst(LocalConfig).local_station_id()
+        m_pSession->send_monitor_data_message(d_devInfo.sStationNum,d_devInfo.sDevNum,
                                               d_devInfo.iDevType,mapData,d_devInfo.map_MonitorItem);
         time_t tmCurTime;
         time(&tmCurTime);

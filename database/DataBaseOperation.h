@@ -39,6 +39,8 @@ public:
     //获得所有设备信息
     bool GetAllDevInfo(vector<ModleInfo>& v_Linkinfo,string sStationId,string sServerId);
 
+
+
     //获得数据字典映射表(不包含设备类型字段)
     bool GetDataDictionary(map<int,pair<string,string> >& mapDicry);
 
@@ -125,6 +127,8 @@ protected:
     bool GetCmd(QSqlDatabase &db,string strDevnum,vector<Command_Scheduler>& vcmdsch);
     bool GetDevMonItem(QSqlDatabase &db,string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item);
     bool GetDevProperty(QSqlDatabase &db,string strDevnum,map<string,DevProperty>& map_property);
+    //根据设备id填充台站编号
+    bool GetObjOwnerStationNum(QSqlDatabase &db,string strObjnum,string &sDevOwnerStationId);
     //bool GetNetProperty(QSqlDatabase &db,string strConTypeNumber,NetCommunicationMode& nmode);
     //bool GetComProperty(QSqlDatabase &db,string strConTypeNumber,ComCommunicationMode& cmode);
     bool GetLinkActionParam(QSqlDatabase &db, string strParamnum,map<int,vector<ActionParam> >& map_Params);
@@ -132,7 +136,7 @@ protected:
     bool GetAlarmConfig(QSqlDatabase &db,string strDevnum,map<int,Alarm_config>& map_Alarmconfig);
     bool GetItemAlarmConfig(QSqlDatabase &db, string strDevnum,int iIndex,int iThid,vector<Alarm_config>& vAlarmconfig);
     bool GetDevInfo(QSqlDatabase &db,string strDevnum,DeviceInfo& device,string sServerNumber);
-    bool GetAssDevChan(QSqlDatabase &db, QString strDevNum,map<int,vector<AssDevChan> >& mapAssDev );
+    bool GetAssDevChan(QSqlDatabase &db, string strDevNum,map<int,vector<AssDevChan> >& mapAssDev );
 private:
     QString d_serveraddress;
     QString d_database;

@@ -135,7 +135,7 @@ namespace hx_net
     void  connect_handler::user_duty_log(string sUserId,const string &sContent,int nType)
     {
         dutyLogAckMsgPtr dutyAck(new DutyLogAck);
-        std::string sstationid = GetInst(LocalConfig).local_station_id();
+        //std::string sstationid = GetInst(LocalConfig).local_station_id();
         if(!GetInst(DataBaseOperation).AddDutyLog(sUserId,sContent,nType))
             dutyAck->set_eresult(EC_FAILED);
         else

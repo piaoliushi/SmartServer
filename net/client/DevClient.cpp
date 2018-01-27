@@ -39,12 +39,12 @@ void DevClient::connect_all()
         vector<ModleInfo>::iterator modle_iter = vModle.begin();
         for(;modle_iter != vModle.end();modle_iter++)
         {
-            if(device_pool_.find(DevKey(sLocalStationId,(*modle_iter).sModleNumber))==device_pool_.end())
+            if(device_pool_.find(DevKey((*modle_iter).sStationNum,(*modle_iter).sModleNumber))==device_pool_.end())
             {
 
                 session_ptr new_session(new device_session(io_service_pool_.get_io_service(),
                                                            (*modle_iter),http_report_session_ptr_));
-                device_pool_[DevKey(sLocalStationId,(*modle_iter).sModleNumber)]=new_session;
+                device_pool_[DevKey(sLocalStationId,(*modle_iter).sModleNumber)]=new_session;//(*modle_iter).sStationNum
                 new_session->init_session_config();
 
                 //单一设备且为代理设置，则不进行网络连接
@@ -281,7 +281,7 @@ e_ErrorCode DevClient::SendSMSContent(vector<string> &PhoneNumber, string AlarmC
     return EC_OBJECT_NULL;
 }
 
-//发送联动命令
+//发送联动命令,联动目标的设备id必须是第一个参数
 e_ErrorCode  DevClient::SendActionCommand(map<int,vector<ActionParam> > &param,string sUser,int actionType)
 {
 
