@@ -176,12 +176,12 @@ namespace hx_net
         return m_msgImpl->cur_dev_state();
     }
 
-    void MsgHandleAgent::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel,
+    void MsgHandleAgent::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
                                        bool bSnmp,Snmp *snmp,CTarget *target)
     {
         if(m_msgImpl==NULL)
             return ;
-        return m_msgImpl->exec_task_now(icmdType,sUser,eErrCode,nChannel,bSnmp,snmp,target);
+        return m_msgImpl->exec_task_now(icmdType,sUser,eErrCode,mapParam,bSnmp,snmp,target);
     }
 
     //执行通用指令

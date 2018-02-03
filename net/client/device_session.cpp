@@ -1181,7 +1181,15 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
         vector<Command_Scheduler>::iterator cmd_iter = witer->second.vCommSch.begin();
         for(;cmd_iter!=witer->second.vCommSch.end();++cmd_iter)
         {
-
+            //控制参数提取
+            map<int,string> mapParam;//保存参数
+            //携带参数
+            if((*cmd_iter).iHasParam > 0)
+            {
+                mapParam[0] = (*cmd_iter).cParam.sParam1;
+                if((*cmd_iter).cParam.bUseP2)
+                     mapParam[1] = (*cmd_iter).cParam.sParam2;
+            }
             //按天控制
             if((*cmd_iter).iDateType == RUN_TIME_DAY){
                 //在５秒内
@@ -1189,7 +1197,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
 
                     e_ErrorCode eResult = EC_OBJECT_NULL;
                     bool bRslt =  start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType,
-                                                  (*cmd_iter).iChannelId);
+                                                  mapParam);//(*cmd_iter).iChannelId
                     //通知客户端正在执行
                     if(bRslt==true){
                         notify_client_execute_result(witer->second.sStationNum,witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
@@ -1211,7 +1219,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
 
                         e_ErrorCode eResult = EC_OBJECT_NULL;
                         bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType
-                                                     ,(*cmd_iter).iChannelId);
+                                                     ,mapParam);//(*cmd_iter).iChannelId
                         //通知客户端正在执行
                         if(bRslt==true)
                             notify_client_execute_result(witer->second.sStationNum,witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
@@ -1231,7 +1239,7 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                     if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
                         e_ErrorCode eResult = EC_OBJECT_NULL;
                         bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType,
-                                                     (*cmd_iter).iChannelId);
+                                                     mapParam);//(*cmd_iter).iChannelId
                         //通知客户端正在执行
                         if(bRslt==true)
                             notify_client_execute_result(witer->second.sStationNum,witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
@@ -1315,7 +1323,7 @@ dev_opr_state  device_session::get_opr_state(string sdevId){
 }
 
 //开始执行任务
-bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,int nChannel)
+bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,map<int,string> &mapParam)
 {
 
     static  char str_time[64];
@@ -1339,11 +1347,11 @@ bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opR
 
     //现在执行任务
     if(modleInfos_.iCommunicationMode==CON_MOD_NET && modleInfos_.netMode.inet_type == NET_MOD_SNMP){
-        dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,nChannel,
+        dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,mapParam,
                                                         true,snmp_ptr_,target_ptr_);
     }
     else
-        dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,nChannel);
+        dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,mapParam);
 
 
     return true;
@@ -2209,7 +2217,7 @@ void device_session::doAction(LinkAction &action, string sStationid, string sDev
     case ACTP_SENDMSG:{//发短信
         string smscontent;
         string strDevtype = GetInst(StationConfig).get_dictionary_value("DeviceType",devType);
-        smscontent = str(boost::format("%1%:%2%(%3%)---%4%")%strDevtype%sDevName%sDevid%sReason);
+        smscontent = str(boost::format("%1%:%2%(%3%)---%4%--%5%")%strDevtype%sDevName%sDevid%sReason%sStartTime);
         Action_sendsms(action,smscontent);
     }
         break;

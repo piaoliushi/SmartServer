@@ -179,7 +179,7 @@ namespace hx_net
         void http_cmd_close_i();
 
         //开始执行任务
-        bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,int nChannel=0);
+        bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,map<int,string> &mapParam);
 
 
 

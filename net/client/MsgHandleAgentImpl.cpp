@@ -223,12 +223,12 @@ namespace hx_net
         return m_pbaseMsg->cur_dev_state();
     }
 
-    void MsgHandleAgentImpl::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel,
+    void MsgHandleAgentImpl::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
                                            bool bSnmp,Snmp *snmp,CTarget *target)
     {
         if(m_pbaseMsg==NULL)
             return ;
-        return m_pbaseMsg->exec_task_now(icmdType,sUser,eErrCode,nChannel,bSnmp,snmp,target);
+        return m_pbaseMsg->exec_task_now(icmdType,sUser,eErrCode,mapParam,bSnmp,snmp,target);
     }
 
     //执行通用指令

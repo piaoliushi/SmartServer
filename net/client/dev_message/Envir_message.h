@@ -17,7 +17,7 @@ public:
 	void GetAllCmd(CommandAttribute &cmdAll);
 
     //执行任务
-    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel,
+    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
                                      bool bSnmp,Snmp *snmp,CTarget *target);
     //执行通用命令
     void exec_general_task(int icmdType,string sUser,devCommdMsgPtr lpParam,e_ErrorCode &eErrCode);

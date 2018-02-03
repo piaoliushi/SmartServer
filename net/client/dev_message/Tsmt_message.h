@@ -24,8 +24,8 @@ public:
     bool IsStandardCommand();
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     void GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit);
-    int   cur_dev_state();
-    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel=0,
+    int  cur_dev_state();
+    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
                        bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
     //执行联动命令
     void exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,
@@ -72,9 +72,10 @@ private:
     int                    d_shutdown_count_;//关机状态计数
     string                 d_cur_user_;//当前用户
     int                    d_cur_task_;//当前任务
+    map<int,string>        d_cur_task_param_;//当前任务参数
     DeviceInfo            *d_relate_tsmt_ptr_;//关联发射机
     DeviceInfo            *d_relate_antenna_ptr_;//关联天线
-    int                    d_Host_;//主机标志(-1:未绑定主备属性)
+    int                    d_Host_;//主机标志(-1:未绑定主备属性//0->主机，1->备机)
     bool                   d_relate_Agent_;//主机代理标志
     bool                   d_antenna_Agent_;//天线代理标志
     time_t                 d_OprStartTime;//提交控制命令开始时间

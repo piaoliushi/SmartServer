@@ -760,7 +760,7 @@ namespace hx_net
     }
 
     //执行任务
-    void Envir_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel,
+    void Envir_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
                                      bool bSnmp,Snmp *snmp,CTarget *target)
     {
         if(m_pSession!=NULL)

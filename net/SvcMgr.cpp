@@ -167,10 +167,10 @@ namespace hx_net
 		return EC_OBJECT_NULL;
 	}
 
-    e_ErrorCode SvcMgr:: start_exec_task(string sDevId,string sUser,int cmdType,int nChannel)
+    e_ErrorCode SvcMgr:: start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam)
     {
         if(m_pDevMgrPtr)
-            return m_pDevMgrPtr->start_exec_task(sDevId,sUser,cmdType,nChannel);
+            return m_pDevMgrPtr->start_exec_task(sDevId,sUser,cmdType,mapParam);
         return EC_OBJECT_NULL;
     }
 

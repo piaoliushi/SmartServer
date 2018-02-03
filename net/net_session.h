@@ -121,7 +121,7 @@ namespace hx_net
         //发送命令到设备
         virtual void send_cmd_to_dev(string sDevId,int cmdType,int childId,e_ErrorCode &eErrCode){}
         virtual void send_cmd_to_dev(CommandUnit cmdUnit,e_ErrorCode &eErrCode){}
-        virtual bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,int nChannel=0){return false;}
+        virtual bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,map<int,string> &mapParam){return false;}
 
         virtual void init_session_config(){}
         //更新运行图

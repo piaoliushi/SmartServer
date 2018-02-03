@@ -1340,10 +1340,11 @@ void Bohui_Protocol::_controlDeviceCommand(int nDevType,xml_node<> *rootNode,int
         sDevId = attr_devId->value();
         nSwitch = strtol(attr_switch->value(),NULL,10);
         //--------------发送控制指令------------------------------------//
+        map<int,string> mapParam;//博汇指令暂不携带控制参数
         if(nSwitch == 0)//关机
-            GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNOFF_OPR);
+            GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNOFF_OPR,mapParam);
         else if(nSwitch == 1)//开机
-            GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNON_OPR);
+            GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNON_OPR,mapParam);
     }
 }
 

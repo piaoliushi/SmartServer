@@ -110,7 +110,10 @@ void websocket_server::on_message(connection_hdl hdl, ws_server::message_ptr msg
 
             string sUsr = curWebPtr->msgcommandreq().soperuser();
             string sDevId = curWebPtr->msgcommandreq().sdevid();
-            e_ErrorCode nReult = GetInst(SvcMgr).start_exec_task(sDevId,sUsr,msgType);
+            map<int,string> mapParam;//保存参数
+            for(int i=0;i<curWebPtr->msgcommandreq().cparams().size();++i)
+                mapParam[i] = curWebPtr->msgcommandreq().cparams(0).sparamvalue();
+            e_ErrorCode nReult = GetInst(SvcMgr).start_exec_task(sDevId,sUsr,msgType,mapParam);
 
             devCommdRsltPtr ackMsg(new DeviceCommandResultNotify);
             ackMsg->set_sstationid(curWebPtr->msgcommandreq().sstationid());

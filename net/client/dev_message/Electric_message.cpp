@@ -791,11 +791,15 @@ void Electric_message::GetSignalCommand(int nChannel, CommandUnit &cmdUnit)
     }
 }
 
-void Electric_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode, int nChannel, bool bSnmp, Snmp *snmp, CTarget *target)
+void Electric_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode,map<int,string> &mapParam,
+                                     bool bSnmp, Snmp *snmp, CTarget *target)
 {
     CommandUnit cmdUnit;
     cmdUnit.commandLen=0;
-    GetSignalCommand(nChannel,cmdUnit);
+    if(mapParam.size()>0){
+        int nChannel = atoi(mapParam[0].c_str());
+        GetSignalCommand(nChannel,cmdUnit);
+    }
     if(cmdUnit.commandLen>0)
     {
         eErrCode = EC_OK;

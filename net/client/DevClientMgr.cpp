@@ -95,10 +95,10 @@ namespace hx_net
 	}
 
     //开始执行控制任务
-    e_ErrorCode DevClientMgr::start_exec_task(string sDevId,string sUser,int cmdType,int nChannel)
+    e_ErrorCode DevClientMgr::start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam)
     {
         if(_devclientptr)
-            return _devclientptr->start_exec_task(sDevId,sUser,cmdType,nChannel);
+            return _devclientptr->start_exec_task(sDevId,sUser,cmdType,mapParam);
         return EC_OBJECT_NULL;
     }
     //更新运行图

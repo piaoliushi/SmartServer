@@ -861,20 +861,27 @@ namespace hx_net
         }
     }
 
-    void Link_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode,int nChannel, bool bSnmp, Snmp *snmp, CTarget *target)
+    void Link_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode,map<int,string> &mapParam,
+                                     bool bSnmp, Snmp *snmp, CTarget *target)
     {
         eErrCode = EC_UNKNOWN;
         CommandUnit cmdUnit;
         cmdUnit.commandLen = 0;
 
+
+
         switch (icmdType) {
         case MSG_ADJUST_TIME_SET_OPR:
             break;
-        case MSG_CONTROL_MOD_SWITCH_OPR:
+        case MSG_CONTROL_MOD_SWITCH_OPR:{
+            int nChannel = atoi(mapParam[0].c_str());
             GetControlModCmdByModId(nChannel,cmdUnit);
+        }
             break;
-        case MSG_0401_SWITCH_OPR://通道切换
+        case MSG_0401_SWITCH_OPR:{//通道切换
+            int nChannel = atoi(mapParam[0].c_str());
             GetSwitchCmdByChannel(nChannel,cmdUnit);
+        }
             break;
         default:
             break;

@@ -22,7 +22,7 @@ public:
     void set_run_state(int curState);
     void excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult);
     //执行命令
-    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel=0,
+    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
                                bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
 
     void switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult);

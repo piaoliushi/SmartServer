@@ -283,7 +283,7 @@ void Antenna_message::excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult)
 }
 
 
-void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,int nChannel,
+void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
                            bool bSnmp,Snmp *snmp,CTarget *target)
 {
     eErrCode = EC_UNKNOWN;

@@ -117,7 +117,10 @@ public:
             devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
             commandmsg_->ParseFromArray(task->body(),task->bodySize());
             string sUsr = commandmsg_->soperuser();
-            e_ErrorCode nReult = GetInst(SvcMgr).start_exec_task(commandmsg_->sdevid(),sUsr,MsgPtr->type);
+            map<int,string> mapParam;//保存参数
+            for(int i=0;i<commandmsg_->cparams().size();++i)
+                mapParam[i] = commandmsg_->cparams(0).sparamvalue();
+            e_ErrorCode nReult = GetInst(SvcMgr).start_exec_task(commandmsg_->sdevid(),sUsr,MsgPtr->type,mapParam);
             devCommdRsltPtr ackMsg(new DeviceCommandResultNotify);
             ackMsg->set_sstationid(commandmsg_->sstationid());
             ackMsg->set_sdevid(commandmsg_->sdevid());

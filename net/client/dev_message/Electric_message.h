@@ -29,7 +29,7 @@ public:
 
     void exec_general_task(int icmdType, string sUser, devCommdMsgPtr lpParam, e_ErrorCode &eErrCode);
 
-    void exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode, int nChannel,
+    void exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode,map<int,string> &mapParam,
                        bool bSnmp, Snmp *snmp, CTarget *target);
     //执行联动命令
     void exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,string sUser,e_ErrorCode &eErrCode);
