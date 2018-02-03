@@ -573,7 +573,7 @@ namespace hx_net
             }
              //////-----2018-2-3 15:53---end----------/////
 
-            if(bIgnoreAntenna){
+            if(bIgnoreAntenna && d_cur_user_!="auto"){
                 //天线在位执行开机，否则返回
                 dev_run_state nAntennaS = GetInst(SvcMgr).get_dev_run_state(d_relate_antenna_ptr_->sStationNum,
                                            d_relate_antenna_ptr_->sDevNum);
