@@ -57,6 +57,9 @@ namespace hx_net
         case LINK_SMSX_ASI_ENCODER:
             init_smsx_asi_decoder_Oid();
             break;
+        case LINK_NORMAL_SNMP_DEV:
+            init_normal_snmp_oid();
+            break;
         default:
             break;
         }
@@ -690,6 +693,7 @@ namespace hx_net
                  case LINK_WEILE_AVSP_ADAPTER:
                  case LINK_SMSX_ASI_ADAPTER:
                  case LINK_SMSX_ASI_ENCODER:
+                 case LINK_NORMAL_SNMP_DEV:
                      return parse_SingAptReceive_data(snmp,d_curData_ptr,target);
                  default:
                      return RE_NOPROTOCOL;
@@ -857,6 +861,7 @@ namespace hx_net
         case LINK_WEILE_AVSP_ADAPTER:
         case LINK_SMSX_ASI_ADAPTER:
         case LINK_SMSX_ASI_ENCODER:
+        case LINK_NORMAL_SNMP_DEV:
             return parse_weile_avsp_apt_data(pdu,target);
         }
     }
@@ -1244,10 +1249,14 @@ namespace hx_net
         if(d_curData_ptr == NULL)
             return;
         int pdu_error = pdu.get_error_status();
-        if (pdu_error)
+        if (pdu_error){
+            cout << "parse_weile_avsp_apt_data-----pdu.get_error_status() == ---"<<pdu_error<<endl;
             return;
-        if (pdu.get_vb_count() == 0)
+        }
+        if (pdu.get_vb_count() == 0){
+            cout << "parse_weile_avsp_apt_data-----get_vb_count() == 0---"<<endl;
             return;
+        }
         int vbcount = pdu.get_vb_count();
         for(int i=0;i<vbcount;++i)
         {
@@ -1335,5 +1344,21 @@ namespace hx_net
        map_Oid["1.3.6.1.4.1.32285.2.2.1.4023.300.1.9.1.1"] = 9;
        vbl.set_oid(Oid("1.3.6.1.4.1.32285.2.2.1.4023.300.1.9.1.1"));
        query_pdu += vbl;
+   }
+
+   void Link_message::init_normal_snmp_oid()
+   {
+        map<int,DeviceMonitorItem>::iterator iter = d_devInfo.map_MonitorItem.begin();
+        for(;iter!=d_devInfo.map_MonitorItem.end();++iter)
+        {
+            Vb vbl;
+            string sOid = iter->second.cmdSnmpOid;
+            if(!sOid.empty()){
+                map_Oid[sOid] = iter->first;
+                vbl.set_oid(Oid(sOid.c_str()));
+                query_pdu += vbl;
+            }
+
+        }
    }
 }

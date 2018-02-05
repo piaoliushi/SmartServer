@@ -14,12 +14,29 @@ Antenna_message::Antenna_message(session_ptr pSession,DeviceInfo &devInfo)
     ,d_devInfo(devInfo)
     ,d_cur_task_(-1)
     ,dev_run_state_(dev_unknown)
+    ,d_relate_host_tsmt_ptr_(NULL)
+    ,d_relate_backup_tsmt_ptr_(NULL)
 {
 
     m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
     if(IsStandardCommand())
         d_curData_ptr.reset(new Data);
+
+    map<int,vector<AssDevChan> >::iterator find_iter = d_devInfo.map_AssDevChan.find(0);
+    if(find_iter!=d_devInfo.map_AssDevChan.end()){
+        vector<AssDevChan>::iterator dev_iter = find_iter->second.begin();
+        for(;dev_iter!=find_iter->second.end();++dev_iter){
+            DeviceInfo *curDev =  GetInst(StationConfig).get_devinfo_by_id((*dev_iter).sAstNum);
+            if(curDev==NULL)
+                continue;
+            if(curDev->iDevType == DEVICE_TRANSMITTER && (*dev_iter).iAssType == ATTENA_TO_H_TSMT)
+                d_relate_host_tsmt_ptr_ = curDev;
+            if(curDev->iDevType == DEVICE_TRANSMITTER && (*dev_iter).iAssType == ATTENA_TO_B_TSMT)
+                d_relate_backup_tsmt_ptr_ = curDev;
+        }
+    }
 }
+
 Antenna_message::~Antenna_message()
 {
 
@@ -258,6 +275,15 @@ void Antenna_message::switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult
         nExcutResult = 5;
         return;
     }
+
+    //天线在位执行开机，否则返回
+    dev_run_state nHostRunS = GetInst(SvcMgr).get_dev_run_state(d_relate_host_tsmt_ptr_->sStationNum,
+                               d_relate_host_tsmt_ptr_->sDevNum);
+    dev_run_state nBackupRunS = GetInst(SvcMgr).get_dev_run_state(d_relate_backup_tsmt_ptr_->sStationNum,
+                               d_relate_backup_tsmt_ptr_->sDevNum);
+
+    if(nHostRunS == dev_running || nBackupRunS == dev_running)
+        return;
 
     if(m_pSession!=NULL)
         m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0,eErrCode);

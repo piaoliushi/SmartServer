@@ -292,6 +292,7 @@ typedef enum LINK_DEVICE
     LINK_WEILE_AVSP_ADAPTER = 13,//伟乐avs+适配器
     LINK_SMSX_ASI_ADAPTER   = 14,//数码视讯ASI复用器
     LINK_SMSX_ASI_ENCODER   = 15,//数码视讯ASI编码码器
+    LINK_NORMAL_SNMP_DEV    = 16,//通用snmp设备
 }LinkDeviceSubProtocol;
 
 typedef enum SHANGHAIPROTOCL

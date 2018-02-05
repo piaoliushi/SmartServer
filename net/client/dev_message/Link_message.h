@@ -48,6 +48,7 @@ protected:
     void init_weile_avsp_decoder_Oid();
     void init_avsApt_Oid();
     void init_smsx_asi_Oid();
+    void init_normal_snmp_oid();
 
     int decode_0401AV(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_0401DA(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);

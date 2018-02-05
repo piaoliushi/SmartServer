@@ -39,5 +39,7 @@ private:
     int dev_run_state_;
     string                 d_cur_user_;//当前用户
     int                    d_cur_task_;//当前任务
+    DeviceInfo            *d_relate_host_tsmt_ptr_;//关联主发射机
+    DeviceInfo            *d_relate_backup_tsmt_ptr_;//关联备发射机
 };
 }

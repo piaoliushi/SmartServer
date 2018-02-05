@@ -435,9 +435,9 @@ bool DataBaseOperation::GetDevMonItem(QSqlDatabase &db, string strDevnum,QString
         return false;
     }
 
-    QSqlQuery itemschquery(db);
+    QSqlQuery itemschquery(db);//
     QString strSql=QString("select a.MonitoringIndex,a.MonitoringName,a.Ratio,a.ItemType,a.ItemValueType,a.AlarmEnable,a.IsUpload,c.name,a.alarmtype,a.type,a.moduletype,a.moduleid \
-                           from Monitoring_Device_Item a left join data_dictionary c on c.code=a.unitstring and c.type='CompanyType'\
+                           ,a.snmpoid from Monitoring_Device_Item a left join data_dictionary c on c.code=a.unitstring and c.type='CompanyType'\
             where a.DeviceNumber='%1'").arg(QString::fromStdString(strDevnum));
             itemschquery.prepare(strSql);
             if(itemschquery.exec()) {
@@ -457,6 +457,7 @@ bool DataBaseOperation::GetDevMonItem(QSqlDatabase &db, string strDevnum,QString
                     item.iTargetId = itemschquery.value(9).toInt();
                     item.iModTypeId = itemschquery.value(10).toInt();
                     item.iModDevId = itemschquery.value(11).toInt();
+                    item.cmdSnmpOid = itemschquery.value(12).toString().toStdString();
                     map_item[item.iItemIndex] = item;
              }
         } else{

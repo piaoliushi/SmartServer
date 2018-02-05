@@ -209,6 +209,7 @@ typedef struct
     int  iTargetId;
     int  iModTypeId;
     int iModDevId;
+    string cmdSnmpOid;//snmp oid信息
     vector<Alarm_config>  vItemAlarm;
 }DeviceMonitorItem;
 
@@ -326,9 +327,10 @@ enum _tagAssType
 {
     DEV_TO_DEV     = 0,//设备关联设备
     TSMT_TO_ATTENA = 1,//发射机关联天线
-    ATTENA_TO_TSMT = 2,//天线关联发射机
-    DEV_TO_MOUDLE  = 3,//设备关联模块
-    MOUDLE_TO_DEV  = 4,//模块关联设备
+    ATTENA_TO_H_TSMT = 2,//天线关联主发射机
+    ATTENA_TO_B_TSMT = 3,//天线关联备发射机
+    DEV_TO_MOUDLE  = 4,//设备关联模块
+    MOUDLE_TO_DEV  = 5,//模块关联设备
 };
 
 typedef struct
