@@ -1531,7 +1531,7 @@ namespace hx_net{
                 dtinfo.fValue = Getbit(data[17],6);
                 data_ptr->mValues[index++] = dtinfo;
                 dtinfo.bType = false;
-                dtinfo.fValue = ((data[18]<<24)|(data[19]<<16)|(data[20]<<8)|data[21])&0x7FFFFFF;
+                dtinfo.fValue = (((data[18]<<24)|(data[19]<<16)|(data[20]<<8)|data[21])&0x7FFFFFF)*0.000001;
                 data_ptr->mValues[index++] = dtinfo;
                 dtinfo.fValue = data[23];
                 data_ptr->mValues[index++] = dtinfo;

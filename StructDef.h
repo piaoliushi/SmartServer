@@ -114,12 +114,13 @@ typedef enum GMEPROTOCOL
 	GME_MMAVE1033_3KW     = 6,//吉兆米波调频电视3kw,1033系列 256	
 	GME_1F33E             = 7,
 	GME_SIMTV             = 8,//吉兆模拟电视取全部数据
-	GME_DIGTV             = 9, //吉兆数字国标
+    GME_DIGTV             = 9,//吉兆数字国标
 	GME_DIGTV_6           = 10,
     GME_CDR_1KW           = 11,//cdr1kw
     GME_CDR_10KW          = 12,
     GME_GB_300W           = 13,
 }GmeSubProtocol,*pGmeSubProtocol;
+
 typedef enum BGPROTOCOL
 {
 	BEIJING_BEIGUANG_300W = 0,
@@ -132,6 +133,7 @@ typedef enum BGPROTOCOL
 	BEIGUANG_FM_10KW      = 7,
 	BEIGUANG_AM_1KW       = 8,
 }BgSubProtocol,*pBgSubProtocol;
+
 typedef enum CDPROTOCOL
 {
 	CHENGDU_KAITENG       = 0,//凯腾非300瓦
@@ -146,6 +148,7 @@ typedef enum CDPROTOCOL
     CHENGDU_KAITENG_50W_AMP = 9,//50W功放直放站
 
 }CdSubProtocol;
+
 typedef enum SGPROTOCOL
 {
 	SHANXI_762_3_5KW      = 0,//陕西762 3/5KW
@@ -156,6 +159,7 @@ typedef enum SGPROTOCOL
     SHANXI_AM_10KW        = 5,//中波10Kw
     SHANXI_3KW_PDM        = 6 //如意3KwPDM
 }SgSubProtocol;
+
 typedef enum HGPROTOCOL
 {
 	HAERBIN_HG_50kw       = 0,//哈尔滨50KW
@@ -163,11 +167,13 @@ typedef enum HGPROTOCOL
     HAERBIN_HG_10kw       = 2,//哈尔滨10KW
     HAERBIN_HGEX_10kw     = 3,//哈尔滨10KW 扩展
 }HgSubProtocol;
+
 typedef enum ASPROTOCOL
 {
 	ANSHAN_JIAHUI         = 0,//鞍山家惠1KW
 	ANSHAN_JIAHUI_3KW_TV  = 1,//鞍山家惠通用电视3KW
 }AsSubProtocol;
+
 typedef enum HCPROTOCOL
 {
 	HangChun_HCF5KW       = 0,//杭州杭醇5KW
@@ -176,6 +182,7 @@ typedef enum HCPROTOCOL
     HC_CDR_3KW            = 3,//杭州杭醇CDR3Kw
     HC_CDR_10KW           = 4,//杭州杭醇CDR10Kw
 }HcSubProtocol;
+
 typedef enum HXPROTOCOL
 {
 	HUIXIN_993            = 0,//汇鑫993数据采集单元
@@ -183,12 +190,14 @@ typedef enum HXPROTOCOL
     HUIXIN_996            = 2,
 
 }HxSubPrototcol;
+
 typedef enum ITPROTOCOL
 {
 	ITALY_TECHNO_S        = 0,//意大利TECHNO
 	TECHNO_UNICOM         = 1,//TECHNO系列 UNICOM发射机
 	ELENOS                = 2,//ELENOS
 }ItSubProtocol;
+
 typedef enum EKAPROTOCOL
 {
 	EKA_3KFM              = 0,//eka 3kw
@@ -199,11 +208,13 @@ typedef enum RSPROTOCOL
 {
 	GERMANY_RS            = 0,//德国RS
 }RsSubProtocol;
+
 typedef enum DZPROTOCOL
 {
 	DLDZ_SIMTV            = 0,//大连东芝
 	DLDZ_SIMTV2           = 1,//大连东芝(包含11个功放)
 }DzSubProtocol;
+
 typedef enum EDAPROTOCOL
 {
 	Eda9033_A            = 0,//9033A型电表
@@ -221,9 +232,11 @@ typedef enum EDAPROTOCOL
     ACR_PZ               = 12,//安科瑞网络电力仪表
     ACR_ARD_2L           = 13,//安科瑞网络电力仪表
     ST_UPS_C6_20         = 14,//山特c6
+    DSE_7320_POWER       = 15,//DSE7320发电机
     ABB_104              = 100,//ABB104电表
 
 }EdaSubProtocol;
+
 typedef enum WSPROTOCOL
 {
 	WS2032_A            = 0,
@@ -237,17 +250,20 @@ typedef enum WSPROTOCOL
     NT511_AD            = 8,
 
 }WsSubProtocol;
+
 typedef enum KANGTEPROTOCOL
 {
 	KT_TV_Netport      = 0,//康特电视网口
     KT_HTTP            = 1,//康特http
 }KangTeSubProtocol;
+
 typedef enum LIAOPROTOCOL
 {
 	LNSZ_HS           = 0,//辽宁数字HSFM-3 3KW   
-    LNSZ_10_5Kw    = 1,//辽宁数字调频5/10Kw
-    LNSZ_169         =2,//辽宁dtmb
+    LNSZ_10_5Kw       = 1,//辽宁数字调频5/10Kw
+    LNSZ_169          =2,//辽宁dtmb
 }LngdSubProtocol;
+
 typedef enum SHANGHAIPROTOCOL
 {
 	MZ_DTV1000        = 0,//明珠数字电视1000
@@ -256,7 +272,7 @@ typedef enum SHANGHAIPROTOCOL
 typedef enum HarPROTOCOL
 {
     HARRIS_AM50       = 0,//哈里斯中波50Kw
-    HARRIS_ZXB       = 1,//
+    HARRIS_ZXB        = 1,//
     HARRIS_SNMP       = 2,//SNMP协议
 }HarSubPrototcol;
 
@@ -266,12 +282,6 @@ typedef enum DxPROTOCOL
     DX_DIG_TV   = 1
 }DxSubProtocol;
 
-
-//typedef enum ElECTRICPROTOCOL
-//{
-//  ELEC_ABB_104     = 0,
-//	ELECTRIC_101     = 1,
-//}ElectricSubProtocol,*pElectricSubProtocol;
 
 typedef enum TIMEROTOCOL
 {
@@ -324,7 +334,7 @@ typedef enum GSBR_TAG
 
 typedef enum ZHC_TAG
 {
-    ZHC_618F = 0,
+    ZHC_618F   = 0,
     ZHC_10KWTV = 1,
     ZHC_3KWFM  = 2
 }ZhcSybProtocol;

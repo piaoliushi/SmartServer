@@ -152,7 +152,7 @@ string device_session::get_devid_by_addcode(int iaddcode)
     map<int,string>::iterator iter = map_addcode_devid_.find(iaddcode);
     if(iter!=map_addcode_devid_.end())
         return iter->second;
-    return "-1";
+    return "";
 }
 
 //获得连接状态
@@ -866,9 +866,9 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId,e_Err
     map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
     if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
         if(iter->second.size()>childId){
-            //string strHex;
-            //CharStr2HexStr(iter->second[childId].commandId,strHex,iter->second[childId].commandLen);
-            //cout<<"command string:"<<strHex<<endl;
+            string strHex;
+            CharStr2HexStr(iter->second[childId].commandId,strHex,iter->second[childId].commandLen);
+            cout<<"command string:"<<strHex<<endl;
 
             eErrCode = EC_CMD_SEND_SUCCEED;
             start_write(iter->second[childId].commandId,iter->second[childId].commandLen);
@@ -1496,6 +1496,10 @@ void device_session::start_handler_data(string sDevId,DevMonitorDataPtr curDataP
 void device_session::start_handler_data(int iaddcode, DevMonitorDataPtr curDataPtr, bool bCheckAlarm)
 {
     string sdevid = get_devid_by_addcode(iaddcode);
+    if(sdevid.empty()){
+        cout<<"get_devid_by_addcode---sdevid is empty--error!"<<endl;
+        return;
+    }
     handler_data(sdevid,curDataPtr);
 }
 
