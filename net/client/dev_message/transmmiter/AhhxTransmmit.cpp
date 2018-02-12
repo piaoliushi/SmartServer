@@ -134,7 +134,7 @@ namespace hx_net{
             tmUnit.commandId[5]=0x00;*/
 
 
-            //tmUnit.commandId[6]=0x00;
+
 
             vector<CommandUnit> vtHTurnOnUnit;
             vtHTurnOnUnit.push_back(tmUnit);
@@ -150,7 +150,7 @@ namespace hx_net{
             vtLTurnOnUnit.push_back(tmUnit);
             cmdAll.mapCommand[MSG_TRANSMITTER_LOW_POWER_TURNON_OPR] = vtLTurnOnUnit;
 
-            //0x55,0x03,0xFA,0x00,0xFA,0x00
+
             /*tmUnit.commandId[1]=0x03;
             tmUnit.commandId[2]=0xFA;
             tmUnit.commandId[3]=0x00;

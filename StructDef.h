@@ -87,7 +87,7 @@ typedef enum PROTOCOL
     SHANGHAI_MZ           = 16, //上海明珠
     HARRIS                = 17, //哈里斯
     DE_XIN                = 18, //德芯
-    ELECTRIC_104          = 19, //电力规约
+    ELECTRIC_104          = 19, //电力104规约
     ANTENNA_CONTROL       = 20, //天线控制器
     TSC_TMIEDEV           = 21, //校时设备
     LINK_DEVICE           = 22, //链路设备
@@ -107,14 +107,14 @@ typedef enum GMEPROTOCOL
 {
 	BEIJING_JIZHAO_FM     = 0, //吉兆调频 1024	
 	BEIJING_JIZHAO_DIGTV  = 1, //吉兆数字电视
-	BEIJING_JIZHAO_SIMTV  = 2, 
-	GME_SIMTV1014A        = 3,//吉兆1014A模拟电视发射机 256
-	GME_SIMTV_MWAVE       = 4,//吉兆分米波调频电视1kw 256
-	GME_FEN_MWAVE3KW      = 5,//吉兆分米波调频电视3kw 256	
-	GME_MMAVE1033_3KW     = 6,//吉兆米波调频电视3kw,1033系列 256	
+    BEIJING_JIZHAO_SIMTV  = 2, //吉兆模拟电视
+    GME_SIMTV1014A        = 3, //吉兆1014A模拟电视发射机 256
+    GME_SIMTV_MWAVE       = 4, //吉兆分米波调频电视1kw 256
+    GME_FEN_MWAVE3KW      = 5, //吉兆分米波调频电视3kw 256
+    GME_MMAVE1033_3KW     = 6, //吉兆米波调频电视3kw,1033系列 256
 	GME_1F33E             = 7,
-	GME_SIMTV             = 8,//吉兆模拟电视取全部数据
-    GME_DIGTV             = 9,//吉兆数字国标
+    GME_SIMTV             = 8, //吉兆模拟电视取全部数据
+    GME_DIGTV             = 9, //吉兆数字国标
 	GME_DIGTV_6           = 10,
     GME_CDR_1KW           = 11,//cdr1kw
     GME_CDR_10KW          = 12,
@@ -136,15 +136,15 @@ typedef enum BGPROTOCOL
 
 typedef enum CDPROTOCOL
 {
-	CHENGDU_KAITENG       = 0,//凯腾非300瓦
-	CHENGDU_KAITENG_300W  = 1,
-	CHENGDU_CHENGGUANG    = 2,
-	CHENGDU_KT_DIG        = 3,
-    CHENGDU_KAITENG_TV10KW = 4,
-    CHENGDU_XINGUANG       = 5,
-    CHENGDU_XINGUANG_247   = 6,
-    CHENGDU_CHENGGUANG_DIG = 7,//成广1Kw数字
-    CHENGDU_KAITENG_KFS_II = 8,//凯腾KFS-II-813 1Kw
+    CHENGDU_KAITENG         = 0,//凯腾非300瓦
+    CHENGDU_KAITENG_300W    = 1,
+    CHENGDU_CHENGGUANG      = 2,
+    CHENGDU_KT_DIG          = 3,
+    CHENGDU_KAITENG_TV10KW  = 4,
+    CHENGDU_XINGUANG        = 5,
+    CHENGDU_XINGUANG_247    = 6,
+    CHENGDU_CHENGGUANG_DIG  = 7,//成广1Kw数字
+    CHENGDU_KAITENG_KFS_II  = 8,//凯腾KFS-II-813 1Kw
     CHENGDU_KAITENG_50W_AMP = 9,//50W功放直放站
 
 }CdSubProtocol;
@@ -198,23 +198,28 @@ typedef enum ITPROTOCOL
 	ELENOS                = 2,//ELENOS
 }ItSubProtocol;
 
+//意大利EKA
 typedef enum EKAPROTOCOL
 {
 	EKA_3KFM              = 0,//eka 3kw
 	EKA_6KFM              = 1,
 	EKA_MIRA_FM           = 2,
 }EkaSubProtocol;
+
+//德国RS
 typedef enum RSPROTOCOL
 {
 	GERMANY_RS            = 0,//德国RS
 }RsSubProtocol;
 
+//大连东芝
 typedef enum DZPROTOCOL
 {
 	DLDZ_SIMTV            = 0,//大连东芝
 	DLDZ_SIMTV2           = 1,//大连东芝(包含11个功放)
 }DzSubProtocol;
 
+//EDA
 typedef enum EDAPROTOCOL
 {
 	Eda9033_A            = 0,//9033A型电表
@@ -234,9 +239,9 @@ typedef enum EDAPROTOCOL
     ST_UPS_C6_20         = 14,//山特c6
     DSE_7320_POWER       = 15,//DSE7320发电机
     ABB_104              = 100,//ABB104电表
-
 }EdaSubProtocol;
 
+//环境设备
 typedef enum WSPROTOCOL
 {
 	WS2032_A            = 0,
@@ -251,24 +256,28 @@ typedef enum WSPROTOCOL
 
 }WsSubProtocol;
 
+//康特
 typedef enum KANGTEPROTOCOL
 {
 	KT_TV_Netport      = 0,//康特电视网口
     KT_HTTP            = 1,//康特http
 }KangTeSubProtocol;
 
+//辽宁数字
 typedef enum LIAOPROTOCOL
 {
 	LNSZ_HS           = 0,//辽宁数字HSFM-3 3KW   
     LNSZ_10_5Kw       = 1,//辽宁数字调频5/10Kw
-    LNSZ_169          =2,//辽宁dtmb
+    LNSZ_169          = 2,//辽宁dtmb
 }LngdSubProtocol;
 
+//上海明珠
 typedef enum SHANGHAIPROTOCOL
 {
 	MZ_DTV1000        = 0,//明珠数字电视1000
 }MzSubProtocol;
 
+//哈里斯
 typedef enum HarPROTOCOL
 {
     HARRIS_AM50       = 0,//哈里斯中波50Kw
@@ -276,6 +285,7 @@ typedef enum HarPROTOCOL
     HARRIS_SNMP       = 2,//SNMP协议
 }HarSubPrototcol;
 
+//德鑫
 typedef enum DxPROTOCOL
 {
     DX_DUT_8413 = 0,
@@ -288,6 +298,7 @@ typedef enum TIMEROTOCOL
     TFS_001 = 0
 }TimeSubProtocol;
 
+//链路设备
 typedef enum LINK_DEVICE
 {
     LINK_STATELITE_RECEVIE  = 0,//卫星接收机
@@ -305,12 +316,14 @@ typedef enum LINK_DEVICE
     LINK_NORMAL_SNMP_DEV    = 16,//通用snmp设备
 }LinkDeviceSubProtocol;
 
+//上海全波
 typedef enum SHANGHAIPROTOCL
 {
     All_Band_Pa  = 0,
     All_Band_Exc = 1,
 }ShSubProtocol;
 
+//汇鑫媒体设备
 typedef enum  MEDIASUBPROTOCL_TAG
 {
     MEDIA_DTMB = 0,
@@ -320,18 +333,19 @@ typedef enum  MEDIASUBPROTOCL_TAG
     DTMB_BD    = 4,//DTMB板卡
 
 }MediaSubProtocol;
-
+//桂林思奇
 typedef enum GLSQ_TAG
 {
     GLSQ_T = 0,//思奇T型发射机
 }GlsqSubProtocol;
 
+//高斯贝尔
 typedef enum GSBR_TAG
 {
     GSBR_SNMP = 0,
 }GsbrSubProtocol;
 
-
+//众传
 typedef enum ZHC_TAG
 {
     ZHC_618F   = 0,
