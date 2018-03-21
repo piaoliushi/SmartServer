@@ -1871,8 +1871,8 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
     strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
 
 
-    //存储告警到数据库
-    if(!bMod){//0:告警产生
+    //存储告警到数据库---0:告警产生
+    if(!bMod){
 
         curAlarm.sReason = str(boost::format("%1%%2%,当前值：%3%%4%,门限值：%5%%6%")
                                %ItemInfo.sItemName%CONST_STR_ALARM_CONTENT(curAlarm.nLimitId)

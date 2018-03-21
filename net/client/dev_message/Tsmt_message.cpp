@@ -549,7 +549,12 @@ namespace hx_net
 
                     int nResult = 3;//3：正在执行（循环发送指令）
                     excute_task_cmd(eErrCode,nResult);
-
+                    if(eErrCode == EC_OK){
+                        m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
+                        d_cur_user_.clear();
+                        d_cur_task_ = -1;
+                        return;
+                    }
                     start_task_timeout_timer();
                 }
             }
@@ -578,10 +583,16 @@ namespace hx_net
                 //天线在位执行开机，否则返回
                 dev_run_state nAntennaS = GetInst(SvcMgr).get_dev_run_state(d_relate_antenna_ptr_->sStationNum,
                                            d_relate_antenna_ptr_->sDevNum);
-                if(nAntennaS == antenna_host && d_Host_!=0)
+                if(nAntennaS == antenna_host && d_Host_!=0){
+                    eErrCode = EC_OK;
+                    nExcutResult = 7;
                     return;
-                if(nAntennaS == antenna_backup && d_Host_!=1)
+                }
+                if(nAntennaS == antenna_backup && d_Host_!=1){
+                    eErrCode = EC_OK;
+                    nExcutResult = 7;
                     return;
+                }
 
             }else{
                 //非定时开关机，且关联机在使用

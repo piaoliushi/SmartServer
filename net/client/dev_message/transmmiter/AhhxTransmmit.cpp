@@ -117,21 +117,21 @@ namespace hx_net{
 
 
 
-            tmUnit.commandLen = 7;
-            tmUnit.commandId[0]=0x55;
+            tmUnit.commandLen = 6;
+            /*tmUnit.commandId[0]=0x55;
             tmUnit.commandId[1]=0x03;
             tmUnit.commandId[2]=0xF2;
             tmUnit.commandId[3]=0x00;//脉冲
             tmUnit.commandId[4]=0x01;
             tmUnit.commandId[5]=0xF3;
-            tmUnit.commandId[6]=0x00;
+            tmUnit.commandId[6]=0x00;*/
 
-            /*tmUnit.commandId[0]=0x55;
+            tmUnit.commandId[0]=0x55;
             tmUnit.commandId[1]=0x02;
             tmUnit.commandId[2]=0xFA;
             tmUnit.commandId[3]=0x01;//电平
             tmUnit.commandId[4]=0xFB;
-            tmUnit.commandId[5]=0x00;*/
+            tmUnit.commandId[5]=0x00;
 
 
 
@@ -151,14 +151,15 @@ namespace hx_net{
             cmdAll.mapCommand[MSG_TRANSMITTER_LOW_POWER_TURNON_OPR] = vtLTurnOnUnit;
 
 
-            /*tmUnit.commandId[1]=0x03;
+            tmUnit.commandId[1]=0x03;
             tmUnit.commandId[2]=0xFA;
             tmUnit.commandId[3]=0x00;
             tmUnit.commandId[4]=0xFA;//电平
-            tmUnit.commandId[5]=0x00;*/
+            tmUnit.commandId[5]=0x00;
 
-            tmUnit.commandId[3]=0x01;
-            tmUnit.commandId[5]=0xF2;//脉冲
+            //tmUnit.commandId[3]=0x01;
+            //tmUnit.commandId[5]=0xF2;//脉冲
+
             vector<CommandUnit> vtTurnOffUnit;
             vtTurnOffUnit.push_back(tmUnit);
             cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR] = vtTurnOffUnit;
