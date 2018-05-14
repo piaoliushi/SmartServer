@@ -6,6 +6,14 @@ RsTransmmit::RsTransmmit(Tsmt_message_ptr ptsmessage,int subprotocol,int address
     ,m_addresscode(addresscode)
     ,m_pmessage(ptsmessage)
 {
+    switch (subprotocol) {
+    case GER_DIG_ONE:
+    case GER_DIG_TWO:
+        initOid();
+        break;
+    default:
+        break;
+    }
 }
 
 int RsTransmmit::check_msg_header(unsigned char *data, int nDataLen, CmdType cmdType, int number)
