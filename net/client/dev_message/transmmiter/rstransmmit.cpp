@@ -499,17 +499,13 @@ void RsTransmmit::rs_decode(int reason, Snmp *session, Pdu &pdu, SnmpTarget &tar
         pdu.get_vb(nextVb, i);
         string cur_oid = nextVb.get_printable_oid();
         string cur_value =nextVb.get_printable_value();
-        dainfo.bType = true;
+        dainfo.bType = false;
         dainfo.fValue = atof(cur_value.c_str());
         map<string,int>::iterator iter = map_Oid.find(cur_oid);
         std::cout<<cur_oid<<endl;
         if(iter!=map_Oid.end())
         {
-            if((*iter).second<4)
-            {
-                dainfo.bType = false;
-                dainfo.fValue = dainfo.fValue*0.1;
-            }
+
             curdata_ptr->mValues[(*iter).second] = dainfo;
         }
     }
