@@ -609,6 +609,8 @@ namespace hx_net{
         do{
             dataType = data[3];
             dataLen = (data[5]<<8)|data[4];
+            if(dataLen<=0)
+                break;
             DataInfo dainfo;
             switch(dataType){
               case 0x01:
