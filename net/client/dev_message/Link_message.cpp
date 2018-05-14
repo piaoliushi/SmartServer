@@ -1219,9 +1219,6 @@ namespace hx_net
 
     int  Link_message::parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target)
     {
-        //if(d_task_queue_ptr->get_Task_Size()>10)   // amend by lk 2017-6-22
-        //    return -1;
-        //d_task_queue_ptr->SubmitTask(data_ptr);
 
         Pdu pdu;
         Vb vbl[NUM_SYS_VBS];

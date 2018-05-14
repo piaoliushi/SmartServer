@@ -258,7 +258,7 @@ typedef struct
 {
     string    sStationNum;       //所属实际台站id
     string    sModleNumber;
-    int       iCommunicationMode;//连接类型0:网口,1:串口
+    int       iCommunicationMode;//连接类型0:串口,1:网口
     NetCommunicationMode      netMode;
     ComCommunicationMode      comMode;
     map<string,DeviceInfo>    mapDevInfo;

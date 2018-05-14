@@ -210,6 +210,8 @@ typedef enum EKAPROTOCOL
 typedef enum RSPROTOCOL
 {
 	GERMANY_RS            = 0,//德国RS
+    GER_DIG_ONE           = 1,//RS数字发射机，单频点
+    GER_DIG_TWO           = 2,//RS数字发射机，双频点
 }RsSubProtocol;
 
 //大连东芝

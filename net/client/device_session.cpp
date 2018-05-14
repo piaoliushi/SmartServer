@@ -479,11 +479,12 @@ void device_session::udp_connect(std::string hostname,unsigned short port)
     udp::resolver::iterator iter = uresolver_.resolve(query,ec);
     if(iter!=udp::resolver::iterator())
     {
+        boost::system::error_code ignored_ec;
         uendpoint_ = (*iter).endpoint();
         usocket().open(udp::v4());
         const udp::endpoint local_endpoint = udp::endpoint(udp::v4(),port);
-        usocket().bind(local_endpoint);
-        //set_con_state(con_connected);
+        usocket().bind(local_endpoint,ignored_ec);
+        cout<<"udp-bind:"<<ignored_ec.message();
         boost::system::error_code err= boost::system::error_code();
         handle_connected(err);
     }

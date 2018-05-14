@@ -87,7 +87,8 @@ SOURCES += main.cpp\
     net/client/dev_message/transmmiter/sgtransmmit.cpp \
     net/client/dev_message/transmmiter/bgtransmmiter.cpp \
     net/client/dev_message/transmmiter/hgtransmmitr.cpp \
-    net/client/dev_message/transmmiter/hctransmmiter.cpp
+    net/client/dev_message/transmmiter/hctransmmiter.cpp \
+    net/client/dev_message/transmmiter/rstransmmit.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -171,7 +172,8 @@ HEADERS  += \
     net/client/dev_message/transmmiter/sgtransmmit.h \
     net/client/dev_message/transmmiter/bgtransmmiter.h \
     net/client/dev_message/transmmiter/hgtransmmitr.h \
-    net/client/dev_message/transmmiter/hctransmmiter.h
+    net/client/dev_message/transmmiter/hctransmmiter.h \
+    net/client/dev_message/transmmiter/rstransmmit.h
 
 FORMS    += mainwindow.ui
 
@@ -216,14 +218,14 @@ else:{
 QMAKE_CXXFLAGS +=-Zm300
 win32:CONFIG(release, debug|release): {
 LIBS += -lQtSerialPort
-LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib -llibprotobuf -llibprotoc -llibprotobuf-lite
+LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib/vs2010 -llibprotobuf -llibprotoc -llibprotobuf-lite
 LIBS += -LD:/ThirdSdk/snmp++/lib -lsnmplib
 LIBS += -LD:/ThirdSdk/boost_1_48_0/stage/lib -llibboost_system-vc100-mt-1_48 -llibboost_date_time-vc100-mt-1_48 -llibboost_thread-vc100-mt-1_48 -llibboost_chrono-vc100-mt-1_48
 }
 else:win32:CONFIG(debug, debug|release): {
 CONFIG += console
 LIBS += -lQtSerialPortd
-LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib/ -llibprotobufD -llibprotocD -llibprotobuf-liteD
+LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib/vs2010 -llibprotobufD -llibprotocD -llibprotobuf-liteD
 LIBS += -LD:/ThirdSdk/snmp++/lib/ -lsnmplib
 LIBS += -LD:/ThirdSdk/boost_1_48_0/stage/lib -llibboost_system-vc100-mt-gd-1_48 -llibboost_date_time-vc100-mt-gd-1_48 -llibboost_thread-vc100-mt-gd-1_48
 #LIBS += -LD:/ThirdSdk/Visual Leak Detector/lib/Win32/ -lvld
