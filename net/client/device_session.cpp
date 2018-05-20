@@ -1519,21 +1519,37 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     //博汇发射机需要上报开关机状态
     if(nDevType == DEVICE_TRANSMITTER){
         //插入一条编号为500的运行状态指标
-        int runState = (get_run_state(sDevId)==dev_running)?1:0;
+
         DataInfo  tmInfo;
-        tmInfo.bType=1;
-        tmInfo.fValue = runState;
-        curDataPtr->mValues[500] = tmInfo;
+        map<int,DataInfo>::iterator iter =  curDataPtr->mValues.find(500);
+        if(iter!=curDataPtr->mValues.end()){
+            int runState = (get_run_state(sDevId)==dev_running)?1:0;
+            tmInfo.bType=1;
+            tmInfo.fValue = runState;
+            iter->second = tmInfo;
+        }
         //插入一条编号为501的频率填充指标
-        map<string,DevProperty>::iterator iter = modleInfos_.mapDevInfo[sDevId].map_DevProperty.find("Freq");
-        tmInfo.bType = 0;
-        if(iter!=modleInfos_.mapDevInfo[sDevId].map_DevProperty.end()){
-            tmInfo.sValue = iter->second.property_value;
+        iter =  curDataPtr->mValues.find(501);
+        if(iter!=curDataPtr->mValues.end()){
+            map<string,DevProperty>::iterator iter_Prop = modleInfos_.mapDevInfo[sDevId].map_DevProperty.find("Freq");
+            tmInfo.bType = 0;
+            if(iter_Prop!=modleInfos_.mapDevInfo[sDevId].map_DevProperty.end())
+                tmInfo.sValue = iter_Prop->second.property_value;
+            else
+                tmInfo.sValue = "0";
+            iter->second = tmInfo;
         }
-        else{
+
+    }else if(nDevType>=DEVICE_GS_RECIVE && nDevType<=DEVICE_ADAPTER){
+
+        DataInfo  tmInfo;
+        map<int,DataInfo>::iterator iter =  curDataPtr->mValues.find(502);
+        if(iter!=curDataPtr->mValues.end()){
+            tmInfo.bType = 1;
+            tmInfo.fValue = 0;
             tmInfo.sValue = "0";
+            iter->second = tmInfo;
         }
-        curDataPtr->mValues[501] =tmInfo;
     }
 
     //打包发送客户端GetInst(LocalConfig).local_station_id()

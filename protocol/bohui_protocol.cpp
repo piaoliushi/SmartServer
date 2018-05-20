@@ -19,6 +19,7 @@ Bohui_Protocol::Bohui_Protocol()
 {
      Bohui_Protocol::SrcCode = GetInst(LocalConfig).src_code();
      Bohui_Protocol::DstCode = GetInst(LocalConfig).dst_code();
+
 }
 
 //分析http请求数据(包括发射机,动环,链路告警门限,运行图,告警开关设置)

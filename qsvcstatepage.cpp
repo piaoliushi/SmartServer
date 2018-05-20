@@ -12,7 +12,7 @@
 #include "./net/config.h"
 #include "StationConfig.h"
 #include "LocalConfig.h"
-
+#include "./protocol/bohui_protocol.h"
 using namespace db;
 
 QSvcStatePage::QSvcStatePage(QNotifyHandler &Notify,QWidget *parent)
@@ -156,6 +156,8 @@ void QSvcStatePage::StartSvc()
             d_pDatabaseStateValueLabel->setStyleSheet("font: 18pt;color:rgb(117,250,0)");
             d_pDatabaseStateValueLabel->setText(tr("connect ok"));
             if(GetInst(StationConfig).load_station_config()==true){
+
+                GetInst(DataBaseOperation).GetDataDictionary(Bohui_Protocol::mapTypeToStr);
                 emit updateDevList(true);
 
             }

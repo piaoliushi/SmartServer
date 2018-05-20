@@ -1,7 +1,7 @@
 #include "StationConfig.h"
 #include "LocalConfig.h"
 #include "./net/config.h"
-#include "./protocol/bohui_protocol.h"
+//#include "./protocol/bohui_protocol.h"
 using namespace db;
 StationConfig::StationConfig(void)
 {
@@ -22,9 +22,6 @@ bool StationConfig::load_station_config()
     string sLocalServerId  = GetInst(LocalConfig).local_dev_server_number();
 
     if(!GetInst(DataBaseOperation).GetAllDevInfo(mapModleInfo,sLocalStationId,sLocalServerId))
-        return false;
-
-    if(!GetInst(DataBaseOperation).GetDataDictionary(Bohui_Protocol::mapTypeToStr))
         return false;
 
     if(!GetInst(DataBaseOperation).GetDeviceDataDictionary(mapDeviceDicry))

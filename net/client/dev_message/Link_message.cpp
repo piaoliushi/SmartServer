@@ -1191,7 +1191,6 @@ namespace hx_net
             }
         }
 
-        //cout << "parse_weile_avsp_decorder_data-----ok---"<<endl;
         m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
     }
 
