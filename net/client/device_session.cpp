@@ -1519,39 +1519,27 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     //博汇发射机需要上报开关机状态
     if(nDevType == DEVICE_TRANSMITTER){
         //插入一条编号为500的运行状态指标
-
         DataInfo  tmInfo;
-        map<int,DataInfo>::iterator iter =  curDataPtr->mValues.find(500);
-        if(iter!=curDataPtr->mValues.end()){
-            int runState = (get_run_state(sDevId)==dev_running)?1:0;
-            tmInfo.bType=1;
-            tmInfo.fValue = runState;
-            iter->second = tmInfo;
-        }
+        int runState = (get_run_state(sDevId)==dev_running)?1:0;
+        tmInfo.bType=1;
+        tmInfo.fValue = runState;
+        curDataPtr->mValues[500] = tmInfo;
         //插入一条编号为501的频率填充指标
-        iter =  curDataPtr->mValues.find(501);
-        if(iter!=curDataPtr->mValues.end()){
-            map<string,DevProperty>::iterator iter_Prop = modleInfos_.mapDevInfo[sDevId].map_DevProperty.find("Freq");
-            tmInfo.bType = 0;
-            if(iter_Prop!=modleInfos_.mapDevInfo[sDevId].map_DevProperty.end()){
-                cout<<"find Freq property ok!===="<<iter_Prop->second.property_value<<endl;
-                tmInfo.sValue = iter_Prop->second.property_value;
-            }
-            else
-                tmInfo.sValue = "0";
-            iter->second = tmInfo;
-        }
+        map<string,DevProperty>::iterator iter_Prop = modleInfos_.mapDevInfo[sDevId].map_DevProperty.find("Freq");
+        tmInfo.bType = 0;
+        if(iter_Prop!=modleInfos_.mapDevInfo[sDevId].map_DevProperty.end())
+             tmInfo.sValue = iter_Prop->second.property_value;
+          else
+             tmInfo.sValue = "0";
+         curDataPtr->mValues[501] = tmInfo;
 
     }else if(nDevType>=DEVICE_GS_RECIVE && nDevType<=DEVICE_ADAPTER){
 
         DataInfo  tmInfo;
-        map<int,DataInfo>::iterator iter =  curDataPtr->mValues.find(502);
-        if(iter!=curDataPtr->mValues.end()){
-            tmInfo.bType = 1;
-            tmInfo.fValue = 0;
-            tmInfo.sValue = "0";
-            iter->second = tmInfo;
-        }
+        tmInfo.bType = 1;
+        tmInfo.fValue = 0;
+        tmInfo.sValue = "0";
+        curDataPtr->mValues[502] = tmInfo;
     }
 
     //打包发送客户端GetInst(LocalConfig).local_station_id()
