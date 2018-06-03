@@ -1533,8 +1533,10 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
         if(iter!=curDataPtr->mValues.end()){
             map<string,DevProperty>::iterator iter_Prop = modleInfos_.mapDevInfo[sDevId].map_DevProperty.find("Freq");
             tmInfo.bType = 0;
-            if(iter_Prop!=modleInfos_.mapDevInfo[sDevId].map_DevProperty.end())
+            if(iter_Prop!=modleInfos_.mapDevInfo[sDevId].map_DevProperty.end()){
+                cout<<"find Freq property ok!===="<<iter_Prop->second.property_value<<endl;
                 tmInfo.sValue = iter_Prop->second.property_value;
+            }
             else
                 tmInfo.sValue = "0";
             iter->second = tmInfo;

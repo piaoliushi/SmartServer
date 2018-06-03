@@ -82,7 +82,7 @@ http_request_session::~http_request_session(void)
                       boost::system::error_code ec;
                       //cout<<"http_stream_.open----------start!!!"<<endl;
                       http_stream_.open(task_.first, ec);
-                      //cout<<"task size:------"<<_taskqueueptr->get_Task_Size()<<"-------"<<ec.message()<<endl;
+                      cout<<"task size:------"<<_taskqueueptr->get_Task_Size()<<"-------"<<ec.message()<<endl;
                       http_stream_.close();
                   }
               }
