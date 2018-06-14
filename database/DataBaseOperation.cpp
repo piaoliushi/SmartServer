@@ -105,7 +105,8 @@ bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicr
     }
 
     QSqlQuery query(db);
-    QString strSql=QString("select code,name,remark from data_dictionary where type='IndexType' union select alarmswitch,alarmswitchname,remark from alarm_switch where alarmswitchtype<>5");
+    QString strSql=QString("select code,name,remark from data_dictionary where type='IndexType' "
+                           "union select alarmswitch,alarmswitchname,remark from alarm_switch where alarmswitchtype<>5 and alarmswitchtype<>6");
     query.prepare(strSql);
     if(!query.exec()){
         cout<<query.lastError().text().toStdString()<<"GetDataDictionary---query---error!"<<endl;

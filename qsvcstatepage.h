@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
+#include <QThread>
 #include "qnotifyhandler.h"
 
 class QSvcStatePage : public QWidget

@@ -143,6 +143,7 @@ bool QSvcStatePage::IsStart()
 {
     return m_IsRunning;
 }
+
 void QSvcStatePage::StartSvc()
 {
     if(m_IsRunning==false)

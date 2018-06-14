@@ -157,7 +157,7 @@ namespace hx_net
         void Action_sendsms(LinkAction &action,string sendcontent);
 
         //分析联动
-        void paser_action(vector<LinkAction> &vaction,string &devId,DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm);
+        void parse_action(vector<LinkAction> &vaction,string &devId,DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm);
 
     protected:
         void handle_connected(const boost::system::error_code& error);

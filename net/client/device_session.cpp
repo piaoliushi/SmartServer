@@ -1976,9 +1976,10 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                     double  dtime_during = difftime( curTime, alarm_type_findIter->second.startTime );
                     if(dtime_during>=ItemInfo.vItemAlarm[nIndex].iDelaytime){
                         //存储告警,通知告警,联动告警
-                        record_alarm_and_notify(devId,fValue, ItemInfo.vItemAlarm[nIndex].fLimitvalue,0,ItemInfo,alarm_type_findIter->second);
+                        record_alarm_and_notify(devId,fValue, ItemInfo.vItemAlarm[nIndex].fLimitvalue,0,
+                                                ItemInfo,alarm_type_findIter->second);
                         //分析告警联动
-                        paser_action(ItemInfo.vItemAlarm[nIndex].vLinkAction,devId,ItemInfo,alarm_type_findIter->second);
+                        parse_action(ItemInfo.vItemAlarm[nIndex].vLinkAction,devId,ItemInfo,alarm_type_findIter->second);
 
                         alarm_type_findIter->second.bNotifyed = true;
                         //标志当前有新的告警发生
@@ -2274,7 +2275,7 @@ void device_session::Action_sendsms(LinkAction &action, string sendcontent)
 }
 
 
-void device_session::paser_action(vector<LinkAction> &vaction,string &devId,DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm)
+void device_session::parse_action(vector<LinkAction> &vaction,string &devId,DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm)
 {
     static  char str_time[64];
     tm *local_time = localtime(&curAlarm.startTime);

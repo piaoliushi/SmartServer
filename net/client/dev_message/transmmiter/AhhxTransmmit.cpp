@@ -52,14 +52,13 @@ namespace hx_net{
         }
             break;
         case HUIXIN_996:
+
         {
-            if(data[0]!=0x7E || data[1]!=0x30)
+           if(data[0]!=0x7E || data[4]!=0x30)
                 return RE_HEADERROR;
-            else
-            {
-                return int((data[5]<<8)|data[4]);
-            }
-        }
+           else
+                return int((data[3]<<8)|data[2])-1;
+         }
             break;
         }
         return RE_NOPROTOCOL;
@@ -180,21 +179,20 @@ namespace hx_net{
         {
             CommandUnit tmUnit;
             tmUnit.commandLen = 9;
-            tmUnit.ackLen = 6;
+            tmUnit.ackLen = 5;
             tmUnit.commandId[0] = 0x7E;
-            tmUnit.commandId[1] = 0x30;
-            tmUnit.commandId[2] = (m_addresscode&0x00FF);
-            tmUnit.commandId[3] = ((m_addresscode&0xFF00)>>8);
-            tmUnit.commandId[4] = 0x03;
-            tmUnit.commandId[5] = 0x00;
-            tmUnit.commandId[6] = 0x01;
-            tmUnit.commandId[7] = 0x11;
+            tmUnit.commandId[1] = 0x11;
+            tmUnit.commandId[2] = 0x05;
+            tmUnit.commandId[3] = 0x00;
+            tmUnit.commandId[4] = 0x30;
+            tmUnit.commandId[5] = (m_addresscode&0x00FF);
+            tmUnit.commandId[6] = ((m_addresscode&0xFF00)>>8);
+            tmUnit.commandId[7] = 0x01;
             tmUnit.commandId[8] = 0x55;
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
             tmUnit.commandLen = 10;
-            tmUnit.commandId[4] = 0x04;
-            tmUnit.commandId[6] = 0x01;
-            tmUnit.commandId[7] = 0x77;
+            tmUnit.commandId[1] = 0x77;
+            tmUnit.commandId[2] = 0x06;
             tmUnit.commandId[8] = 0x01;
             tmUnit.commandId[9] = 0x55;
             cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
@@ -204,13 +202,14 @@ namespace hx_net{
             cmdAll.mapCommand[MSG_TRANSMITTER_LOW_POWER_TURNON_OPR].push_back(tmUnit);
             tmUnit.commandId[8] = 0x00;
             cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
-            tmUnit.commandId[7] = 0xB3;
+            tmUnit.commandId[1] = 0x31;
             tmUnit.commandId[8] = 0x01;
             cmdAll.mapCommand[MSG_TRANSMITTER_RISE_POWER_OPR].push_back(tmUnit);
             tmUnit.commandId[8] = 0x02;
             cmdAll.mapCommand[MSG_TRANSMITTER_REDUCE_POWER_OPR].push_back(tmUnit);
             tmUnit.commandId[8] = 0x03;
             cmdAll.mapCommand[MSG_DEV_RESET_OPR].push_back(tmUnit);
+
 
         }
             break;
@@ -257,31 +256,24 @@ namespace hx_net{
 
     int AhhxTransmmit::Md996Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
     {
-        int nCmd = data[7];
+
+        int nCmd = data[1];
         if(nCmd!=0x11)
-        {
             return RE_CMDACK;
-        }
-        int nAdc_Count,nSta_Cout;
-        nAdc_Count = data[16];
-        nSta_Cout = data[2*nAdc_Count+17];
+
         DataInfo dtinfo;
         dtinfo.bType = false;
-        for(int i=0;i<nAdc_Count;++i)
-        {
+        for(int i=0;i<50;++i){
             if(i==2)
-            {
                continue;
-            }
             else{
-                dtinfo.fValue = data[18+2*i]*256+data[17+2*i];
+                dtinfo.fValue = data[8+2*i]*256+data[9+2*i];
                 data_ptr->mValues[i] = dtinfo;
             }
         }
         dtinfo.bType = true;
-        for(int i=0;i<nSta_Cout;++i)
-        {
-            dtinfo.fValue = data[2*nAdc_Count+18+i];
+        for(int i=0;i<50;++i){
+            dtinfo.fValue = data[108+i];
             data_ptr->mValues[50+i] = dtinfo;
         }
         return RE_SUCCESS;
