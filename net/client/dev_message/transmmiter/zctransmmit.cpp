@@ -27,6 +27,14 @@ namespace hx_net{
                return RE_HEADERROR;
        }
            break;
+       case ZHC_EXCITER:
+       {
+           if(data[0]==0x00 && data[1]==0x7E && data[2]==0xE7)
+               return (data[7]*2+1);
+           else
+               return RE_HEADERROR;
+       }
+           break;
        }
        return RE_NOPROTOCOL;
    }
@@ -41,6 +49,8 @@ namespace hx_net{
            return Zhc10KWTv_Data(data,data_ptr,nDataLen,runstate);
        case ZHC_3KWFM:
            return Zhc3KWFm_Data(data,data_ptr,nDataLen,runstate);
+       case ZHC_EXCITER:
+           return ZhcExciter_Data(data,data_ptr,nDataLen,runstate);
        }
        return RE_NOPROTOCOL;
    }
@@ -52,6 +62,7 @@ namespace hx_net{
        case ZHC_618F:
        case ZHC_10KWTV:
        case ZHC_3KWFM:
+       case ZHC_EXCITER:
            return true;
        }
        return false;
@@ -161,6 +172,33 @@ namespace hx_net{
            tmUnit.commandId[9] = 0xEF;
            tmUnit.commandId[10] = 0x01;
            tmUnit.commandId[11] = 0xFE;
+           cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
+           tmUnit.commandId[8] = 0x11;
+           tmUnit.commandId[9] = 0xEE;
+           cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
+       }
+           break;
+       case ZHC_EXCITER:
+       {
+           CommandUnit tmUnit;
+           tmUnit.commandId[0] = 0x7E;
+           tmUnit.commandId[1] = 0xE7;
+           tmUnit.commandId[2] = m_addresscode;
+           tmUnit.commandId[3] = (0xFF^m_addresscode);
+           tmUnit.commandId[4] = 0x01;
+           tmUnit.commandId[5] = 0xFE;
+           tmUnit.commandId[6] = 0x00;
+           tmUnit.commandId[7] = 0xFF;
+           tmUnit.commandId[8] = 0x02;
+           tmUnit.commandId[9] = 0xFD;
+           tmUnit.commandId[10] = 0x01;
+           tmUnit.commandId[11] = 0xFE;
+           tmUnit.commandId[12] = 0xCC;
+           tmUnit.commandLen = 13;
+           tmUnit.ackLen = 13;
+           cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+           tmUnit.commandId[8] = 0x10;
+           tmUnit.commandId[9] = 0xEF;
            cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
            tmUnit.commandId[8] = 0x11;
            tmUnit.commandId[9] = 0xEE;
@@ -510,6 +548,27 @@ namespace hx_net{
        default:
            break;
        }
+       return RE_SUCCESS;
+   }
+
+   int ZcTransmmit::ZhcExciter_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+   {
+       DataInfo dainfo;
+       dainfo.bType = false;
+       dainfo.fValue = ((data[13]<<8)|data[15])*0.1;
+       data_ptr->mValues[0] = dainfo;
+       dainfo.fValue = ((data[17]<<8)|data[19])*0.1;
+       data_ptr->mValues[1] = dainfo;
+       dainfo.fValue = data[21];
+       data_ptr->mValues[2] = dainfo;
+       dainfo.fValue = ((data[23]<<8)|data[25])*0.1;
+       data_ptr->mValues[3] = dainfo;
+       dainfo.fValue = ((data[27]<<8)|data[29])*0.1;
+       data_ptr->mValues[4] = dainfo;
+       dainfo.fValue = data[31];
+       data_ptr->mValues[5] = dainfo;
+       dainfo.fValue = data[33];
+       data_ptr->mValues[6] = dainfo;
        return RE_SUCCESS;
    }
 }

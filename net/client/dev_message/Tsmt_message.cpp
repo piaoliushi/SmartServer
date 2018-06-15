@@ -18,6 +18,7 @@
 #include "./transmmiter/bgtransmmiter.h"
 #include "./transmmiter/hctransmmiter.h"
 #include "./transmmiter/rstransmmit.h"
+#include "./transmmiter/rvrtransmmit.h"
 
 #include "../../../database/DataBaseOperation.h"
 using namespace db;
@@ -381,7 +382,9 @@ namespace hx_net
         case ZHC:
             d_ptransmmit = new ZcTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
-
+        case RVR:
+            d_ptransmmit = new RvrTransmmit(boost::shared_ptr<hx_net::Tsmt_message>(this),d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+            break;
         }
     }
 

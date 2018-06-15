@@ -96,6 +96,8 @@ typedef enum PROTOCOL
     GLSQ                  = 26, //桂林思奇
     GSBR                  = 27, //高斯贝尔
     ZHC                   = 29, //众传
+    RVR                   = 30, //RVR系列
+
 }Protocol,*pProtocol;
 
 typedef enum ANTENAPROTOCOL
@@ -224,12 +226,12 @@ typedef enum DZPROTOCOL
 //EDA
 typedef enum EDAPROTOCOL
 {
-	Eda9033_A            = 0,//9033A型电表
-	Eda9003_F            = 1,//9033F
-	ST_UPS_3C3           = 2,//山特UPS
-	C2000_MH08           = 3,//康耐德电路电压检测
- 	STATIC_SWITCH        = 4,//静态转换开关
-	ZXJY_BACK            = 5,//中心继远
+    Eda9033_A            = 0,//9033A型电表
+    Eda9003_F            = 1,//9033F
+    ST_UPS_3C3           = 2,//山特UPS
+    C2000_MH08           = 3,//康耐德电路电压检测
+    STATIC_SWITCH        = 4,//静态转换开关
+    ZXJY_BACK            = 5,//中心继远
     PAINUO_SPM33         = 6,//珠海派诺SPM33电表
     KSTAR_UPS            = 7,//科士达UPS
     YINGJIA_EM400        = 8,//广州盈嘉EM400电表
@@ -240,6 +242,10 @@ typedef enum EDAPROTOCOL
     ACR_ARD_2L           = 13,//安科瑞网络电力仪表
     ST_UPS_C6_20         = 14,//山特c6
     DSE_7320_POWER       = 15,//DSE7320发电机
+    YISITE_EA800         = 16,//易事特UPS-EA800
+    HX_MD9703            = 17,//汇鑫8路电源控制器
+    SF_3P_MANOSTAT       = 18,//松丰3相稳压器
+    SF_DJ_UPS            = 19,//松丰DJ-UPS
     ABB_104              = 100,//ABB104电表
 }EdaSubProtocol;
 
@@ -350,9 +356,17 @@ typedef enum GSBR_TAG
 //众传
 typedef enum ZHC_TAG
 {
-    ZHC_618F   = 0,
-    ZHC_10KWTV = 1,
-    ZHC_3KWFM  = 2
+    ZHC_618F    = 0,
+    ZHC_10KWTV  = 1,
+    ZHC_3KWFM   = 2,
+    ZHC_EXCITER = 3,
 }ZhcSybProtocol;
+
+//RVR
+typedef enum RVRPROTOCOL
+{
+    RVR_GENERAL = 0, //RVR激励器协议
+    RSM_FM_OCBD = 1, //调频开关板协议
+}RvrSubProtocol;
 
 #endif

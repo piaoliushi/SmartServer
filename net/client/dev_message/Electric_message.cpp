@@ -114,6 +114,7 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             else
                 return -1;
         }
+
         case ABB_104: {
             if(data[0]==START) {
                 int nBodyLen = data[1];
@@ -140,11 +141,25 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             }
             break;
         }
+        case HX_MD9703:
+        {
+            if(data[0]==0xAA && data[2]==0x97)
+                return data[5]*256+data[6];
+            else
+                return -1;
+        }
         case YISITE_EA66:
         {
             if(nDataLen < 3)
                 return -1;
             if(data[0]==d_devInfo.iAddressCode && (data[1]==0x02 || data[1]==0x04))
+                return data[2]+2;
+            else
+                return -1;
+        }
+        case YISITE_EA800:
+        {
+            if(data[0]==d_devInfo.iAddressCode && data[1]==0x04)
                 return data[2]+2;
             else
                 return -1;
@@ -168,12 +183,32 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             }
         }
         case DSE_7320_POWER:
+        {
+            if(data[0]==d_devInfo.iAddressCode && data[1]==0x03)
+                return data[2]+2;
+            else
+                return -1;
+        }
+        case SF_3P_MANOSTAT:
+        {
+            if(data[0]==0x7E && data[1]==0x33 && data[2]==0x32)
             {
-                if(data[0]==d_devInfo.iAddressCode && data[1]==0x03)
-                    return data[2]+2;
-                else
-                    return -1;
+                return AsciiToInt(data[10])*256+AsciiToInt(data[11])*16+AsciiToInt(data[12])+5;
             }
+            else
+                return -1;
+        }
+        case SF_DJ_UPS:
+        {
+            if(data[0] == 0x21)
+                return 0;
+            else
+            {
+                unsigned char cDes[1]={0};
+                cDes[0]=0x21;
+                return kmp(data,nDataLen,cDes,1);
+            }
+        }
         }
     }
         break;
@@ -225,6 +260,13 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
             m_pSession->start_handler_data(iaddcode,d_curData_ptr);
             return iresult;
         }
+        case YISITE_EA800://decode_EA800
+        {
+            int iresult = decode_EA800(data,d_curData_ptr,nDataLen,iaddcode);
+            GetResultData(d_curData_ptr);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
         case ACR_NET_EM:{
             int iresult = decode_AcrNetEm(data,d_curData_ptr,nDataLen,iaddcode);
             GetResultData(d_curData_ptr);
@@ -250,14 +292,30 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
         }
         case ST_UPS_C6_20:
              return decode_ST_C6_20Ks(data,d_curData_ptr,nDataLen,iaddcode);
-        }
-        break;
         case DSE_7320_POWER:
         {
             int iresult = decode_DSE_7320(data,d_curData_ptr,nDataLen,iaddcode);
             m_pSession->start_handler_data(iaddcode,d_curData_ptr);
             return iresult;
         }
+        case HX_MD9703:
+        {
+            int iresult = decode_hx9703(data,d_curData_ptr,nDataLen,iaddcode);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
+        case SF_3P_MANOSTAT:
+        {
+            int iresult = decode_Sf3pmanostat(data,d_curData_ptr,nDataLen,iaddcode);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
+        case SF_DJ_UPS:
+        {
+            return decode_Sfdjups(data,d_curData_ptr,nDataLen,iaddcode);
+        }
+        }
+        break;
     }
     return -1;
 }
@@ -281,8 +339,10 @@ bool Electric_message::IsStandardCommand()
         case ACR_NET_EM:
         case ACR_PZ:
         case ACR_ARD_2L:
-            return true;
         case DSE_7320_POWER:
+        case YISITE_EA800:
+        case HX_MD9703:
+        case SF_3P_MANOSTAT:
             return true;
         case ABB_104:
             return true;
@@ -537,30 +597,6 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
-        case DSE_7320_POWER:
-       {
-           CommandUnit tmUnit;
-           tmUnit.ackLen = 3;
-           tmUnit.commandLen = 8;
-           tmUnit.commandId[0] = d_devInfo.iAddressCode;
-           tmUnit.commandId[1] = 0x03;
-           tmUnit.commandId[2] = 0x04;
-           tmUnit.commandId[3] = 0x07;
-           tmUnit.commandId[4] = 0x00;
-           tmUnit.commandId[5] = 0x1C;
-           unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
-           tmUnit.commandId[6] = (uscrc&0x00FF);
-           tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
-           cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
-           tmUnit.commandId[2] = 0x06;
-           tmUnit.commandId[3] = 0x00;
-           tmUnit.commandId[5] = 0x18;
-           uscrc = CRC16_A001(tmUnit.commandId,6);
-           tmUnit.commandId[6] = (uscrc&0x00FF);
-           tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
-           cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
-       }
-           break;
         case PAINUO_SPM33:
         {
             CommandUnit tmUnit;
@@ -669,6 +705,22 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
+        case YISITE_EA800:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 3;
+            tmUnit.commandLen = 8;
+            tmUnit.commandId[0] = d_devInfo.iAddressCode;
+            tmUnit.commandId[1] = 0x04;
+            tmUnit.commandId[2] = 0x00;
+            tmUnit.commandId[3] = 0x02;
+            tmUnit.commandId[4] = 0x00;
+            tmUnit.commandId[5] = 0x44;
+            unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
         case ACR_NET_EM:
         {
             CommandUnit tmUnit;
@@ -760,6 +812,110 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
 
         }
             break;
+        case DSE_7320_POWER:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 3;
+            tmUnit.commandLen = 8;
+            tmUnit.commandId[0] = d_devInfo.iAddressCode;
+            tmUnit.commandId[1] = 0x03;
+            tmUnit.commandId[2] = 0x04;
+            tmUnit.commandId[3] = 0x07;
+            tmUnit.commandId[4] = 0x00;
+            tmUnit.commandId[5] = 0x1C;
+            unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            tmUnit.commandId[2] = 0x06;
+            tmUnit.commandId[3] = 0x00;
+            tmUnit.commandId[5] = 0x18;
+            uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case HX_MD9703:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 7;
+            tmUnit.commandLen = 13;
+            tmUnit.commandId[0] = 0xAA;
+            tmUnit.commandId[1] = 0x97;
+            tmUnit.commandId[2] = 0x11;
+            tmUnit.commandId[3] = 0x00;
+            tmUnit.commandId[4] = 0x00;
+            tmUnit.commandId[5] = 0x00;
+
+            tmUnit.commandId[6] = 0x06;
+            tmUnit.commandId[7] = 0x00;
+            tmUnit.commandId[8] = 0x00;
+            tmUnit.commandId[9] = 0x00;
+            tmUnit.commandId[10] = 0x00;
+            tmUnit.commandId[11] = 0x00;
+            tmUnit.commandId[12] = 0x55;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case SF_3P_MANOSTAT:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 13;
+            tmUnit.commandLen = 20;
+            tmUnit.commandId[0] = 0x7E;
+            tmUnit.commandId[1] = 0x33;
+            tmUnit.commandId[2] = 0x32;
+
+            unsigned char chadd[10]={'0','0','0','0','0','0','0','0','0','\0'};
+
+            IntToAscii(d_devInfo.iAddressCode,&chadd[0]);
+            tmUnit.commandId[3] = chadd[1];
+            tmUnit.commandId[4] = chadd[0];
+
+            tmUnit.commandId[5] = 0x32;
+            tmUnit.commandId[6] = 0x36;
+            tmUnit.commandId[7] = 0x34;
+            tmUnit.commandId[8] = 0x32;
+            tmUnit.commandId[9] = 0x45;
+            tmUnit.commandId[10] = 0x30;
+            tmUnit.commandId[11] = 0x30;
+            tmUnit.commandId[12] = 0x32;
+            tmUnit.commandId[13] = 0x30;
+            tmUnit.commandId[14] = 0x30;
+            int icheck = SF_checkSum(&tmUnit.commandId[1],14);
+            unsigned char chsum[10]={'0','0','0','0','0','0','0','0','0','\0'};
+            IntToAscii(icheck,&chsum[0]);
+            tmUnit.commandId[15] = chsum[3];
+            tmUnit.commandId[16] = chsum[2];
+            tmUnit.commandId[17] = chsum[1];
+            tmUnit.commandId[18] = chsum[0];
+            tmUnit.commandId[19] = 0x0D;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case SF_DJ_UPS:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 41;
+            tmUnit.commandLen = 3;
+            tmUnit.commandId[0] = 0x47;
+            tmUnit.commandId[1] = 0x31;
+            tmUnit.commandId[2] = 0x0D;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            tmUnit.ackLen = 73;
+            tmUnit.commandId[1] = 0x33;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+
+            tmUnit.commandLen = 4;
+            tmUnit.ackLen = 0;
+            tmUnit.commandId[0]=0x53;
+            tmUnit.commandId[1]=0x2E;
+            tmUnit.commandId[2]=0x32;
+            tmUnit.commandId[3]=0x0D;
+            cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
+        }
+            break;
         }
     }
         break;
@@ -792,6 +948,28 @@ void Electric_message::GetSignalCommand(devCommdMsgPtr lpParam, CommandUnit &cmd
         cmdUnit.commandId[1]=0x2E;
         cmdUnit.commandId[2]=0x32;
         cmdUnit.commandId[3]=0x0D;
+    }
+        break;
+    case HX_MD9703:
+    {
+        if(lpParam->cparams_size()==2)
+        {
+            cmdUnit.commandLen = 13;
+            cmdUnit.ackLen = 0;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x97;
+            cmdUnit.commandId[2] = 0x22;
+            cmdUnit.commandId[3] = 0x00;
+            cmdUnit.commandId[4] = 0x00;
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x06;
+            cmdUnit.commandId[7] =atoi(lpParam->cparams(0).sparamvalue().c_str());
+            cmdUnit.commandId[8] = atoi(lpParam->cparams(1).sparamvalue().c_str());
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = cmdUnit.commandId[7]+cmdUnit.commandId[8];
+            cmdUnit.commandId[12] = 0x55;
+        }
     }
         break;
     default:
@@ -1691,4 +1869,143 @@ int Electric_message::decode_DSE_7320(unsigned char *data, DevMonitorDataPtr dat
     return RE_SUCCESS;
 }
 
+int Electric_message::decode_EA800(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    int indexpos =0;
+    iaddcode = data[0];
+    DataInfo dainfo;
+    dainfo.bType = false;
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = ((data[3+2*i]<<8)|data[4+2*i])*0.01;
+        dainfo.sValue = (QString("%1V").arg(dainfo.fValue)).toStdString();
+        data_ptr->mValues[indexpos++] = dainfo;
+    }
+    dainfo.fValue = ((data[15]<<8)|data[16])*0.01;
+    dainfo.sValue = (QString("%1HZ").arg(dainfo.fValue)).toStdString();
+    data_ptr->mValues[indexpos++] = dainfo;
+    dainfo.fValue = ((data[23]<<8)|data[24])*0.01;
+    dainfo.sValue = (QString("%1V").arg(dainfo.fValue)).toStdString();
+    data_ptr->mValues[indexpos++] = dainfo;
+    dainfo.fValue = ((data[41]<<8)|data[42])*0.01;
+    dainfo.sValue = (QString("%1HZ").arg(dainfo.fValue)).toStdString();
+    data_ptr->mValues[indexpos++] = dainfo;
+    dainfo.fValue = ((data[45]<<8)|data[46])*0.01;
+    dainfo.sValue = (QString("%1V").arg(dainfo.fValue)).toStdString();
+    data_ptr->mValues[indexpos++] = dainfo;
+    dainfo.fValue = ((data[57]<<8)|data[58])*0.01;
+    dainfo.sValue = (QString("%1HZ").arg(dainfo.fValue)).toStdString();
+    data_ptr->mValues[indexpos++] = dainfo;
+    dainfo.fValue = ((data[59]<<8)|data[60])*0.01;
+    dainfo.sValue = (QString("%1V").arg(dainfo.fValue)).toStdString();
+    data_ptr->mValues[indexpos++] = dainfo;
+    dainfo.fValue = ((data[131]<<8)|data[132])*0.01;
+    dainfo.sValue = (QString("%1V").arg(dainfo.fValue)).toStdString();
+    data_ptr->mValues[indexpos++] = dainfo;
+    dainfo.fValue = ((data[137]<<8)|data[138])*0.01;
+    dainfo.sValue = (QString("%1HZ").arg(dainfo.fValue)).toStdString();
+    data_ptr->mValues[indexpos++] = dainfo;
+    return RE_SUCCESS;
+}
+
+int Electric_message::decode_hx9703(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    int indexpos =0;
+    iaddcode = d_devInfo.iAddressCode;
+    DataInfo dainfo;
+    dainfo.bType = true;
+    for(int i=0;i<8;++i)
+    {
+        dainfo.fValue = Getbit(data[7],i);
+        data_ptr->mValues[indexpos++] = dainfo;
+    }
+    dainfo.fValue = data[8];
+    data_ptr->mValues[indexpos++] = dainfo;
+    return RE_SUCCESS;
+}
+
+int Electric_message::decode_Sf3pmanostat(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    iaddcode = AsciiToInt(data[3])*16+AsciiToInt(data[4]);
+    int indexpos =0;
+    DataInfo dainfo;
+    dainfo.bType = false;
+    //模拟量数据从下标15开始
+    int datapos = 15;
+    for(int i=0;i<12;++i)
+    {
+        dainfo.fValue = ((AsciiToInt(data[15+4*i])*16+AsciiToInt(data[16+4*i]))*256
+                +AsciiToInt(data[17+4*i])*16+AsciiToInt(data[18+4*i]))*0.01;
+        data_ptr->mValues[indexpos++] = dainfo;
+    }
+    return RE_SUCCESS;
+}
+
+int Electric_message::decode_Sfdjups(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    int indexpos =0,iReadNum=1,iLastNum=(nDataLen-1);
+    char cNum[10]={0};
+    iaddcode = d_devInfo.iAddressCode;
+    DataInfo dainfo;
+    dainfo.bType = false;
+    for(int i=0;i<8;++i)//解析前8个模拟量
+    {
+        for(int jpos=0;iLastNum>0 && jpos<10;++jpos) //读取每个模拟量有效数值
+        {
+            if(data[iReadNum]!=0x20)
+            {
+                cNum[jpos] = data[iReadNum];
+                ++iReadNum;
+                --iLastNum;
+            }
+            else
+            {
+                ++iReadNum;
+                --iLastNum;
+                break;
+            }
+        }
+        if(cNum[0]==0x2D)
+            dainfo.fValue = 0;
+        else
+            dainfo.fValue = float(atof(cNum));
+        data_ptr->mValues[i] = dainfo;
+        memset(&cNum,0,10);
+    }
+    //查找下个命令数据头
+    unsigned char cDes[1]={0};
+    cDes[0]=0x21;
+    cDes[1]=d_devInfo.iAddressCode;
+    indexpos = kmp(&data[iReadNum],iLastNum,cDes,1);
+    if(indexpos>=0)
+    {
+        iReadNum = iReadNum+indexpos+1;
+        iLastNum = iLastNum-(indexpos+1);
+        for(int i=0;i<12;++i)
+        {
+            for(int jpos=0;iLastNum>0 && jpos<10;++jpos) //读取每个模拟量有效数值
+            {
+                if(data[iReadNum]!=0x20 && data[iReadNum]!=0x2F)
+                {
+                    cNum[jpos] = data[iReadNum];
+                    ++iReadNum;
+                    --iLastNum;
+                }
+                else
+                {
+                    ++iReadNum;
+                    --iLastNum;
+                    break;
+                }
+            }
+            if(cNum[0]==0x2D)
+                dainfo.fValue = 0;
+            else
+                dainfo.fValue = float(atof(cNum));
+            data_ptr->mValues[i+8] = dainfo;
+            memset(&cNum,0,10);
+        }
+    }
+    return RE_SUCCESS;
+}
 }

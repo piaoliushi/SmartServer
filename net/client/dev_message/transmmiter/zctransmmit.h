@@ -17,6 +17,7 @@ private:
     int Zhc618F_Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
     int Zhc10KWTv_Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
     int Zhc3KWFm_Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+    int ZhcExciter_Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
 private:
     int m_subprotocol;
     int m_addresscode;  
