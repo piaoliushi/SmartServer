@@ -172,6 +172,7 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             else
                 return -1;
         }
+        case YISITE_EA800II:
         case ST_UPS_C6_20:{
             if(data[0] == 0x28)
                 return 0;
@@ -224,96 +225,97 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
     case EDA9033:
         switch (d_devInfo.nSubProtocol)
         {
-        case Eda9033_A:
-            return decode_Eda9033A(data,d_curData_ptr,nDataLen,iaddcode);
-        case PAINUO_SPM33://标准head/body
-        {
-            int iresult = decode_SPM33(data,d_curData_ptr,nDataLen,iaddcode);
-            GetResultData(d_curData_ptr);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case YINGJIA_EM400://标准head/body
-        {
-            int iresult = decode_EM400(data,d_curData_ptr,nDataLen,iaddcode);
-            GetResultData(d_curData_ptr);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case KSTAR_UPS://标准head/body
-        {
-            int iresult = decode_KSTUPS(data,d_curData_ptr,nDataLen,iaddcode);
-            GetResultData(d_curData_ptr);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case ABB_104://标准head/body
-        {
-            int iresult = parse_104_data(data,d_curData_ptr,nDataLen,iaddcode);
-            //m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case YISITE_EA66:
-        {
-            int iresult = decode_EA66(data,d_curData_ptr,nDataLen,iaddcode);
-            GetResultData(d_curData_ptr);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case YISITE_EA800://decode_EA800
-        {
-            int iresult = decode_EA800(data,d_curData_ptr,nDataLen,iaddcode);
-            GetResultData(d_curData_ptr);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case ACR_NET_EM:{
-            int iresult = decode_AcrNetEm(data,d_curData_ptr,nDataLen,iaddcode);
-            GetResultData(d_curData_ptr);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case HX_ELEC_CTR:
-        {
-            int iresult = decode_Elecctr(data,d_curData_ptr,nDataLen,iaddcode);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case ACR_PZ:{
-            int iresult = decode_Acr_PZ(data,d_curData_ptr,nDataLen,iaddcode);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case ACR_ARD_2L:
-        {
-            int iresult = decode_Acr_Ard2L(data,d_curData_ptr,nDataLen,iaddcode);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case ST_UPS_C6_20:
-             return decode_ST_C6_20Ks(data,d_curData_ptr,nDataLen,iaddcode);
-        case DSE_7320_POWER:
-        {
-            int iresult = decode_DSE_7320(data,d_curData_ptr,nDataLen,iaddcode);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case HX_MD9703:
-        {
-            int iresult = decode_hx9703(data,d_curData_ptr,nDataLen,iaddcode);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case SF_3P_MANOSTAT:
-        {
-            int iresult = decode_Sf3pmanostat(data,d_curData_ptr,nDataLen,iaddcode);
-            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-            return iresult;
-        }
-        case SF_DJ_UPS:
-        {
-            return decode_Sfdjups(data,d_curData_ptr,nDataLen,iaddcode);
-        }
+            case Eda9033_A:
+                return decode_Eda9033A(data,d_curData_ptr,nDataLen,iaddcode);
+            case PAINUO_SPM33://标准head/body
+            {
+                int iresult = decode_SPM33(data,d_curData_ptr,nDataLen,iaddcode);
+                GetResultData(d_curData_ptr);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case YINGJIA_EM400://标准head/body
+            {
+                int iresult = decode_EM400(data,d_curData_ptr,nDataLen,iaddcode);
+                GetResultData(d_curData_ptr);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case KSTAR_UPS://标准head/body
+            {
+                int iresult = decode_KSTUPS(data,d_curData_ptr,nDataLen,iaddcode);
+                GetResultData(d_curData_ptr);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case ABB_104://标准head/body
+            {
+                int iresult = parse_104_data(data,d_curData_ptr,nDataLen,iaddcode);
+                //m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case YISITE_EA66:
+            {
+                int iresult = decode_EA66(data,d_curData_ptr,nDataLen,iaddcode);
+                GetResultData(d_curData_ptr);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case YISITE_EA800://decode_EA800
+            {
+                int iresult = decode_EA800(data,d_curData_ptr,nDataLen,iaddcode);
+                GetResultData(d_curData_ptr);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case ACR_NET_EM:{
+                int iresult = decode_AcrNetEm(data,d_curData_ptr,nDataLen,iaddcode);
+                GetResultData(d_curData_ptr);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case HX_ELEC_CTR:
+            {
+                int iresult = decode_Elecctr(data,d_curData_ptr,nDataLen,iaddcode);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case ACR_PZ:{
+                int iresult = decode_Acr_PZ(data,d_curData_ptr,nDataLen,iaddcode);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case ACR_ARD_2L:
+            {
+                int iresult = decode_Acr_Ard2L(data,d_curData_ptr,nDataLen,iaddcode);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case ST_UPS_C6_20:
+                 return decode_ST_C6_20Ks(data,d_curData_ptr,nDataLen,iaddcode);
+            case DSE_7320_POWER:
+            {
+                int iresult = decode_DSE_7320(data,d_curData_ptr,nDataLen,iaddcode);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case HX_MD9703:
+            {
+                int iresult = decode_hx9703(data,d_curData_ptr,nDataLen,iaddcode);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case SF_3P_MANOSTAT:
+            {
+                int iresult = decode_Sf3pmanostat(data,d_curData_ptr,nDataLen,iaddcode);
+                m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                return iresult;
+            }
+            case SF_DJ_UPS:
+                return decode_Sfdjups(data,d_curData_ptr,nDataLen,iaddcode);
+            case YISITE_EA800II:
+                return decode_EA800II(data,d_curData_ptr,nDataLen,iaddcode);
+
         }
         break;
     }
@@ -915,6 +917,25 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             tmUnit.commandId[3]=0x0D;
             cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
         }
+            break;
+        case YISITE_EA800II:
+               {
+                   CommandUnit tmUnit;
+                   tmUnit.commandLen = 3;
+
+                   tmUnit.ackLen = 47;
+                   tmUnit.commandId[0]=0x51;
+                   tmUnit.commandId[1]=0x36;
+                   tmUnit.commandId[2]=0x0D;
+                   cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                   tmUnit.commandLen = 4;
+                   tmUnit.ackLen = 0;
+                   tmUnit.commandId[0]=0x53;
+                   tmUnit.commandId[1]=0x2E;
+                   tmUnit.commandId[2]=0x32;
+                   tmUnit.commandId[3]=0x0D;
+                   cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
+               }
             break;
         }
     }
@@ -2008,4 +2029,52 @@ int Electric_message::decode_Sfdjups(unsigned char *data, DevMonitorDataPtr data
     }
     return RE_SUCCESS;
 }
+
+int Electric_message::decode_EA800II(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    int indexpos =0,iReadNum=1,iLastNum=(nDataLen-1);
+    char cNum[10]={0};
+    iaddcode = d_devInfo.iAddressCode;
+    DataInfo dainfo;
+    dainfo.bType = false;
+    for(int i=0;i<7;++i)
+    {
+        for(int jpos=0;iLastNum>0 && jpos<10;++jpos) //读取每个模拟量有效数值
+        {
+            if(data[iReadNum]!=0x20)
+            {
+                cNum[jpos] = data[iReadNum];
+                ++iReadNum;
+                --iLastNum;
+            }
+            else
+            {
+                ++iReadNum;
+                --iLastNum;
+                break;
+            }
+        }
+        if(i!=1)
+        {
+            if(cNum[0]==0x2D)
+                dainfo.fValue = 0;
+            else
+                dainfo.fValue = float(atof(cNum));
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
+        memset(&cNum,0,10);
+    }
+    dainfo.bType = true;
+    for(int j=0;j<8;++j)
+    {
+        if(iReadNum>nDataLen)
+            break;
+        dainfo.fValue = AsciiToInt(data[iReadNum]);
+        data_ptr->mValues[indexpos++] = dainfo;
+        ++iReadNum;
+    }
+    return RE_SUCCESS;
+}
+
+
 }

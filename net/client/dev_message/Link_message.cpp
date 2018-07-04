@@ -493,6 +493,23 @@ namespace hx_net
             cmdUnit.commandId[13] = 0x55;
         }
             break;
+        case LINK_HX_0214_DA:
+        {
+            if(lpParam->cparams().size()<2)
+                return;
+            cmdUnit.commandLen = 10;
+            cmdUnit.commandId[0] = 0x7E;
+            cmdUnit.commandId[1] = 0x40;
+            cmdUnit.commandId[2] = 0x66;
+            cmdUnit.commandId[3] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[4] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[5] = 0x03;
+            cmdUnit.commandId[6] = 0x00;
+            cmdUnit.commandId[7] = atoi(lpParam->cparams(0).sparamvalue().c_str());
+            cmdUnit.commandId[8] = atoi(lpParam->cparams(1).sparamvalue().c_str());
+            cmdUnit.commandId[9] = 0x55;
+        }
+            break;
         default:
             break;
         }
@@ -664,6 +681,13 @@ namespace hx_net
             else
                 return RE_HEADERROR;
         }
+        case LINK_HX_0214_DA:
+        {
+            if(data[0]==0x7E && data[1]==0x40)
+                return (data[6]*256+data[5]);
+            else
+                return RE_HEADERROR;
+        }
         default:
             break;
         }
@@ -718,6 +742,9 @@ namespace hx_net
             break;
         case LINK_HX_0401_DABS:
             idecresult = decode_0401DABS(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
+        case LINK_HX_0214_DA:
+            idecresult = decode_0214DA(data,d_curData_ptr,nDataLen,iaddcode);
             break;
         default:
             break;
@@ -811,6 +838,14 @@ namespace hx_net
             tmUnit.commandId[13] = 0x55;
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
             tmUnit.commandId[2] = 0x77;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case LINK_HX_0214_DA:
+        {
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 0;
+            tmUnit.ackLen = 7;
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
@@ -1357,4 +1392,41 @@ namespace hx_net
 
         }
    }
+
+   int Link_message::decode_0214DA(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+       if(data[2]!=0x11)
+            return RE_CMDACK;
+
+        iaddcode = data[4]*256+data[3];
+        DataInfo dainfo;
+        dainfo.bType = true;
+        if(data[7]==0x01)
+        {
+            dainfo.fValue = 1;
+            data_ptr->mValues[0] = dainfo;
+            dainfo.fValue = 0;
+            data_ptr->mValues[1] = dainfo;
+        }
+        else if(data[7]==0x02)
+        {
+            dainfo.fValue = 0;
+            data_ptr->mValues[0] = dainfo;
+            dainfo.fValue = 1;
+            data_ptr->mValues[1] = dainfo;
+        }
+        else {
+            dainfo.fValue = 1;
+            data_ptr->mValues[0] = dainfo;
+            data_ptr->mValues[1] = dainfo;
+        }
+        for(int i=0;i<16;++i)
+        {
+            dainfo.fValue = data[8+i];
+            data_ptr->mValues[2+i] = dainfo;
+        }
+
+        return 0;
+    }
+
 }

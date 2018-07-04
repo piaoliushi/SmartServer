@@ -59,6 +59,7 @@ protected:
     int decode_hx9703(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int decode_Sf3pmanostat(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int decode_Sfdjups(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
+    int decode_EA800II(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
 private:
     int              m_Subprotocol;//设备子协议号
     int              m_mainprotocol;//主协议编号

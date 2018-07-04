@@ -38,6 +38,7 @@ protected:
     void parse_weile_avsp_decorder_data(Pdu &pdu, SnmpTarget &target);
     void parse_weile_avsp_apt_data(Pdu &pdu, SnmpTarget &target);
 
+
     void  GetResultData(DevMonitorDataPtr data_ptr);
 
     void initOid();
@@ -53,6 +54,7 @@ protected:
     int decode_0401AV(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_0401DA(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_0401DABS(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
+    int decode_0214DA(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
 private:
     void GetSwitchCmd(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     void GetControlModCmd(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);

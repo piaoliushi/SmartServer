@@ -246,6 +246,7 @@ typedef enum EDAPROTOCOL
     HX_MD9703            = 17,//汇鑫8路电源控制器
     SF_3P_MANOSTAT       = 18,//松丰3相稳压器
     SF_DJ_UPS            = 19,//松丰DJ-UPS
+    YISITE_EA800II       = 20,//易事特UPS-EA800II型
     ABB_104              = 100,//ABB104电表
 }EdaSubProtocol;
 
@@ -322,6 +323,7 @@ typedef enum LINK_DEVICE
     LINK_SMSX_ASI_ADAPTER   = 14,//数码视讯ASI复用器
     LINK_SMSX_ASI_ENCODER   = 15,//数码视讯ASI编码码器
     LINK_NORMAL_SNMP_DEV    = 16,//通用snmp设备
+    LINK_HX_0214_DA         = 18,//汇鑫0214DA切换器
 }LinkDeviceSubProtocol;
 
 //上海全波
