@@ -15,13 +15,21 @@ public:
     bool IsStandardCommand();
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     void GetAllCmd(CommandAttribute &cmdAll);
+    void rvr_Callback(int reason, Snmp *session, Pdu &pdu, SnmpTarget &target);
 private:
     int RvrGeneralData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
     int RsmContrlBdData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+    void TEL3100_decode(int reason, Snmp *session, Pdu &pdu, SnmpTarget &target);
+    int get_snmp(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target);
+    void initOid();
 private:
     int m_subprotocol;
     int m_addresscode;
     Tsmt_message_ptr m_pmessage;
+    Pdu query_pdu;
+    map<string,int> map_Oid;
+    boost::recursive_mutex data_mutex;
+    DevMonitorDataPtr curdata_ptr;
 };
 }
 #endif // RVRTRANSMMIT_H

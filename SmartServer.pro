@@ -89,7 +89,8 @@ SOURCES += main.cpp\
     net/client/dev_message/transmmiter/hgtransmmitr.cpp \
     net/client/dev_message/transmmiter/hctransmmiter.cpp \
     net/client/dev_message/transmmiter/rstransmmit.cpp \
-    net/client/dev_message/transmmiter/rvrtransmmit.cpp
+    net/client/dev_message/transmmiter/rvrtransmmit.cpp \
+    net/client/dev_message/transmmiter/astransmmit.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -175,7 +176,8 @@ HEADERS  += \
     net/client/dev_message/transmmiter/hgtransmmitr.h \
     net/client/dev_message/transmmiter/hctransmmiter.h \
     net/client/dev_message/transmmiter/rstransmmit.h \
-    net/client/dev_message/transmmiter/rvrtransmmit.h
+    net/client/dev_message/transmmiter/rvrtransmmit.h \
+    net/client/dev_message/transmmiter/astransmmit.h
 
 FORMS    += mainwindow.ui
 

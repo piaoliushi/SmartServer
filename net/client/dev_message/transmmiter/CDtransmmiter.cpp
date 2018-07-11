@@ -195,7 +195,7 @@ namespace hx_net{
         case CHENGDU_KAITENG_50W_AMP:
         case CHENGDU_KT_DIG:{
             CommandUnit tmUnit;
-            tmUnit.ackLen = 471;
+            tmUnit.ackLen = 719;
             tmUnit.commandLen=10;
             tmUnit.commandId[0] = 0xAA;
             tmUnit.commandId[1] = 0xFF;

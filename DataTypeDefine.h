@@ -51,6 +51,8 @@ enum DEVType
 #define    RUN_TIME_MONTH  1 //运行图-月
 #define    RUN_TIME_DAY    2 //运行图-天
 
+#define    TRANSMITTER_HOST   0 //主发射机
+#define    TRANSMITTER_BACKUP 1 //备发射机
 
 enum _tag_CommandType{
     DEV_TASK_TURNON  = 0,

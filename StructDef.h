@@ -324,6 +324,7 @@ typedef enum LINK_DEVICE
     LINK_SMSX_ASI_ENCODER   = 15,//数码视讯ASI编码码器
     LINK_NORMAL_SNMP_DEV    = 16,//通用snmp设备
     LINK_HX_0214_DA         = 18,//汇鑫0214DA切换器
+    LINK_HX_0401_SP         = 19,//汇鑫0401SP切换器
 }LinkDeviceSubProtocol;
 
 //上海全波
@@ -369,6 +370,7 @@ typedef enum RVRPROTOCOL
 {
     RVR_GENERAL = 0, //RVR激励器协议
     RSM_FM_OCBD = 1, //调频开关板协议
+    ETL3100     = 2, //泰诺克etl3100
 }RvrSubProtocol;
 
 #endif

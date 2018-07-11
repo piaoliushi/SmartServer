@@ -7,6 +7,7 @@ RvrTransmmit::RvrTransmmit(Tsmt_message_ptr ptsmessage,int subprotocol,int addre
     ,m_addresscode(addresscode)
     ,m_pmessage(ptsmessage)
 {
+     initOid();
 }
 
 int RvrTransmmit::check_msg_header(unsigned char *data, int nDataLen, CmdType cmdType, int number)
@@ -173,6 +174,111 @@ int RvrTransmmit::RsmContrlBdData(unsigned char *data, DevMonitorDataPtr data_pt
     }
     data_ptr->mValues[2] = dtinfo;
     return RE_SUCCESS;
+}
+
+void RvrTransmmit::rvr_Callback(int reason, Snmp *session, Pdu &pdu, SnmpTarget &target)
+{
+    switch(m_subprotocol)
+    {
+    case ETL3100:
+        TEL3100_decode(reason,session,pdu,target);
+        break;
+    default:
+        break;
+    }
+}
+
+void RvrTransmmit::initOid()
+{
+    switch(m_subprotocol)
+    {
+    case ETL3100:
+    {
+        map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.465.1"] = 0;
+        Vb vbl;
+        vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.465.1"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.469.1"] = 1;
+        vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.469.1"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.85.1"] = 3;
+        vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.85.1"));
+
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.89.1"] = 4;
+        vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.89.1"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.93.1"] = 5;
+        vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.93.1"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.349.1"] = 6;
+        vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.349.1"));
+        query_pdu += vbl;
+        map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.353.1"] = 7;
+        vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.353.1"));
+        query_pdu += vbl;
+    }
+        break;
+    default:
+        break;
+    }
+}
+
+void rvr_aysnc_callback(int reason, Snmp *session,
+                         Pdu &pdu, SnmpTarget &target, void *cd)
+{
+    if (cd)
+        ((RvrTransmmit*)cd)->rvr_Callback(reason, session, pdu, target);
+}
+
+
+int RvrTransmmit::get_snmp(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target)
+{
+    {
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        if(data_ptr)
+            curdata_ptr = data_ptr;
+    }
+    int status = snmp->get(query_pdu,*target,rvr_aysnc_callback,this);
+    if(status)
+        return -1;
+
+    return 0;
+}
+
+void RvrTransmmit::TEL3100_decode(int reason, Snmp *session, Pdu &pdu, SnmpTarget &target)
+{
+    int pdu_error = pdu.get_error_status();
+    if (pdu_error)
+    {
+        std::cout<<"ERROR"<<endl;
+        return;
+    }
+    if (pdu.get_vb_count() == 0)
+    {
+
+        std::cout<<"COUNT==0"<<endl;
+        return;
+    }
+    int vbcount = pdu.get_vb_count();
+    boost::recursive_mutex::scoped_lock lock(data_mutex);
+    for(int i=0;i<vbcount;++i)
+    {
+        DataInfo dainfo;
+        Vb nextVb;
+        pdu.get_vb(nextVb, i);
+        string cur_oid = nextVb.get_printable_oid();
+        string cur_value =nextVb.get_printable_value();
+        dainfo.bType = false;
+        dainfo.fValue = atof(cur_value.c_str());
+        map<string,int>::iterator iter = map_Oid.find(cur_oid);
+        std::cout<<cur_oid<<endl;
+        if(iter!=map_Oid.end())
+        {
+            curdata_ptr->mValues[(*iter).second] = dainfo;
+        }
+    }
+    m_pmessage->aysnc_data(curdata_ptr);
 }
 
 }

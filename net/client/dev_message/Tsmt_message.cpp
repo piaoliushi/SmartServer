@@ -19,6 +19,7 @@
 #include "./transmmiter/hctransmmiter.h"
 #include "./transmmiter/rstransmmit.h"
 #include "./transmmiter/rvrtransmmit.h"
+#include "./transmmiter/astransmmit.h"
 
 #include "../../../database/DataBaseOperation.h"
 using namespace db;
@@ -64,7 +65,7 @@ namespace hx_net
         }
         map<string,DevProperty>::iterator iter = d_devInfo.map_DevProperty.find("Standby");
         if(iter!=d_devInfo.map_DevProperty.end())
-            d_Host_= (iter->second.property_value == "0")?0:1;//0->主机，1->备机
+            d_Host_= (iter->second.property_value == "0")?TRANSMITTER_HOST:TRANSMITTER_BACKUP;//0->主机，1->备机
 
         if(d_relate_tsmt_ptr_!=NULL){
             iter = d_relate_tsmt_ptr_->map_DevProperty.find("Agent");
@@ -347,6 +348,7 @@ namespace hx_net
             d_ptransmmit = new HgTransmmitr(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case ANSHAN:
+            d_ptransmmit = new AsTransmmit(boost::shared_ptr<hx_net::Tsmt_message>(this),d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case HANGCHUN:
             d_ptransmmit = new HcTransmmiter(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
@@ -385,6 +387,7 @@ namespace hx_net
         case RVR:
             d_ptransmmit = new RvrTransmmit(boost::shared_ptr<hx_net::Tsmt_message>(this),d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
+
         }
     }
 
@@ -585,11 +588,15 @@ namespace hx_net
             }
              //////-----2018-2-3 15:53---end----------/////
 
-            if(bIgnoreAntenna && d_cur_user_!="auto"){
+
+
+
+            //既不是自动开关机也不是定时开关机
+            if( d_cur_user_!="auto" && d_cur_user_!="timer"){//bIgnoreAntenna &&
                 //天线在位执行开机，否则返回
                 dev_run_state nAntennaS = GetInst(SvcMgr).get_dev_run_state(d_relate_antenna_ptr_->sStationNum,
                                            d_relate_antenna_ptr_->sDevNum);
-                if(nAntennaS == antenna_host && d_Host_!=0){
+                /*if(nAntennaS == antenna_host && d_Host_!=0){
                     eErrCode = EC_OK;
                     nExcutResult = 7;
                     return;
@@ -598,20 +605,29 @@ namespace hx_net
                     eErrCode = EC_OK;
                     nExcutResult = 7;
                     return;
+                }*/
+
+                if((nAntennaS == antenna_host && d_Host_==TRANSMITTER_HOST) ||
+                    (nAntennaS == antenna_backup && d_Host_==TRANSMITTER_BACKUP))
+                {
+
+                }else{
+                    eErrCode = EC_OK;
+                    nExcutResult = 7;
+                    return;
                 }
 
             }else{
                 //非定时开关机，且关联机在使用
-                if(d_cur_user_!="timer" && d_relate_tsmt_ptr_->bUsed==true){
+               /* if(d_cur_user_!="timer" && d_relate_tsmt_ptr_->bUsed==true){
 
-
-                    //关联机器在运行且天线不是代理则返回，不进行单步开机动作GetInst(LocalConfig).local_station_id()
+                    //关联机器在运行且天线不是代理则返回，不进行单步开机动作
                     if(GetInst(SvcMgr).get_dev_run_state(d_relate_tsmt_ptr_->sStationNum,
                            d_relate_tsmt_ptr_->sDevNum)==dev_running  && d_antenna_Agent_==false) {
                         nExcutResult = 6;
                         return;
                     }
-                }
+                }*/
 
                 //关联机器在使用则进行关主机动作
                 if(d_relate_tsmt_ptr_->bUsed==true) {

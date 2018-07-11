@@ -510,6 +510,19 @@ namespace hx_net
             cmdUnit.commandId[9] = 0x55;
         }
             break;
+        case LINK_HX_0401_SP:
+       {
+           if(lpParam->cparams().size()<1)
+               return;
+           cmdUnit.commandLen = 6;
+           cmdUnit.commandId[0] = 0xAA;
+           cmdUnit.commandId[1] = 0x22;
+           cmdUnit.commandId[2] = atoi(lpParam->cparams(0).sparamvalue().c_str());
+           cmdUnit.commandId[3] = 0x00;
+           cmdUnit.commandId[4] = cmdUnit.commandId[1]^cmdUnit.commandId[2];
+           cmdUnit.commandId[5] = 0x55;
+       }
+           break;
         default:
             break;
         }
@@ -555,6 +568,17 @@ namespace hx_net
             cmdUnit.commandId[11] = 0x00;
             cmdUnit.commandId[12] = channelId;
             cmdUnit.commandId[13] = 0x55;
+        }
+            break;
+        case LINK_HX_0401_SP:
+        {
+            cmdUnit.commandLen = 6;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x22;
+            cmdUnit.commandId[2] = channelId;
+            cmdUnit.commandId[3] = 0x00;
+            cmdUnit.commandId[4] = cmdUnit.commandId[1]^cmdUnit.commandId[2];
+            cmdUnit.commandId[5] = 0x55;
         }
             break;
         default:
@@ -605,6 +629,18 @@ namespace hx_net
             cmdUnit.commandId[13] = 0x55;
         }
             break;
+        case LINK_HX_0401_SP:
+       {
+           cmdUnit.commandLen = 6;
+           cmdUnit.commandId[0] = 0xAA;
+           cmdUnit.commandId[1] = 0xF1;
+           cmdUnit.commandId[2] = 0x00;
+           cmdUnit.commandId[3] = modId;
+           cmdUnit.commandId[4] = cmdUnit.commandId[1]^cmdUnit.commandId[2];
+           cmdUnit.commandId[5] = 0x55;
+
+       }
+           break;
         default:
             break;
         }
@@ -659,6 +695,19 @@ namespace hx_net
             cmdUnit.commandId[13] = 0x55;
         }
             break;
+        case LINK_HX_0401_SP:
+       {
+           if(lpParam->cparams().size()<1)
+               return;
+           cmdUnit.commandLen = 6;
+           cmdUnit.commandId[0] = 0xAA;
+           cmdUnit.commandId[1] = 0xF1;
+           cmdUnit.commandId[2] = 0x00;
+           cmdUnit.commandId[3] = atoi(lpParam->cparams(0).sparamvalue().c_str());
+           cmdUnit.commandId[4] = cmdUnit.commandId[1]^cmdUnit.commandId[2];
+           cmdUnit.commandId[5] = 0x55;
+       }
+           break;
         default:
             break;
         }
@@ -688,6 +737,18 @@ namespace hx_net
             else
                 return RE_HEADERROR;
         }
+        case LINK_HX_0401_SP:
+        {
+            if(data[0]==0xAA)
+                return 0;
+            else
+            {
+                unsigned char cDes[1]={0};
+                cDes[0]=0xAA;
+                return kmp(data,nDataLen,cDes,1);
+            }
+        }
+            break;
         default:
             break;
         }
@@ -746,6 +807,9 @@ namespace hx_net
         case LINK_HX_0214_DA:
             idecresult = decode_0214DA(data,d_curData_ptr,nDataLen,iaddcode);
             break;
+        case LINK_HX_0401_SP:
+            idecresult = decode_0401SP(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
         default:
             break;
         }
@@ -764,6 +828,7 @@ namespace hx_net
         case LINK_HX_0401_AV:
         case LINK_HX_0401_DA:
         case LINK_HX_0401_DABS:
+        case LINK_HX_0214_DA:
             return true;
         }
         return false;
@@ -847,6 +912,20 @@ namespace hx_net
             tmUnit.commandLen = 0;
             tmUnit.ackLen = 7;
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case LINK_HX_0401_SP:
+        {
+           CommandUnit tmUnit;
+           tmUnit.commandLen = 6;
+           tmUnit.ackLen = 11;
+           tmUnit.commandId[0] = 0xAA;
+           tmUnit.commandId[1] = 0x44;
+           tmUnit.commandId[2] = 0x00;
+           tmUnit.commandId[3] = 0x00;
+           tmUnit.commandId[4] = 0x44;
+           tmUnit.commandId[5] = 0x55;
+           cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
         }
@@ -1428,5 +1507,72 @@ namespace hx_net
 
         return 0;
     }
+
+   int Link_message::decode_0401SP(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+   {
+       if(data[1]!=0x44)
+           return RE_CMDACK;
+       iaddcode = d_devInfo.iAddressCode;
+       DataInfo dainfo;
+       dainfo.bType = true;
+       int ichanel;
+       ichanel = data[2];
+       switch(ichanel)
+       {
+       case 0:
+       {
+           dainfo.fValue = 1.0;
+           data_ptr->mValues[0] = dainfo;
+           dainfo.fValue = 0.0;
+           data_ptr->mValues[1] = dainfo;
+           data_ptr->mValues[2] = dainfo;
+       }
+           break;
+       case 1:
+       {
+           dainfo.fValue = 1.0;
+           data_ptr->mValues[1] = dainfo;
+           dainfo.fValue = 0.0;
+           data_ptr->mValues[0] = dainfo;
+           data_ptr->mValues[2] = dainfo;
+       }
+           break;
+       case 2:
+       {
+           dainfo.fValue = 1.0;
+           data_ptr->mValues[2] = dainfo;
+           dainfo.fValue = 0.0;
+           data_ptr->mValues[1] = dainfo;
+           data_ptr->mValues[0] = dainfo;
+       }
+           break;
+       default:
+       {
+           dainfo.fValue = 0.0;
+           data_ptr->mValues[0] = dainfo;
+           data_ptr->mValues[1] = dainfo;
+           data_ptr->mValues[2] = dainfo;
+       }
+           break;
+       }
+       dainfo.fValue = data[3];
+       data_ptr->mValues[3] = dainfo;
+       for(int i=0;i<3;++i)
+       {
+           dainfo.fValue = Getbit(data[4],i);
+           data_ptr->mValues[4+i] = dainfo;
+       }
+       dainfo.bType = false;
+       dainfo.fValue = data[5];
+       data_ptr->mValues[7] = dainfo;
+      /* for(int j=0;j<6;++j)
+       {
+           dainfo.fValue = data[6+j];
+           data_ptr->mValues[8+j] = dainfo;
+       }
+       data_ptr->mValues[14] = data_ptr->mValues[8+2*ichanel];
+       data_ptr->mValues[15] = data_ptr->mValues[9+2*ichanel];*/
+       return RE_SUCCESS;
+   }
 
 }
