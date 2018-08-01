@@ -211,12 +211,12 @@ void RvrTransmmit::initOid()
         map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.93.1"] = 5;
         vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.93.1"));
         query_pdu += vbl;
-        map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.349.1"] = 6;
-        vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.349.1"));
-        query_pdu += vbl;
-        map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.353.1"] = 7;
-        vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.353.1"));
-        query_pdu += vbl;
+       // map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.349.1"] = 6;
+       // vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.349.1"));
+        //query_pdu += vbl;
+       // map_Oid["1.3.6.1.4.1.27874.3.2.13.1.2.9.1.353.1"] = 7;
+       // vbl.set_oid(Oid("1.3.6.1.4.1.27874.3.2.13.1.2.9.1.353.1"));
+        //query_pdu += vbl;
     }
         break;
     default:
@@ -278,7 +278,29 @@ void RvrTransmmit::TEL3100_decode(int reason, Snmp *session, Pdu &pdu, SnmpTarge
             curdata_ptr->mValues[(*iter).second] = dainfo;
         }
     }
+    DataInfo vsrinfo;
+    vsrinfo.bType = false;
+    vsrinfo.fValue = 0;
+    if(curdata_ptr->mValues.find(0)!=curdata_ptr->mValues.end() && curdata_ptr->mValues.find(1)!=curdata_ptr->mValues.end())
+    {
+        if(curdata_ptr->mValues[0].fValue>curdata_ptr->mValues[1].fValue)
+            vsrinfo.fValue = sqrt((curdata_ptr->mValues[0].fValue+curdata_ptr->mValues[1].fValue)/(curdata_ptr->mValues[0].fValue-curdata_ptr->mValues[1].fValue));
+       curdata_ptr->mValues[0].fValue = curdata_ptr->mValues[0].fValue*0.001;
+    }
+    curdata_ptr->mValues[2] = vsrinfo;
     m_pmessage->aysnc_data(curdata_ptr);
 }
+
+
+int RvrTransmmit::decode_msg_body(Snmp *snmp, DevMonitorDataPtr data_ptr, CTarget *target, int &runstate)
+{
+    switch(m_subprotocol)
+    {
+    case ETL3100:
+        return get_snmp(snmp,data_ptr,target);
+    }
+    return RE_NOPROTOCOL;
+}
+
 
 }

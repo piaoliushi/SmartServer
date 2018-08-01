@@ -478,13 +478,13 @@ namespace hx_net
                     tmUnit.commandId[0] = d_devInfo.iAddressCode;
                     tmUnit.commandId[1] = 0x03;
                     tmUnit.commandId[2] = 0x00;
-                    tmUnit.commandId[3] = 0x01;
+                    tmUnit.commandId[3] = 0x00;
                     tmUnit.commandId[4] = 0x00;
                     tmUnit.commandId[5] = 0x08;
                     unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
                     tmUnit.commandId[6] = (uscrc&0x00FF);
                     tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
-                    cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
                 }
                     break;
                 }
@@ -833,7 +833,11 @@ namespace hx_net
             dainfo.fValue = Getbit(data[12+2*j],7);
             data_ptr->mValues[9+6*j] = dainfo;
         }
-        return RE_SUCCESS;
+
+
+        //cout<<"wendu="<<data_ptr->mValues[0].fValue<<"--"<<data_ptr->mValues[1].fValue<<"--"<<data_ptr->mValues[2].fValue<<endl;
+
+         return RE_SUCCESS;
     }
 
 }

@@ -53,6 +53,9 @@ namespace hx_net
         void set_dev_run_state(string sStationId,string sDevid,int nState);
 		//获得设备运行状态
         void get_dev_alarm_state(string sStationId,string sDevid,map<int,map<int,CurItemAlarmInfo> >& cellAlarm);
+
+        //获得设备是否允许控制
+        bool dev_can_excute_cmd(string sStationId,string sDevid);
 		
 		//发送设备数据通知
         void send_monitor_data_to_client(string sStationid,string sDevid,devDataNfyMsgPtr &dataPtrToClient);

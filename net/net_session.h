@@ -32,6 +32,7 @@ namespace hx_net
 		virtual con_state       get_con_state(){return con_disconnected;}
         virtual dev_run_state   get_run_state(string sDevId){return dev_unknown;}
         virtual void            set_run_state(string sDevId,int nState){}
+        virtual bool            dev_can_excute_cmd(string sDevId){return false;}
 		virtual con_state       get_child_con_state(string sId){return con_disconnected;}
         virtual void            set_child_run_state(string sId,dev_run_state s){}
 		virtual dev_run_state   get_child_run_state(string sId){return dev_unknown;}

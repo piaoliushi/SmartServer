@@ -232,6 +232,13 @@ namespace hx_net
          return m_msgImpl->reset_run_state();
      }
 
+     bool MsgHandleAgent::dev_can_excute_cmd()
+     {
+         if(m_msgImpl==NULL)
+             return false;
+         return m_msgImpl->dev_can_excute_cmd();
+     }
+
      //是否需要清除告警
      bool  MsgHandleAgent::is_need_clear_alarm()
      {

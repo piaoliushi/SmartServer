@@ -179,6 +179,13 @@ void device_session::set_run_state(string sDevId,int nState)
         dev_agent_and_com[sDevId].second->set_run_state(nState);
 }
 
+bool device_session::dev_can_excute_cmd(string sDevId)
+{
+    if(dev_agent_and_com.find(sDevId)!=dev_agent_and_com.end())
+       return dev_agent_and_com[sDevId].second->dev_can_excute_cmd();
+    return false;
+}
+
 void device_session::set_con_state(con_state curState)
 {
     boost::recursive_mutex::scoped_lock llock(con_state_mutex_);

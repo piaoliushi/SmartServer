@@ -86,6 +86,14 @@ namespace hx_net
             _devclientptr->set_dev_run_state(sStationId,sDevid,nState);
     }
 
+    //获得设备是否允许控制
+    bool DevClientMgr::dev_can_excute_cmd(string sStationId,string sDevid)
+    {
+        if (_devclientptr)
+            return _devclientptr->dev_can_excute_cmd(sStationId,sDevid);
+        return false;
+    }
+
 	//获得设备基本信息
 	bool DevClientMgr::dev_base_info(string sStationId,DevBaseInfo& devInfo,string sdevId)
 	{

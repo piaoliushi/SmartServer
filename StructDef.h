@@ -247,6 +247,7 @@ typedef enum EDAPROTOCOL
     SF_3P_MANOSTAT       = 18,//松丰3相稳压器
     SF_DJ_UPS            = 19,//松丰DJ-UPS
     YISITE_EA800II       = 20,//易事特UPS-EA800II型
+    AMS_REF615           = 21,//艾默生REF615
     ABB_104              = 100,//ABB104电表
 }EdaSubProtocol;
 

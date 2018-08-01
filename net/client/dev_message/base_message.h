@@ -53,6 +53,8 @@ namespace hx_net
         virtual void set_run_state(int curState){}
         virtual void reset_run_state(){}
 
+        virtual bool dev_can_excute_cmd(){return false;}
+
         //是否需要清除告警
         virtual bool  is_need_clear_alarm(){return false;}
 

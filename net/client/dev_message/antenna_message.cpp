@@ -9,13 +9,15 @@ namespace hx_net {
 unsigned char  Cmd_SwitchToMaster[] ={0xaa,0x22,0x01,0x01,0x00,0x00,0x00,0x00,0x00,0x22,0xbb};
 unsigned char  Cmd_SwitchToSlave[]  ={0xaa,0x22,0x01,0x00,0x01,0x00,0x00,0x00,0x00,0x22,0xbb};
 
-Antenna_message::Antenna_message(session_ptr pSession,DeviceInfo &devInfo)
+Antenna_message::Antenna_message(session_ptr pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
     :base_message()
     ,d_devInfo(devInfo)
+    ,task_timeout_timer_(io_service)
     ,d_cur_task_(-1)
     ,dev_run_state_(dev_unknown)
     ,d_relate_host_tsmt_ptr_(NULL)
     ,d_relate_backup_tsmt_ptr_(NULL)
+    ,can_switch_(true)
 {
 
     m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
@@ -39,7 +41,7 @@ Antenna_message::Antenna_message(session_ptr pSession,DeviceInfo &devInfo)
 
 Antenna_message::~Antenna_message()
 {
-
+     task_timeout_timer_.cancel();
 }
 
 int Antenna_message::check_msg_header(unsigned char *data, int nDataLen, CmdType cmdType, int number)
@@ -190,11 +192,39 @@ int Antenna_message::get_run_state()
     return dev_run_state_;
 }
 
+void Antenna_message::restart_task_timeout_timer()
+{
+
+    task_timeout_timer_.cancel();
+    task_timeout_timer_.expires_from_now(boost::posix_time::seconds(180));
+    task_timeout_timer_.async_wait(boost::bind(&Antenna_message::schedules_task_time_out,
+        this,boost::asio::placeholders::error));
+}
+
+void Antenna_message::schedules_task_time_out(const boost::system::error_code& error)
+{
+    boost::recursive_mutex::scoped_lock lock(can_switch_mutex_);
+    can_switch_ = true;
+}
+
+bool Antenna_message::can_switch_antenna()
+{
+    boost::recursive_mutex::scoped_lock lock(can_switch_mutex_);
+    return can_switch_;
+}
+
 void Antenna_message::set_run_state(int curState)
 {
     boost::recursive_mutex::scoped_lock llock(run_state_mutex_);
     if(dev_run_state_ != curState)
     {
+         {
+             boost::recursive_mutex::scoped_lock lock(can_switch_mutex_);
+             can_switch_ = false;
+         }
+
+        restart_task_timeout_timer();
+
         dev_run_state_=curState;
         GetInst(SvcMgr).get_notify()->OnDevStatus(d_devInfo.sDevNum,dev_run_state_+1);
         if(m_pSession!=NULL)//GetInst(LocalConfig).local_station_id()
@@ -224,6 +254,11 @@ bool Antenna_message::is_detecting()
  {
      boost::recursive_mutex::scoped_lock llock(run_state_mutex_);
      dev_run_state_=dev_unknown;
+ }
+
+ bool Antenna_message::dev_can_excute_cmd()
+ {
+     return can_switch_antenna();
  }
 
 int Antenna_message::parse_HX_981(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
@@ -276,13 +311,19 @@ void Antenna_message::switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult
         return;
     }
 
+    if(!can_switch_antenna()){
+        eErrCode = EC_UNKNOWN;
+        return;
+    }
+
     //天线在位执行开机，否则返回
     dev_run_state nHostRunS = GetInst(SvcMgr).get_dev_run_state(d_relate_host_tsmt_ptr_->sStationNum,
                                d_relate_host_tsmt_ptr_->sDevNum);
     dev_run_state nBackupRunS = GetInst(SvcMgr).get_dev_run_state(d_relate_backup_tsmt_ptr_->sStationNum,
                                d_relate_backup_tsmt_ptr_->sDevNum);
 
-    if(nHostRunS == dev_running || nBackupRunS == dev_running)
+    if((nHostRunS == dev_running && get_run_state()==antenna_host)
+            || (nBackupRunS == dev_running && get_run_state()==antenna_backup))
         return;
 
     if(m_pSession!=NULL)

@@ -62,6 +62,8 @@ namespace hx_net
         void set_run_state(int curState);
         //复位运行状态
         void reset_run_state();
+        //判断是否可以进行控制
+        bool dev_can_excute_cmd();
 
         //是否需要清除告警
         bool  is_need_clear_alarm();//{return false;}

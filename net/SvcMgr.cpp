@@ -133,6 +133,14 @@ namespace hx_net
             return m_pDevMgrPtr->set_dev_run_state(sStationId,sDevid,nState);
     }
 
+    //获得设备是否允许控制
+    bool SvcMgr::dev_can_excute_cmd(string sStationId,string sDevid)
+    {
+        if(m_pDevMgrPtr)
+            return m_pDevMgrPtr->dev_can_excute_cmd(sStationId,sDevid);
+        return false;
+    }
+
 	//获得设备运行状态
     void SvcMgr::get_dev_alarm_state(string sStationId,string sDevid,map<int,map<int,CurItemAlarmInfo> >& cellAlarm)
 	{

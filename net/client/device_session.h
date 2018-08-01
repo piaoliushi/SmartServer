@@ -58,6 +58,8 @@ namespace hx_net
         //获得设备运行状态（默认连接正常则运行正常）
         dev_run_state   get_run_state(string sDevId);
         void            set_run_state(string sDevId,int nState);
+
+        bool dev_can_excute_cmd(string sDevId);
         //获得报警状态
         void get_alarm_state(string sDevId,map<int,map<int,CurItemAlarmInfo> >& cellAlarm);
         //执行通用指令

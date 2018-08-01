@@ -59,7 +59,7 @@ namespace hx_net
             } break;
 
         case DEVICE_ANTENNA:{
-                m_pbaseMsg = new Antenna_message(m_pSessionPtr,m_devInfo);
+                m_pbaseMsg = new Antenna_message(m_pSessionPtr,m_io_service,m_devInfo);
         } break;
 		default:
 			return false;
@@ -275,6 +275,13 @@ namespace hx_net
         if(m_pbaseMsg==NULL)
             return;
         return m_pbaseMsg->reset_run_state();
+    }
+
+    bool MsgHandleAgentImpl::dev_can_excute_cmd()
+    {
+        if(m_pbaseMsg==NULL)
+            return false;
+        return m_pbaseMsg->dev_can_excute_cmd();
     }
 
     //是否需要清除告警

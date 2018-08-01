@@ -72,6 +72,13 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             }else
                 return -1;
         }
+        case AMS_REF615:
+        {
+            if(data[0]==d_devInfo.iAddressCode && data[1]==0x00)
+                return data[5];
+            else
+                return RE_HEADERROR;
+        }
         case Eda9033_A:
         {
             if(nDataLen<2)
@@ -192,7 +199,7 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
         }
         case SF_3P_MANOSTAT:
         {
-            if(data[0]==0x7E && data[1]==0x33 && data[2]==0x32)
+            if(data[0]==0x7E && data[1]==0x30 && data[2]==0x33)
             {
                 return AsciiToInt(data[10])*256+AsciiToInt(data[11])*16+AsciiToInt(data[12])+5;
             }
@@ -315,6 +322,12 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
                 return decode_Sfdjups(data,d_curData_ptr,nDataLen,iaddcode);
             case YISITE_EA800II:
                 return decode_EA800II(data,d_curData_ptr,nDataLen,iaddcode);
+            case AMS_REF615:
+               {
+                   int iresult = decode_REF615(data,d_curData_ptr,nDataLen,iaddcode);
+                   m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                   return iresult;
+               }
 
         }
         break;
@@ -347,6 +360,8 @@ bool Electric_message::IsStandardCommand()
         case SF_3P_MANOSTAT:
             return true;
         case ABB_104:
+            return true;
+        case AMS_REF615:
             return true;
         }
         return false;
@@ -866,8 +881,8 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             tmUnit.ackLen = 13;
             tmUnit.commandLen = 20;
             tmUnit.commandId[0] = 0x7E;
-            tmUnit.commandId[1] = 0x33;
-            tmUnit.commandId[2] = 0x32;
+            tmUnit.commandId[1] = 0x30;
+            tmUnit.commandId[2] = 0x33;
 
             unsigned char chadd[10]={'0','0','0','0','0','0','0','0','0','\0'};
 
@@ -925,7 +940,7 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
 
                    tmUnit.ackLen = 47;
                    tmUnit.commandId[0]=0x51;
-                   tmUnit.commandId[1]=0x36;
+                   tmUnit.commandId[1]=0x31;
                    tmUnit.commandId[2]=0x0D;
                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
                    tmUnit.commandLen = 4;
@@ -937,6 +952,28 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
                    cmdAll.mapCommand[MSG_DEV_TURNOFF_OPR].push_back(tmUnit);
                }
             break;
+        case AMS_REF615:
+                {
+                    CommandUnit tmUnit;
+                    tmUnit.commandLen = 12;
+                    tmUnit.ackLen = 6;
+                    //01 00 00 00 00 06 00 04 00 89 00 03
+                    tmUnit.commandId[0]=d_devInfo.iAddressCode;
+                    tmUnit.commandId[1]=0x00;
+                    tmUnit.commandId[2]=0x00;
+                    tmUnit.commandId[3]=0x00;
+                    tmUnit.commandId[4]=0x00;
+                    tmUnit.commandId[5]=0x06;
+                    tmUnit.commandId[6]=0x00;
+                    tmUnit.commandId[7]=0x04;
+                    tmUnit.commandId[8]=0x00;
+                    tmUnit.commandId[9]=0x89;
+                    tmUnit.commandId[10]=0x00;
+                    tmUnit.commandId[11]=0x03;
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                }
+            break;
+
         }
     }
         break;
@@ -1055,6 +1092,7 @@ void Electric_message::exec_general_task(int icmdType, string sUser, devCommdMsg
     {
         eErrCode = EC_OK;
         m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
+        m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
     }
 }
 
@@ -1951,14 +1989,25 @@ int Electric_message::decode_Sf3pmanostat(unsigned char *data, DevMonitorDataPtr
     int indexpos =0;
     DataInfo dainfo;
     dainfo.bType = false;
-    //模拟量数据从下标15开始
-    int datapos = 15;
-    for(int i=0;i<12;++i)
+    //模拟量数据从下标15开始   
+    for(int j=0;j<4;++j)
     {
-        dainfo.fValue = ((AsciiToInt(data[15+4*i])*16+AsciiToInt(data[16+4*i]))*256
-                +AsciiToInt(data[17+4*i])*16+AsciiToInt(data[18+4*i]))*0.01;
-        data_ptr->mValues[indexpos++] = dainfo;
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = ((AsciiToInt(data[15+4*i+j*12])*16+AsciiToInt(data[16+4*i+j*12]))*256
+                    +AsciiToInt(data[17+4*i+j*12])*16+AsciiToInt(data[18+4*i+j*12]));
+            if(j%2==0)
+            {
+                dainfo.fValue = dainfo.fValue * 0.01/sqrt(3.00);
+            }
+            else
+            {
+                dainfo.fValue = dainfo.fValue * 0.1;
+            }
+            data_ptr->mValues[indexpos++] = dainfo;
+        }
     }
+
     return RE_SUCCESS;
 }
 
@@ -1973,7 +2022,7 @@ int Electric_message::decode_Sfdjups(unsigned char *data, DevMonitorDataPtr data
     {
         for(int jpos=0;iLastNum>0 && jpos<10;++jpos) //读取每个模拟量有效数值
         {
-            if(data[iReadNum]!=0x20)
+            if(data[iReadNum]!=0x20 && data[iReadNum]!=0x0D)
             {
                 cNum[jpos] = data[iReadNum];
                 ++iReadNum;
@@ -2006,7 +2055,7 @@ int Electric_message::decode_Sfdjups(unsigned char *data, DevMonitorDataPtr data
         {
             for(int jpos=0;iLastNum>0 && jpos<10;++jpos) //读取每个模拟量有效数值
             {
-                if(data[iReadNum]!=0x20 && data[iReadNum]!=0x2F)
+                if(data[iReadNum]!=0x20 && data[iReadNum]!=0x2F && data[iReadNum]!=0x0D)
                 {
                     cNum[jpos] = data[iReadNum];
                     ++iReadNum;
@@ -2072,6 +2121,22 @@ int Electric_message::decode_EA800II(unsigned char *data, DevMonitorDataPtr data
         dainfo.fValue = AsciiToInt(data[iReadNum]);
         data_ptr->mValues[indexpos++] = dainfo;
         ++iReadNum;
+    }
+    return RE_SUCCESS;
+}
+
+int Electric_message::decode_REF615(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    if(data[7]!=0x04 && data[7] !=0x02)
+        return RE_CMDACK;
+    iaddcode = data[0];
+    int crcnum = data[8]/2;
+    DataInfo dainfo;
+    dainfo.bType = false;
+    for(int i=0;i<crcnum;++i)
+    {
+        dainfo.fValue = ((data[9+2*i]*256+data[10+2*i])*0.001f)*m_Ibb;
+        data_ptr->mValues[i] = dainfo;
     }
     return RE_SUCCESS;
 }

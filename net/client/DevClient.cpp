@@ -151,6 +151,23 @@ void DevClient::set_dev_run_state(string sStationId,string sDevid,int nState)
     }
 }
 
+//获得设备是否允许控制
+bool DevClient::dev_can_excute_cmd(string sStationId,string sDevid)
+{
+    boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
+    std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
+    for(;iter!=device_pool_.end();++iter)
+    {
+        if(iter->first.stationId == sStationId)
+        {
+            if(iter->second->is_contain_dev(sDevid))
+                return iter->second->dev_can_excute_cmd(sDevid);
+         }
+    }
+
+    return false;
+}
+
 //获得设备告警状态
 void DevClient::get_dev_alarm_state(string sStationId,string sDevid,map<int,map<int,CurItemAlarmInfo> >& cellAlarm)
 {
