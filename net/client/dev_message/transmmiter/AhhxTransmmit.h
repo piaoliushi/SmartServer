@@ -14,6 +14,8 @@ namespace hx_net{
 	private:
         int Md993Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
         int Md996Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+        int Md996HrrisData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate);
+        int Md996QBData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate);
 	private:
 		int m_subprotocol;
 		int m_addresscode;

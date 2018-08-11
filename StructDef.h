@@ -190,7 +190,8 @@ typedef enum HXPROTOCOL
 	HUIXIN_993            = 0,//汇鑫993数据采集单元
 	ANHUI_994             = 1,//安徽汇鑫994NEW
     HUIXIN_996            = 2,
-
+    HUIXIN_996_QBEX       = 3,//全波扩展
+    HUIXIN_996_HRRISEX    = 4,//哈里斯扩展
 }HxSubPrototcol;
 
 typedef enum ITPROTOCOL
@@ -326,6 +327,7 @@ typedef enum LINK_DEVICE
     LINK_NORMAL_SNMP_DEV    = 16,//通用snmp设备
     LINK_HX_0214_DA         = 18,//汇鑫0214DA切换器
     LINK_HX_0401_SP         = 19,//汇鑫0401SP切换器
+    LINK_JC_5103            = 20,//大连捷成DAS-5103
 }LinkDeviceSubProtocol;
 
 //上海全波

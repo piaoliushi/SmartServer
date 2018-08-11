@@ -523,6 +523,14 @@ namespace hx_net
            cmdUnit.commandId[5] = 0x55;
        }
            break;
+        case LINK_JC_5103:
+        {
+            if(lpParam->cparams().size()<1)
+                return;
+            int nChan = atoi(lpParam->cparams(0).sparamvalue().c_str());
+            GetSwitchCmdByChannel(nChan,cmdUnit);
+        }
+            break;
         default:
             break;
         }
@@ -579,6 +587,37 @@ namespace hx_net
             cmdUnit.commandId[3] = 0x00;
             cmdUnit.commandId[4] = cmdUnit.commandId[1]^cmdUnit.commandId[2];
             cmdUnit.commandId[5] = 0x55;
+        }
+            break;
+        case LINK_JC_5103:
+        {
+            if(channelId<3)
+            {
+                cmdUnit.commandLen = 14;
+                cmdUnit.commandId[0] = 0x01;
+                cmdUnit.commandId[1] = d_devInfo.iAddressCode;
+                cmdUnit.commandId[2] = 0x30;
+                cmdUnit.commandId[3] = 0x30;
+                cmdUnit.commandId[4] = 0x57;
+                cmdUnit.commandId[5] = 0x53;
+                cmdUnit.commandId[6] = 0x2B;
+                unsigned char chadd[10]={'0','0','0','0','0','0','0','0','0','\0'};
+
+                IntToAscii(channelId,&chadd[0]);
+                cmdUnit.commandId[7] = 0x30;
+                cmdUnit.commandId[8] = chadd[0];
+                cmdUnit.commandId[9] = 0x20;
+                cmdUnit.commandId[10] = 0xFE;
+                int ixor=0;
+                for(int i=1;i<11;++i)
+                {
+                    ixor = ixor^cmdUnit.commandId[i];
+                }
+                IntToAscii(ixor,&chadd[0]);
+                cmdUnit.commandId[11] = chadd[0];
+                cmdUnit.commandId[12] = chadd[1];
+                cmdUnit.commandId[13] = 0x04;
+            }
         }
             break;
         default:
@@ -749,6 +788,23 @@ namespace hx_net
             }
         }
             break;
+        case LINK_JC_5103:
+        {
+            if(data[0]==0x01 && data[1]==d_devInfo.iAddressCode && data[4]==0x52 && data[5]==0x53)
+                return 0;
+            else
+            {
+                unsigned char cDes[6]={0};
+                cDes[0]=0x01;
+                cDes[1]=d_devInfo.iAddressCode;
+                cDes[2]=0x30;
+                cDes[3]=0x30;
+                cDes[4]=0x52;
+                cDes[5]=0x53;
+                return kmp(data,nDataLen,cDes,6);
+            }
+        }
+            break;
         default:
             break;
         }
@@ -809,6 +865,9 @@ namespace hx_net
             break;
         case LINK_HX_0401_SP:
             idecresult = decode_0401SP(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
+        case LINK_JC_5103:
+            idecresult = decode_JC5103(data,d_curData_ptr,nDataLen,iaddcode);
             break;
         default:
             break;
@@ -926,6 +985,23 @@ namespace hx_net
            tmUnit.commandId[4] = 0x44;
            tmUnit.commandId[5] = 0x55;
            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case LINK_JC_5103:
+        {
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 9;
+            tmUnit.ackLen = 66;
+            tmUnit.commandId[0] = 0x01;
+            tmUnit.commandId[1] = d_devInfo.iAddressCode;
+            tmUnit.commandId[2] = 0x30;
+            tmUnit.commandId[3] = 0x30;
+            tmUnit.commandId[4] = 0x52;
+            tmUnit.commandId[5] = 0x53;
+            tmUnit.commandId[6] = 0x32;
+            tmUnit.commandId[7] = 0x33;
+            tmUnit.commandId[8] = 0x04;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
         }
@@ -1574,5 +1650,140 @@ namespace hx_net
        data_ptr->mValues[15] = data_ptr->mValues[9+2*ichanel];*/
        return RE_SUCCESS;
    }
+   int Link_message::decode_JC5103(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+  {
+      if(data[4]!=0x52 || data[5]!=0x53)
+          return RE_CMDACK;
+      iaddcode = data[1];
+      int nDataType;
+      char cNum[10]={0};
+      data = data+6;
+      int iLastNum=(nDataLen-6);
+      DataInfo dainfo;
+      while(1)
+      {
+          nDataType = data[0];
+          if(nDataType==0xFE)
+              break;
+          int iReadNum = 1;
+          for(int jpos=0;iLastNum>iReadNum && jpos<10;++jpos)
+          {
+              if(data[iReadNum]!=0x20)
+              {
+                  cNum[jpos] = data[iReadNum];
+                  ++iReadNum;
+              }
+              else
+              {
+                  ++iReadNum;
+                  break;
+              }
+          }
+          data = data+iReadNum;
+          switch(nDataType)
+          {
+          case 0x21:
+          {
+              dainfo.bType = true;
+              dainfo.fValue = atoi(cNum) == 1? 0:1;
+              data_ptr->mValues[0] = dainfo;
+          }
+              break;
+          case 0x22:
+          {
+              dainfo.bType = true;
+              dainfo.fValue = atoi(cNum) == 1? 0:1;
+              data_ptr->mValues[1] = dainfo;
+          }
+              break;
+          case 0x23:
+          {
+              dainfo.bType = true;
+              dainfo.fValue = atoi(cNum) == 1? 0:1;
+              data_ptr->mValues[2] = dainfo;
+          }
+              break;
+          case 0x24:
+          {
+              dainfo.bType = true;
+              dainfo.fValue = atoi(cNum) == 1? 0:1;
+              data_ptr->mValues[3] = dainfo;
+          }
+              break;
+          case 0x25:
+          {
+              dainfo.bType = false;
+              dainfo.fValue = atof(cNum);
+              data_ptr->mValues[4] = dainfo;
+          }
+              break;
+          case 0x26:
+          {
+              dainfo.bType = false;
+              dainfo.fValue = atof(cNum);
+              data_ptr->mValues[5] = dainfo;
+          }
+              break;
+          case 0x27:
+          {
+              dainfo.bType = false;
+              dainfo.fValue = atof(cNum);
+              data_ptr->mValues[6] = dainfo;
+          }
+              break;
+          case 0x28:
+          {
+              dainfo.bType = false;
+              dainfo.fValue = atof(cNum);
+              data_ptr->mValues[7] = dainfo;
+          }
+              break;
+          case 0x29:
+          {
+              dainfo.bType = false;
+              dainfo.fValue = atof(cNum);
+              data_ptr->mValues[8] = dainfo;
+          }
+              break;
+          case 0x2A:
+          {
+              dainfo.bType = false;
+              dainfo.fValue = atof(cNum);
+              data_ptr->mValues[9] = dainfo;
+          }
+              break;
+          case 0x2B:
+          {
+              dainfo.bType = false;
+              dainfo.fValue = atof(cNum);
+              data_ptr->mValues[10] = dainfo;
+          }
+              break;
+          case 0x2C:
+          {
+              dainfo.bType = true;
+              dainfo.fValue = atoi(cNum) == 1? 0:1;
+              data_ptr->mValues[11] = dainfo;
+          }
+              break;
+          case 0x2D:
+          {
+              dainfo.bType = false;
+              dainfo.fValue = atof(cNum);
+              data_ptr->mValues[12] = dainfo;
+          }
+              break;
+          case 0x2E:
+          {
+              dainfo.bType = true;
+              dainfo.fValue = atoi(cNum);
+              data_ptr->mValues[11] = dainfo;
+          }
+              break;
+          }
 
+          memset(&cNum,0,10);
+      }
+      return RE_SUCCESS;
+  }
 }
