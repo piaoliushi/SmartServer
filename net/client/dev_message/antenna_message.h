@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../../../DataType.h"
 #include "base_message.h"
 using namespace std;
@@ -22,12 +22,10 @@ public:
     void set_run_state(int curState);
     bool dev_can_excute_cmd();
     void excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult);
-    //执行命令
     void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
                                bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
 
     void switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult);
-//状态翻转是否可以倒天线
     bool can_switch_antenna();
 
 protected:
