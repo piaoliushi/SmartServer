@@ -1,4 +1,4 @@
-﻿#include "antenna_message.h"
+#include "antenna_message.h"
 #include "./net/SvcMgr.h"
 #include "../../../StationConfig.h"
 #include "../../../LocalConfig.h"
