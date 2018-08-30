@@ -96,7 +96,9 @@ See detail:  http://www.codeproject.com/Articles/508529/yaolog-A-powerful-easy-u
         #ifndef _T
         #define _T(x)     x
         #endif
-        //typedef char      TCHAR;
+#ifndef _YAOLOG_WIN32_
+        typedef char      TCHAR;
+#endif
     #endif
 #endif
 

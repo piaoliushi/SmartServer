@@ -196,7 +196,13 @@ void StrUtil::vFormat(yao_tstring& s, const TCHAR *fmt, va_list ap)
 #ifdef _YAOLOG_UNICODE_
     vFormatW(s, fmt, ap);
 #else
-    char *coverFmt = ConvertLPWSTRToLPSTR(fmt);
+
+    #ifdef _YAOLOG_WIN32_
+        char *coverFmt = ConvertLPWSTRToLPSTR(fmt);
+    #else
+        char *coverFmt = fmt;
+    #endif
+
     vFormatA(s, coverFmt, ap);
 #endif
 }
