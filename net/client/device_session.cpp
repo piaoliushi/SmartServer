@@ -1375,7 +1375,11 @@ void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curData
     double ninterval = difftime(tmCurTime,tmLastSaveTime[sDevId]);
 
     if(ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
+    {
+        if(ninterval<0)
+             tmLastSaveTime[sDevId] = tmCurTime;
         return ;
+    }
     GetInst(DataBaseOperation).AddItemMonitorRecord(sDevId,tmCurTime,curDataPtr,mapMonitorItem);
 
     //amend by lk at 2017-7-12 无论是否记录成功都更新保存时间
@@ -1408,7 +1412,11 @@ bool device_session::is_need_report_data(string sDevId)
     if(iter_propty!= modleInfos_.mapDevInfo[sDevId].map_DevProperty.end())
         nReportSpan = atoi(iter_propty->second.property_value.c_str());
     if(ninterval<nReportSpan)//间隔上报时间 need amend;
+    {
+        if(ninterval<0)
+             tmLastSendHttpTime[sDevId] = tmCurTime;
         return false;
+    }
     tmLastSendHttpTime[sDevId] = tmCurTime;
     return true;
 }
