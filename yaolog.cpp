@@ -200,7 +200,7 @@ void StrUtil::vFormat(yao_tstring& s, const TCHAR *fmt, va_list ap)
     #ifdef _YAOLOG_WIN32_
         char *coverFmt = ConvertLPWSTRToLPSTR(fmt);
     #else
-        char *coverFmt = fmt;
+        char *coverFmt = fmt2;
     #endif
 
     vFormatA(s, coverFmt, ap);
