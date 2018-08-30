@@ -91,7 +91,6 @@ SOURCES += main.cpp\
     net/client/dev_message/transmmiter/rstransmmit.cpp \
     net/client/dev_message/transmmiter/rvrtransmmit.cpp \
     net/client/dev_message/transmmiter/astransmmit.cpp \
-    minilogger.cpp \
     yaolog.cpp
 
 HEADERS  += \
@@ -180,7 +179,6 @@ HEADERS  += \
     net/client/dev_message/transmmiter/rstransmmit.h \
     net/client/dev_message/transmmiter/rvrtransmmit.h \
     net/client/dev_message/transmmiter/astransmmit.h \
-    minilogger.h \
     yaolog.h
 
 FORMS    += mainwindow.ui
