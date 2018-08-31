@@ -96,9 +96,9 @@ See detail:  http://www.codeproject.com/Articles/508529/yaolog-A-powerful-easy-u
         #ifndef _T
         #define _T(x)     x
         #endif
-#ifndef _YAOLOG_WIN32_
-        typedef char      TCHAR;
-#endif
+//#ifndef _YAOLOG_WIN32_
+        typedef char      T_CHAR;
+//#endif
     #endif
 #endif
 
@@ -296,7 +296,7 @@ private:
 class StrUtil
 {
 public:
-    static void vFormat(yao_tstring& s, const TCHAR *fmt, va_list ap);
+    static void vFormat(yao_tstring& s, const char *fmt, va_list ap);//TCHAR
     static void vFormatA(std::string& s, const char *fmt, va_list ap);
     static bool CompareNoCase(const std::string& strIn1, const std::string& strIn2);
     static std::string GetSysTimeStr(bool withMillisecond);
@@ -687,7 +687,7 @@ public:
     bool IsTextLog() { return m_logType != LOG_TYPE_BIN; }
 
     virtual void Log(const char *szSrcFile, const char *szFunction,
-        int nLine, const TCHAR *szFormat, ...) = 0;
+        int nLine, const char *szFormat, ...) = 0;//TCHAR
 #ifdef _YAOLOG_WIN32_
     virtual void LogA(const char *szSrcFile, const char *szFunction,
         int nLine, const char *szFormat, ...) = 0;
@@ -733,7 +733,7 @@ public:
     YaoLog(const char *szLogID, bool bEnable);
     virtual ~YaoLog();
     virtual void Log(const char *szSrcFile, const char *szFunction,
-        int nLine, const TCHAR *szFormat, ...);
+        int nLine, const char *szFormat, ...);//TCHAR
 #ifdef _YAOLOG_WIN32_
     virtual void LogA(const char *szSrcFile, const char *szFunction,
         int nLine, const char *szFormat, ...);
@@ -764,7 +764,7 @@ public:
 private:
     // unuseful...
     virtual void Log(const char *szSrcFile, const char *szFunction,
-        int nLine, const TCHAR *szFormat, ...) { assert(0); }
+        int nLine, const char *szFormat, ...) { assert(0); }//TCHAR
 #ifdef _YAOLOG_WIN32_
     virtual void LogA(const char *szSrcFile, const char *szFunction,
         int nLine, const char *szFormat, ...) { assert(0); }
@@ -789,7 +789,7 @@ private:
 
     // unuseful...
     virtual void Log(const char *szSrcFile, const char *szFunction,
-        int nLine, const TCHAR *szFormat, ...) { assert(0); }
+        int nLine, const char *szFormat, ...) { assert(0); }//TCHAR
 #ifdef _YAOLOG_WIN32_
     virtual void LogA(const char *szSrcFile, const char *szFunction,
         int nLine, const char *szFormat, ...) { assert(0); }

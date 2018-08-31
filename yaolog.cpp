@@ -133,7 +133,7 @@ tm *LocalTime(unsigned short& millitm)
 #ifdef _YAOLOG_UNICODE_
 
 #else
-char* ConvertLPWSTRToLPSTR (const TCHAR * lpwszStrIn)
+/*char* ConvertLPWSTRToLPSTR (const TCHAR * lpwszStrIn)
 {
     LPSTR pszOut = NULL;
     if (lpwszStrIn != NULL)
@@ -151,7 +151,7 @@ char* ConvertLPWSTRToLPSTR (const TCHAR * lpwszStrIn)
         }
     }
     return pszOut;
-}
+}*/
 #endif
 #endif
 
@@ -191,19 +191,19 @@ void TinyMutex::Unlock()
 #endif
 }
 
-void StrUtil::vFormat(yao_tstring& s, const TCHAR *fmt, va_list ap)
+void StrUtil::vFormat(yao_tstring& s, const char *fmt, va_list ap)//TCHAR
 {
 #ifdef _YAOLOG_UNICODE_
     vFormatW(s, fmt, ap);
 #else
 
-    #ifdef _YAOLOG_WIN32_
-        char *coverFmt = ConvertLPWSTRToLPSTR(fmt);
-    #else
-        char *coverFmt = fmt;
-    #endif
+   // #ifdef _YAOLOG_WIN32_
+    //    const char *coverFmt = ConvertLPWSTRToLPSTR(fmt);
+   // #else
+    //   const char *coverFmt = fmt;
+    //#endif
 
-    vFormatA(s, coverFmt, ap);
+    vFormatA(s,fmt , ap);//coverFmt
 #endif
 }
 
@@ -2120,7 +2120,7 @@ void YaoLog::DoLog(const std::string& str,
 }
 
 void YaoLog::Log(const char *szSrcFile, const char *szFunction,
-                 int nLine, const TCHAR *szFormat, ...)
+                 int nLine, const char *szFormat, ...)//TCHAR
 {
     if (!m_params.bEnable) return;
 
