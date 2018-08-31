@@ -151,11 +151,12 @@ int main(int argc, char *argv[])
             "info", true,
             YaoUtil::OUT_FLAG_STDOUT | YaoUtil::OUT_FLAG_FILE,
             true, false, true, true, NULL);
+    YAOLOG_SET_LOGFILE_ATTR("info", false, false, true,NULL,NULL);
 
     LOG__("info", "My name is ! I'm %d!",  29);
     LOGA__("info", "My name is %s! I'm %d!", "neil", 29);
 
-
+YAOLOG_DISABLE_ALL(false);
     MainWindow w;
 
 #ifdef Q_OS_WIN
