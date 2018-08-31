@@ -119,7 +119,7 @@ public:
             string sUsr = commandmsg_->soperuser();
             map<int,string> mapParam;//保存参数
             for(int i=0;i<commandmsg_->cparams().size();++i)
-                mapParam[i] = commandmsg_->cparams(0).sparamvalue();
+                mapParam[i] = commandmsg_->cparams(i).sparamvalue();
             e_ErrorCode nReult = GetInst(SvcMgr).start_exec_task(commandmsg_->sdevid(),sUsr,MsgPtr->type,mapParam);
             devCommdRsltPtr ackMsg(new DeviceCommandResultNotify);
             ackMsg->set_sstationid(commandmsg_->sstationid());

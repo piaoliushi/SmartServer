@@ -37,6 +37,8 @@ namespace hx_net
         ,d_Host_(-1)
         ,d_relate_Agent_(false)
         ,d_antenna_Agent_(false)
+        ,d_onekeyopen_996(false)
+        ,d_onekeyopen_soft(false)
         ,d_cur_task_(-1)
         ,d_ptransmmit(NULL)
         ,dev_run_state_(dev_unknown)
@@ -77,6 +79,12 @@ namespace hx_net
             iter = d_relate_antenna_ptr_->map_DevProperty.find("Agent");
             if(iter!=d_relate_antenna_ptr_->map_DevProperty.end())
                  d_antenna_Agent_= true;
+            iter = d_relate_antenna_ptr_->map_DevProperty.find("WPBootFor996");
+            if(iter!=d_relate_antenna_ptr_->map_DevProperty.end())
+                 d_onekeyopen_996= true;
+            iter = d_relate_antenna_ptr_->map_DevProperty.find("WPBootForServer");
+            if(iter!=d_relate_antenna_ptr_->map_DevProperty.end())
+                 d_onekeyopen_soft= true;
         }
 
 
@@ -598,19 +606,64 @@ namespace hx_net
 
             //既不是自动开关机也不是定时开关机
             if( d_cur_user_!="auto"){// && d_cur_user_!="timer"
-                //天线在位执行开机，否则返回
-                dev_run_state nAntennaS = GetInst(SvcMgr).get_dev_run_state(d_relate_antenna_ptr_->sStationNum,
-                                           d_relate_antenna_ptr_->sDevNum);
+
+                if(d_onekeyopen_996==false && d_onekeyopen_soft==false){
+                    //天线在位执行开机，否则返回
+                    if(d_antenna_Agent_ == false){
+                        dev_run_state nAntennaS = GetInst(SvcMgr).get_dev_run_state(d_relate_antenna_ptr_->sStationNum,
+                                                                                    d_relate_antenna_ptr_->sDevNum);
 
 
-                if((nAntennaS == antenna_host && d_Host_==TRANSMITTER_HOST) ||
-                    (nAntennaS == antenna_backup && d_Host_==TRANSMITTER_BACKUP))
+                        if((nAntennaS == antenna_host && d_Host_==TRANSMITTER_HOST) ||
+                                (nAntennaS == antenna_backup && d_Host_==TRANSMITTER_BACKUP))
+                        {
+
+                        }else{
+                            eErrCode = EC_OK;
+                            nExcutResult = 7;//天线不在位
+                            return;
+                        }
+                    }
+                }
+                else if(d_onekeyopen_soft)
                 {
+                    if(d_antenna_Agent_ == false){
 
-                }else{
-                    eErrCode = EC_OK;
-                    nExcutResult = 7;//天线不在位
-                    return;
+                        bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
+                        if(can_excute == false){
+                            eErrCode = EC_OK;
+                            nExcutResult = 8;//天线防抖
+                            return ;
+                        }
+                    }
+
+                    //关联机器在使用则进行关主机动作
+                    if(d_relate_tsmt_ptr_->bUsed==true) {
+                        //待处理，由开机指令引起的关机参数，可以依据开机带入的参数来转化为关机参数，暂时不用
+                        map<int,string>  tmParam;
+                        if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
+                                                                    d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam))
+                            return ;
+
+                      //  devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
+                      //  commandmsg_->set_sdevid(d_relate_tsmt_ptr_->sDevNum);
+                     //   GetInst(SvcMgr).excute_command(d_relate_tsmt_ptr_->sDevNum,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_user_,commandmsg_);
+                    }
+
+                    //计算目标天线位置
+                    e_MsgType nAntennaCmd = (d_Host_== 0)?MSG_ANTENNA_BTOH_OPR:MSG_ANTENNA_HTOB_OPR;
+
+                    //验证并切换天线
+                    if(d_antenna_Agent_ == false){//如果天线是代理，不进行倒天线动作
+                        //待处理，由开机指令引起的倒天线参数，可以依据开机带入的参数来转化为倒天线参数，暂时不用
+                        map<int,string>  tmParam;
+                        int nResult = GetInst(SvcMgr).start_exec_task(d_relate_antenna_ptr_->sDevNum,
+                                                                      d_cur_user_,nAntennaCmd,tmParam);
+                        if(EC_OK != nResult){
+
+                            return ;
+                        }
+                    }
                 }
 
             }else{

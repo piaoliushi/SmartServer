@@ -80,6 +80,8 @@ private:
     int                    d_Host_;//主机标志(-1:未绑定主备属性//0->主机，1->备机)
     bool                   d_relate_Agent_;//主机代理标志
     bool                   d_antenna_Agent_;//天线代理标志
+    bool                   d_onekeyopen_996;//996一键开机标志
+    bool                   d_onekeyopen_soft;//通用软件一键开机标志
     time_t                 d_OprStartTime;//提交控制命令开始时间
     Transmmiter           *d_ptransmmit;
     DevMonitorDataPtr      d_curData_ptr;
