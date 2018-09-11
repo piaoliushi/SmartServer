@@ -58,9 +58,15 @@ public:
         stIsHaveModelAck,
         stAteAck,
         stCmgfAck,
+        stSmsssAck,
+        stRssirep_Ack,
         stExitThread				// 退出
     } nState;				// 处理过程的状态
-    explicit Gsms(QObject *parent = 0);
+    enum{
+        tyGsm    = 0,//通用GSM
+        tyHwCdma = 1,//华为CDMA323
+    }SmsType;
+    explicit Gsms(int mdtype=0,QObject *parent = 0);
     ~Gsms();
     bool OpenCom(int nPort,int nBaudRate=57600);
     bool CloseComm();
@@ -96,7 +102,8 @@ public slots:
     void check_timer();
     void try_timer();
 
-private:
+private://GSM
+    void GsmComdata(int istate);
     void get_sendmsg_cmd_ack();
     void get_Response_cmd_ack();
     void get_CSCA_cmd_ack();
@@ -115,7 +122,16 @@ private:
     int gsmSerializeNumbers(const char* pSrc, char* pDst, int nSrcLength);
     int gsmEncodePdu(const SM_PARAM* pSrc, char* pDst);
     int gsmDecodePdu(const char* pSrc, SM_PARAM* pDst);
-
+private://CDMA-HW
+    void HwcdmaComdata(int istate);
+    void get_have_cdma_ack();
+    void get_rssirep_cmd_ack();
+    void get_ate_cdma_ack();
+    void get_cmgf_cdma_ack();
+    void get_smsss_cmd_ack();
+    void get_sysinfo_ack();
+    void get_sendmsg_cdma_ack();
+    void get_Response_cdma_ack();
 private:
     int m_nSendIn;		// 发送队列的输入指针
     int m_nSendOut;		// 发送队列的输出指针
@@ -142,6 +158,8 @@ private:
     QTimer *pTimerTryInit_;
     int nTrycount_;//尝试计数
     QByteArray cach_receive_;
+    int modle_type;
+    int m_nSendPduLen;
 };
 
 #endif // GSMS_H

@@ -217,6 +217,13 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
                 return kmp(data,nDataLen,cDes,1);
             }
         }
+        case AMS_PM800:
+        case AMS_PM1200:{
+            if(data[0]==0x50 && data[1]==0x4D)
+                return (data[4]*256+data[5]);
+            else
+                return RE_HEADERROR;
+        }
         }
     }
         break;
@@ -328,6 +335,13 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
                    m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                    return iresult;
                }
+            case AMS_PM800:
+            case AMS_PM1200:
+                {
+                   int iresult = decode_PM812(data,d_curData_ptr,nDataLen,iaddcode);
+                   m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                   return iresult;
+               }
 
         }
         break;
@@ -362,6 +376,8 @@ bool Electric_message::IsStandardCommand()
         case ABB_104:
             return true;
         case AMS_REF615:
+        case AMS_PM800:
+         case AMS_PM1200:
             return true;
         }
         return false;
@@ -972,6 +988,14 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
                     tmUnit.commandId[11]=0x03;
                     cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
                 }
+            break;
+        case AMS_PM800:
+        case AMS_PM1200:{
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 0;
+            tmUnit.ackLen = 6;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
             break;
 
         }
@@ -2140,6 +2164,25 @@ int Electric_message::decode_REF615(unsigned char *data, DevMonitorDataPtr data_
     }
     return RE_SUCCESS;
 }
-
+int Electric_message::decode_PM812(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    iaddcode = data[2];
+    int ndanum = (data[4]*256+data[5]-2)/5;
+    DataInfo dainfo;
+    dainfo.bType = false;
+    float fdat=0;
+    int index = 0;
+    for(int i=0;i<ndanum;++i)
+    {
+        index = data[6+5*i];
+        *(((char*)(&fdat) + 0)) = data[7+5*i];
+        *(((char*)(&fdat) + 1)) = data[8+5*i];
+        *(((char*)(&fdat) + 2)) = data[9+5*i];
+        *(((char*)(&fdat) + 3)) = data[10+5*i];
+        dainfo.fValue = fdat;
+        data_ptr->mValues[index] = dainfo;
+    }
+    return RE_SUCCESS;
+}
 
 }

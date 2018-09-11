@@ -805,6 +805,12 @@ namespace hx_net
             }
         }
             break;
+        case LINK_HX_6300:{
+               if(data[0]==0xAA && data[1]==0x63)
+                   return (data[5]*256+data[6]);
+               else
+                   return RE_HEADERROR;
+           }
         default:
             break;
         }
@@ -869,6 +875,9 @@ namespace hx_net
         case LINK_JC_5103:
             idecresult = decode_JC5103(data,d_curData_ptr,nDataLen,iaddcode);
             break;
+        case LINK_HX_6300:
+            idecresult = decode_6300(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
         default:
             break;
         }
@@ -888,6 +897,7 @@ namespace hx_net
         case LINK_HX_0401_DA:
         case LINK_HX_0401_DABS:
         case LINK_HX_0214_DA:
+        case LINK_HX_6300:
             return true;
         }
         return false;
@@ -1001,6 +1011,27 @@ namespace hx_net
             tmUnit.commandId[6] = 0x32;
             tmUnit.commandId[7] = 0x33;
             tmUnit.commandId[8] = 0x04;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case LINK_HX_6300:{
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 14;
+            tmUnit.ackLen = 7;
+            tmUnit.commandId[0] = 0xAA;
+            tmUnit.commandId[1] = 0x63;
+            tmUnit.commandId[2] = 0x11;
+            tmUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            tmUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            tmUnit.commandId[5] = 0x00;
+            tmUnit.commandId[6] = 0x07;
+            tmUnit.commandId[7] = 0x00;
+            tmUnit.commandId[8] = 0x00;
+            tmUnit.commandId[9] = 0x00;
+            tmUnit.commandId[10] = 0x00;
+            tmUnit.commandId[11] = 0x00;
+            tmUnit.commandId[12] = 0x00;
+            tmUnit.commandId[13] = 0x55;
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
@@ -1650,6 +1681,25 @@ namespace hx_net
        data_ptr->mValues[15] = data_ptr->mValues[9+2*ichanel];*/
        return RE_SUCCESS;
    }
+
+
+   int Link_message::decode_6300(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+  {
+      if(data[2]!=0x11)
+          return RE_CMDACK;
+      iaddcode = data[3]*256+data[4];
+      DataInfo dainfo;
+      dainfo.bType = false;
+      dainfo.fValue = (data[8]-120)*0.10;
+      data_ptr->mValues[0] = dainfo;
+      dainfo.fValue = (data[9]-120)*0.10;
+      data_ptr->mValues[1] = dainfo;
+      dainfo.fValue = (data[10]-100)*0.1;
+      data_ptr->mValues[2] = dainfo;
+      return RE_SUCCESS;
+  }
+
+
    int Link_message::decode_JC5103(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
   {
       if(data[4]!=0x52 || data[5]!=0x53)

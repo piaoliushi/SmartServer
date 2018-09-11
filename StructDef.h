@@ -249,6 +249,8 @@ typedef enum EDAPROTOCOL
     SF_DJ_UPS            = 19,//松丰DJ-UPS
     YISITE_EA800II       = 20,//易事特UPS-EA800II型
     AMS_REF615           = 21,//艾默生REF615
+    AMS_PM800            = 22,
+    AMS_PM1200           = 23,
     ABB_104              = 100,//ABB104电表
 }EdaSubProtocol;
 
@@ -328,6 +330,7 @@ typedef enum LINK_DEVICE
     LINK_HX_0214_DA         = 18,//汇鑫0214DA切换器
     LINK_HX_0401_SP         = 19,//汇鑫0401SP切换器
     LINK_JC_5103            = 20,//大连捷成DAS-5103
+    LINK_HX_6300            = 21,//汇鑫6300音频处理器
 }LinkDeviceSubProtocol;
 
 //上海全波

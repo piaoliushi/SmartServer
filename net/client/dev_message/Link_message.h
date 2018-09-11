@@ -57,6 +57,7 @@ protected:
     int decode_0214DA(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_0401SP(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_JC5103(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
+    int decode_6300(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
 private:
     void GetSwitchCmd(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     void GetControlModCmd(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);

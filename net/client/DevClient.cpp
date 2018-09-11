@@ -68,11 +68,26 @@ void DevClient::connect_all()
 
     }
 
-    if(GetInst(StationConfig).IsHaveGsm())
+   /* if(GetInst(StationConfig).IsHaveGsm())
     {
         ComCommunicationMode cominfo = GetInst(StationConfig).getGsmInfo();
         if(!m_pGsm_ptr_)
             m_pGsm_ptr_=boost::shared_ptr<Gsms>(new Gsms());
+
+        if(m_pGsm_ptr_->OpenCom(cominfo.icomport,cominfo.irate))
+        {
+            QObject::connect(m_pGsm_ptr_.get(),SIGNAL(S_state(int,bool)),
+                             GetInst(SvcMgr).get_notify(),SIGNAL(S_gsm_state(int,bool)));
+            m_pGsm_ptr_->gsmInit();
+        }
+    }*/
+
+
+    if(GetInst(StationConfig).IsHaveGsm())
+    {
+        ComCommunicationMode cominfo = GetInst(StationConfig).getGsmInfo();
+        if(!m_pGsm_ptr_)
+            m_pGsm_ptr_=boost::shared_ptr<Gsms>(new Gsms(cominfo.iparity_bit));
 
         if(m_pGsm_ptr_->OpenCom(cominfo.icomport,cominfo.irate))
         {

@@ -1,9 +1,10 @@
 #include "gsms.h"
 //#include <QWaitCondition>
-Gsms::Gsms(QObject *parent) :
+Gsms::Gsms(int mdtype,QObject *parent) :
     QObject(parent)
   ,pQSerialport_ptr_(new QSerialPort(this))
   ,str_SCA("")
+  ,modle_type(mdtype)
 {
     m_nSendIn = 0;
     m_nSendOut = 0;
@@ -11,6 +12,7 @@ Gsms::Gsms(QObject *parent) :
     m_nRecvOut = 0;
     b_run_ = false;
     nTrycount_ = 0;
+    m_nSendPduLen = 0;
     //  _SmThreadptr.reset(new boost::thread(boost::bind(&Gsms::SmThread,this)));
     pTimerOut_ = new QTimer(this);
     pTimerTryInit_ = new QTimer(this);
@@ -350,21 +352,40 @@ void Gsms::Run()
 
 int Gsms::gsmSendMessage(SM_PARAM *pSrc)
 {
-    int nPduLength;		// PDU串长度
-    unsigned char nSmscLength;	// SMSC串长度
-    char cmd[16];		// 命令串
-    memset(pdu,0,512);
-    nPduLength = gsmEncodePdu(pSrc, pdu);	// 根据PDU参数，编码PDU串
-    strcat(pdu, "\x01a");		// 以Ctrl-Z结束
+    if(modle_type==tyGsm)
+    {
+        int nPduLength;		// PDU串长度
+        unsigned char nSmscLength;	// SMSC串长度
+        char cmd[16];		// 命令串
+        memset(pdu,0,512);
+        nPduLength = gsmEncodePdu(pSrc, pdu);	// 根据PDU参数，编码PDU串
+        strcat(pdu, "\x01a");		// 以Ctrl-Z结束
 
-    gsmString2Bytes(pdu, &nSmscLength, 2);	// 取PDU串中的SMSC信息长度
-    nSmscLength++;
-    sprintf(cmd, "AT+CMGS=%d\r", nPduLength / 2 - nSmscLength);	// 生成命令
-    n_cmdresult_=-1;
-    boost::recursive_mutex::scoped_lock lock(data_mutex);
-    nstate=stSendMessageRequest;
-    int nwlen = WriteComm(cmd, strlen(cmd));	// 先输出命令串
-    return -1;
+        gsmString2Bytes(pdu, &nSmscLength, 2);	// 取PDU串中的SMSC信息长度
+        nSmscLength++;
+        sprintf(cmd, "AT+CMGS=%d\r", nPduLength / 2 - nSmscLength);	// 生成命令
+        n_cmdresult_=-1;
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        nstate=stSendMessageRequest;
+        int nwlen = WriteComm(cmd, strlen(cmd));	// 先输出命令串
+    }
+    else// if(modle_type==tyHwCdma)
+    {
+        char cmd[1024];
+        sprintf(cmd, "AT^HCMGS=\"%s\"\r", pSrc->TPA);
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        nstate=stSendMessageRequest;
+        unsigned char buf[1024];
+        m_nSendPduLen = gsmEncodeUcs2(pSrc->TP_UD,&buf[0],strlen(pSrc->TP_UD));
+        memcpy(&pdu[0],&buf[0],m_nSendPduLen);
+        int nwlen = WriteComm(cmd, strlen(cmd));	// 先输出命令串
+    }
+   /* else
+    {
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        nstate=stContinueRest;
+    }*/
+    return 0;
 }
 
 int Gsms::gsmReadMessageList()
@@ -591,28 +612,13 @@ void Gsms::comrecive()
         boost::recursive_mutex::scoped_lock lock(data_mutex);
         cur_state = nstate;
     }
-    switch (cur_state) {
-    case stSendMessageRequest:
-        get_sendmsg_cmd_ack();
-        break;
-    case stSendMessageResponse:
-        get_Response_cmd_ack();
-        break;
-    case stReadCSCAack:
-        get_CSCA_cmd_ack();
-        break;
-    case stIsHaveModelAck:
-        get_have_cmd_ack();
-        break;
-    case stAteAck:
-        get_ate_cmd_ack();
-        break;
-    case stCmgfAck:
-        get_cmgf_cmd_ack();
-        break;
-    default:
-        pQSerialport_ptr_->readAll();
-        break;
+    if(modle_type==tyGsm)
+    {
+        GsmComdata(nstate);
+    }
+    else
+    {
+        HwcdmaComdata(nstate);
     }
 }
 
@@ -680,6 +686,33 @@ void Gsms::try_timer()
     }
         break;
     default:
+        break;
+    }
+}
+
+void Gsms::GsmComdata(int istate)
+{
+    switch (istate) {
+    case stSendMessageRequest:
+        get_sendmsg_cmd_ack();
+        break;
+    case stSendMessageResponse:
+        get_Response_cmd_ack();
+        break;
+    case stReadCSCAack:
+        get_CSCA_cmd_ack();
+        break;
+    case stIsHaveModelAck:
+        get_have_cmd_ack();
+        break;
+    case stAteAck:
+        get_ate_cmd_ack();
+        break;
+    case stCmgfAck:
+        get_cmgf_cmd_ack();
+        break;
+    default:
+        pQSerialport_ptr_->readAll();
         break;
     }
 }
@@ -1051,5 +1084,227 @@ int Gsms::gsmDecodePdu(const char *pSrc, SM_PARAM *pDst)
     // 返回目标字符串长度
     return nDstLength;
 
+}
+
+void Gsms::HwcdmaComdata(int istate)
+{
+    switch (istate) {
+    case stSendMessageRequest:
+        get_sendmsg_cdma_ack();
+        break;
+    case stSendMessageResponse:
+        get_Response_cdma_ack();
+        break;
+    case stReadCSCAack:
+        get_sysinfo_ack();
+        break;
+    case stIsHaveModelAck:
+        get_have_cdma_ack();
+        break;
+    case stAteAck:
+        get_ate_cdma_ack();
+        break;
+    case stCmgfAck:
+        get_cmgf_cdma_ack();
+        break;
+    case stSmsssAck:
+        get_smsss_cmd_ack();
+        break;
+    case stRssirep_Ack:
+        get_rssirep_cmd_ack();
+        break;
+    default:
+        pQSerialport_ptr_->readAll();
+        break;
+    }
+}
+
+void Gsms::get_have_cdma_ack()
+{
+    if(pTimerOut_->isActive())
+        pTimerOut_->stop();
+    QByteArray qarray = pQSerialport_ptr_->readAll();
+    if(strstr(qarray.constData(),"OK")==NULL)
+    {
+        emit S_state(0,false);
+        if(nTrycount_<5)
+            pTimerTryInit_->start(60000+60000*nTrycount_);
+    }
+    else
+    {
+        emit S_state(0,true);
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        nstate=stRssirep_Ack;
+        WriteComm("AT^RSSIREP=0\r", 13);
+        nTrycount_ = 0;
+        pTimerOut_->start(1000);
+
+    }
+}
+
+void Gsms::get_rssirep_cmd_ack()
+{
+    if(pTimerOut_->isActive())
+        pTimerOut_->stop();
+    QByteArray qarray = pQSerialport_ptr_->readAll();
+    if(strstr(qarray.constData(),"OK")==NULL)
+    {
+        emit S_state(1,false);
+        if(nTrycount_<5)
+            pTimerTryInit_->start(60000+60000*nTrycount_);
+    }
+    else
+    {
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        nstate=stAteAck;
+        WriteComm("ATE0\r", 5);
+        nTrycount_ = 0;
+        pTimerOut_->start(1000);
+    }
+}
+
+void Gsms::get_ate_cdma_ack()
+{
+    if(pTimerOut_->isActive())
+        pTimerOut_->stop();
+    QByteArray qarray = pQSerialport_ptr_->readAll();
+    if(strstr(qarray.constData(),"OK")==NULL)
+    {
+        emit S_state(1,false);
+        if(nTrycount_<5)
+            pTimerTryInit_->start(60000+60000*nTrycount_);
+    }
+    else
+    {
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        nstate=stCmgfAck;
+        WriteComm("AT+CMGF=1\r",10);
+        nTrycount_ = 0;
+        pTimerOut_->start(1000);
+    }
+}
+
+void Gsms::get_cmgf_cdma_ack()
+{
+    if(pTimerOut_->isActive())
+        pTimerOut_->stop();
+    QByteArray qarray = pQSerialport_ptr_->readAll();
+    if(strstr(qarray.constData(),"OK")==NULL)
+    {
+        emit S_state(1,false);
+        if(nTrycount_<5)
+            pTimerTryInit_->start(60000+60000*nTrycount_);
+    }
+    else
+    {
+        emit S_state(1,true);
+        nTrycount_ = 0;
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        nstate=stSmsssAck;
+        WriteComm("AT^HSMSSS=0,0,6,0\r",18);
+        pTimerOut_->start(1000);
+    }
+}
+
+void Gsms::get_smsss_cmd_ack()
+{
+    if(pTimerOut_->isActive())
+        pTimerOut_->stop();
+    QByteArray qarray = pQSerialport_ptr_->readAll();
+    if(strstr(qarray.constData(),"OK")==NULL)
+    {
+        emit S_state(1,false);
+        if(nTrycount_<5)
+            pTimerTryInit_->start(60000+60000*nTrycount_);
+    }
+    else
+    {
+         nTrycount_ = 0;
+         boost::recursive_mutex::scoped_lock lock(data_mutex);
+         nstate=stReadCSCAack;
+         WriteComm("AT^SYSINFO\r",11);
+         pTimerOut_->start(2000);
+    }
+}
+
+void Gsms::get_sysinfo_ack()
+{
+    if(pTimerOut_->isActive())
+        pTimerOut_->stop();
+    QByteArray qarray = pQSerialport_ptr_->readAll();
+    cach_receive_.append(qarray);
+    if(strstr(cach_receive_.constData(),"ERROR")!=NULL)
+    {
+        cach_receive_.clear();
+        emit S_state(2,false);
+        if(nTrycount_<5)
+            pTimerTryInit_->start(60000+60000*nTrycount_);
+        return;
+    }
+    if(strstr(cach_receive_.constData(), "^SYSINFO") != NULL)
+    {
+        if(strstr(cach_receive_.constData(), "OK\r\n") != NULL)
+        {
+            string sysinfo = string(strstr(cach_receive_.constData(), ":"));
+            cach_receive_.clear();
+            string strcard = sysinfo.substr(sysinfo.find_last_of(",")+1,1);
+            if(strcard=="1")
+            {
+                Run();
+                emit S_state(2,true);
+            }
+            else
+            {
+                emit S_state(2,false);
+            }
+        }
+    }
+}
+
+void Gsms::get_sendmsg_cdma_ack()
+{
+    cach_receive_.clear();
+
+    QByteArray qarray = pQSerialport_ptr_->readAll();
+
+    if(qarray.size()==4 && strncmp(qarray.constData(),"\r\n> ",4)==0)
+    {
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        nstate=stSendMessageResponse;
+        pdu[m_nSendPduLen]=0x00;
+        pdu[m_nSendPduLen+1]=0x1A;		// 得到肯定回答，继续输出PDU串
+        WriteComm(pdu, m_nSendPduLen+2);
+    }
+    else
+    {
+        boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
+        n_cmdresult_ = 1;
+    }
+}
+
+void Gsms::get_Response_cdma_ack()
+{
+    QByteArray qarray = pQSerialport_ptr_->readAll();
+    cach_receive_.append(qarray);
+    cout<<"get_Response_cmd_ack:-----readAll===size="<<cach_receive_.size()<<"---value="<<cach_receive_.constData()<<endl;
+    if (strstr(cach_receive_.constData(), "OK\r\n") != NULL)
+    {
+        cach_receive_.clear();
+        boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
+        n_cmdresult_ = 0;
+        emit S_state(3,true);
+    }
+    else if (strstr(cach_receive_.constData(), "ERROR") != NULL)
+    {
+         cach_receive_.clear();
+         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
+         n_cmdresult_ = 1;
+         emit S_state(3,false);
+    }
+    else
+    {
+        boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
+        n_cmdresult_ = -1;
+    }
 }
 
