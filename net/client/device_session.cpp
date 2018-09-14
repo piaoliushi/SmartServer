@@ -1185,6 +1185,12 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
     map<string,DeviceInfo>::iterator witer = modleInfos_.mapDevInfo.begin();
     for(;witer!=modleInfos_.mapDevInfo.end();++witer)
     {
+
+
+        //notify_test_message(witer->second.sDevName);
+
+
+
         boost::recursive_mutex::scoped_lock lock(update_cmd_schedule_mutex_);//增加锁防止读写竞争
         vector<Command_Scheduler>::iterator cmd_iter = witer->second.vCommSch.begin();
         for(;cmd_iter!=witer->second.vCommSch.end();++cmd_iter)
@@ -1259,6 +1265,19 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
         }
     }
     start_task_schedules_timer();
+}
+
+void device_session::notify_test_message(string sDevId)
+{
+    time_t  curTm;
+    std::time(&curTm);//循环执行计时开始
+    tm *pCurTime = localtime(&curTm);
+    char str_time[64];
+    strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
+
+    string sDesc = "TestDevice"+DEV_CMD_OPR_DESC(CMD_EXC_A_ON);
+    sDesc+=DEV_CMD_RESULT_DESC(CMD_EXC_SUCCESS);
+    http_ptr_->send_http_excute_result_messge_to_platform(sDevId,str_time,CMD_EXC_A_ON,sDesc);
 }
 
 void device_session::notify_client_execute_result(string sStationId,string sDevId,string devName,int devType,
@@ -1614,6 +1633,8 @@ void device_session::handle_connected(const boost::system::error_code& error)
 
             start_read_head(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
         }
+        else  if(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen<=0)
+            start_read_some();
         else
             start_read(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
 
@@ -2302,5 +2323,81 @@ void device_session::parse_action(vector<LinkAction> &vaction,string &devId,Devi
     }
 
 }
+
+
+void device_session::start_read_some()
+{
+    if(receive_msg_ptr_->space()<=10)
+    {
+        return;
+    }
+    socket().async_read_some(boost::asio::buffer(receive_msg_ptr_->w_ptr(),receive_msg_ptr_->space()),
+                         #ifdef USE_STRAND
+                                     strand_.wrap(
+                             #endif
+                                         boost::bind(&device_session::handle_read_some,this,
+                                                     boost::asio::placeholders::error,
+                                                     boost::asio::placeholders::bytes_transferred)
+                             #ifdef USE_STRAND
+                                         )
+                         #endif
+                             );
+}
+
+void device_session::handle_read_some(const boost::system::error_code &error, size_t bytes_transferred)
+{
+    if(!is_connected())
+        return;
+    if(!error)
+    {
+
+        int nResult = receive_msg_ptr_->check_msg_header(dev_agent_and_com[cur_dev_id_].second,
+                                                                bytes_transferred,CMD_QUERY,cur_msg_q_id_);
+        if(nResult == RE_SUCCESS || nResult == RE_CMDACK)
+        {
+            query_timeout_count_ = 0;
+            if(cur_msg_q_id_<dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY].size()-1)
+            {
+                ++cur_msg_q_id_;
+                boost::this_thread::sleep(boost::posix_time::milliseconds(200));
+                e_ErrorCode eErrCode = EC_UNKNOWN;
+                send_cmd_to_dev(cur_dev_id_,MSG_DEVICE_QUERY,cur_msg_q_id_,eErrCode);
+            }
+            else{
+                cur_msg_q_id_=0;
+                DevMonitorDataPtr curData_ptr(new Data);
+                int iaddcode=-1;
+                int nResult = receive_msg_ptr_->decode_msg(dev_agent_and_com[cur_dev_id_].second,curData_ptr,bytes_transferred,iaddcode);
+                if(nResult == RE_SUCCESS){
+                    string sdevid = get_devid_by_addcode(iaddcode);
+                    handler_data(sdevid,curData_ptr);//处理数据
+                    cur_dev_id_ = next_dev_id();//切换到下一个设备
+                }
+                else if( nResult != RE_CMDACK){
+                    close_all();
+                    cout<<"handle_read---nResult!=0-----close"<<endl;
+                    start_connect_timer();
+                    return;
+                }
+            }
+            start_read_some();// (dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
+        }
+        else if(nResult > RE_SUCCESS){//还有后续消息
+            start_read_some();//start_read(nResult);
+        }
+        else if(nResult == RE_HEADERROR){
+            close_all();
+            start_connect_timer();
+            return;
+        }
+    }
+    else{
+        close_all();
+        cout<<"handle_read---error!=0-----close"<<endl;
+        start_connect_timer();
+        return;
+    }
+}
+
 
 }

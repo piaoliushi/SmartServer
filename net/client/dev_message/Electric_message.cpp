@@ -2175,10 +2175,10 @@ int Electric_message::decode_PM812(unsigned char *data, DevMonitorDataPtr data_p
     for(int i=0;i<ndanum;++i)
     {
         index = data[6+5*i];
-        *(((char*)(&fdat) + 0)) = data[7+5*i];
-        *(((char*)(&fdat) + 1)) = data[8+5*i];
-        *(((char*)(&fdat) + 2)) = data[9+5*i];
-        *(((char*)(&fdat) + 3)) = data[10+5*i];
+        *(((char*)(&fdat) + 0)) = data[10+5*i];
+        *(((char*)(&fdat) + 1)) = data[9+5*i];
+        *(((char*)(&fdat) + 2)) = data[8+5*i];
+        *(((char*)(&fdat) + 3)) = data[7+5*i];
         dainfo.fValue = fdat;
         data_ptr->mValues[index] = dainfo;
     }

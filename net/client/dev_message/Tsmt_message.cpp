@@ -644,10 +644,6 @@ namespace hx_net
                         if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
                                                                     d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam))
                             return ;
-
-                      //  devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
-                      //  commandmsg_->set_sdevid(d_relate_tsmt_ptr_->sDevNum);
-                     //   GetInst(SvcMgr).excute_command(d_relate_tsmt_ptr_->sDevNum,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_user_,commandmsg_);
                     }
 
                     //计算目标天线位置
@@ -680,11 +676,6 @@ namespace hx_net
 
                 //关联机器在使用则进行关主机动作
                 if(d_relate_tsmt_ptr_->bUsed==true) {
-                    //待处理，由开机指令引起的关机参数，可以依据开机带入的参数来转化为关机参数，暂时不用
-                    //map<int,string>  tmParam;
-                    //if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
-                    //                                            d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam))
-                    //    return ;
 
                     devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
                     commandmsg_->set_sdevid(d_relate_tsmt_ptr_->sDevNum);
