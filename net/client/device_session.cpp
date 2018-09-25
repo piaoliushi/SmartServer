@@ -1,4 +1,4 @@
-#include "device_session.h"
+﻿#include "device_session.h"
 #include <boost/thread/detail/singleton.hpp>
 #include <boost/asio/serial_port.hpp>
 #include "../../ErrorCode.h"

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "base_message.h"
 #include "./snmp_pp/snmp_pp.h"
 using namespace std;
@@ -63,6 +63,8 @@ private:
     void GetControlModCmd(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     void GetControlModCmdByModId(int modId, CommandUnit &cmdUnit);
     void GetSwitchCmdByChannel(int channelId, CommandUnit &cmdUnit);
+
+    void DAS_5103_ACK(unsigned char *data);
 private:
     Pdu query_pdu;
     session_ptr m_pSession;//关联连接对象

@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include <QApplication>
 #include <QTextCodec>
 #include <QPalette>
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     pal.setBrush(QPalette::Dark,QColor(30,30,30));
     pal.setBrush(QPalette::Highlight, QColor(40,40,70,150));
     pal.setBrush(QPalette::HighlightedText, Qt::white);
-    pal.setBrush(QPalette::Link, QColor(85,170,255));
+    pal.setBrush(QPalette::Link, QColor(85,170,255)) ;
     //pal.setBrush(QPalette::LinkVisited, QColor(170,100,240));
 
 

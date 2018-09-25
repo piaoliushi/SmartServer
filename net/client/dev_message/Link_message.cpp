@@ -1,4 +1,4 @@
-#include "Link_message.h"
+﻿#include "Link_message.h"
 #include"../../../utility.h"
 //#include "./snmp_pp/snmp_pp.h"
 
@@ -625,6 +625,26 @@ namespace hx_net
         }
     }
 
+    void Link_message::DAS_5103_ACK(unsigned char *data)
+    {
+        CommandUnit tmUnit;
+        tmUnit.commandLen = 9;
+        tmUnit.commandId[0] = 0x01;
+        tmUnit.commandId[1] = data[1];
+        tmUnit.commandId[2] = data[2];
+        tmUnit.commandId[3] = data[3];
+        tmUnit.commandId[4] = 0x53;
+        tmUnit.commandId[5] = 0x43;
+        int checknum = (tmUnit.commandId[1]^tmUnit.commandId[4]^tmUnit.commandId[5]^data[2]^data[3])&0xFF;
+        unsigned char ccheck[3]={'0'};
+        IntToAscii(checknum,&ccheck[0]);
+        tmUnit.commandId[6] = ccheck[1];
+        tmUnit.commandId[7] = ccheck[0];
+        tmUnit.commandId[8] = 0x04;
+        e_ErrorCode eErrCode;
+        m_pSession->send_cmd_to_dev(tmUnit,eErrCode);
+    }
+
     void Link_message::GetControlModCmdByModId(int modId, CommandUnit &cmdUnit)
     {
         switch (d_devInfo.nSubProtocol){
@@ -788,20 +808,20 @@ namespace hx_net
             }
         }
             break;
-        case LINK_JC_5103:
+        case LINK_JC_5103://&& data[1]==d_devInfo.iAddressCode
         {
-            if(data[0]==0x01 && data[1]==d_devInfo.iAddressCode && data[4]==0x52 && data[5]==0x53)
+            if(data[0]==0x01)
                 return 0;
             else
             {
                 unsigned char cDes[6]={0};
                 cDes[0]=0x01;
-                cDes[1]=d_devInfo.iAddressCode;
+            //    cDes[1]=d_devInfo.iAddressCode;
                 cDes[2]=0x30;
                 cDes[3]=0x30;
                 cDes[4]=0x52;
                 cDes[5]=0x53;
-                return kmp(data,nDataLen,cDes,6);
+                return kmp(data,nDataLen,cDes,1);
             }
         }
             break;
@@ -1001,15 +1021,20 @@ namespace hx_net
         {
             CommandUnit tmUnit;
             tmUnit.commandLen = 9;
-            tmUnit.ackLen = 66;
+            tmUnit.ackLen = -1;
             tmUnit.commandId[0] = 0x01;
             tmUnit.commandId[1] = d_devInfo.iAddressCode;
-            tmUnit.commandId[2] = 0x30;
-            tmUnit.commandId[3] = 0x30;
+            unsigned char ccmdindex[3]={'0'};
+            IntToAscii(d_devInfo.iAddressCode,&ccmdindex[0]);
+            tmUnit.commandId[2] = ccmdindex[1];
+            tmUnit.commandId[3] = ccmdindex[0];
             tmUnit.commandId[4] = 0x52;
             tmUnit.commandId[5] = 0x53;
-            tmUnit.commandId[6] = 0x32;
-            tmUnit.commandId[7] = 0x33;
+            int checknum = (tmUnit.commandId[1]^tmUnit.commandId[2]^tmUnit.commandId[3]^tmUnit.commandId[4]^tmUnit.commandId[5])&0xFF;
+            unsigned char ccheck[3]={'0'};
+            IntToAscii(checknum,&ccheck[0]);
+            tmUnit.commandId[6] = ccheck[1];
+            tmUnit.commandId[7] = ccheck[0];
             tmUnit.commandId[8] = 0x04;
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
@@ -1702,138 +1727,169 @@ namespace hx_net
 
    int Link_message::decode_JC5103(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
   {
-      if(data[4]!=0x52 || data[5]!=0x53)
-          return RE_CMDACK;
-      iaddcode = data[1];
-      int nDataType;
-      char cNum[10]={0};
-      data = data+6;
-      int iLastNum=(nDataLen-6);
-      DataInfo dainfo;
-      while(1)
-      {
-          nDataType = data[0];
-          if(nDataType==0xFE)
-              break;
-          int iReadNum = 1;
-          for(int jpos=0;iLastNum>iReadNum && jpos<10;++jpos)
-          {
-              if(data[iReadNum]!=0x20)
-              {
-                  cNum[jpos] = data[iReadNum];
-                  ++iReadNum;
-              }
-              else
-              {
-                  ++iReadNum;
-                  break;
-              }
-          }
-          data = data+iReadNum;
-          switch(nDataType)
-          {
-          case 0x21:
-          {
-              dainfo.bType = true;
-              dainfo.fValue = atoi(cNum) == 1? 0:1;
-              data_ptr->mValues[0] = dainfo;
-          }
-              break;
-          case 0x22:
-          {
-              dainfo.bType = true;
-              dainfo.fValue = atoi(cNum) == 1? 0:1;
-              data_ptr->mValues[1] = dainfo;
-          }
-              break;
-          case 0x23:
-          {
-              dainfo.bType = true;
-              dainfo.fValue = atoi(cNum) == 1? 0:1;
-              data_ptr->mValues[2] = dainfo;
-          }
-              break;
-          case 0x24:
-          {
-              dainfo.bType = true;
-              dainfo.fValue = atoi(cNum) == 1? 0:1;
-              data_ptr->mValues[3] = dainfo;
-          }
-              break;
-          case 0x25:
-          {
-              dainfo.bType = false;
-              dainfo.fValue = atof(cNum);
-              data_ptr->mValues[4] = dainfo;
-          }
-              break;
-          case 0x26:
-          {
-              dainfo.bType = false;
-              dainfo.fValue = atof(cNum);
-              data_ptr->mValues[5] = dainfo;
-          }
-              break;
-          case 0x27:
-          {
-              dainfo.bType = false;
-              dainfo.fValue = atof(cNum);
-              data_ptr->mValues[6] = dainfo;
-          }
-              break;
-          case 0x28:
-          {
-              dainfo.bType = false;
-              dainfo.fValue = atof(cNum);
-              data_ptr->mValues[7] = dainfo;
-          }
-              break;
-          case 0x29:
-          {
-              dainfo.bType = false;
-              dainfo.fValue = atof(cNum);
-              data_ptr->mValues[8] = dainfo;
-          }
-              break;
-          case 0x2A:
-          {
-              dainfo.bType = false;
-              dainfo.fValue = atof(cNum);
-              data_ptr->mValues[9] = dainfo;
-          }
-              break;
-          case 0x2B:
-          {
-              dainfo.bType = false;
-              dainfo.fValue = atof(cNum);
-              data_ptr->mValues[10] = dainfo;
-          }
-              break;
-          case 0x2C:
-          {
-              dainfo.bType = true;
-              dainfo.fValue = atoi(cNum) == 1? 0:1;
-              data_ptr->mValues[11] = dainfo;
-          }
-              break;
-          case 0x2D:
-          {
-              dainfo.bType = false;
-              dainfo.fValue = atof(cNum);
-              data_ptr->mValues[12] = dainfo;
-          }
-              break;
-          case 0x2E:
-          {
-              dainfo.bType = true;
-              dainfo.fValue = atoi(cNum);
-              data_ptr->mValues[11] = dainfo;
-          }
-              break;
-          }
+       int nresult = RE_CMDACK;
+       int lastlen = nDataLen;
+       while(lastlen>10){
+           if(data[4]==0x52 && data[5]==0x53)
+           {
+               iaddcode = data[1];
+               int nDataType;
+               char cNum[10]={0};
+               data = data+6;
+               int iLastNum=(nDataLen-6);
+               DataInfo dainfo;
+               while(1)
+               {
+                   nDataType = data[0];
+                   if(nDataType==0xFE)
+                       break;
+                   int iReadNum = 1;
+                   for(int jpos=0;iLastNum>iReadNum && jpos<10;++jpos)
+                   {
+                       if(data[iReadNum]!=0x20)
+                       {
+                           cNum[jpos] = data[iReadNum];
+                           ++iReadNum;
+                       }
+                       else
+                       {
+                           ++iReadNum;
+                           break;
+                       }
+                   }
+                   data = data+iReadNum;
+                   switch(nDataType)
+                   {
+                   case 0x21:
+                   {
+                       dainfo.bType = true;
+                       dainfo.fValue = atoi(cNum);// == 1? 0:1
+                       data_ptr->mValues[0] = dainfo;
+                   }
+                       break;
+                   case 0x22:
+                   {
+                       dainfo.bType = true;
+                       dainfo.fValue = atoi(cNum);// == 1? 0:1
+                       data_ptr->mValues[1] = dainfo;
+                   }
+                       break;
+                   case 0x23:
+                   {
+                       dainfo.bType = true;
+                       dainfo.fValue = atoi(cNum);// == 1? 0:1
+                       data_ptr->mValues[2] = dainfo;
+                   }
+                       break;
+                   case 0x24:
+                   {
+                       dainfo.bType = true;
+                       dainfo.fValue = atoi(cNum);// == 1? 0:1
+                       data_ptr->mValues[3] = dainfo;
+                   }
+                       break;
+                   case 0x25:
+                   {
+                       dainfo.bType = false;
+                       dainfo.fValue = atof(cNum);
+                       data_ptr->mValues[4] = dainfo;
+                   }
+                       break;
+                   case 0x26:
+                   {
+                       dainfo.bType = false;
+                       dainfo.fValue = atof(cNum);
+                       data_ptr->mValues[5] = dainfo;
+                   }
+                       break;
+                   case 0x27:
+                   {
+                       dainfo.bType = false;
+                       dainfo.fValue = atof(cNum);
+                       data_ptr->mValues[6] = dainfo;
+                   }
+                       break;
+                   case 0x28:
+                   {
+                       dainfo.bType = false;
+                       dainfo.fValue = atof(cNum);
+                       data_ptr->mValues[7] = dainfo;
+                   }
+                       break;
+                   case 0x29:
+                   {
+                       dainfo.bType = false;
+                       dainfo.fValue = atof(cNum);
+                       data_ptr->mValues[8] = dainfo;
+                   }
+                       break;
+                   case 0x2A:
+                   {
+                       dainfo.bType = false;
+                       dainfo.fValue = atof(cNum);
+                       data_ptr->mValues[9] = dainfo;
+                   }
+                       break;
+                   case 0x2B:
+                   {
+                       dainfo.bType = false;
+                       dainfo.fValue = atof(cNum);
+                       data_ptr->mValues[10] = dainfo;
+                   }
+                       break;
+                   case 0x2C:
+                   {
+                       dainfo.bType = true;
+                       dainfo.fValue = atoi(cNum);// == 1? 0:1
+                       data_ptr->mValues[11] = dainfo;
+                   }
+                       break;
+                   case 0x2D:
+                   {
+                       dainfo.bType = false;
+                       dainfo.fValue = atof(cNum);
+                       data_ptr->mValues[12] = dainfo;
+                   }
+                       break;
+                   case 0x2E:
+                   {
+                       dainfo.bType = true;
+                       dainfo.fValue = atoi(cNum);
+                       data_ptr->mValues[11] = dainfo;
+                   }
+                       break;
+                   }
 
-          memset(&cNum,0,10);
-      }
-      return RE_SUCCESS;
+                   memset(&cNum,0,10);
+               }
+               nresult = RE_SUCCESS;
+               break;
+           }else if(data[4]==0x53 && data[5]==0x43)
+           {
+               DAS_5103_ACK(data);
+               for(int i=9;i<lastlen;++i)
+               {
+                   if(data[i]==0x04)
+                   {
+                       data = data+i+1;
+                       lastlen = lastlen-i-1;
+                       break;
+                   }
+               }
+           }
+           else
+           {
+               for(int i=9;i<lastlen;++i)
+               {
+                   if(data[i]==0x04)
+                   {
+                       data = data+i+1;
+                       lastlen = lastlen-i-1;
+                       break;
+                   }
+               }
+           }
+       }
+       return nresult;
   }
 }

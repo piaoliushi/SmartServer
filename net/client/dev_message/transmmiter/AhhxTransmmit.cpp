@@ -1,4 +1,4 @@
-#include "AhhxTransmmit.h"
+﻿#include "AhhxTransmmit.h"
 
 namespace hx_net{
 
@@ -363,74 +363,74 @@ namespace hx_net{
         dtinfo.bType = true;
         for(int i=2;i<8;++i)
         {
-            dtinfo.fValue = Getbit(data[408],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[408],i);
 
             data_ptr->mValues[174+i] = dtinfo;
         }
         for(int i=0;i<7;++i)
         {
-            dtinfo.fValue = Getbit(data[409],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[409],i);
             data_ptr->mValues[182+i] = dtinfo;
         }
         for(int i=0;i<3;++i)
         {
-            dtinfo.fValue = Getbit(data[410],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[410],i);
             data_ptr->mValues[189+i] = dtinfo;
         }
         for(int i=0;i<8;++i)
         {
-            dtinfo.fValue = Getbit(data[411],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[411],i);
             data_ptr->mValues[192+i] = dtinfo;
         }
         for(int i=0;i<8;++i)
         {
-            dtinfo.fValue = Getbit(data[412],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[412],i);
             data_ptr->mValues[200+i] = dtinfo;
         }
         for(int i=0;i<8;++i)
         {
-            dtinfo.fValue = Getbit(data[413],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[413],i);
             data_ptr->mValues[208+i] = dtinfo;
         }
         for(int i=0;i<6;++i)
         {
-            dtinfo.fValue = Getbit(data[414],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[414],i);
             data_ptr->mValues[216+i] = dtinfo;
         }
-        dtinfo.fValue = Getbit(data[414],7)==0 ? 1:0;
+        dtinfo.fValue = Getbit(data[414],7);
         data_ptr->mValues[222] = dtinfo;
         for(int i=0;i<8;++i)
         {
-            dtinfo.fValue = Getbit(data[415],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[415],i);
             data_ptr->mValues[223+i] = dtinfo;
         }
         for(int i=0;i<7;++i)
         {
-            dtinfo.fValue = Getbit(data[416],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[416],i);
             data_ptr->mValues[231+i] = dtinfo;
         }
         for(int i=1;i<4;++i)
         {
-            dtinfo.fValue = Getbit(data[417],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[417],i);
             data_ptr->mValues[237+i] = dtinfo;
         }
         for(int i=5;i<8;++i)
         {
-            dtinfo.fValue = Getbit(data[417],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[417],i);
             data_ptr->mValues[236+i] = dtinfo;
         }
         for(int i=0;i<4;++i)
         {
-            dtinfo.fValue = Getbit(data[418],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[418],i);
             data_ptr->mValues[244+i] = dtinfo;
         }
-        dtinfo.fValue = Getbit(data[418],6)==0 ? 1:0;
+        dtinfo.fValue = Getbit(data[418],6);
         data_ptr->mValues[248] = dtinfo;
-        dtinfo.fValue = Getbit(data[418],7)==0 ? 1:0;
+        dtinfo.fValue = Getbit(data[418],7);
         data_ptr->mValues[249] = dtinfo;
         for(int i=1;i<8;++i)
         {
-            dtinfo.fValue = Getbit(data[419],i)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[419],i);
             data_ptr->mValues[249+i] = dtinfo;
         }
 
@@ -438,42 +438,42 @@ namespace hx_net{
         {
             for(int i=0;i<8;++i)
             {
-                dtinfo.fValue = Getbit(data[420+j*4],i)==0 ? 1:0;
+                dtinfo.fValue = Getbit(data[420+j*4],i);
                 data_ptr->mValues[257+i+28*j] = dtinfo;
             }
             for(int i=0;i<8;++i)
             {
-                dtinfo.fValue = Getbit(data[421+j*4],i)==0 ? 1:0;
+                dtinfo.fValue = Getbit(data[421+j*4],i);
                 data_ptr->mValues[265+i+28*j] = dtinfo;
             }
             for(int i=0;i<8;++i)
             {
-                dtinfo.fValue = Getbit(data[422+j*4],i)==0 ? 1:0;
+                dtinfo.fValue = Getbit(data[422+j*4],i);
                 data_ptr->mValues[273+i+28*j] = dtinfo;
             }
             for(int i=0;i<3;++i)
             {
-                dtinfo.fValue = Getbit(data[423+j*4],i)==0 ? 1:0;
+                dtinfo.fValue = Getbit(data[423+j*4],i);
                 data_ptr->mValues[281+i+28*j] = dtinfo;
             }
-            dtinfo.fValue = Getbit(data[423+j*4],5)==0 ? 1:0;
+            dtinfo.fValue = Getbit(data[423+j*4],5);
             data_ptr->mValues[284+28*j] = dtinfo;
         }
         for(int j=0;j<4;++j)
         {
             for(int i=0;i<4;++i)
             {
-                dtinfo.fValue = Getbit(data[437+j*4],i)==0 ? 1:0;
+                dtinfo.fValue = Getbit(data[437+j*4],i);
                 data_ptr->mValues[369+i+16*j] = dtinfo;
             }
             for(int i=3;i<7;++i)
             {
-                dtinfo.fValue = Getbit(data[438+j*4],i)==0 ? 1:0;
+                dtinfo.fValue = Getbit(data[438+j*4],i);
                 data_ptr->mValues[370+i+16*j] = dtinfo;
             }
             for(int i=0;i<8;++i)
             {
-                dtinfo.fValue = Getbit(data[439+j*4],i)==0 ? 1:0;
+                dtinfo.fValue = Getbit(data[439+j*4],i);
                 data_ptr->mValues[377+i+16*j] = dtinfo;
             }
         }
