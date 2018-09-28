@@ -27,7 +27,7 @@ signals:
     void S_Gpsdatetime(QString qsDatetime);
     void S_Gpsgll(bool block);
 protected:
-    void handle_write(const boost::system::error_code& error, size_t bytes_transferred){};
+    void handle_write(const boost::system::error_code& error, size_t bytes_transferred){}
     void paseGpsdata(char* qData);
     int get_data_len(){return (i_write_pos_-i_read_pos_);}
     void gpzda_data(QString strdata);

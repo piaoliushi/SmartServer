@@ -614,8 +614,8 @@ namespace hx_net
                     ixor = ixor^cmdUnit.commandId[i];
                 }
                 IntToAscii(ixor,&chadd[0]);
-                cmdUnit.commandId[11] = chadd[0];
-                cmdUnit.commandId[12] = chadd[1];
+                cmdUnit.commandId[11] = chadd[1];
+                cmdUnit.commandId[12] = chadd[0];
                 cmdUnit.commandId[13] = 0x04;
             }
         }
@@ -1741,7 +1741,7 @@ namespace hx_net
                while(1)
                {
                    nDataType = data[0];
-                   if(nDataType==0xFE)
+                   if(nDataType==0xFE  || iLastNum<3)
                        break;
                    int iReadNum = 1;
                    for(int jpos=0;iLastNum>iReadNum && jpos<10;++jpos)
@@ -1758,6 +1758,7 @@ namespace hx_net
                        }
                    }
                    data = data+iReadNum;
+                   iLastNum -= iReadNum;
                    switch(nDataType)
                    {
                    case 0x21:

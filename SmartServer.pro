@@ -223,6 +223,7 @@ else:{
 
 QMAKE_CXXFLAGS +=-Zm300
 win32:CONFIG(release, debug|release): {
+CONFIG += console
 LIBS += -lQtSerialPort
 LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib/vs2010 -llibprotobuf -llibprotoc -llibprotobuf-lite
 LIBS += -LD:/ThirdSdk/snmp++/lib -lsnmplib
