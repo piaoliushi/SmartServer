@@ -183,7 +183,9 @@ namespace hx_net
             cell->set_ecelltype((e_CellType)(*cell_iter).second.iItemType);
             cell->set_scellid((*cell_iter).second.iItemIndex);
             cell->set_scellname((*cell_iter).second.sItemName);
-            string  sValue = str(boost::format("%.2f")%curData->mValues[iter->first].fValue);
+            string  sValue = str(boost::format("%.2f")%(curData->mValues[iter->first].fValue+0.005f));
+            if(sValue == "0.00")
+                sValue = "0";
             int nValueType = (*cell_iter).second.iItemvalueType;
             if(nValueType==VALUE_TYPE_STRING)//string 值类型
                 sValue = curData->mValues[iter->first].sValue;

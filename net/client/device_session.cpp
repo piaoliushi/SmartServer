@@ -1917,9 +1917,9 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
     //存储告警到数据库---0:告警产生
     if(!bMod){
 
-        curAlarm.sReason = str(boost::format("%1%%2%,当前值：%3%%4%,门限值：%5%%6%")
+        curAlarm.sReason = str(boost::format("%1%%2%,%3%%4%%5%,%6%%7%%8%")
                                %ItemInfo.sItemName%CONST_STR_ALARM_CONTENT(curAlarm.nLimitId)
-                               %fValue%ItemInfo.sUnit%fLimitValue%ItemInfo.sUnit);
+                               %GLOBAL_STR(10)%fValue%ItemInfo.sUnit%GLOBAL_STR(11)%fLimitValue%ItemInfo.sUnit);
 
         bool bRslt = GetInst(DataBaseOperation).AddItemAlarmRecord(devId,curAlarm.startTime,
                                                                    ItemInfo.iItemIndex,curAlarm.nLimitId,curAlarm.nType,
