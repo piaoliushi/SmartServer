@@ -455,6 +455,7 @@ typedef struct
 	vector<MonitorScheduler> vecMonitorScheduler;
 	vector<MonitorScheduler> vecRecoringScheduler;
 }PrgInfo;
+
 typedef struct
 {
 	string sStation;
