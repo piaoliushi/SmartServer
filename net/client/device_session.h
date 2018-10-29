@@ -237,8 +237,8 @@ namespace hx_net
         http_request_session_ptr   &http_ptr_;
 
         boost::recursive_mutex                    opr_state_mutex_;
-        map<string,dev_opr_state>              dev_opr_state_;//设备控制命令发送状态
-        boost::asio::io_service&                   io_service_;
+        map<string,dev_opr_state>                 dev_opr_state_;//设备控制命令发送状态
+        boost::asio::io_service&                  io_service_;
 
         boost::recursive_mutex                    update_time_schedule_mutex_;//更新运行图锁
         boost::recursive_mutex                    update_cmd_schedule_mutex_;//更新运行图锁

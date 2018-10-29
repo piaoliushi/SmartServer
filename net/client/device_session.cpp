@@ -159,8 +159,6 @@ string device_session::get_devid_by_addcode(int iaddcode)
 con_state device_session::get_con_state()
 {
     boost::recursive_mutex::scoped_lock llock(con_state_mutex_);
-    //    if(get_run_state(dev_agent_and_com.begin()->first) == dev_running)
-    //        return con_connected;
     return othdev_con_state_;
 }
 //获得运行状态
