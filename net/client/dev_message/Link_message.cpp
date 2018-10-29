@@ -1900,7 +1900,7 @@ namespace hx_net
       int lastlen = nDataLen;
       unsigned char cEnd[1]={0x04};
       while(lastlen>10){
-          if(data[1]!=d_devInfo.iAddressCode)
+          /*if(data[1]!=d_devInfo.iAddressCode)
           {
               int npos = kmp(data,lastlen,cEnd,1);
               if(npos>=0)
@@ -1911,7 +1911,8 @@ namespace hx_net
               else
                   break;
           }
-          else if(data[4]==0x52 && data[5]==0x53)
+          else*/
+          if(data[4]==0x52 && data[5]==0x53)
           {
               iaddcode = data[1];
               int nDataType;

@@ -195,13 +195,13 @@ namespace hx_net
         void handle_read_some(const boost::system::error_code& error, size_t bytes_transferred);
 
     private:
-        tcp::resolver                     resolver_;
+        tcp::resolver                    resolver_;
         udp::resolver                    uresolver_;
 
-        tcp::endpoint                     endpoint_;
+        tcp::endpoint                    endpoint_;
         udp::endpoint                    uendpoint_;
-        boost::recursive_mutex      con_state_mutex_;
-        con_state                          othdev_con_state_;
+        boost::recursive_mutex           con_state_mutex_;
+        con_state                        othdev_con_state_;
         othdevMsgPtr                    receive_msg_ptr_;
         boost::asio::deadline_timer     connect_timer_;//连接定时器
         boost::asio::deadline_timer     timeout_timer_;//连接超时定时器
@@ -216,7 +216,7 @@ namespace hx_net
         //devid<itemid<iLimittype,info> > >
         map<string ,map<int,map<int,CurItemAlarmInfo> > > mapItemAlarm;//设备监控量告警信息
 
-        CurItemAlarmInfo  netAlarm;//通讯异常告警
+        CurItemAlarmInfo                netAlarm;//通讯异常告警
         map<string,time_t>                               tmLastSaveTime;
         map<string,time_t>                               tmLastSendHttpTime;
         map<string,pair<CommandAttrPtr,HMsgHandlePtr> >   dev_agent_and_com;//add by lk 2013-11-26
@@ -260,8 +260,6 @@ namespace hx_net
         std::string    http_content_;
 
         bool short_connect_;//短连接标志（短连接标志为true则无需进行连接状态通知）
-        //string  http_command_id_;//待发指令id
-        //boost::asio::streambuf http_cmd_request_;
 
 
         urdl::read_stream http_stream_;
