@@ -15,6 +15,7 @@ struct HandlerKey
     string         usr_;     //登陆用户
     string         psw_;     //登陆密码
     string         usr_number_;//用户编号
+    string         client_id_;//客户端编号
 };
 
 struct UserSignInInfo
@@ -79,7 +80,10 @@ public:
                               ,e_ErrorCode &eError);
         //通知客户端签到结果
         void notify_other_client_signin_result(session_ptr ch_ptr,int bIn,const UserSignInInfo &sUser);
-
+    protected:
+        void user_switch_login(session_ptr ch_ptr,string sNewUser,string sPassword,LoginAck &loginAck,UserInformation &tmpUser);
+        //获取用户与当前客户端id下的设备授权信息
+        void get_authorize_info_by_user(session_ptr ch_ptr,string sUserNum,string sClientNum,LoginAck &loginAck);
 
 	private:	
 		

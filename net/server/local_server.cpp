@@ -90,21 +90,41 @@ namespace hx_net
     void LocalServer::user_login(session_ptr ch_ptr,string sUser,string sPassword,LoginAck &loginAck)
 	{
         loginAck.set_eresult(EC_FAILED);
-		boost::recursive_mutex::scoped_lock lock(mutex_);
+        boost::recursive_mutex::scoped_lock lock(mutex_);
+        string lgUser;
+        string lgClientId = "00000000";//客户端默认id
+
+        if(sUser.find('_') != -1){
+            vector<string> vUserInfo;
+            boost::split(vUserInfo,sUser,boost::is_any_of("_"));
+            if(vUserInfo.size() == 2){
+                 lgUser = vUserInfo[1];
+                 lgClientId = vUserInfo[0];
+            }
+
+        }else{
+           lgUser = sUser;
+        }
+
 		std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.begin();
         for(;iter!=session_pool_.end();++iter){
-            if(sUser==(*iter).second.usr_)	{
+
+            //if(sUser==(*iter).second.usr_)
+            if(lgClientId==(*iter).second.client_id_)
+            {
 				loginAck.set_eresult(EC_USR_REPEAT_LOGIN);//已登陆
 				return ;
 			}
 		}
+
+
 		iter = session_pool_.find(ch_ptr);
 		if(iter!=session_pool_.end())
 		{
 			//找到此连接并判断此用户是否合法
 			UserInformation tmpUser;
 			std::string sstationid = GetInst(LocalConfig).local_station_id();
-            if(!GetInst(DataBaseOperation).GetUserInfo(sUser,tmpUser))
+            if(!GetInst(DataBaseOperation).GetUserInfo(lgUser,tmpUser))//sUser替换为lgUser
 				loginAck.set_eresult(EC_FAILED);//获取用户信息失败（访问数据库出错）
 			else
 			{
@@ -126,11 +146,12 @@ namespace hx_net
                     loginAck.set_usrheadship(tmpUser.sHeadship.c_str());
 
                     //收集当前签到人信息
-                    addSignInUsersToLoginAck(ch_ptr,tmpUser,loginAck);
+                    //addSignInUsersToLoginAck(ch_ptr,tmpUser,loginAck);
 					
-					(*iter).second.usr_= sUser;//记录当前登陆用户
+                    (*iter).second.usr_= lgUser;//sUser记录当前登陆用户
 					(*iter).second.psw_= tmpUser.sPassword;//记录当前登陆用户密码
                     (*iter).second.usr_number_ = tmpUser.sNumber;//记录当前用户编号
+                    (*iter).second.client_id_ = lgClientId;//记录当前客户端编号
 					
                     //登陆成功
                     tcp::endpoint remote_add = ch_ptr->get_addr();
@@ -138,13 +159,14 @@ namespace hx_net
                                                                 tmpUser.sName,tmpUser.sNumber);
                     //查找该用户授权设备，并插入到设备-〉用户映射表
                     vector<string> debnumber;
-                    if(GetInst(DataBaseOperation).GetAllAuthorizeDevByUser(tmpUser.sNumber,debnumber))
+                    if(GetInst(DataBaseOperation).GetAllAuthorizeDevByUser(tmpUser.sNumber,debnumber,lgClientId))
                     {
                         vector<string>::iterator itersNum = debnumber.begin();
-                        vector<string> usrTodev;//用户设备列表
+                        //vector<string> usrTodev;//用户设备列表
                         for(;itersNum!=debnumber.end();++itersNum)
                         {
-                            usrTodev.push_back(*itersNum);
+                            //usrTodev.push_back(*itersNum);
+
                             //判断设备是否属于本地台站或者是上级台站直连下级台站设备
                             DevBaseInfo devBaseInfo;
                             GetInst(SvcMgr).dev_base_info(sstationid,devBaseInfo,*itersNum);
@@ -208,21 +230,6 @@ namespace hx_net
 		return ;
 	}
 
-//    int API_TimeToStringEX(string &strDateStr,const time_t &timeData)
-//    {
-//        char chTmp[100];
-//        memset(chTmp,0,sizeof(chTmp));
-//        struct tm *p;
-//        p = localtime(&timeData);
-//        p->tm_year = p->tm_year + 1900;
-//        p->tm_mon = p->tm_mon + 1;
-
-//        _snprintf(chTmp,sizeof(chTmp),"%04d-%02d-%02d %02d:%02d:%02d",
-//            p->tm_year, p->tm_mon, p->tm_mday,p->tm_hour,p->tm_min,p->tm_sec);
-//        strDateStr = chTmp;
-//        return 0;
-//    }
-
     //收集当前签到人信息,打包进入登陆回复消息
     void LocalServer::addSignInUsersToLoginAck(session_ptr ch_ptr,const UserInformation &sUser,LoginAck &loginAck)
     {
@@ -278,7 +285,7 @@ namespace hx_net
                 else if(bIsIn==false)//签退
                 {
                     //检查该用户是否已登陆，若登陆拒绝签退
-                    {
+                    /*{
                         boost::recursive_mutex::scoped_lock clientlock_(mutex_);
                         std::map<session_ptr,HandlerKey>::iterator itersession = session_pool_.begin();
                         for(;itersession!=session_pool_.end();++itersession){
@@ -289,11 +296,8 @@ namespace hx_net
                                 }
                             }
                         }
-                    }
-
-                    //tm ltimeS = (*iter).SignInTime;
+                    }*/
                     time_t curTm = time(0);
-                    //tm ltimeE = *(localtime(&curTm));
                     if(!GetInst(DataBaseOperation).AddSignout((*iter).UsrInfo.sNumber,(*iter).SignInTime,curTm))
                         return;
 
@@ -345,8 +349,6 @@ namespace hx_net
                 signinAck->set_eresult(EC_OK);
                 signinAck->set_issignin(bIn);
                 string sSignTime = QDateTime::fromTime_t(sSignUser.SignInTime).toString(Qt::DefaultLocaleLongDate).toStdString();
-                //API_TimeToStringEX(sSignTime,sSignUser.SignInTime);
-                 //newSignUser->set_signintime(QDateTime::fromTime_t(sign_in_users_[i].SignInTime).toString().toStdString().c_str());
                 signinAck->mutable_cusersinfo()->set_signintime(sSignTime);
                 signinAck->mutable_cusersinfo()->set_eusrlevel(sSignUser.UsrInfo.nControlLevel);
                 signinAck->mutable_cusersinfo()->set_usrnumber(sSignUser.UsrInfo.sNumber);
@@ -359,8 +361,213 @@ namespace hx_net
         }
     }
 
-    //用户交接班
+    //交接班用户切换
+    void LocalServer::user_switch_login(session_ptr ch_ptr,string sNewUser,string sPassword,LoginAck &loginAck,UserInformation &tmpUser)
+    {
+
+
+        std::string sstationid = GetInst(LocalConfig).local_station_id();
+        if(!GetInst(DataBaseOperation).GetUserInfo(sNewUser,tmpUser))//sUser替换为lgUser
+            loginAck.set_eresult(EC_FAILED);//获取用户信息失败（访问数据库出错）
+        else
+        {
+            if(tmpUser.sName == "")
+                loginAck.set_eresult(EC_USR_NOT_FOUND);//未找到此用户
+            else if(sPassword != tmpUser.sPassword)
+                loginAck.set_eresult(EC_USR_PSW_ERROR);//密码错误
+            else
+            {
+
+
+                loginAck.set_eresult(EC_OK);
+
+
+                //获取该台站所有用户信息
+                /*GetInst(DataBaseOperation).GetAllUserInfoByStation(sstationid,loginAck);
+                loginAck.set_eusrlevel(tmpUser.nControlLevel);
+                loginAck.set_usrnumber(tmpUser.sNumber);
+                loginAck.set_usrname(tmpUser.sName.c_str());
+                loginAck.set_usrpsw(tmpUser.sPassword.c_str());
+                loginAck.set_usrjobnumber(tmpUser.sJobNumber);
+                loginAck.set_usrheadship(tmpUser.sHeadship.c_str());*/
+
+
+               // (*iter).second.usr_= lgUser;//sUser记录当前登陆用户
+               // (*iter).second.psw_= tmpUser.sPassword;//记录当前登陆用户密码
+                //(*iter).second.usr_number_ = tmpUser.sNumber;//记录当前用户编号
+                //(*iter).second.client_id_ = lgClientId;//记录当前客户端编号
+
+                //登陆成功
+                //tcp::endpoint remote_add = ch_ptr->get_addr();
+                //GetInst(SvcMgr).get_notify()->OnClientLogin(remote_add.address().to_string(),remote_add.port(),
+                //                                            tmpUser.sName,tmpUser.sNumber);
+
+             }
+        }
+    }
+
+    //获取用户与当前客户端id下的设备授权信息
+    void LocalServer::get_authorize_info_by_user(session_ptr ch_ptr,string sUserNum,string sClientNum,LoginAck &loginAck)
+    {
+        std::string sstationid = GetInst(LocalConfig).local_station_id();
+        //查找该用户授权设备，并插入到设备-〉用户映射表
+        vector<string> debnumber;
+        if(GetInst(DataBaseOperation).GetAllAuthorizeDevByUser(sUserNum,debnumber,sClientNum))
+        {
+            vector<string>::iterator itersNum = debnumber.begin();
+            for(;itersNum!=debnumber.end();++itersNum)
+            {
+                //判断设备是否属于本地台站或者是上级台站直连下级台站设备
+                DevBaseInfo devBaseInfo;
+                GetInst(SvcMgr).dev_base_info(sstationid,devBaseInfo,*itersNum);
+
+                map<int,map<int,CurItemAlarmInfo> > curAlarm;
+                con_state  netState = GetInst(SvcMgr).get_dev_net_state(sstationid,*itersNum);
+                dev_run_state   runState = GetInst(SvcMgr).get_dev_run_state(sstationid,*itersNum);
+                if(runState >= dev_running && runState < dev_unknown)
+                    netState = con_connected;
+                GetInst(SvcMgr).get_dev_alarm_state(sstationid,*itersNum,curAlarm);
+                //收集设备连接信息
+                DevNetStatus *dev_n_s = loginAck.add_cdevcurnetstatus();
+                dev_n_s->set_sstationid(sstationid);
+                dev_n_s->set_sdevid(*itersNum);
+                dev_n_s->set_sdevname(devBaseInfo.sDevName.c_str());
+                dev_n_s->set_edevtype(devBaseInfo.nDevType);
+                dev_n_s->set_enetstatus((DevNetStatus_e_NetStatus)netState);
+                //收集设备运行信息
+                DevWorkStatus *dev_run_s = loginAck.add_cdevcurworkstatus();
+                dev_run_s->set_sstationid(sstationid);
+                dev_run_s->set_sdevid(*itersNum);
+                dev_run_s->set_edevtype(devBaseInfo.nDevType);
+                dev_run_s->set_sdevname(devBaseInfo.sDevName.c_str());
+                dev_run_s->set_eworkstatus((DevWorkStatus_e_WorkStatus)runState);
+                //收集设备报警信息
+                map<int,map<int,CurItemAlarmInfo> >::iterator iter = curAlarm.begin();
+                if(iter!=curAlarm.end())
+                {
+                    DevAlarmStatus *dev_alarm_s = loginAck.add_cdevcuralarmstatus();
+                    dev_alarm_s->set_sstationid(sstationid);
+                    dev_alarm_s->set_sdevid(*itersNum);
+                    dev_alarm_s->set_sdevname(devBaseInfo.sDevName.c_str());
+                    dev_alarm_s->set_edevtype(devBaseInfo.nDevType);
+                    dev_alarm_s->set_nalarmcount(curAlarm.size());
+                    for(;iter!=curAlarm.end();++iter)
+                    {
+                        map<int,CurItemAlarmInfo>::iterator iter_a = iter->second.begin();
+                        for(;iter_a!=iter->second.end();++iter_a){
+                            if(iter_a->second.bNotifyed==false)
+                                continue;
+                            DevAlarmStatus_eCellAlarmMsg *pCellAlarm = dev_alarm_s->add_ccellalarm();
+                            pCellAlarm->set_scellid(iter->first);
+                            pCellAlarm->set_sdesp(iter_a->second.sReason);
+                            char str_time[64];
+                            tm *local_time = localtime(&iter_a->second.startTime);
+                            strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
+                            pCellAlarm->set_sstarttime(str_time);
+                            pCellAlarm->set_ccellstatus(e_AlarmStatus(iter_a->first));
+                        }
+                    }
+                }
+                devToUser_[*itersNum].push_back(ch_ptr);
+            }
+
+        }
+    }
+
+    //用户交接班(将当前用户所有接都切换到新用户，并通知兄弟连接)
     void LocalServer::user_handover(session_ptr ch_ptr,string sCurUsr,string sNewUser,
+                               string sNewPassword,const string &sContents,LoginAck &loginAck)//
+    {
+        loginAck.set_eresult(EC_FAILED);
+        boost::recursive_mutex::scoped_lock lock(mutex_);
+
+        UserInformation tmpUser;
+        user_switch_login(ch_ptr,sNewUser,sNewPassword,loginAck,tmpUser);
+        //接班用户没找到
+        if(loginAck.eresult() != EC_OK)
+            return;
+        //获取该台站所有用户信息
+        std::string sstationid = GetInst(LocalConfig).local_station_id();
+        GetInst(DataBaseOperation).GetAllUserInfoByStation(sstationid,loginAck);
+        loginAck.set_eusrlevel(tmpUser.nControlLevel);
+        loginAck.set_usrnumber(tmpUser.sNumber);
+        loginAck.set_usrname(tmpUser.sName.c_str());
+        loginAck.set_usrpsw(tmpUser.sPassword.c_str());
+        loginAck.set_usrjobnumber(tmpUser.sJobNumber);
+        loginAck.set_usrheadship(tmpUser.sHeadship.c_str());
+
+
+        bool bfindOldUser = false;
+        std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.begin();
+        for(;iter!=session_pool_.end();++iter)
+        {
+            //查找当前用户
+            if(iter->second.usr_ == sCurUsr){
+
+                bfindOldUser = true;
+                //更新当前用户信息
+                iter->second.usr_= sNewUser;//sUser记录当前登陆用户
+                iter->second.psw_= sNewPassword;//记录当前登陆用户密码
+                iter->second.usr_number_ = tmpUser.sNumber;//记录当前用户编号
+                
+                //解除所有设备所属的连接对应关系
+                std::map<string,vector<session_ptr> >::iterator itersession = devToUser_.begin();
+                for(;itersession!=devToUser_.end();++itersession)
+                {
+                    vector<session_ptr>::iterator itervect= (*itersession).second.begin();
+                    for(;itervect!=(*itersession).second.end();++itervect)
+                    {
+                        if((*itervect) == iter->first){
+                            (*itersession).second.erase(itervect);
+                            break;
+                        }
+                    }
+                }
+
+                if(iter->first == ch_ptr){
+                    get_authorize_info_by_user(ch_ptr,tmpUser.sNumber,iter->second.client_id_,loginAck);
+
+
+                }else{
+                     loginAckMsgPtr sloginAck(new LoginAck);
+                     sloginAck->mutable_alluserinfo()->CopyFrom(loginAck.alluserinfo());
+                     sloginAck->set_eusrlevel(tmpUser.nControlLevel);
+                     sloginAck->set_usrnumber(tmpUser.sNumber);
+                     sloginAck->set_usrname(tmpUser.sName.c_str());
+                     sloginAck->set_usrpsw(tmpUser.sPassword.c_str());
+                     sloginAck->set_usrjobnumber(tmpUser.sJobNumber);
+                     sloginAck->set_usrheadship(tmpUser.sHeadship.c_str());
+
+
+                     get_authorize_info_by_user(ch_ptr,tmpUser.sNumber,iter->second.client_id_,*sloginAck);
+
+                     iter->first->sendMessage(MSG_LOGIN_ACK,sloginAck);
+                }
+
+                //更新授权信息
+                time_t curTm = time(0);
+                std::string oldUsrId = (*iter).second.usr_number_;//记录当前登陆用户id
+                if(!GetInst(DataBaseOperation).AddHandove(oldUsrId,tmpUser.sNumber,sContents,curTm))
+                   return;
+
+                //更新切换用户的连接信息
+                tcp::endpoint remote_add = iter->first->get_addr();
+                GetInst(SvcMgr).get_notify()->OnClientLogin(remote_add.address().to_string(),remote_add.port(),
+                                                            tmpUser.sName,tmpUser.sNumber);
+
+            }
+        }
+
+
+        //没找到当前用户
+        if(bfindOldUser == false)
+            loginAck.set_eresult(EC_USR_NOT_FOUND);
+
+
+    }
+
+    //用户交接班(将当前用户所有链接都切换到新用户，并通知兄弟连接)
+    /*void LocalServer::user_handover(session_ptr ch_ptr,string sCurUsr,string sNewUser,
                                string sNewPassword,const string &sContents,LoginAck &loginAck)
     {
         loginAck.set_eresult(EC_FAILED);
@@ -403,7 +610,7 @@ namespace hx_net
                 }
             }
         }
-    }
+    }*/
 
     //用户签到
     void LocalServer::user_signin_out(session_ptr ch_ptr,string sSignInUsr,string sSignInPsw
@@ -430,7 +637,7 @@ namespace hx_net
                 {
                     //string sSignTime;
                     //API_TimeToStringEX(sSignTime,curTm);
-                     string sSignTime = QDateTime::fromTime_t(curTm).toString(Qt::DefaultLocaleLongDate).toStdString();
+                    string sSignTime = QDateTime::fromTime_t(curTm).toString(Qt::DefaultLocaleLongDate).toStdString();
                     signinPtr->set_eresult(EC_OK);
                     signinPtr->mutable_cusersinfo()->set_signintime(sSignTime);
                     signinPtr->mutable_cusersinfo()->set_eusrlevel(tmpUser.nControlLevel);
@@ -477,16 +684,16 @@ namespace hx_net
 	}
 
     void LocalServer::send_dev_data(string sStationid,string sDevid,devDataNfyMsgPtr &dataPtr)
+    {
+        boost::recursive_mutex::scoped_lock lock(mutex_);
+        std::map<string,vector<session_ptr> >::iterator iter = devToUser_.find(sDevid);
+        if(iter!=devToUser_.end())
         {
-            boost::recursive_mutex::scoped_lock lock(mutex_);
-            std::map<string,vector<session_ptr> >::iterator iter = devToUser_.find(sDevid);
-            if(iter!=devToUser_.end())
-            {
-                vector<session_ptr>::iterator iter_session = (*iter).second.begin();
-                for(;iter_session!=(*iter).second.end();++iter_session)
-                    (*iter_session)->sendMessage(MSG_DEV_REALTIME_DATA_NOTIFY,dataPtr);
-            }
+            vector<session_ptr>::iterator iter_session = (*iter).second.begin();
+            for(;iter_session!=(*iter).second.end();++iter_session)
+                (*iter_session)->sendMessage(MSG_DEV_REALTIME_DATA_NOTIFY,dataPtr);
         }
+    }
 
     void LocalServer::send_dev_net_state_data(string sStationid,string sDevid,devNetNfyMsgPtr &netPtr)
     {
@@ -597,9 +804,9 @@ namespace hx_net
         std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.find(ch_ptr);
         if(iter!=session_pool_.end())
         {
-            string curUsr = (*iter).second.usr_;
-            string curPsw = (*iter).second.psw_;
-            string curUsrId = (*iter).second.usr_number_;
+            //string curUsr = (*iter).second.usr_;
+            //string curPsw = (*iter).second.psw_;
+            //string curUsrId = (*iter).second.usr_number_;
             tcp::endpoint remote_add = (*iter).second.endPoint_;
             GetInst(SvcMgr).get_notify()->OnClientOffline(remote_add.address().to_string(),remote_add.port());
             (*iter).first->close_i();
@@ -614,7 +821,7 @@ namespace hx_net
                     }
                 }
             }
-            map<session_ptr,HandlerKey>::iterator useriter = session_pool_.find(ch_ptr);
+           /* map<session_ptr,HandlerKey>::iterator useriter = session_pool_.find(ch_ptr);
             if(useriter!=session_pool_.end())
             {
                 time_t curTm=time(0);
@@ -622,7 +829,7 @@ namespace hx_net
                 UserInformation sUserInfo;
                 GetInst(DataBaseOperation).GetUserInfo((*useriter).second.usr_,sUserInfo);
                 handSignInAndOut(ch_ptr,false,curTm,sUserInfo,errorCode);
-            }
+            }*/
             session_pool_.erase(iter);
             return 0;
         }

@@ -1519,7 +1519,7 @@ bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
     return true;
 }
 
-bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice )
+bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice ,string sClientId)
 {
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlDatabase db = ConnectionPool::openConnection();
@@ -1530,6 +1530,10 @@ bool DataBaseOperation::GetAllAuthorizeDevByUser( const string sUserId,vector<st
 
     QSqlQuery query(db);
     QString strSql=QString("select a.objectnumber from user_role_object a,users b where b.number='%1' and a.rolenumber=b.rolenumber").arg(QString::fromStdString(sUserId));
+    if(sClientId.compare("00000000") != 0){
+        strSql = QString("select c.objectnumber from user_role_object a,users b,platform_server_purview c where c.servernumber='%1'"
+                         " and b.number='%2' and a.rolenumber=b.rolenumber and a.objectnumber=c.objectnumber").arg(QString::fromStdString(sClientId)).arg(QString::fromStdString(sUserId));
+    }
     if(!query.exec(strSql)){
         cout<<query.lastError().text().toStdString()<<"GetAllAuthorizeDevByUser---query---error!"<<endl;
         ConnectionPool::closeConnection(db);

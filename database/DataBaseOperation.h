@@ -87,7 +87,7 @@ public:
     bool GetUserInfoByNumber(const string sNumber,UserInformation &user);
 
     //获得用户授权设备
-    bool GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice );
+    bool GetAllAuthorizeDevByUser( const string sUserId,vector<string> &vDevice ,string sClientId = "00000000");
 
     //获得更新设备的运行图信息(用于动态配置回读)
     bool GetUpdateDevTimeScheduleInfo( string strDevnum,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
