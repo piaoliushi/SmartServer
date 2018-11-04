@@ -814,14 +814,15 @@ namespace hx_net
                 return 0;
             else
             {
-                unsigned char cDes[6]={0};
+               /* unsigned char cDes[6]={0};
                 cDes[0]=0x01;
             //    cDes[1]=d_devInfo.iAddressCode;
                 cDes[2]=0x30;
                 cDes[3]=0x30;
                 cDes[4]=0x52;
                 cDes[5]=0x53;
-                return kmp(data,nDataLen,cDes,1);
+                return kmp(data,nDataLen,cDes,1);*/
+                return RE_HEADERROR;
             }
         }
             break;
@@ -1900,7 +1901,7 @@ namespace hx_net
       int lastlen = nDataLen;
       unsigned char cEnd[1]={0x04};
       while(lastlen>10){
-          /*if(data[1]!=d_devInfo.iAddressCode)
+          if(data[1]!=d_devInfo.iAddressCode)
           {
               int npos = kmp(data,lastlen,cEnd,1);
               if(npos>=0)
@@ -1911,8 +1912,7 @@ namespace hx_net
               else
                   break;
           }
-          else*/
-          if(data[4]==0x52 && data[5]==0x53)
+          else if(data[4]==0x52 && data[5]==0x53)
           {
               iaddcode = data[1];
               int nDataType;
@@ -1950,28 +1950,28 @@ namespace hx_net
                   case 0x21:
                   {
                       dainfo.bType = true;
-                      dainfo.fValue = atoi(cNum) == 1? 0:1;
+                      dainfo.fValue = atoi(cNum);// == 1? 0:1;
                       data_ptr->mValues[0] = dainfo;
                   }
                       break;
                   case 0x22:
                   {
                       dainfo.bType = true;
-                      dainfo.fValue = atoi(cNum) == 1? 0:1;
+                      dainfo.fValue = atoi(cNum);// == 1? 0:1;
                       data_ptr->mValues[1] = dainfo;
                   }
                       break;
                   case 0x23:
                   {
                       dainfo.bType = true;
-                      dainfo.fValue = atoi(cNum) == 1? 0:1;
+                      dainfo.fValue = atoi(cNum);// == 1? 0:1;
                       data_ptr->mValues[2] = dainfo;
                   }
                       break;
                   case 0x24:
                   {
                       dainfo.bType = true;
-                      dainfo.fValue = atoi(cNum) == 1? 0:1;
+                      dainfo.fValue = atoi(cNum);// == 1? 0:1;
                       data_ptr->mValues[3] = dainfo;
                   }
                       break;
@@ -2027,7 +2027,7 @@ namespace hx_net
                   case 0x2C:
                   {
                       dainfo.bType = true;
-                      dainfo.fValue = atoi(cNum) == 1? 0:1;
+                      dainfo.fValue = atoi(cNum);// == 1? 0:1;
                       data_ptr->mValues[11] = dainfo;
                   }
                       break;
