@@ -47,6 +47,7 @@ namespace hx_net
         ,d_bUse_snmp(false)
         ,d_cur_snmp(NULL)
         ,d_cur_target(NULL)
+        ,d_curStep(-1)
     {
         m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
         CreateObject();
@@ -86,8 +87,10 @@ namespace hx_net
             if(iter!=d_relate_antenna_ptr_->map_DevProperty.end())
                  d_onekeyopen_soft= true;
         }
-
-
+        if(d_devProperty->is_step_open_close)
+        {
+            GetInst(LocalConfig).device_step_cmd(d_devInfo.sDevNum,d_step_oc_cmd);
+        }
 
 	}
 
@@ -123,7 +126,8 @@ namespace hx_net
                 //设置运行状态
                 set_run_state(irunstate);
             }
-
+            //
+            d_checkData_ptr = d_curData_ptr;
             if(d_ptransmmit->IsStandardCommand()){
                 m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);
             }
@@ -229,6 +233,72 @@ namespace hx_net
     void  Tsmt_message::check_device_alarm(int nAlarmType)
     {
 
+    }
+
+    int Tsmt_message::getsteptimeout()
+    {
+        if(d_curStep<0)
+            return -1;
+        if(d_cur_task_!=MSG_TRANSMITTER_TURNOFF_OPR)
+        {
+           return  d_step_oc_cmd.mapstepopencmd[d_curStep].stcmdtimeout;
+        }
+        else{
+            return  d_step_oc_cmd.mapstepclosecmd[d_curStep].stcmdtimeout;
+        }
+    }
+
+    bool Tsmt_message::is_step_task_exeok()
+    {
+        if(d_curStep<0)
+            return false;
+        if(d_cur_task_!=MSG_TRANSMITTER_TURNOFF_OPR)
+        {
+           // map<int,DataInfo> mValues;
+            if(d_checkData_ptr->mValues.find(d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex)!=d_checkData_ptr->mValues.end())
+            {
+
+                if(d_checkData_ptr->mValues[d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex].fValue==d_step_oc_cmd.mapstepopencmd[d_curStep].fvalue)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+        {
+            if(d_checkData_ptr->mValues.find(d_step_oc_cmd.mapstepclosecmd[d_curStep].checkindex)!=d_checkData_ptr->mValues.end())
+            {
+
+                if(d_checkData_ptr->mValues[d_step_oc_cmd.mapstepclosecmd[d_curStep].checkindex].fValue==d_step_oc_cmd.mapstepclosecmd[d_curStep].fvalue)
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+    }
+
+    bool Tsmt_message::is_step_all_exeok()
+    {
+        if(d_curStep<0)
+            return true;
+        if(d_cur_task_!=MSG_TRANSMITTER_TURNOFF_OPR)
+        {
+            if(d_step_oc_cmd.mapstepopencmd.size()<=d_curStep)
+                return true;
+            else
+                return false;
+        }
+        else
+        {
+            if(d_step_oc_cmd.mapstepclosecmd.size()<=d_curStep)
+                return true;
+            else
+                return false;
+        }
     }
 
     //检测发射机运行状态
@@ -429,9 +499,9 @@ namespace hx_net
         if(cmd_excute_is_ok()){
             eErrCode = EC_OK;
             m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
+
             return;
         }
-
         //snmp参数设置专用
         d_bUse_snmp = bSnmp;
         d_cur_snmp = snmp;
@@ -443,6 +513,7 @@ namespace hx_net
 
         //执行任务2：正在执行（首次发送指令）
         int nResult = 2;//2：正在执行（循环发送指令）
+
         excute_task_cmd(eErrCode,nResult);
         //天线防抖，不在位
         if(nResult == 7 || nResult==8){
@@ -459,7 +530,14 @@ namespace hx_net
                                                   d_cur_task_,pCurTime,false,eErrCode);
         //目前只有发射机的开关机进行循环发送（）
         if(icmdType >=MSG_TRANSMITTER_TURNON_OPR &&  icmdType < MSG_TRANSMITTER_RISE_POWER_OPR){
-            start_task_timeout_timer();
+            if(!d_devProperty->is_step_open_close)
+            {
+                start_task_timeout_timer();
+            }
+            else
+            {
+                start_step_task_timeout_timer();
+            }
         }else{
             //恢复执行标志
             m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
@@ -471,37 +549,89 @@ namespace hx_net
     {
         task_timeout_timer_.expires_from_now(boost::posix_time::seconds(d_devProperty->cmd_timeout_interval));
         task_timeout_timer_.async_wait(boost::bind(&Tsmt_message::schedules_task_time_out,
-            this,boost::asio::placeholders::error));
+                                                   this,boost::asio::placeholders::error));
+    }
+
+    void Tsmt_message::start_step_task_timeout_timer()
+    {
+        task_timeout_timer_.expires_from_now(boost::posix_time::seconds(d_devProperty->cmd_timeout_interval));
+        task_timeout_timer_.async_wait(boost::bind(&Tsmt_message::schedules_step_task_time_out,
+                                                   this,boost::asio::placeholders::error));
     }
 
     void Tsmt_message::excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult)
     {
-        switch (d_cur_task_) {
-        case MSG_TRANSMITTER_TURNON_OPR:{
-            eErrCode = EC_OPR_ON_GOING;
-            exec_trunon_task_(HIGH_POWER_ON,eErrCode,nExcutResult);
-        }
-            break;
-        case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:{
-            eErrCode = EC_OPR_ON_GOING;
-            exec_trunon_task_(MIDDLE_POWER_ON,eErrCode,nExcutResult);
-        }
-            break;
-        case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR:{
-            eErrCode = EC_OPR_ON_GOING;
-            exec_trunon_task_(LOW_POWER_ON,eErrCode,nExcutResult);
-        }
-            break;
-        case MSG_TRANSMITTER_TURNOFF_OPR:{
-            eErrCode = EC_OPR_ON_GOING;
-            exec_trunoff_task_(eErrCode,nExcutResult);
-        }
-            break;
-        default:{//执行其他任务
+        if(!d_devProperty->is_step_open_close)
+        {
+            switch (d_cur_task_) {
+            case MSG_TRANSMITTER_TURNON_OPR:{
+                eErrCode = EC_OPR_ON_GOING;
+                exec_trunon_task_(HIGH_POWER_ON,eErrCode,nExcutResult);
+            }
+                break;
+            case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:{
+                eErrCode = EC_OPR_ON_GOING;
+                exec_trunon_task_(MIDDLE_POWER_ON,eErrCode,nExcutResult);
+            }
+                break;
+            case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR:{
+                eErrCode = EC_OPR_ON_GOING;
+                exec_trunon_task_(LOW_POWER_ON,eErrCode,nExcutResult);
+            }
+                break;
+            case MSG_TRANSMITTER_TURNOFF_OPR:{
+                eErrCode = EC_OPR_ON_GOING;
+                exec_trunoff_task_(eErrCode,nExcutResult);
+            }
+                break;
+            case MSG_GENERAL_COMMAND_OPR:
+            {
+                CommandUnit cmdUnit;
+                d_ptransmmit->GetSignalCommand(d_cur_task_param_,cmdUnit);
+                if(m_pSession && cmdUnit.commandLen>0)
+                    m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
+            }
+            default:{//执行其他任务
 
-           exec_other_task_(eErrCode);
+                exec_other_task_(eErrCode);
+            }
+                break;
+            }
         }
-            break;
+        else
+        {
+            //if(d_curStep
+            switch (d_cur_task_) {
+            case MSG_TRANSMITTER_TURNON_OPR:
+            case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:
+            case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR:{
+                if(d_curStep==-1)
+                    d_curStep = 0;
+                eErrCode = EC_OPR_ON_GOING;
+                exec_step_trunon_task_(eErrCode,nExcutResult);
+            }
+                break;
+            case MSG_TRANSMITTER_TURNOFF_OPR:{
+                if(d_curStep==-1)
+                    d_curStep = 0;
+                eErrCode = EC_OPR_ON_GOING;
+                exec_step_trunoff_task_(eErrCode,nExcutResult);
+            }
+                break;
+            case MSG_GENERAL_COMMAND_OPR:
+            {
+                CommandUnit cmdUnit;
+                d_ptransmmit->GetSignalCommand(d_cur_task_param_,cmdUnit);
+                if(m_pSession && cmdUnit.commandLen>0)
+                    m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
+            }
+                break;
+            default:{//执行其他任务
+
+                exec_other_task_(eErrCode);
+            }
+                break;
+            }
         }
 
 
@@ -586,6 +716,77 @@ namespace hx_net
         }
     }
 
+    void Tsmt_message::schedules_step_task_time_out(const boost::system::error_code &error)
+    {
+        if(error!= boost::asio::error::operation_aborted)
+        {
+            time_t tmCurTime;
+            time(&tmCurTime);
+            double ninterval = difftime(tmCurTime,d_OprStartTime);
+             tm *pCurTime = localtime(&tmCurTime);
+
+
+             if(is_step_task_exeok()){
+                 ++d_curStep;
+                 if(is_step_all_exeok())
+                 {
+                     string  sResult = DEV_CMD_RESULT_DESC(0);//0：成功
+                     GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
+                    //通知到客户端...
+                    m_pSession->notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,d_devInfo.sDevName,d_devInfo.iDevType,d_cur_user_,
+                                              d_cur_task_,pCurTime,true,EC_OK);
+
+                    m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
+                    d_cur_user_.clear();
+                    d_cur_task_ = -1;
+                    d_curStep=-1;
+                    return;
+                 }
+                 else
+                 {
+                     d_OprStartTime = tmCurTime;
+                     e_ErrorCode eErrCode = EC_OPR_ON_GOING;
+                     int nResult = 3;
+                     excute_task_cmd(eErrCode,nResult);
+                     start_step_task_timeout_timer();
+                 }
+             }
+             else{
+                //超时
+                 //d_cur_task_
+                 int ntime = getsteptimeout();
+                 if(ntime<=0 || ninterval>=ntime) {
+                    //写日志
+                    string  sResult = DEV_CMD_RESULT_DESC(4);//4：失败（超时）
+                    GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
+                    //通知到客户端...
+                    m_pSession->notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,
+                                                             d_devInfo.sDevName,d_devInfo.iDevType,d_cur_user_,
+                                                             d_cur_task_,pCurTime,true,EC_FAILED);
+                    m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
+                    d_cur_user_.clear();
+                    d_cur_task_ = -1;
+                    d_curStep=-1;
+                    return;
+                 }
+                 else{
+                    e_ErrorCode eErrCode = EC_OPR_ON_GOING;
+
+                    int nResult = 3;//3：正在执行（循环发送指令）
+                    excute_task_cmd(eErrCode,nResult);
+                    if(eErrCode == EC_OK){
+                        m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
+                        d_cur_user_.clear();
+                        d_cur_task_ = -1;
+                        d_curStep=-1;
+                        return;
+                    }
+                    start_step_task_timeout_timer();
+                }
+            }
+        }
+    }
+
     void Tsmt_message::exec_trunon_task_(int nType,e_ErrorCode &eErrCode,int &nExcutResult)
     {
         if(!d_ptransmmit)
@@ -595,6 +796,176 @@ namespace hx_net
             nExcutResult = 5;
             return;
         }
+        if(d_relate_tsmt_ptr_!=NULL && d_relate_antenna_ptr_!=NULL){
+            //////-----2018-2-3 15:53-------------/////
+            bool bIgnoreAntenna = false;
+            if(d_cur_task_param_.size()>0){
+                if(d_cur_task_param_[0]=="ignore_antenna")
+                    bIgnoreAntenna=true;
+            }
+             //////-----2018-2-3 15:53---end----------/////
+
+            //既不是自动开关机也不是定时开关机
+            if( d_cur_user_!="auto"){// && d_cur_user_!="timer"
+
+                if(d_onekeyopen_996==false && d_onekeyopen_soft==false){
+                    //天线在位执行开机，否则返回
+                    if(d_antenna_Agent_ == false){
+                        dev_run_state nAntennaS = GetInst(SvcMgr).get_dev_run_state(d_relate_antenna_ptr_->sStationNum,
+                                                                                    d_relate_antenna_ptr_->sDevNum);
+
+
+                        if((nAntennaS == antenna_host && d_Host_==TRANSMITTER_HOST) ||
+                                (nAntennaS == antenna_backup && d_Host_==TRANSMITTER_BACKUP))
+                        {
+
+                        }else{
+                            eErrCode = EC_OK;
+                            nExcutResult = 7;//天线不在位
+                            return;
+                        }
+                    }
+                }
+                else if(d_onekeyopen_soft)
+                {
+                    if(d_antenna_Agent_ == false){
+
+                        bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
+                        if(can_excute == false){
+                            eErrCode = EC_OK;
+                            nExcutResult = 8;//天线防抖
+                            return ;
+                        }
+                    }
+
+                    //关联机器在使用则进行关主机动作
+                    if(d_relate_tsmt_ptr_->bUsed==true) {
+                        //待处理，由开机指令引起的关机参数，可以依据开机带入的参数来转化为关机参数，暂时不用
+                        map<int,string>  tmParam;
+                        if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
+                                                                    d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam))
+                            return ;
+
+                      //  devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
+                      //  commandmsg_->set_sdevid(d_relate_tsmt_ptr_->sDevNum);
+                     //   GetInst(SvcMgr).excute_command(d_relate_tsmt_ptr_->sDevNum,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_user_,commandmsg_);
+                    }
+
+                    //计算目标天线位置
+                    e_MsgType nAntennaCmd = (d_Host_== 0)?MSG_ANTENNA_BTOH_OPR:MSG_ANTENNA_HTOB_OPR;
+
+                    //验证并切换天线
+                    if(d_antenna_Agent_ == false){//如果天线是代理，不进行倒天线动作
+                        //待处理，由开机指令引起的倒天线参数，可以依据开机带入的参数来转化为倒天线参数，暂时不用
+                        map<int,string>  tmParam;
+                        int nResult = GetInst(SvcMgr).start_exec_task(d_relate_antenna_ptr_->sDevNum,
+                                                                      d_cur_user_,nAntennaCmd,tmParam);
+                        if(EC_OK != nResult){
+
+                            return ;
+                        }
+                    }
+                }
+
+            }else{
+
+                if(d_antenna_Agent_ == false){
+
+                    bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
+                    if(can_excute == false){
+                        eErrCode = EC_OK;
+                        nExcutResult = 8;//天线防抖
+                        return ;
+                    }
+                }
+
+                //关联机器在使用则进行关主机动作
+                if(d_relate_tsmt_ptr_->bUsed==true) {
+                    //待处理，由开机指令引起的关机参数，可以依据开机带入的参数来转化为关机参数，暂时不用
+                    //map<int,string>  tmParam;
+                    //if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
+                    //                                            d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam))
+                    //    return ;
+
+                    devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
+                    commandmsg_->set_sdevid(d_relate_tsmt_ptr_->sDevNum);
+                    GetInst(SvcMgr).excute_command(d_relate_tsmt_ptr_->sDevNum,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_user_,commandmsg_);
+                }
+
+                //计算目标天线位置
+                e_MsgType nAntennaCmd = (d_Host_== 0)?MSG_ANTENNA_BTOH_OPR:MSG_ANTENNA_HTOB_OPR;
+
+                //验证并切换天线
+                if(d_antenna_Agent_ == false){//如果天线是代理，不进行倒天线动作
+                    //待处理，由开机指令引起的倒天线参数，可以依据开机带入的参数来转化为倒天线参数，暂时不用
+                    map<int,string>  tmParam;
+                    int nResult = GetInst(SvcMgr).start_exec_task(d_relate_antenna_ptr_->sDevNum,
+                                                                  d_cur_user_,nAntennaCmd,tmParam);
+                    if(EC_OK != nResult){
+
+                        return ;
+                    }
+                }
+
+            }
+
+        }
+
+        if(!d_bUse_snmp){
+            if(m_pSession!=NULL)
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,nType,eErrCode);
+        }
+        else
+            d_ptransmmit->exec_cmd(d_cur_snmp,MSG_TRANSMITTER_TURNON_OPR,d_cur_target);
+
+    }
+
+    //关机
+    void Tsmt_message::exec_trunoff_task_(e_ErrorCode &eErrCode,int &nExcutResult)
+    {
+        if(!d_ptransmmit)
+            return;
+        if(is_detecting()){
+            nExcutResult = 5;
+            return;
+        }
+
+        if(!d_bUse_snmp){
+            if(m_pSession!=NULL)
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0,eErrCode);
+        }
+        else
+            d_ptransmmit->exec_cmd(d_cur_snmp,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_target);
+
+        return;
+    }
+
+    //其他控制指令
+    void Tsmt_message::exec_other_task_(e_ErrorCode &eErrCode)
+    {
+        if(!d_ptransmmit)
+            return;
+
+        eErrCode = EC_CMD_SEND_SUCCEED;
+        if(!d_bUse_snmp){
+            if(m_pSession!=NULL)
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0,eErrCode);
+        }
+        else
+            d_ptransmmit->exec_cmd(d_cur_snmp,d_cur_task_,d_cur_target);
+
+        return;
+    }
+
+    void Tsmt_message::exec_step_trunon_task_(e_ErrorCode &eErrCode, int &nExcutResult)
+    {
+        if(!d_ptransmmit)
+            return;
+        //如果发射机正在监测运行状态，不执行开机操作
+     /*   if(is_detecting()){
+            nExcutResult = 5;
+            return;
+        }*/
         if(d_relate_tsmt_ptr_!=NULL && d_relate_antenna_ptr_!=NULL){
             //////-----2018-2-3 15:53-------------/////
             bool bIgnoreAntenna = false;
@@ -676,7 +1047,6 @@ namespace hx_net
 
                 //关联机器在使用则进行关主机动作
                 if(d_relate_tsmt_ptr_->bUsed==true) {
-
                     devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
                     commandmsg_->set_sdevid(d_relate_tsmt_ptr_->sDevNum);
                     GetInst(SvcMgr).excute_command(d_relate_tsmt_ptr_->sDevNum,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_user_,commandmsg_);
@@ -700,51 +1070,19 @@ namespace hx_net
             }
 
         }
-
-        if(!d_bUse_snmp){
-            if(m_pSession!=NULL)
-                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,nType,eErrCode);
-        }
-        else
-            d_ptransmmit->exec_cmd(d_cur_snmp,MSG_TRANSMITTER_TURNON_OPR,d_cur_target);
-
-    }
-
-    //关机
-    void Tsmt_message::exec_trunoff_task_(e_ErrorCode &eErrCode,int &nExcutResult)
-    {
-        if(!d_ptransmmit)
-            return;
-        if(is_detecting()){
-            nExcutResult = 5;
-            return;
-        }
-
-        if(!d_bUse_snmp){
-            if(m_pSession!=NULL)
-                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0,eErrCode);
-        }
-        else
-            d_ptransmmit->exec_cmd(d_cur_snmp,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_target);
-
-        return;
-    }
-
-    //其他控制指令
-    void Tsmt_message::exec_other_task_(e_ErrorCode &eErrCode)
-    {
-        if(!d_ptransmmit)
-            return;
-
         eErrCode = EC_CMD_SEND_SUCCEED;
-        if(!d_bUse_snmp){
-            if(m_pSession!=NULL)
-                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0,eErrCode);
-        }
-        else
-            d_ptransmmit->exec_cmd(d_cur_snmp,d_cur_task_,d_cur_target);
+        if(m_pSession!=NULL)
+            m_pSession->start_write(d_step_oc_cmd.mapstepopencmd[d_curStep].commandId,d_step_oc_cmd.mapstepopencmd[d_curStep].commandLen);
+    }
 
-        return;
+    void Tsmt_message::exec_step_trunoff_task_(e_ErrorCode &eErrCode, int &nExcutResult)
+    {
+        if(!d_ptransmmit)
+            return;
+        eErrCode = EC_CMD_SEND_SUCCEED;
+        if(m_pSession!=NULL)
+            m_pSession->start_write(d_step_oc_cmd.mapstepclosecmd[d_curStep].commandId,d_step_oc_cmd.mapstepclosecmd[d_curStep].commandLen);
+
     }
 
 
@@ -781,6 +1119,14 @@ namespace hx_net
             }
 
              m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
+             break;
+         case MSG_GENERAL_COMMAND_OPR:
+         {
+             CommandUnit cmdUnit;
+             d_ptransmmit->GetSignalCommand(lpParam,cmdUnit);
+             if(m_pSession && cmdUnit.commandLen>0)
+                 m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
+         }
              break;
          }
      }

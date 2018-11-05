@@ -224,6 +224,12 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             else
                 return RE_HEADERROR;
         }
+        case PRD_PES_3100:{
+            if(data[0]==d_devInfo.iAddressCode && data[1]==0x04)
+                return data[2]+2;
+            else
+                return RE_HEADERROR;
+        }
         }
     }
         break;
@@ -335,14 +341,17 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
                    m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                    return iresult;
                }
-            case AMS_PM800:
-            case AMS_PM1200:
-                {
-                   int iresult = decode_PM812(data,d_curData_ptr,nDataLen,iaddcode);
-                   m_pSession->start_handler_data(iaddcode,d_curData_ptr);
-                   return iresult;
-               }
-
+        case AMS_PM800:
+        case AMS_PM1200:{
+            int iresult = decode_PM812(data,d_curData_ptr,nDataLen,iaddcode);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
+        case PRD_PES_3100:{
+            int iresult = decode_PES3100(data,d_curData_ptr,nDataLen,iaddcode);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
         }
         break;
     }
@@ -377,7 +386,8 @@ bool Electric_message::IsStandardCommand()
             return true;
         case AMS_REF615:
         case AMS_PM800:
-         case AMS_PM1200:
+        case AMS_PM1200:
+        case PRD_PES_3100:
             return true;
         }
         return false;
@@ -864,6 +874,22 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             tmUnit.commandId[3] = 0x00;
             tmUnit.commandId[5] = 0x18;
             uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case PRD_PES_3100:{
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 3;
+            tmUnit.commandLen = 8;
+            tmUnit.commandId[0] = d_devInfo.iAddressCode;
+            tmUnit.commandId[1] = 0x04;
+            tmUnit.commandId[2] = 0x00;
+            tmUnit.commandId[3] = 0x00;
+            tmUnit.commandId[4] = 0x00;
+            tmUnit.commandId[5] = 0x15;
+            unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
             tmUnit.commandId[6] = (uscrc&0x00FF);
             tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
@@ -2164,6 +2190,7 @@ int Electric_message::decode_REF615(unsigned char *data, DevMonitorDataPtr data_
     }
     return RE_SUCCESS;
 }
+
 int Electric_message::decode_PM812(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
 {
     iaddcode = data[2];
@@ -2184,5 +2211,22 @@ int Electric_message::decode_PM812(unsigned char *data, DevMonitorDataPtr data_p
     }
     return RE_SUCCESS;
 }
+
+int Electric_message::decode_PES3100(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    int indexpos =0;
+    iaddcode = data[0];
+    DataInfo dainfo;
+    dainfo.bType = false;
+    for(int i=0;i<14;++i)
+    {
+        dainfo.fValue=(data[11+i*2]*256+data[12+i*2])*0.01;
+        data_ptr->mValues[i] = dainfo;
+    }
+    dainfo.fValue=(data[9]*256+data[10])*0.01;
+    data_ptr->mValues[14] = dainfo;
+    return RE_SUCCESS;
+}
+
 
 }

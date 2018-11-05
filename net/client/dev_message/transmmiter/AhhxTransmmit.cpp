@@ -1,4 +1,4 @@
-﻿#include "AhhxTransmmit.h"
+#include "AhhxTransmmit.h"
 
 namespace hx_net{
 
@@ -95,8 +95,108 @@ namespace hx_net{
 
     void AhhxTransmmit::GetSignalCommand( devCommdMsgPtr lpParam,CommandUnit &cmdUnit )
 	{
+        switch(m_subprotocol)
+        {
+        case HUIXIN_996:{
+            if(lpParam->cparams().size()<2)
+                return;
+            if(lpParam->cparams(0).sparamvalue()=="0")
+            {
+                cmdUnit.commandLen = 10;
+                cmdUnit.commandId[0] = 0x7E;
+                cmdUnit.commandId[1] = 0x31;
+                cmdUnit.commandId[2] = 0x06;
+                cmdUnit.commandId[3] = 0x00;
+                cmdUnit.commandId[4] = 0x30;
+                cmdUnit.commandId[5] = (m_addresscode&0x00FF);
+                cmdUnit.commandId[6] = ((m_addresscode&0xFF00)>>8);
+                cmdUnit.commandId[7] = 0x01;
+                cmdUnit.commandId[8] = atoi(lpParam->cparams(1).sparamvalue().c_str());
+                cmdUnit.commandId[9] = 0x55;
+            }else if(lpParam->cparams(0).sparamvalue()=="1"){
+                cmdUnit.commandLen = 10;
+                cmdUnit.commandId[0] = 0x7E;
+                cmdUnit.commandId[1] = 0x77;
+                cmdUnit.commandId[2] = 0x06;
+                cmdUnit.commandId[3] = 0x00;
+                cmdUnit.commandId[4] = 0x30;
+                cmdUnit.commandId[5] = (m_addresscode&0x00FF);
+                cmdUnit.commandId[6] = ((m_addresscode&0xFF00)>>8);
+                cmdUnit.commandId[7] = 0x01;
+                cmdUnit.commandId[8] = atoi(lpParam->cparams(1).sparamvalue().c_str());
+                cmdUnit.commandId[9] = 0x55;
+            }
+        }
+            break;
+        case HUIXIN_993:
+        {
+            if(lpParam->cparams().size()<1)
+                return;
+            cmdUnit.commandLen = 7;
+            cmdUnit.commandId[0] = 0x55;
+            cmdUnit.commandId[1] = 0x03;
+            cmdUnit.commandId[2] = 0xF2;
+            cmdUnit.commandId[3] = atoi(lpParam->cparams(0).sparamvalue().c_str());
+            cmdUnit.commandId[4] = 0x01;
+            cmdUnit.commandId[5] = cmdUnit.commandId[2]^cmdUnit.commandId[3]^cmdUnit.commandId[4];
+            cmdUnit.commandId[6] = 0x00;
+        }
+            break;
+        }
+    }
 
-	}
+    void AhhxTransmmit::GetSignalCommand(map<int, string> mapParam, CommandUnit &cmdUnit)
+    {
+        switch(m_subprotocol)
+        {
+        case HUIXIN_996:{
+            if(mapParam.size()<2)
+                return;
+            if(mapParam[0]=="0")
+            {
+                cmdUnit.commandLen = 10;
+                cmdUnit.commandId[0] = 0x7E;
+                cmdUnit.commandId[1] = 0x31;
+                cmdUnit.commandId[2] = 0x06;
+                cmdUnit.commandId[3] = 0x00;
+                cmdUnit.commandId[4] = 0x30;
+                cmdUnit.commandId[5] = (m_addresscode&0x00FF);
+                cmdUnit.commandId[6] = ((m_addresscode&0xFF00)>>8);
+                cmdUnit.commandId[7] = 0x01;
+                cmdUnit.commandId[8] = atoi(mapParam[1].c_str());
+                cmdUnit.commandId[9] = 0x55;
+            }else if(mapParam[0]=="1")
+            {
+                cmdUnit.commandLen = 10;
+                cmdUnit.commandId[0] = 0x7E;
+                cmdUnit.commandId[1] = 0x77;
+                cmdUnit.commandId[2] = 0x06;
+                cmdUnit.commandId[3] = 0x00;
+                cmdUnit.commandId[4] = 0x30;
+                cmdUnit.commandId[5] = (m_addresscode&0x00FF);
+                cmdUnit.commandId[6] = ((m_addresscode&0xFF00)>>8);
+                cmdUnit.commandId[7] = 0x01;
+                cmdUnit.commandId[8] = atoi(mapParam[1].c_str());
+                cmdUnit.commandId[9] = 0x55;
+            }
+        }
+            break;
+        case HUIXIN_993:
+        {
+            if(mapParam.begin()==mapParam.end())
+                return;
+            cmdUnit.commandLen = 7;
+            cmdUnit.commandId[0] = 0x55;
+            cmdUnit.commandId[1] = 0x03;
+            cmdUnit.commandId[2] = 0xF2;
+            cmdUnit.commandId[3] = atoi(mapParam[0].c_str());
+            cmdUnit.commandId[4] = 0x01;
+            cmdUnit.commandId[5] = cmdUnit.commandId[2]^cmdUnit.commandId[3]^cmdUnit.commandId[4];
+            cmdUnit.commandId[6] = 0x00;
+        }
+            break;
+        }
+    }
 
     void AhhxTransmmit::GetAllCmd( CommandAttribute &cmdAll )
 	{
@@ -123,21 +223,22 @@ namespace hx_net{
 
 
 
-            tmUnit.commandLen = 6;
-            /*tmUnit.commandId[0]=0x55;
+            tmUnit.commandLen = 7;
+            tmUnit.commandId[0]=0x55;
             tmUnit.commandId[1]=0x03;
             tmUnit.commandId[2]=0xF2;
             tmUnit.commandId[3]=0x00;//脉冲
             tmUnit.commandId[4]=0x01;
             tmUnit.commandId[5]=0xF3;
-            tmUnit.commandId[6]=0x00;*/
+            tmUnit.commandId[6]=0x00;
 
+           /* tmUnit.commandLen = 6;
             tmUnit.commandId[0]=0x55;
             tmUnit.commandId[1]=0x02;
             tmUnit.commandId[2]=0xFA;
             tmUnit.commandId[3]=0x01;//电平
             tmUnit.commandId[4]=0xFB;
-            tmUnit.commandId[5]=0x00;
+            tmUnit.commandId[5]=0x00;*/
 
 
 
@@ -157,14 +258,14 @@ namespace hx_net{
             cmdAll.mapCommand[MSG_TRANSMITTER_LOW_POWER_TURNON_OPR] = vtLTurnOnUnit;
 
 
-            tmUnit.commandId[1]=0x03;
+           /* tmUnit.commandId[1]=0x03;
             tmUnit.commandId[2]=0xFA;
             tmUnit.commandId[3]=0x00;
             tmUnit.commandId[4]=0xFA;//电平
-            tmUnit.commandId[5]=0x00;
+            tmUnit.commandId[5]=0x00;*/
 
-            //tmUnit.commandId[3]=0x01;
-            //tmUnit.commandId[5]=0xF2;//脉冲
+            tmUnit.commandId[3]=0x01;
+            tmUnit.commandId[5]=0xF2;//脉冲
 
             vector<CommandUnit> vtTurnOffUnit;
             vtTurnOffUnit.push_back(tmUnit);
@@ -179,7 +280,10 @@ namespace hx_net{
             tmUnit.commandId[5]=0xF6;
             vector<CommandUnit> vtDwUnit;
             vtDwUnit.push_back(tmUnit);
-             cmdAll.mapCommand[MSG_TRANSMITTER_REDUCE_POWER_OPR] = vtDwUnit;
+            cmdAll.mapCommand[MSG_TRANSMITTER_REDUCE_POWER_OPR] = vtDwUnit;
+            tmUnit.commandId[3]=0x06;
+            tmUnit.commandId[5]=0xF5;
+            cmdAll.mapCommand[MSG_DEV_RESET_OPR].push_back(tmUnit);
         }
             break;
         case HUIXIN_996:

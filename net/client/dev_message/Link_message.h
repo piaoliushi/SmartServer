@@ -18,6 +18,7 @@ public:
     int decode_msg_body(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
     bool IsStandardCommand();
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
+    void GetSignalCommand(map<int, string> mapParam, CommandUnit &cmdUnit);
     void GetAllCmd(CommandAttribute &cmdAll);
     void Link_Callback(int reason, Snmp *session,Pdu &pdu, SnmpTarget &target);
 
@@ -58,6 +59,8 @@ protected:
     int decode_0401SP(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_JC5103(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_6300(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
+    int decode_6300_AD(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
+    int decode_9020(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
 private:
     void GetSwitchCmd(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     void GetControlModCmd(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);

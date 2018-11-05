@@ -32,6 +32,7 @@ public:
                                                 string sUser,e_ErrorCode &eErrCode);
     //启动定时控制
     void start_task_timeout_timer();
+    void start_step_task_timeout_timer();
     //设备运行状态
     bool is_running();
     bool is_shut_down();
@@ -51,16 +52,25 @@ public:
 protected:
     //任务超时回调
     void  schedules_task_time_out(const boost::system::error_code& error);
+    void  schedules_step_task_time_out(const boost::system::error_code& error);
     //检测运行状态
     void  detect_run_state(DevMonitorDataPtr curDataPtr);
     void  exec_trunon_task_(int nType,e_ErrorCode &eErrCode,int &nExcutResult);
     void  exec_trunoff_task_(e_ErrorCode &eErrCode,int &nExcutResult);
     void  exec_other_task_(e_ErrorCode &eErrCode);
+    void  exec_step_trunon_task_(e_ErrorCode &eErrCode,int &nExcutResult);
+    void  exec_step_trunoff_task_(e_ErrorCode &eErrCode,int &nExcutResult);
     void  excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult);
     void  GetResultData(DevMonitorDataPtr data_ptr);
     void  CreateObject();
     bool  cmd_excute_is_ok();
     void  check_device_alarm(int nAlarmType);
+
+    //获取分几开关当前步骤超时设置
+    int getsteptimeout();
+    bool is_step_task_exeok();
+    bool is_step_all_exeok();
+
 private:
     int                             m_Subprotocol;//设备子协议号
     int                             m_mainprotocol;//主协议编号
@@ -88,7 +98,9 @@ private:
     Snmp                  *d_cur_snmp;
     bool                   d_bUse_snmp;
     CTarget               *d_cur_target;
-
+    int                   d_curStep;//分步骤开关机当前步骤号
+    StepCommandAttribute  d_step_oc_cmd;
+    DevMonitorDataPtr      d_checkData_ptr;
 };
 typedef boost::shared_ptr<hx_net::Tsmt_message>  Tsmt_message_ptr;
 typedef boost::weak_ptr<hx_net::Tsmt_message>    Tsmt_message_weak_ptr;

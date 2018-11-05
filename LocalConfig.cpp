@@ -349,8 +349,55 @@ bool LocalConfig::load_local_config(const char* sFileName)
                     //if(vCmd.size()>0)
                         cmd.mapCommand[MSG_DEV_RESET_OPR] = vCmd;
                 }
-
                 devices_cmd_[devId] = cmd;
+                xml_property = xml_device->first_node("stepopenclose");
+                if(xml_property)
+                {
+                    long nUse =  strtol(xml_property->value(),NULL,10);
+                    if(nUse>0)
+                        tmpPropertyEx->is_step_open_close = true;
+                    else
+                        tmpPropertyEx->is_step_open_close = false;
+                }
+                if(tmpPropertyEx->is_step_open_close)
+                {
+                    StepCommandAttribute stepcmd;
+                    xml_property = xml_device->first_node("stepopen");
+                    if(xml_property)
+                    {
+                         xml_node<>* xml_stcmd = xml_property->first_node("step_opcommand");
+                         while(xml_stcmd!=0)
+                         {
+                             int nid = strtol(xml_stcmd->first_attribute("id")->value(),NULL,10);
+                             StepCommandUnit stcmdUnit;
+                             std::string qcmd = xml_stcmd->first_attribute("command")->value();
+                             stcmdUnit.commandLen = StrToHex(qcmd,&stcmdUnit.commandId[0]);
+                             stcmdUnit.checkindex = strtol(xml_stcmd->first_attribute("checkindex")->value(),NULL,10);
+                             stcmdUnit.fvalue     = atof(xml_stcmd->first_attribute("checkvalue")->value());
+                             stcmdUnit.stcmdtimeout = strtol(xml_stcmd->first_attribute("timeout")->value(),NULL,10);
+                             stepcmd.mapstepopencmd[nid] = stcmdUnit;
+                             xml_stcmd = xml_stcmd->next_sibling("step_opcommand");
+                         }
+                    }
+                    xml_property = xml_device->first_node("stepclose");
+                    if(xml_property)
+                    {
+                         xml_node<>* xml_stcmd = xml_property->first_node("step_clcommand");
+                         while(xml_stcmd!=0)
+                         {
+                             int nid = strtol(xml_stcmd->first_attribute("id")->value(),NULL,10);
+                             StepCommandUnit stcmdUnit;
+                             std::string qcmd = xml_stcmd->first_attribute("command")->value();
+                             stcmdUnit.commandLen = StrToHex(qcmd,&stcmdUnit.commandId[0]);
+                             stcmdUnit.checkindex = strtol(xml_stcmd->first_attribute("checkindex")->value(),NULL,10);
+                             stcmdUnit.fvalue     = atof(xml_stcmd->first_attribute("checkvalue")->value());
+                             stcmdUnit.stcmdtimeout = strtol(xml_stcmd->first_attribute("timeout")->value(),NULL,10);
+                             stepcmd.mapstepclosecmd[nid] = stcmdUnit;
+                             xml_stcmd = xml_stcmd->next_sibling("step_clcommand");
+                         }
+                    }
+                    devices_step_cmd[devId] = stepcmd;
+                }
                 device_property_Ex_[devId]=tmpPropertyEx;
             }
 
@@ -467,5 +514,14 @@ void LocalConfig::device_cmd( string sDevId,CommandAttribute& cmd )
                 cmd.mapCommand[type_iter->first] = type_iter->second;
             }
         }
+    }
+}
+
+void LocalConfig::device_step_cmd(string sDevId, StepCommandAttribute &stcmd)
+{
+    map<string,StepCommandAttribute>::iterator iter = devices_step_cmd.find(sDevId);
+    if(iter != devices_step_cmd.end())
+    {
+        stcmd = (*iter).second;
     }
 }

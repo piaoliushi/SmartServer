@@ -47,6 +47,7 @@ namespace hx_net
         virtual bool IsStandardCommand(){return false;}
         virtual void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit){}
         virtual void GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit){}
+        virtual void GetSignalCommand(map<int,string> mapParam,CommandUnit &cmdUnit){}
         virtual void GetAllCmd(CommandAttribute &cmdAll){}
         virtual int  decode_msg_body(DevMonitorDataPtr data_ptr,int nDataLen){return -1;}
         virtual bool isLastQueryCmd(){return true;}

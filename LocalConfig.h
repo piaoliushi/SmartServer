@@ -52,6 +52,7 @@ public:
 	bool writeSmsParToXml(const char* sFileName,bool bUse,string comId,int baudRate,string smsCenterNumber);
 	
     void device_cmd(string sDevId,CommandAttribute& cmd);//读取配置的命令
+    void device_step_cmd(string sDevId,StepCommandAttribute& stcmd);
 
 private:
     string src_code_;//本平台唯一id
@@ -91,6 +92,6 @@ private:
 	map<string,pMoxaPropertyExPtr> moxas_property_Ex_;
 
     map<string,CommandAttribute> devices_cmd_;
-
+    map<string,StepCommandAttribute> devices_step_cmd;
 };
 #endif

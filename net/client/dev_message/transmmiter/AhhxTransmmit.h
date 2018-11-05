@@ -10,6 +10,7 @@ namespace hx_net{
 		int  decode_msg_body(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
 		bool IsStandardCommand();
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
+        void GetSignalCommand(map<int,string> mapParam,CommandUnit &cmdUnit);
 		void GetAllCmd(CommandAttribute &cmdAll);
 	private:
         int Md993Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);

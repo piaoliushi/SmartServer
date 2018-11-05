@@ -251,8 +251,11 @@ typedef enum EDAPROTOCOL
     AMS_REF615           = 21,//艾默生REF615
     AMS_PM800            = 22,
     AMS_PM1200           = 23,
+    PRD_PES_3100         = 24,//普尔顿PES_3100系列
     ABB_104              = 100,//ABB104电表
 }EdaSubProtocol;
+
+
 
 //环境设备
 typedef enum WSPROTOCOL
@@ -331,6 +334,8 @@ typedef enum LINK_DEVICE
     LINK_HX_0401_SP         = 19,//汇鑫0401SP切换器
     LINK_JC_5103            = 20,//大连捷成DAS-5103
     LINK_HX_6300            = 21,//汇鑫6300音频处理器
+    LINK_HX_6300_AD         = 22,//汇鑫6300模拟/数字音频处理器
+    LINK_HX_9020            = 23,//汇鑫9020调幅度测试仪
 }LinkDeviceSubProtocol;
 
 //上海全波
@@ -378,5 +383,24 @@ typedef enum RVRPROTOCOL
     RSM_FM_OCBD = 1, //调频开关板协议
     ETL3100     = 2, //泰诺克etl3100
 }RvrSubProtocol;
+
+
+typedef struct CStepMDUnit
+{
+    CStepMDUnit()
+    {
+        commandLen = 0;
+    }
+    unsigned char commandId[128];
+    int           commandLen;
+    int           checkindex;
+    float         fvalue;
+    int           stcmdtimeout;
+}StepCommandUnit;
+typedef struct
+{
+    map<int,StepCommandUnit> mapstepopencmd;
+    map<int,StepCommandUnit> mapstepclosecmd;
+}StepCommandAttribute;
 
 #endif

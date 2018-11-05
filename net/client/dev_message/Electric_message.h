@@ -62,6 +62,7 @@ protected:
     int decode_EA800II(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_REF615(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_PM812(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
+    int decode_PES3100(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
 private:
     int              m_Subprotocol;//设备子协议号
     int              m_mainprotocol;//主协议编号

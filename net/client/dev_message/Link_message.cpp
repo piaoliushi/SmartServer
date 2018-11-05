@@ -767,6 +767,29 @@ namespace hx_net
            cmdUnit.commandId[5] = 0x55;
        }
            break;
+        case LINK_HX_6300_AD:{
+           if(lpParam->cparams().size()<=1)
+               return;
+           cmdUnit.ackLen = 0;
+           cmdUnit.commandLen = 14;
+           cmdUnit.commandId[0] = 0xAA;
+           cmdUnit.commandId[1] = 0x63;
+           cmdUnit.commandId[2] = 0x22;
+           cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+           cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+           cmdUnit.commandId[5] = 0x00;
+           cmdUnit.commandId[6] = 0x07;
+           cmdUnit.commandId[7] = atoi(lpParam->cparams(0).sparamvalue().c_str());
+           cmdUnit.commandId[8] = atoi(lpParam->cparams(1).sparamvalue().c_str());
+           cmdUnit.commandId[9] = 0x00;
+           cmdUnit.commandId[10] = 0x00;
+           cmdUnit.commandId[11] = 0x00;
+           cmdUnit.commandId[12] = cmdUnit.commandId[7]+cmdUnit.commandId[8];
+           cmdUnit.commandId[13] = 0x55;
+            }
+        break;
+        case LINK_HX_9020:
+            break;
         default:
             break;
         }
@@ -826,12 +849,21 @@ namespace hx_net
             }
         }
             break;
-        case LINK_HX_6300:{
+        case LINK_HX_6300:
+        case LINK_HX_6300_AD:
+        {
                if(data[0]==0xAA && data[1]==0x63)
                    return (data[5]*256+data[6]);
                else
                    return RE_HEADERROR;
            }
+        case LINK_HX_9020:{
+               if(data[0]==0xAA && data[1]==0x92)
+                   return (data[5]*256+data[6]);
+               else
+                   return RE_HEADERROR;
+           }
+            break;
         default:
             break;
         }
@@ -899,6 +931,12 @@ namespace hx_net
         case LINK_HX_6300:
             idecresult = decode_6300(data,d_curData_ptr,nDataLen,iaddcode);
             break;
+        case LINK_HX_6300_AD:
+            idecresult = decode_6300_AD(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
+        case LINK_HX_9020:
+            idecresult = decode_9020(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
         default:
             break;
         }
@@ -919,6 +957,8 @@ namespace hx_net
         case LINK_HX_0401_DABS:
         case LINK_HX_0214_DA:
         case LINK_HX_6300:
+        case LINK_HX_6300_AD:
+        case LINK_HX_9020:
             return true;
         }
         return false;
@@ -927,6 +967,60 @@ namespace hx_net
     void Link_message::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)
     {
     }
+
+    void Link_message::GetSignalCommand(map<int, string> mapParam, CommandUnit &cmdUnit)
+    {
+        switch (d_devInfo.nSubProtocol){
+        case LINK_HX_6300:
+        case LINK_HX_6300_AD:
+        {
+            if(mapParam.size()<=1)
+                break;
+            cmdUnit.ackLen = 0;
+            cmdUnit.commandLen = 14;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x63;
+            cmdUnit.commandId[2] = 0x22;
+            cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x07;
+            cmdUnit.commandId[7] = atoi(mapParam[0].c_str());
+            cmdUnit.commandId[8] = atoi(mapParam[1].c_str());
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = 0x00;
+            cmdUnit.commandId[12] = cmdUnit.commandId[7]+cmdUnit.commandId[8];
+            cmdUnit.commandId[13] = 0x55;
+            break;
+        }
+        case LINK_HX_9020:
+        {
+            if(mapParam.size()<=1)
+                break;
+            cmdUnit.ackLen = 0;
+            cmdUnit.commandLen = 14;
+            cmdUnit.commandId[0] = 0xAA;
+            cmdUnit.commandId[1] = 0x92;
+            cmdUnit.commandId[2] = 0x66;
+            cmdUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            cmdUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            cmdUnit.commandId[5] = 0x00;
+            cmdUnit.commandId[6] = 0x07;
+            cmdUnit.commandId[7] = atoi(mapParam[0].c_str());
+            cmdUnit.commandId[8] = atoi(mapParam[1].c_str());
+            cmdUnit.commandId[9] = 0x00;
+            cmdUnit.commandId[10] = 0x00;
+            cmdUnit.commandId[11] = 0x00;
+            cmdUnit.commandId[12] = cmdUnit.commandId[7]+cmdUnit.commandId[8];
+            cmdUnit.commandId[13] = 0x55;
+        }
+            break;
+        default:
+            break;
+        }
+    }
+
 
     void Link_message::GetAllCmd( CommandAttribute &cmdAll )
     {
@@ -1040,12 +1134,36 @@ namespace hx_net
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
-        case LINK_HX_6300:{
+        case LINK_HX_6300:
+        case LINK_HX_6300_AD:
+        {
             CommandUnit tmUnit;
             tmUnit.commandLen = 14;
             tmUnit.ackLen = 7;
             tmUnit.commandId[0] = 0xAA;
             tmUnit.commandId[1] = 0x63;
+            tmUnit.commandId[2] = 0x11;
+            tmUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            tmUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
+            tmUnit.commandId[5] = 0x00;
+            tmUnit.commandId[6] = 0x07;
+            tmUnit.commandId[7] = 0x00;
+            tmUnit.commandId[8] = 0x00;
+            tmUnit.commandId[9] = 0x00;
+            tmUnit.commandId[10] = 0x00;
+            tmUnit.commandId[11] = 0x00;
+            tmUnit.commandId[12] = 0x00;
+            tmUnit.commandId[13] = 0x55;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case LINK_HX_9020:
+        {
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 14;
+            tmUnit.ackLen = 7;
+            tmUnit.commandId[0] = 0xAA;
+            tmUnit.commandId[1] = 0x92;
             tmUnit.commandId[2] = 0x11;
             tmUnit.commandId[3] = ((d_devInfo.iAddressCode&0xFF00)>>8);
             tmUnit.commandId[4] = (d_devInfo.iAddressCode&0x00FF);
@@ -2076,5 +2194,47 @@ namespace hx_net
           }
       }
       return nresult;
+  }
+
+   int Link_message::decode_6300_AD(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+  {
+      if(data[2]!=0x11)
+          return RE_CMDACK;
+      iaddcode = data[3]*256+data[4];
+      DataInfo dainfo;
+      dainfo.bType = false;
+      dainfo.fValue = (data[8]-120)*0.10;
+      data_ptr->mValues[0] = dainfo;
+      dainfo.fValue = (data[9]-120)*0.10;
+      data_ptr->mValues[1] = dainfo;
+      dainfo.fValue = (data[10]-100)*0.1;
+      data_ptr->mValues[2] = dainfo;
+      dainfo.bType = true;
+      dainfo.fValue = data[11];
+      data_ptr->mValues[3] = dainfo;
+      dainfo.bType = false;
+      dainfo.fValue = data[12];
+      data_ptr->mValues[4] = dainfo;
+      dainfo.fValue = data[13];
+      data_ptr->mValues[5] = dainfo;
+      return RE_SUCCESS;
+  }
+
+   int Link_message::decode_9020(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+  {
+      iaddcode = data[3]*256+data[4];
+      DataInfo dainfo;
+      for(int i=0;i<6;++i)
+      {
+          dainfo.bType = false;
+          dainfo.fValue = data[3*i+7];
+          data_ptr->mValues[3*i] = dainfo;
+          dainfo.fValue = data[3*i+8];
+          data_ptr->mValues[3*i+1] = dainfo;
+          dainfo.bType = true;
+          dainfo.fValue = data[3*i+9];
+          data_ptr->mValues[3*i+2] = dainfo;
+      }
+      return RE_SUCCESS;
   }
 }
