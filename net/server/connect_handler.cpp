@@ -124,13 +124,7 @@ namespace hx_net
         sendMessage(MSG_HANDOVER_ACK,sloginAck);
     }
 
-    //签到,签退(ack)
-    void connect_handler::user_sign_in_out_ack(int bIn,string sUser,string sPassword)
-    {
-        signInOutAckMsgPtr signinAck(new SignInOutAck);
-        srv_.user_signin_out(shared_from_this(),sUser,sPassword,signinAck,bIn);
-        sendMessage(MSG_SIGN_IN_OUT_ACK,signinAck);
-    }
+
     //值班日志
     void  connect_handler::user_duty_log(string sUserId,const string &sContent,int nType)
     {

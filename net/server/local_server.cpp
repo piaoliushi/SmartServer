@@ -90,10 +90,12 @@ namespace hx_net
     void LocalServer::user_login(session_ptr ch_ptr,string sUser,string sPassword,LoginAck &loginAck)
 	{
         loginAck.set_eresult(EC_FAILED);
+
+        //cout<<"1---start----login---------"<<endl;
         boost::recursive_mutex::scoped_lock lock(mutex_);
         string lgUser;
         string lgClientId = "00000000";//客户端默认id
-
+        //cout<<"2---start----login-----------"<<endl;
         if(sUser.find('_') != -1){
             vector<string> vUserInfo;
             boost::split(vUserInfo,sUser,boost::is_any_of("_"));
@@ -117,7 +119,7 @@ namespace hx_net
 			}
 		}
 
-
+        //cout<<"3---start----login-----------"<<endl;
 		iter = session_pool_.find(ch_ptr);
 		if(iter!=session_pool_.end())
 		{
@@ -135,8 +137,9 @@ namespace hx_net
 				else
 				{
                     //获取该台站所有用户信息
+                     //cout<<"4---start----login-----------"<<endl;
                     GetInst(DataBaseOperation).GetAllUserInfoByStation(sstationid,loginAck);
-
+                         //cout<<"5---start----login-----------"<<endl;
 					loginAck.set_eresult(EC_OK);
 					loginAck.set_eusrlevel(tmpUser.nControlLevel);
 					loginAck.set_usrnumber(tmpUser.sNumber);
@@ -145,8 +148,6 @@ namespace hx_net
 					loginAck.set_usrjobnumber(tmpUser.sJobNumber);
                     loginAck.set_usrheadship(tmpUser.sHeadship.c_str());
 
-                    //收集当前签到人信息
-                    //addSignInUsersToLoginAck(ch_ptr,tmpUser,loginAck);
 					
                     (*iter).second.usr_= lgUser;//sUser记录当前登陆用户
 					(*iter).second.psw_= tmpUser.sPassword;//记录当前登陆用户密码
@@ -157,10 +158,13 @@ namespace hx_net
                     tcp::endpoint remote_add = ch_ptr->get_addr();
                     GetInst(SvcMgr).get_notify()->OnClientLogin(remote_add.address().to_string(),remote_add.port(),
                                                                 tmpUser.sName,tmpUser.sNumber);
+
+                     //cout<<"6---start----login-----------"<<endl;
                     //查找该用户授权设备，并插入到设备-〉用户映射表
                     vector<string> debnumber;
                     if(GetInst(DataBaseOperation).GetAllAuthorizeDevByUser(tmpUser.sNumber,debnumber,lgClientId))
                     {
+                        //cout<<"7---start----login-----------"<<endl;
                         vector<string>::iterator itersNum = debnumber.begin();
                         //vector<string> usrTodev;//用户设备列表
                         for(;itersNum!=debnumber.end();++itersNum)
@@ -221,6 +225,8 @@ namespace hx_net
                             devToUser_[*itersNum].push_back(ch_ptr);
                         }
 
+                        //cout<<"8---start----login-----------"<<endl;
+
                     }
                 }
             }
@@ -230,143 +236,13 @@ namespace hx_net
 		return ;
 	}
 
-    //收集当前签到人信息,打包进入登陆回复消息
-    void LocalServer::addSignInUsersToLoginAck(session_ptr ch_ptr,const UserInformation &sUser,LoginAck &loginAck)
-    {
-        e_ErrorCode error_code;
-        time_t curTm;
-        handSignInAndOut(ch_ptr,true,curTm,sUser,error_code);//新用户签到
-        boost::recursive_mutex::scoped_lock lock(mutex_);
-        std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.find(ch_ptr);
-        if(iter!=session_pool_.end())
-        {
-            if(!(*iter).second.usr_.empty())
-            {
-                UserInformation sUserInfo;
-                sUserInfo.sName = (*iter).second.usr_;
-                time_t curTm=time(0);
-                e_ErrorCode errorCode;
-                handSignInAndOut(ch_ptr,false,curTm,sUserInfo,errorCode);//老用户签退
-            }
-
-        }
-        for(int i=0;i<sign_in_users_.size();++i)
-        {
-            UserSigninInfo* newSignUser = loginAck.add_signusers();
-            newSignUser->set_eusrlevel(sign_in_users_[i].UsrInfo.nControlLevel);
-            newSignUser->set_usrnumber(sign_in_users_[i].UsrInfo.sNumber);
-            newSignUser->set_usrname(sign_in_users_[i].UsrInfo.sName.c_str());
-            newSignUser->set_usrpsw(sign_in_users_[i].UsrInfo.sPassword.c_str());
-            newSignUser->set_usrjobnumber(sign_in_users_[i].UsrInfo.sJobNumber);
-            newSignUser->set_usrheadship(sign_in_users_[i].UsrInfo.sHeadship.c_str());
-            string sSignTime = QDateTime::fromTime_t(sign_in_users_[i].SignInTime).toString(Qt::DefaultLocaleLongDate).toStdString();
-            //API_TimeToStringEX(sSignTime,sign_in_users_[i].SignInTime);
-            newSignUser->set_signintime(sSignTime);
-        }
-    }
-
-    //签到签退操作
-    void LocalServer::handSignInAndOut(session_ptr ch_ptr,bool bIsIn,time_t &curTm,
-                                       const UserInformation &sUser,e_ErrorCode &eError)
-    {
-        boost::recursive_mutex::scoped_lock lock(sign_mutex_);
-        bool bfind=false;
-        std::vector<UserSignInInfo>::iterator iter=sign_in_users_.begin();
-        for(;iter!=sign_in_users_.end();++iter)
-        {
-            if((*iter).UsrInfo.sName == sUser.sName)
-            {
-                if(bIsIn==true)//签到
-                {
-                    //重复签到
-                    eError =EC_USR_REPEAT_LOGIN;
-                    return;
-                }
-                else if(bIsIn==false)//签退
-                {
-                    //检查该用户是否已登陆，若登陆拒绝签退
-                    /*{
-                        boost::recursive_mutex::scoped_lock clientlock_(mutex_);
-                        std::map<session_ptr,HandlerKey>::iterator itersession = session_pool_.begin();
-                        for(;itersession!=session_pool_.end();++itersession){
-                            if((*itersession).first!= ch_ptr){
-                                if((*itersession).second.usr_ == sUser.sName){
-                                    eError = EC_LOGOUT_FAILED;
-                                    return;
-                                }
-                            }
-                        }
-                    }*/
-                    time_t curTm = time(0);
-                    if(!GetInst(DataBaseOperation).AddSignout((*iter).UsrInfo.sNumber,(*iter).SignInTime,curTm))
-                        return;
-
-                    notify_other_client_signin_result(ch_ptr,1,*iter);
-
-                    sign_in_users_.erase(iter);
-                    eError = EC_OK;
-
-                    return;
-                }
-                bfind = true;
-            }
-        }
-        if(bfind==false)
-        {
-            if(bIsIn==true)//签到
-            {
-
-                //记录当前签到用户
-                UserSignInInfo  newSignIn;
-                curTm = newSignIn.SignInTime;
-                newSignIn.UsrInfo = sUser;
-                //tm *ltimeS = localtime(&(newSignIn.SignInTime));
-                if(!GetInst(DataBaseOperation).AddSignin(sUser.sNumber,newSignIn.SignInTime,0))
-                    return;
-                sign_in_users_.push_back(newSignIn);
-                eError = EC_OK;
-
-                notify_other_client_signin_result(ch_ptr,0,newSignIn);
-            }
-            else if(bIsIn==false)//签退
-            {
-                //没找到该用户
-                eError = EC_USR_NOT_FOUND;
-            }
-        }
-    }
-
-    void LocalServer::notify_other_client_signin_result(session_ptr ch_ptr,int bIn,const UserSignInInfo &sSignUser)
-    {
-        //打包签到通知消息给其他客户端
-        boost::recursive_mutex::scoped_lock lock(mutex_);
-        std::map<session_ptr,HandlerKey>::iterator itersession = session_pool_.begin();
-        for(;itersession!=session_pool_.end();++itersession)
-        {
-            if((*itersession).first!= ch_ptr)
-            {
-                signInOutAckMsgPtr signinAck(new SignInOutAck);
-                signinAck->set_eresult(EC_OK);
-                signinAck->set_issignin(bIn);
-                string sSignTime = QDateTime::fromTime_t(sSignUser.SignInTime).toString(Qt::DefaultLocaleLongDate).toStdString();
-                signinAck->mutable_cusersinfo()->set_signintime(sSignTime);
-                signinAck->mutable_cusersinfo()->set_eusrlevel(sSignUser.UsrInfo.nControlLevel);
-                signinAck->mutable_cusersinfo()->set_usrnumber(sSignUser.UsrInfo.sNumber);
-                signinAck->mutable_cusersinfo()->set_usrname(sSignUser.UsrInfo.sName.c_str());
-                signinAck->mutable_cusersinfo()->set_usrpsw(sSignUser.UsrInfo.sPassword.c_str());
-                signinAck->mutable_cusersinfo()->set_usrjobnumber(sSignUser.UsrInfo.sJobNumber);
-                signinAck->mutable_cusersinfo()->set_usrheadship(sSignUser.UsrInfo.sHeadship.c_str());
-                (*itersession).first->sendMessage(MSG_SIGN_IN_OUT_ACK,signinAck);
-            }
-        }
-    }
 
     //交接班用户切换
     void LocalServer::user_switch_login(session_ptr ch_ptr,string sNewUser,string sPassword,LoginAck &loginAck,UserInformation &tmpUser)
     {
 
 
-        std::string sstationid = GetInst(LocalConfig).local_station_id();
+        //std::string sstationid = GetInst(LocalConfig).local_station_id();
         if(!GetInst(DataBaseOperation).GetUserInfo(sNewUser,tmpUser))//sUser替换为lgUser
             loginAck.set_eresult(EC_FAILED);//获取用户信息失败（访问数据库出错）
         else
@@ -377,32 +253,9 @@ namespace hx_net
                 loginAck.set_eresult(EC_USR_PSW_ERROR);//密码错误
             else
             {
-
-
                 loginAck.set_eresult(EC_OK);
 
-
-                //获取该台站所有用户信息
-                /*GetInst(DataBaseOperation).GetAllUserInfoByStation(sstationid,loginAck);
-                loginAck.set_eusrlevel(tmpUser.nControlLevel);
-                loginAck.set_usrnumber(tmpUser.sNumber);
-                loginAck.set_usrname(tmpUser.sName.c_str());
-                loginAck.set_usrpsw(tmpUser.sPassword.c_str());
-                loginAck.set_usrjobnumber(tmpUser.sJobNumber);
-                loginAck.set_usrheadship(tmpUser.sHeadship.c_str());*/
-
-
-               // (*iter).second.usr_= lgUser;//sUser记录当前登陆用户
-               // (*iter).second.psw_= tmpUser.sPassword;//记录当前登陆用户密码
-                //(*iter).second.usr_number_ = tmpUser.sNumber;//记录当前用户编号
-                //(*iter).second.client_id_ = lgClientId;//记录当前客户端编号
-
-                //登陆成功
-                //tcp::endpoint remote_add = ch_ptr->get_addr();
-                //GetInst(SvcMgr).get_notify()->OnClientLogin(remote_add.address().to_string(),remote_add.port(),
-                //                                            tmpUser.sName,tmpUser.sNumber);
-
-             }
+            }
         }
     }
 
@@ -564,91 +417,6 @@ namespace hx_net
             loginAck.set_eresult(EC_USR_NOT_FOUND);
 
 
-    }
-
-    //用户交接班(将当前用户所有链接都切换到新用户，并通知兄弟连接)
-    /*void LocalServer::user_handover(session_ptr ch_ptr,string sCurUsr,string sNewUser,
-                               string sNewPassword,const string &sContents,LoginAck &loginAck)
-    {
-        loginAck.set_eresult(EC_FAILED);
-        boost::recursive_mutex::scoped_lock lock(mutex_);
-        std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.find(ch_ptr);
-        if(iter!=session_pool_.end())
-        {
-            if(sCurUsr!=(*iter).second.usr_ )//没有找到当前交班用户
-                loginAck.set_eresult(EC_USR_NOT_FOUND);
-            else//清除当前用户的权限信息
-            {
-                std::string oldUsrId = (*iter).second.usr_number_;//记录当前登陆用户id
-                std::string oldUsrName = (*iter).second.usr_;//记录当前登陆用户id
-                std::string oldUsrPsw = (*iter).second.psw_;//记录当前登陆用户id
-
-                //清除所有设备和连接对应map
-                std::map<string,vector<session_ptr> >::iterator itersession = devToUser_.begin();
-                for(;itersession!=devToUser_.end();++itersession)
-                {
-                    vector<session_ptr>::iterator itervect= (*itersession).second.begin();
-                    for(;itervect!=(*itersession).second.end();++itervect)
-                    {
-                        if((*itervect) == ch_ptr){
-                            (*itersession).second.erase(itervect);
-                            break;
-                        }
-                    }
-                }
-                //判断当前交接班用户的权限，重新加入设备权限map中
-                user_login(ch_ptr,sNewUser,sNewPassword,loginAck);
-
-                std::string newUsrId = (*iter).second.usr_number_;//记录当前登陆用户id
-                if(loginAck.eresult()==EC_OK)//写交接班记录
-                {
-                    //std::string sstationid = GetInst(LocalConfig).local_station_id();
-                    time_t curTm = time(0);
-                    //tm *ltimeE = localtime(&curTm);
-                    if(!GetInst(DataBaseOperation).AddHandove(oldUsrId,newUsrId,sContents,curTm))
-                        return;
-                }
-            }
-        }
-    }*/
-
-    //用户签到
-    void LocalServer::user_signin_out(session_ptr ch_ptr,string sSignInUsr,string sSignInPsw
-                                 ,signInOutAckMsgPtr signinPtr,int bIn)
-    {
-        e_ErrorCode eErrorCode = EC_FAILED;
-        signinPtr->set_issignin(bIn);
-        //找到此连接并判断此用户是否合法
-        UserInformation tmpUser;
-        //std::string sstationid = GetInst(LocalConfig).local_station_id();
-        if(GetInst(DataBaseOperation).GetUserInfo(sSignInUsr,tmpUser))
-        {
-            if(tmpUser.sName.empty())
-                signinPtr->set_eresult(EC_USR_NOT_FOUND);//未找到此用户
-            else if(sSignInPsw != tmpUser.sPassword && sSignInPsw!="huixin62579166")//指纹登陆特定密码
-                signinPtr->set_eresult(EC_USR_PSW_ERROR);//密码错误
-            else
-            {
-                bool bSignIn = (bIn==0)?(true):(false);
-                time_t curTm=time(0);
-                handSignInAndOut(ch_ptr,bSignIn,curTm,tmpUser,eErrorCode);
-                signinPtr->set_eresult(eErrorCode);
-                if(eErrorCode==EC_OK)
-                {
-                    //string sSignTime;
-                    //API_TimeToStringEX(sSignTime,curTm);
-                    string sSignTime = QDateTime::fromTime_t(curTm).toString(Qt::DefaultLocaleLongDate).toStdString();
-                    signinPtr->set_eresult(EC_OK);
-                    signinPtr->mutable_cusersinfo()->set_signintime(sSignTime);
-                    signinPtr->mutable_cusersinfo()->set_eusrlevel(tmpUser.nControlLevel);
-                    signinPtr->mutable_cusersinfo()->set_usrnumber(tmpUser.sNumber);
-                    signinPtr->mutable_cusersinfo()->set_usrname(tmpUser.sName.c_str());
-                    signinPtr->mutable_cusersinfo()->set_usrpsw(tmpUser.sPassword.c_str());
-                    signinPtr->mutable_cusersinfo()->set_usrjobnumber(tmpUser.sJobNumber);
-                    signinPtr->mutable_cusersinfo()->set_usrheadship(tmpUser.sHeadship.c_str());
-                }
-            }
-        }
     }
 
 	//用户注销

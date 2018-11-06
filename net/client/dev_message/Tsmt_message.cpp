@@ -586,10 +586,14 @@ namespace hx_net
                 break;
             case MSG_GENERAL_COMMAND_OPR:
             {
+
                 CommandUnit cmdUnit;
                 d_ptransmmit->GetSignalCommand(d_cur_task_param_,cmdUnit);
-                if(m_pSession && cmdUnit.commandLen>0)
+                cout<<"MSG_GENERAL_COMMAND_OPR  ---- cmdUnit---"<<cmdUnit.commandLen<<endl;
+                if(m_pSession && cmdUnit.commandLen>0){
+                    eErrCode = EC_CMD_SEND_SUCCEED;
                     m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
+                }
             }
             default:{//执行其他任务
 
@@ -622,8 +626,10 @@ namespace hx_net
             {
                 CommandUnit cmdUnit;
                 d_ptransmmit->GetSignalCommand(d_cur_task_param_,cmdUnit);
-                if(m_pSession && cmdUnit.commandLen>0)
+                if(m_pSession && cmdUnit.commandLen>0){
+                     eErrCode = EC_CMD_SEND_SUCCEED;
                     m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
+                }
             }
                 break;
             default:{//执行其他任务
@@ -1122,10 +1128,16 @@ namespace hx_net
              break;
          case MSG_GENERAL_COMMAND_OPR:
          {
+
              CommandUnit cmdUnit;
              d_ptransmmit->GetSignalCommand(lpParam,cmdUnit);
-             if(m_pSession && cmdUnit.commandLen>0)
+              cout<<"exec_general_task-----cmdUnit----"<<cmdUnit.commandLen<<endl;
+
+             if(m_pSession && cmdUnit.commandLen>0){
+                 eErrCode = EC_CMD_SEND_SUCCEED;
+                 cout<<"exec_general_task-----EC_CMD_SEND_SUCCEED----"<<cmdUnit.commandLen<<endl;
                  m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
+             }
          }
              break;
          }

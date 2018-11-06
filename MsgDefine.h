@@ -119,7 +119,8 @@ enum e_MsgType
 enum {
     VALUE_TYPE_STRING  = 0,
     VALUE_TYPE_DOUBLE = 1,
-    VALUE_TYPE_BOOL     = 2,
+    VALUE_TYPE_BOOL   = 2,
+    VALUE_TYPE_INT    = 3,
 };
 
 #endif

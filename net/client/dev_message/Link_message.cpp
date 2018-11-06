@@ -344,7 +344,7 @@ namespace hx_net
         int inputstate = data[9];
         for(int i=0;i<4;++i)
         {
-           dainfo.fValue = Getbit(inputstate,i)==0 ? 1:0;
+           dainfo.fValue = Getbit(inputstate,i);//==0 ? 1:0;
            data_ptr->mValues[6+i] = dainfo;
         }
         inputstate = data[10];
@@ -403,7 +403,7 @@ namespace hx_net
             int inputstate = data[9];
             for(int i=0;i<4;++i)
             {
-               dainfo.fValue = Getbit(inputstate,i)==0 ? 1:0;
+               dainfo.fValue = Getbit(inputstate,i);//==0 ? 1:0;
                data_ptr->mValues[6+i] = dainfo;
             }
             inputstate = data[10];

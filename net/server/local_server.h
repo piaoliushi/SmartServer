@@ -71,15 +71,15 @@ public:
         void user_handover(session_ptr ch_ptr,string sCurUsr,string sNewUser,
                            string sNewPassword,const string &sContents,LoginAck &loginAck);
         //用户签到
-        void user_signin_out(session_ptr ch_ptr,string sSignInUsr,string sSignInPsw,signInOutAckMsgPtr signinPtr,int bIn);
+        //void user_signin_out(session_ptr ch_ptr,string sSignInUsr,string sSignInPsw,signInOutAckMsgPtr signinPtr,int bIn);
 
         //收集当前签到人信息
-        void addSignInUsersToLoginAck(session_ptr ch_ptr,const UserInformation &sUser,LoginAck &loginAck);
+        //void addSignInUsersToLoginAck(session_ptr ch_ptr,const UserInformation &sUser,LoginAck &loginAck);
         //签到签退操作
-        void handSignInAndOut(session_ptr ch_ptr,bool bIsIn,time_t &curTm,const UserInformation &sUser
-                              ,e_ErrorCode &eError);
+        //void handSignInAndOut(session_ptr ch_ptr,bool bIsIn,time_t &curTm,const UserInformation &sUser
+        //                      ,e_ErrorCode &eError);
         //通知客户端签到结果
-        void notify_other_client_signin_result(session_ptr ch_ptr,int bIn,const UserSignInInfo &sUser);
+        //void notify_other_client_signin_result(session_ptr ch_ptr,int bIn,const UserSignInInfo &sUser);
     protected:
         void user_switch_login(session_ptr ch_ptr,string sNewUser,string sPassword,LoginAck &loginAck,UserInformation &tmpUser);
         //获取用户与当前客户端id下的设备授权信息

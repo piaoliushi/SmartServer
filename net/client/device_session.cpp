@@ -872,9 +872,9 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId,e_Err
     map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
     if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
         if(iter->second.size()>childId){
-            string strHex;
-            CharStr2HexStr(iter->second[childId].commandId,strHex,iter->second[childId].commandLen);
-            cout<<"command string:"<<strHex<<endl;
+            //string strHex;
+            //CharStr2HexStr(iter->second[childId].commandId,strHex,iter->second[childId].commandLen);
+            //cout<<"command string:"<<strHex<<endl;
 
             eErrCode = EC_CMD_SEND_SUCCEED;
             start_write(iter->second[childId].commandId,iter->second[childId].commandLen);
@@ -2161,14 +2161,14 @@ bool device_session::excute_command(int cmdType,string sUser,devCommdMsgPtr lpPa
     }
 
     string sDevId = lpParam->sdevid();
-    if(modleInfos_.mapDevInfo[sDevId].iDevType == DEVICE_TRANSMITTER){
+    /*if(modleInfos_.mapDevInfo[sDevId].iDevType == DEVICE_TRANSMITTER){
         if(get_opr_state(sDevId)==dev_no_opr)
             set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
         else{
             opResult = EC_OPR_ON_GOING;//正在执行控制命令
             return false;//已经有任务正在执行
         }
-    }
+    }*/
 
     //现在执行任务
     if(modleInfos_.iCommunicationMode==CON_MOD_NET && modleInfos_.netMode.inet_type == NET_MOD_SNMP){
@@ -2177,6 +2177,7 @@ bool device_session::excute_command(int cmdType,string sUser,devCommdMsgPtr lpPa
     else{
         dev_agent_and_com[sDevId].second->exec_general_task(cmdType,sUser,lpParam,opResult);
     }
+ //   set_opr_state(sDevId,dev_no_opr);
     return true;
 }
 

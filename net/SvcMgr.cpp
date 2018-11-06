@@ -165,12 +165,12 @@ namespace hx_net
 		if(m_pDevMgrPtr)
 		{
             e_ErrorCode eResult = m_pDevMgrPtr->excute_command(sDevId,cmdType,sUser,lpParam);
-// 			if(eResult==EC_DEVICE_NOT_FOUND||eResult==EC_OBJECT_NULL)
-// 			{
-// 				if (m_pClientMgrPtr)
-// 					return m_pClientMgrPtr->excute_command(cmdType,lpParam);
-// 			}else
-				return eResult;
+            /*if(eResult==EC_DEVICE_NOT_FOUND||eResult==EC_OBJECT_NULL)
+            {
+                if (m_pClientMgrPtr)
+                    return m_pClientMgrPtr->excute_command(cmdType,lpParam);
+            }else*/
+                return eResult;
 		}
 		return EC_OBJECT_NULL;
 	}

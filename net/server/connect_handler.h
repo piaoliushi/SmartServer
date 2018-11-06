@@ -40,8 +40,6 @@ namespace hx_net
 
         void handover_ack(string soldUser,string sNewUser,string sNewPassword,msgPointer &pMsg);
 
-        void user_sign_in_out_ack(int bIn,string sUser,string sPassword);
-
         void user_duty_log(string sUserId,const string &sContent,int nType);
 
 

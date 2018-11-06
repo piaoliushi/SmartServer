@@ -132,15 +132,15 @@ namespace hx_net{
         {
             if(lpParam->cparams().size()<1)
                 return;
-            cmdUnit.commandLen = 7;
-            cmdUnit.commandId[0] = 0x55;
-            cmdUnit.commandId[1] = 0x03;
-            cmdUnit.commandId[2] = 0xF2;
-            cmdUnit.commandId[3] = atoi(lpParam->cparams(0).sparamvalue().c_str());
-            cmdUnit.commandId[4] = 0x01;
-            cmdUnit.commandId[5] = cmdUnit.commandId[2]^cmdUnit.commandId[3]^cmdUnit.commandId[4];
-            cmdUnit.commandId[6] = 0x00;
-        }
+                cmdUnit.commandLen = 7;
+                cmdUnit.commandId[0] = 0x55;
+                cmdUnit.commandId[1] = 0x03;
+                cmdUnit.commandId[2] = 0xF2;
+                cmdUnit.commandId[3] = atoi(lpParam->cparams(0).sparamvalue().c_str());
+                cmdUnit.commandId[4] = 0x01;
+                cmdUnit.commandId[5] = cmdUnit.commandId[2]^cmdUnit.commandId[3]^cmdUnit.commandId[4];
+                cmdUnit.commandId[6] = 0x00;
+            }
             break;
         }
     }
