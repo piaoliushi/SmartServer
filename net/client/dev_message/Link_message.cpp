@@ -966,6 +966,10 @@ namespace hx_net
 
     void Link_message::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)
     {
+        map<int,string> mapParam;
+        for(int i=0;i<lpParam->cparams().size();++i)
+            mapParam[i] = lpParam->cparams(i).sparamvalue();
+        GetSignalCommand(mapParam,cmdUnit);
     }
 
     void Link_message::GetSignalCommand(map<int, string> mapParam, CommandUnit &cmdUnit)
@@ -1281,6 +1285,7 @@ namespace hx_net
         }
             break;
         case MSG_GENERAL_COMMAND_OPR://
+            GetSignalCommand(lpParam,cmdUnit);
             break;
         case MSG_SWITCH_AUDIO_CHANNEL_OPR://切换音频通道
             break;
