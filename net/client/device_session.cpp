@@ -861,8 +861,10 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId,e_Err
 
                 if(cmdType != MSG_DEVICE_QUERY)
                     http_send_task(iter->second[childId].sCommandId);
-                else
+                else{
+
                     start_write(iter->second[childId].commandId,iter->second[childId].commandLen);
+                }
             }
         }
         return;
@@ -872,9 +874,9 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId,e_Err
     map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
     if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
         if(iter->second.size()>childId){
-            //string strHex;
-            //CharStr2HexStr(iter->second[childId].commandId,strHex,iter->second[childId].commandLen);
-            //cout<<"command string:"<<strHex<<endl;
+            string strHex;
+            CharStr2HexStr(iter->second[childId].commandId,strHex,iter->second[childId].commandLen);
+            cout<<"command string:"<<strHex<<endl;
 
             eErrCode = EC_CMD_SEND_SUCCEED;
             start_write(iter->second[childId].commandId,iter->second[childId].commandLen);

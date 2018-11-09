@@ -515,6 +515,7 @@ namespace hx_net
         int nResult = 2;//2：正在执行（循环发送指令）
 
         excute_task_cmd(eErrCode,nResult);
+
         //天线防抖，不在位
         if(nResult == 7 || nResult==8){
             string  sResult = DEV_CMD_RESULT_DESC(nResult);
@@ -571,12 +572,12 @@ namespace hx_net
                 break;
             case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:{
                 eErrCode = EC_OPR_ON_GOING;
-                exec_trunon_task_(MIDDLE_POWER_ON,eErrCode,nExcutResult);
+                exec_trunon_task_(HIGH_POWER_ON,eErrCode,nExcutResult);
             }
                 break;
             case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR:{
                 eErrCode = EC_OPR_ON_GOING;
-                exec_trunon_task_(LOW_POWER_ON,eErrCode,nExcutResult);
+                exec_trunon_task_(HIGH_POWER_ON,eErrCode,nExcutResult);
             }
                 break;
             case MSG_TRANSMITTER_TURNOFF_OPR:{

@@ -38,7 +38,7 @@ protected:
     int NT511_AD_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen,
                       int &iaddcode);
 private:
-    session_ptr           m_pSession;//关联连接对象
+    dev_session_ptr       m_pSession;//关联连接对象
     DeviceInfo           &d_devInfo;//设备信息
     DevMonitorDataPtr     d_curData_ptr;
     time_t                d_OprStartTime;//提交控制命令开始时间

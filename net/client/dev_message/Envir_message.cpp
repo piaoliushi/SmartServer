@@ -5,10 +5,10 @@ namespace hx_net
 {
 
     Envir_message::Envir_message(session_ptr pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
-		:m_pSession(pSession)
-        ,d_devInfo(devInfo)
+        :d_devInfo(devInfo)
         ,io_service_(io_service)
 	{
+        m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
         if(IsStandardCommand())
             d_curData_ptr = DevMonitorDataPtr(new Data);
 	}
@@ -763,14 +763,37 @@ namespace hx_net
     void Envir_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
                                      bool bSnmp,Snmp *snmp,CTarget *target)
     {
-        if(m_pSession!=NULL)
-            m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,icmdType,0,eErrCode);
+
+        eErrCode = EC_OK;
+        switch(d_devInfo.nSubProtocol){
+        case C2000_SDD8020_BB3:
+        case C2000_A2_8020:
+        {
+            switch (icmdType) {
+            case MSG_TRANSMITTER_TURNOFF_OPR:
+            case MSG_DEV_TURNOFF_OPR:{
+            if(m_pSession!=NULL)
+
+                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,0,eErrCode);
+
+            }
+                break;
+            default:
+                break;
+            }
+        }
+        break;
+        default:
+            break;
+        }
+
+         m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
     }
 
     //执行通用命令
     void Envir_message::exec_general_task(int icmdType,string sUser,devCommdMsgPtr lpParam,e_ErrorCode &eErrCode)
     {
-         cout<<"exec_general_task ==inter= "<<endl;
+        eErrCode = EC_OK;
         switch (icmdType) {
         case MSG_DEV_TURNOFF_OPR:{
             if(m_pSession!=NULL){
@@ -784,6 +807,7 @@ namespace hx_net
         default:
             break;
         }
+        m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
     }
 
     //执行联动命令
@@ -794,7 +818,6 @@ namespace hx_net
             //联动声光告警只做开设备动作（打开声光告警）
             if(m_pSession!=NULL){
                 eErrCode = EC_OK;
-
                 if(param.size()>=2){
                     int param_2 = atoi(param[1][0].strParamValue.c_str());
                     boost::asio::deadline_timer delay_send_timer(io_service_, boost::posix_time::milliseconds(20));
