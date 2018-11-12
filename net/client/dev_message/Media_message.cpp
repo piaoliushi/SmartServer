@@ -224,6 +224,7 @@ namespace hx_net
                        tmp_alarm_info.nType = alarmId;//告警类型
                        tmp_alarm_info.nLimitId = ALARM_SWITCH;//限值类型
                        tmp_alarm_info.bNotifyed = false;
+                       tmp_alarm_info.alarmLevel = 0;
                        iter->second[alarmId] = tmp_alarm_info;
                         record_alarm_and_notify(sPrgName,0,mapProgramAlarm[sPrgName][alarmId]);
                    }
@@ -233,6 +234,7 @@ namespace hx_net
                    tmp_alarm_info.nType = alarmId;//告警类型
                    tmp_alarm_info.nLimitId = ALARM_SWITCH;//限值类型
                    tmp_alarm_info.bNotifyed = false;
+                   tmp_alarm_info.alarmLevel = 0;
                    map<int,CurItemAlarmInfo>  tmTypeAlarm;
                    tmTypeAlarm[alarmId] = tmp_alarm_info;
                    mapProgramAlarm[sPrgName] = tmTypeAlarm;
@@ -263,7 +265,7 @@ namespace hx_net
          if(bRslt==true){
              //发送监控量报警到客户端(用频点名称填充设备名称,cellId填充告警类型)GetInst(LocalConfig).local_station_id()
            m_pSession->send_alarm_state_message(d_devInfo.sStationNum,d_devInfo.sDevNum,frqName,curAlarm.nType
-                                      ,d_devInfo.iDevType,curAlarm.nLimitId,str_time,mapProgramAlarm[frqName].size(),curAlarm.sReason);
+                                      ,d_devInfo.iDevType,curAlarm.nLimitId,str_time,mapProgramAlarm[frqName].size(),curAlarm.sReason,curAlarm.alarmLevel);
          }
 
     }

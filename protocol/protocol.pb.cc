@@ -254,12 +254,13 @@ void protobuf_AssignDesc_protocol_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DevAlarmStatus));
   DevAlarmStatus_eCellAlarmMsg_descriptor_ = DevAlarmStatus_descriptor_->nested_type(0);
-  static const int DevAlarmStatus_eCellAlarmMsg_offsets_[5] = {
+  static const int DevAlarmStatus_eCellAlarmMsg_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, scellid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, scellname_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, ccellstatus_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, sstarttime_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, sdesp_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DevAlarmStatus_eCellAlarmMsg, nalarmlevel_),
   };
   DevAlarmStatus_eCellAlarmMsg_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -838,93 +839,94 @@ void protobuf_AddDesc_protocol_2eproto() {
     "HOST\020\002\022\022\n\016ANTENNA_BACKUP\020\003\022\r\n\tDETECTING\020"
     "\004\022\017\n\013DEV_UNKNOWN\020\005\"@\n\023DevWorkStatusNotif"
     "y\022)\n\021cDevCurWorkStatus\030\001 \003(\0132\016.DevWorkSt"
-    "atus\"\260\002\n\016DevAlarmStatus\022\022\n\nsStationId\030\001 "
+    "atus\"\306\002\n\016DevAlarmStatus\022\022\n\nsStationId\030\001 "
     "\002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010sDevName\030\003 \001(\t\022\020\n"
     "\010eDevType\030\004 \001(\005\022\023\n\013nAlarmCount\030\005 \001(\005\022\021\n\t"
     "nAlarmMod\030\006 \001(\005\0221\n\ncCellAlarm\030\007 \003(\0132\035.De"
-    "vAlarmStatus.eCellAlarmMsg\032{\n\reCellAlarm"
-    "Msg\022\017\n\007sCellId\030\001 \002(\005\022\021\n\tsCellName\030\002 \001(\t\022"
-    "#\n\013cCellStatus\030\003 \001(\0162\016.e_AlarmStatus\022\022\n\n"
-    "sStartTime\030\004 \001(\t\022\r\n\005sDesp\030\005 \001(\t\"C\n\024DevAl"
-    "armStatusNotify\022+\n\022cDevCurAlarmStatus\030\001 "
-    "\003(\0132\017.DevAlarmStatus\"-\n\010LoginReq\022\020\n\010sUsr"
-    "Name\030\001 \001(\t\022\017\n\007sUsrPsw\030\002 \001(\t\"^\n\013HandOverR"
-    "eq\022\023\n\013sCurUsrName\030\001 \001(\t\022\023\n\013sNewUsrName\030\002"
-    " \001(\t\022\022\n\nsNewUsrPsw\030\003 \001(\t\022\021\n\tsContents\030\004 "
-    "\001(\t\"D\n\nDutyLogReq\022\025\n\rsCurUsrNumber\030\001 \001(\t"
-    "\022\020\n\010sContent\030\002 \001(\t\022\r\n\005nType\030\003 \001(\005\"+\n\nDut"
-    "yLogAck\022\035\n\007eResult\030\001 \001(\0162\014.e_ErrorCode\"\226"
-    "\001\n\016UserSigninInfo\022\021\n\teUsrLevel\030\001 \001(\005\022\021\n\t"
-    "UsrNumber\030\002 \001(\t\022\017\n\007UsrName\030\003 \001(\t\022\024\n\014UsrJ"
-    "obNumber\030\004 \001(\t\022\023\n\013UsrHeadship\030\005 \001(\t\022\016\n\006U"
-    "srPsw\030\006 \001(\t\022\022\n\nSignInTime\030\007 \001(\t\"l\n\010UserI"
-    "nfo\022\021\n\teUsrLevel\030\001 \001(\005\022\021\n\tUsrNumber\030\002 \001("
-    "\t\022\017\n\007UsrName\030\003 \001(\t\022\024\n\014UsrJobNumber\030\004 \001(\t"
-    "\022\023\n\013UsrHeadship\030\005 \001(\t\"\340\002\n\010LoginAck\022\035\n\007eR"
-    "esult\030\001 \001(\0162\014.e_ErrorCode\022\021\n\teUsrLevel\030\002"
-    " \001(\005\022\021\n\tUsrNumber\030\003 \001(\t\022\017\n\007UsrName\030\004 \001(\t"
-    "\022\024\n\014UsrJobNumber\030\005 \001(\t\022\023\n\013UsrHeadship\030\006 "
-    "\001(\t\022\'\n\020cDevCurNetStatus\030\007 \003(\0132\r.DevNetSt"
-    "atus\022)\n\021cDevCurWorkStatus\030\010 \003(\0132\016.DevWor"
-    "kStatus\022+\n\022cDevCurAlarmStatus\030\t \003(\0132\017.De"
-    "vAlarmStatus\022\016\n\006UsrPsw\030\n \001(\t\022\"\n\tSignUser"
-    "s\030\013 \003(\0132\017.UserSigninInfo\022\036\n\013AllUserInfo\030"
-    "\014 \003(\0132\t.UserInfo\"I\n\014SignInOutReq\022\020\n\010IsSi"
-    "gnIn\030\001 \001(\005\022\023\n\013sSignInName\030\002 \001(\t\022\022\n\nsSign"
-    "InPsw\030\003 \001(\t\"d\n\014SignInOutAck\022\020\n\010IsSignIn\030"
-    "\001 \001(\005\022\035\n\007eResult\030\002 \001(\0162\014.e_ErrorCode\022#\n\n"
-    "cUsersInfo\030\003 \001(\0132\017.UserSigninInfo\"=\n\023Sta"
-    "tionWorkingState\022\026\n\016sStationNumber\030\001 \001(\t"
-    "\022\016\n\006nState\030\002 \001(\005\".\n\026CheckStationWorkingR"
-    "eq\022\024\n\014sChildNumber\030\001 \003(\t\")\n\026CheckStation"
-    "WorkingAck\022\017\n\007nResult\030\001 \001(\005\"m\n\032CheackSta"
-    "tionWorkingNotify\022\017\n\007nResult\030\001 \001(\005\022\023\n\013sU"
-    "serNumber\030\002 \001(\t\022\021\n\tsUserName\030\003 \001(\t\022\026\n\016sS"
-    "tationNumber\030\004 \001(\t\".\n\tLogoutReq\022\020\n\010sUsrN"
-    "ame\030\001 \001(\t\022\017\n\007sUsrPsw\030\002 \001(\t\"*\n\tLogoutAck\022"
-    "\035\n\007eResult\030\001 \001(\0162\014.e_ErrorCode\"W\n\014TurnOn"
-    "DevMsg\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002"
-    "(\t\022\020\n\010eDevType\030\003 \001(\005\022\021\n\tsOperUser\030\004 \001(\t\""
-    "X\n\rTurnOffDevMsg\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006"
-    "sDevId\030\002 \002(\t\022\020\n\010eDevType\030\003 \001(\005\022\021\n\tsOperU"
-    "ser\030\004 \001(\t\"7\n\014CommandParam\022\022\n\nsParamName\030"
-    "\001 \001(\t\022\023\n\013sParamValue\030\002 \001(\t\"\215\001\n\020DeviceCom"
-    "mandMsg\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002 "
-    "\002(\t\022\020\n\010sDevName\030\003 \001(\t\022\020\n\010eDevType\030\004 \001(\005\022"
-    "\021\n\tsOperUser\030\005 \001(\t\022\036\n\007cParams\030\006 \003(\0132\r.Co"
-    "mmandParam\"\266\001\n\031DeviceCommandResultNotify"
-    "\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010"
-    "eDevType\030\003 \001(\005\022\020\n\010sDevName\030\004 \001(\t\022\036\n\010eErr"
-    "orId\030\005 \001(\0162\014.e_ErrorCode\022\021\n\tsOperUser\030\006 "
-    "\001(\t\022\036\n\007cParams\030\007 \003(\0132\r.CommandParam\"\332\003\n\020"
-    "WebSocketMessage\022\020\n\010nMsgType\030\001 \002(\005\022\020\n\010sM"
-    "sgType\030\002 \002(\t\022\036\n\013msgLoginReq\030\003 \001(\0132\t.Logi"
-    "nReq\022\036\n\013msgLoginAck\030\004 \001(\0132\t.LoginAck\022&\n\016"
-    "monitorDataNty\030\005 \001(\0132\016.DevDataNotify\022,\n\017"
-    "devNetStatusNty\030\006 \001(\0132\023.DevNetStatusNoti"
-    "fy\022.\n\020devWorkStatusNty\030\007 \001(\0132\024.DevWorkSt"
-    "atusNotify\0220\n\021devAlarmStatusNty\030\010 \001(\0132\025."
-    "DevAlarmStatusNotify\0224\n\020commandResultNty"
-    "\030\t \001(\0132\032.DeviceCommandResultNotify\022#\n\014ms"
-    "gTurnOnReq\030\n \001(\0132\r.TurnOnDevMsg\022%\n\rmsgTu"
-    "rnOffNty\030\013 \001(\0132\016.TurnOffDevMsg\022(\n\rmsgCom"
-    "mandReq\030\014 \001(\0132\021.DeviceCommandMsg*\315\003\n\013e_E"
-    "rrorCode\022\t\n\005EC_OK\020\000\022\r\n\tEC_FAILED\020\001\022\024\n\020EC"
-    "_USR_NOT_FOUND\020\002\022\031\n\025EC_USR_NOT_PERMISSIO"
-    "N\020\003\022\024\n\020EC_USR_PSW_ERROR\020\004\022\027\n\023EC_USR_REPE"
-    "AT_LOGIN\020\005\022\020\n\014EC_NET_ERROR\020\006\022\024\n\020EC_LOGOU"
-    "T_FAILED\020\007\022\027\n\023EC_CONFIGREQ_FAILED\020\010\022\024\n\020E"
-    "C_TURNON_FAILED\020\t\022\025\n\021EC_TURNOFF_FAILED\020\n"
-    "\022\032\n\026EC_ANTENNA_HTOB_FAILED\020\013\022\032\n\026EC_ANTEN"
-    "NA_BTOH_FAILED\020\014\022\027\n\023EC_DEVICE_NOT_FOUND\020"
-    "\r\022\022\n\016EC_OBJECT_NULL\020\016\022\023\n\017EC_OPR_ON_GOING"
-    "\020\017\022\032\n\026EC_SEND_SMS_MSG_FAILED\020\020\022\027\n\023EC_DEV"
-    "_DISCONNECTED\020\021\022\027\n\023EC_CMD_SEND_SUCCEED\020\022"
-    "\022\016\n\nEC_UNKNOWN\020\023*%\n\ne_CellType\022\013\n\007DIGITA"
-    "L\020\000\022\n\n\006ANALOG\020\001*b\n\re_AlarmStatus\022\t\n\005UPPE"
-    "R\020\000\022\t\n\005LOWER\020\001\022\n\n\006UPUPER\020\002\022\014\n\010LOWLOWER\020\003"
-    "\022\t\n\005STATE\020\004\022\n\n\006DEVICE\020\005\022\n\n\006RESUME\020\006*)\n\ne"
-    "_AlarmMod\022\014\n\010MOD_CELL\020\000\022\r\n\tMOD_OTHER\020\001", 4318);
+    "vAlarmStatus.eCellAlarmMsg\032\220\001\n\reCellAlar"
+    "mMsg\022\017\n\007sCellId\030\001 \002(\005\022\021\n\tsCellName\030\002 \001(\t"
+    "\022#\n\013cCellStatus\030\003 \001(\0162\016.e_AlarmStatus\022\022\n"
+    "\nsStartTime\030\004 \001(\t\022\r\n\005sDesp\030\005 \001(\t\022\023\n\013nAla"
+    "rmLevel\030\006 \001(\005\"C\n\024DevAlarmStatusNotify\022+\n"
+    "\022cDevCurAlarmStatus\030\001 \003(\0132\017.DevAlarmStat"
+    "us\"-\n\010LoginReq\022\020\n\010sUsrName\030\001 \001(\t\022\017\n\007sUsr"
+    "Psw\030\002 \001(\t\"^\n\013HandOverReq\022\023\n\013sCurUsrName\030"
+    "\001 \001(\t\022\023\n\013sNewUsrName\030\002 \001(\t\022\022\n\nsNewUsrPsw"
+    "\030\003 \001(\t\022\021\n\tsContents\030\004 \001(\t\"D\n\nDutyLogReq\022"
+    "\025\n\rsCurUsrNumber\030\001 \001(\t\022\020\n\010sContent\030\002 \001(\t"
+    "\022\r\n\005nType\030\003 \001(\005\"+\n\nDutyLogAck\022\035\n\007eResult"
+    "\030\001 \001(\0162\014.e_ErrorCode\"\226\001\n\016UserSigninInfo\022"
+    "\021\n\teUsrLevel\030\001 \001(\005\022\021\n\tUsrNumber\030\002 \001(\t\022\017\n"
+    "\007UsrName\030\003 \001(\t\022\024\n\014UsrJobNumber\030\004 \001(\t\022\023\n\013"
+    "UsrHeadship\030\005 \001(\t\022\016\n\006UsrPsw\030\006 \001(\t\022\022\n\nSig"
+    "nInTime\030\007 \001(\t\"l\n\010UserInfo\022\021\n\teUsrLevel\030\001"
+    " \001(\005\022\021\n\tUsrNumber\030\002 \001(\t\022\017\n\007UsrName\030\003 \001(\t"
+    "\022\024\n\014UsrJobNumber\030\004 \001(\t\022\023\n\013UsrHeadship\030\005 "
+    "\001(\t\"\340\002\n\010LoginAck\022\035\n\007eResult\030\001 \001(\0162\014.e_Er"
+    "rorCode\022\021\n\teUsrLevel\030\002 \001(\005\022\021\n\tUsrNumber\030"
+    "\003 \001(\t\022\017\n\007UsrName\030\004 \001(\t\022\024\n\014UsrJobNumber\030\005"
+    " \001(\t\022\023\n\013UsrHeadship\030\006 \001(\t\022\'\n\020cDevCurNetS"
+    "tatus\030\007 \003(\0132\r.DevNetStatus\022)\n\021cDevCurWor"
+    "kStatus\030\010 \003(\0132\016.DevWorkStatus\022+\n\022cDevCur"
+    "AlarmStatus\030\t \003(\0132\017.DevAlarmStatus\022\016\n\006Us"
+    "rPsw\030\n \001(\t\022\"\n\tSignUsers\030\013 \003(\0132\017.UserSign"
+    "inInfo\022\036\n\013AllUserInfo\030\014 \003(\0132\t.UserInfo\"I"
+    "\n\014SignInOutReq\022\020\n\010IsSignIn\030\001 \001(\005\022\023\n\013sSig"
+    "nInName\030\002 \001(\t\022\022\n\nsSignInPsw\030\003 \001(\t\"d\n\014Sig"
+    "nInOutAck\022\020\n\010IsSignIn\030\001 \001(\005\022\035\n\007eResult\030\002"
+    " \001(\0162\014.e_ErrorCode\022#\n\ncUsersInfo\030\003 \001(\0132\017"
+    ".UserSigninInfo\"=\n\023StationWorkingState\022\026"
+    "\n\016sStationNumber\030\001 \001(\t\022\016\n\006nState\030\002 \001(\005\"."
+    "\n\026CheckStationWorkingReq\022\024\n\014sChildNumber"
+    "\030\001 \003(\t\")\n\026CheckStationWorkingAck\022\017\n\007nRes"
+    "ult\030\001 \001(\005\"m\n\032CheackStationWorkingNotify\022"
+    "\017\n\007nResult\030\001 \001(\005\022\023\n\013sUserNumber\030\002 \001(\t\022\021\n"
+    "\tsUserName\030\003 \001(\t\022\026\n\016sStationNumber\030\004 \001(\t"
+    "\".\n\tLogoutReq\022\020\n\010sUsrName\030\001 \001(\t\022\017\n\007sUsrP"
+    "sw\030\002 \001(\t\"*\n\tLogoutAck\022\035\n\007eResult\030\001 \001(\0162\014"
+    ".e_ErrorCode\"W\n\014TurnOnDevMsg\022\022\n\nsStation"
+    "Id\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010eDevType\030\003 \001"
+    "(\005\022\021\n\tsOperUser\030\004 \001(\t\"X\n\rTurnOffDevMsg\022\022"
+    "\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010eD"
+    "evType\030\003 \001(\005\022\021\n\tsOperUser\030\004 \001(\t\"7\n\014Comma"
+    "ndParam\022\022\n\nsParamName\030\001 \001(\t\022\023\n\013sParamVal"
+    "ue\030\002 \001(\t\"\215\001\n\020DeviceCommandMsg\022\022\n\nsStatio"
+    "nId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010sDevName\030\003 "
+    "\001(\t\022\020\n\010eDevType\030\004 \001(\005\022\021\n\tsOperUser\030\005 \001(\t"
+    "\022\036\n\007cParams\030\006 \003(\0132\r.CommandParam\"\266\001\n\031Dev"
+    "iceCommandResultNotify\022\022\n\nsStationId\030\001 \002"
+    "(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010eDevType\030\003 \001(\005\022\020\n\010"
+    "sDevName\030\004 \001(\t\022\036\n\010eErrorId\030\005 \001(\0162\014.e_Err"
+    "orCode\022\021\n\tsOperUser\030\006 \001(\t\022\036\n\007cParams\030\007 \003"
+    "(\0132\r.CommandParam\"\332\003\n\020WebSocketMessage\022\020"
+    "\n\010nMsgType\030\001 \002(\005\022\020\n\010sMsgType\030\002 \002(\t\022\036\n\013ms"
+    "gLoginReq\030\003 \001(\0132\t.LoginReq\022\036\n\013msgLoginAc"
+    "k\030\004 \001(\0132\t.LoginAck\022&\n\016monitorDataNty\030\005 \001"
+    "(\0132\016.DevDataNotify\022,\n\017devNetStatusNty\030\006 "
+    "\001(\0132\023.DevNetStatusNotify\022.\n\020devWorkStatu"
+    "sNty\030\007 \001(\0132\024.DevWorkStatusNotify\0220\n\021devA"
+    "larmStatusNty\030\010 \001(\0132\025.DevAlarmStatusNoti"
+    "fy\0224\n\020commandResultNty\030\t \001(\0132\032.DeviceCom"
+    "mandResultNotify\022#\n\014msgTurnOnReq\030\n \001(\0132\r"
+    ".TurnOnDevMsg\022%\n\rmsgTurnOffNty\030\013 \001(\0132\016.T"
+    "urnOffDevMsg\022(\n\rmsgCommandReq\030\014 \001(\0132\021.De"
+    "viceCommandMsg*\315\003\n\013e_ErrorCode\022\t\n\005EC_OK\020"
+    "\000\022\r\n\tEC_FAILED\020\001\022\024\n\020EC_USR_NOT_FOUND\020\002\022\031"
+    "\n\025EC_USR_NOT_PERMISSION\020\003\022\024\n\020EC_USR_PSW_"
+    "ERROR\020\004\022\027\n\023EC_USR_REPEAT_LOGIN\020\005\022\020\n\014EC_N"
+    "ET_ERROR\020\006\022\024\n\020EC_LOGOUT_FAILED\020\007\022\027\n\023EC_C"
+    "ONFIGREQ_FAILED\020\010\022\024\n\020EC_TURNON_FAILED\020\t\022"
+    "\025\n\021EC_TURNOFF_FAILED\020\n\022\032\n\026EC_ANTENNA_HTO"
+    "B_FAILED\020\013\022\032\n\026EC_ANTENNA_BTOH_FAILED\020\014\022\027"
+    "\n\023EC_DEVICE_NOT_FOUND\020\r\022\022\n\016EC_OBJECT_NUL"
+    "L\020\016\022\023\n\017EC_OPR_ON_GOING\020\017\022\032\n\026EC_SEND_SMS_"
+    "MSG_FAILED\020\020\022\027\n\023EC_DEV_DISCONNECTED\020\021\022\027\n"
+    "\023EC_CMD_SEND_SUCCEED\020\022\022\016\n\nEC_UNKNOWN\020\023*%"
+    "\n\ne_CellType\022\013\n\007DIGITAL\020\000\022\n\n\006ANALOG\020\001*b\n"
+    "\re_AlarmStatus\022\t\n\005UPPER\020\000\022\t\n\005LOWER\020\001\022\n\n\006"
+    "UPUPER\020\002\022\014\n\010LOWLOWER\020\003\022\t\n\005STATE\020\004\022\n\n\006DEV"
+    "ICE\020\005\022\n\n\006RESUME\020\006*)\n\ne_AlarmMod\022\014\n\010MOD_C"
+    "ELL\020\000\022\r\n\tMOD_OTHER\020\001", 4340);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
   DevDataNotify::default_instance_ = new DevDataNotify();
@@ -3390,6 +3392,7 @@ const int DevAlarmStatus_eCellAlarmMsg::kSCellNameFieldNumber;
 const int DevAlarmStatus_eCellAlarmMsg::kCCellStatusFieldNumber;
 const int DevAlarmStatus_eCellAlarmMsg::kSStartTimeFieldNumber;
 const int DevAlarmStatus_eCellAlarmMsg::kSDespFieldNumber;
+const int DevAlarmStatus_eCellAlarmMsg::kNAlarmLevelFieldNumber;
 #endif  // !_MSC_VER
 
 DevAlarmStatus_eCellAlarmMsg::DevAlarmStatus_eCellAlarmMsg()
@@ -3416,6 +3419,7 @@ void DevAlarmStatus_eCellAlarmMsg::SharedCtor() {
   ccellstatus_ = 0;
   sstarttime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   sdesp_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  nalarmlevel_ = 0;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -3470,7 +3474,7 @@ void DevAlarmStatus_eCellAlarmMsg::Clear() {
     ::memset(&first, 0, n);                                \
   } while (0)
 
-  if (_has_bits_[0 / 32] & 31) {
+  if (_has_bits_[0 / 32] & 63) {
     ZR_(scellid_, ccellstatus_);
     if (has_scellname()) {
       if (scellname_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -3487,6 +3491,7 @@ void DevAlarmStatus_eCellAlarmMsg::Clear() {
         sdesp_->clear();
       }
     }
+    nalarmlevel_ = 0;
   }
 
 #undef OFFSET_OF_FIELD_
@@ -3587,6 +3592,21 @@ bool DevAlarmStatus_eCellAlarmMsg::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(48)) goto parse_nAlarmLevel;
+        break;
+      }
+
+      // optional int32 nAlarmLevel = 6;
+      case 6: {
+        if (tag == 48) {
+         parse_nAlarmLevel:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &nalarmlevel_)));
+          set_has_nalarmlevel();
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -3657,6 +3677,11 @@ void DevAlarmStatus_eCellAlarmMsg::SerializeWithCachedSizes(
       5, this->sdesp(), output);
   }
 
+  // optional int32 nAlarmLevel = 6;
+  if (has_nalarmlevel()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->nalarmlevel(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -3711,6 +3736,11 @@ void DevAlarmStatus_eCellAlarmMsg::SerializeWithCachedSizes(
         5, this->sdesp(), target);
   }
 
+  // optional int32 nAlarmLevel = 6;
+  if (has_nalarmlevel()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->nalarmlevel(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -3757,6 +3787,13 @@ int DevAlarmStatus_eCellAlarmMsg::ByteSize() const {
           this->sdesp());
     }
 
+    // optional int32 nAlarmLevel = 6;
+    if (has_nalarmlevel()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->nalarmlevel());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -3799,6 +3836,9 @@ void DevAlarmStatus_eCellAlarmMsg::MergeFrom(const DevAlarmStatus_eCellAlarmMsg&
     if (from.has_sdesp()) {
       set_sdesp(from.sdesp());
     }
+    if (from.has_nalarmlevel()) {
+      set_nalarmlevel(from.nalarmlevel());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -3828,6 +3868,7 @@ void DevAlarmStatus_eCellAlarmMsg::Swap(DevAlarmStatus_eCellAlarmMsg* other) {
     std::swap(ccellstatus_, other->ccellstatus_);
     std::swap(sstarttime_, other->sstarttime_);
     std::swap(sdesp_, other->sdesp_);
+    std::swap(nalarmlevel_, other->nalarmlevel_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

@@ -88,7 +88,7 @@ namespace hx_net
 		//打包发送设备报警状态消息
         virtual void send_alarm_state_message(string sStationid,string sDevid,string sDevName,
                                               int nCellId,int devType,int  alarmState,
-                                              string sStartTime,int alarmCount,string sReason);
+                                              string sStartTime,int alarmCount,string sReason,int alarmLevel);
 		//打包发送命令执行结果
         virtual void send_command_execute_result_message(string sStationid,string sDevid,int devType,string sDevName,
 						                                 string sUsrName,e_MsgType nMsgType,e_ErrorCode eResult);

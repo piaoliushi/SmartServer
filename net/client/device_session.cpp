@@ -1923,7 +1923,7 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
 
         bool bRslt = GetInst(DataBaseOperation).AddItemAlarmRecord(devId,curAlarm.startTime,
                                                                    ItemInfo.iItemIndex,curAlarm.nLimitId,curAlarm.nType,
-                                                                   fValue,curAlarm. sReason,curAlarm.nAlarmId);
+                                                                   fValue,curAlarm. sReason,curAlarm.nAlarmId,curAlarm.alarmLevel);
         if(bRslt==true){
             //提交监控量告警到上级平台
             string sDesDevId = devId;
@@ -1941,7 +1941,8 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
             }
             //发送监控量报警到客户端GetInst(LocalConfig).local_station_id()
             send_alarm_state_message(modleInfos_.mapDevInfo[devId].sStationNum,devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
-                                     ,modleInfos_.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
+                                     ,modleInfos_.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size()
+                                     ,curAlarm.sReason,curAlarm.alarmLevel);
 
 
         }
@@ -1965,7 +1966,8 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
 
             //发送监控量报警到客户端GetInst(LocalConfig).local_station_id()
             send_alarm_state_message(modleInfos_.mapDevInfo[devId].sStationNum,devId,modleInfos_.mapDevInfo[devId].sDevName,ItemInfo.iItemIndex
-                                     ,modleInfos_.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size(),curAlarm.sReason);
+                                     ,modleInfos_.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size()
+                                     ,curAlarm.sReason,curAlarm.alarmLevel);
             // 联动.....
         }
     }

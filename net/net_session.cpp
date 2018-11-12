@@ -236,7 +236,7 @@ namespace hx_net
 	
     void net_session::send_alarm_state_message(string sStationid,string sDevid,string sDevName,
                                            int nCellId,int devType,int  alarmState,
-                                           string sStartTime,int alarmCount,string sReason)
+                                           string sStartTime,int alarmCount,string sReason,int alarmLevel)
 	{
 		devAlarmNfyMsgPtr dev_alarm_nfy_ptr(new DevAlarmStatusNotify);
 		DevAlarmStatus *dev_n_s = dev_alarm_nfy_ptr->add_cdevcuralarmstatus();
@@ -252,6 +252,7 @@ namespace hx_net
 		dev_cell_alarm->set_sstarttime(sStartTime);
 		dev_cell_alarm->set_ccellstatus((e_AlarmStatus)alarmState);
         dev_cell_alarm->set_sdesp(sReason);
+        dev_cell_alarm->set_nalarmlevel(alarmLevel);//添加告警等级2018-11-12
 
 		GetInst(SvcMgr).send_dev_alarm_state_to_client(sStationid,sDevid,dev_alarm_nfy_ptr);
 	}

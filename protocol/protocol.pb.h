@@ -1068,6 +1068,13 @@ class DevAlarmStatus_eCellAlarmMsg : public ::google::protobuf::Message {
   inline ::std::string* release_sdesp();
   inline void set_allocated_sdesp(::std::string* sdesp);
 
+  // optional int32 nAlarmLevel = 6;
+  inline bool has_nalarmlevel() const;
+  inline void clear_nalarmlevel();
+  static const int kNAlarmLevelFieldNumber = 6;
+  inline ::google::protobuf::int32 nalarmlevel() const;
+  inline void set_nalarmlevel(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:DevAlarmStatus.eCellAlarmMsg)
  private:
   inline void set_has_scellid();
@@ -1080,6 +1087,8 @@ class DevAlarmStatus_eCellAlarmMsg : public ::google::protobuf::Message {
   inline void clear_has_sstarttime();
   inline void set_has_sdesp();
   inline void clear_has_sdesp();
+  inline void set_has_nalarmlevel();
+  inline void clear_has_nalarmlevel();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1090,6 +1099,7 @@ class DevAlarmStatus_eCellAlarmMsg : public ::google::protobuf::Message {
   int ccellstatus_;
   ::std::string* sstarttime_;
   ::std::string* sdesp_;
+  ::google::protobuf::int32 nalarmlevel_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
   friend void protobuf_ShutdownFile_protocol_2eproto();
@@ -5416,6 +5426,30 @@ inline void DevAlarmStatus_eCellAlarmMsg::set_allocated_sdesp(::std::string* sde
     sdesp_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:DevAlarmStatus.eCellAlarmMsg.sDesp)
+}
+
+// optional int32 nAlarmLevel = 6;
+inline bool DevAlarmStatus_eCellAlarmMsg::has_nalarmlevel() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void DevAlarmStatus_eCellAlarmMsg::set_has_nalarmlevel() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void DevAlarmStatus_eCellAlarmMsg::clear_has_nalarmlevel() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void DevAlarmStatus_eCellAlarmMsg::clear_nalarmlevel() {
+  nalarmlevel_ = 0;
+  clear_has_nalarmlevel();
+}
+inline ::google::protobuf::int32 DevAlarmStatus_eCellAlarmMsg::nalarmlevel() const {
+  // @@protoc_insertion_point(field_get:DevAlarmStatus.eCellAlarmMsg.nAlarmLevel)
+  return nalarmlevel_;
+}
+inline void DevAlarmStatus_eCellAlarmMsg::set_nalarmlevel(::google::protobuf::int32 value) {
+  set_has_nalarmlevel();
+  nalarmlevel_ = value;
+  // @@protoc_insertion_point(field_set:DevAlarmStatus.eCellAlarmMsg.nAlarmLevel)
 }
 
 // -------------------------------------------------------------------

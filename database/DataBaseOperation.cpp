@@ -892,7 +892,7 @@ bool DataBaseOperation::UpdateItemAlarmConfigs( string strDevnum,map<int,Alarm_c
 
 //添加告警开始记录
 bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,int nMonitoringIndex,int nlimitType,int nalarmTypeId,double dValue,
-                                            const string &sreason,unsigned long long& irecordid )
+                                            const string &sreason,unsigned long long& irecordid,int alarmlevel )
 {
 
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -903,8 +903,8 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
     }
 
     QSqlQuery inquery(db);
-    QString strSql=QString("insert into device_alarm_record(devicenumber,monitoringindex,alarmstarttime,limittype,alarmvalue,alarmtypeid,alarmreason) values(:devicenumber,:monitoringindex,\
-                           :alarmstarttime,:limittype,:alarmvalue,:alarmtypeid,:alarmreason)");
+    QString strSql=QString("insert into device_alarm_record(devicenumber,monitoringindex,alarmstarttime,limittype,alarmvalue,alarmtypeid,alarmreason,alarmlevel) values(:devicenumber,:monitoringindex,\
+                           :alarmstarttime,:limittype,:alarmvalue,:alarmtypeid,:alarmreason,:alarmlevel)");
             inquery.prepare(strSql);
     inquery.bindValue(":devicenumber",QString::fromStdString(strDevnum));
     inquery.bindValue(":monitoringindex",nMonitoringIndex);
@@ -917,6 +917,7 @@ bool DataBaseOperation::AddItemAlarmRecord( string strDevnum,time_t startTime,in
     inquery.bindValue(":alarmvalue",dValue);
     inquery.bindValue(":alarmtypeid",nalarmTypeId);
     inquery.bindValue(":alarmreason",QString::fromStdString(sreason));
+    inquery.bindValue(":alarmlevel",alarmlevel);
     if(!inquery.exec()){
         cout<<inquery.lastError().text().toStdString()<<"AddItemAlarmRecord---inquery---error!"<<endl;
         ConnectionPool::closeConnection(db);

@@ -67,7 +67,7 @@ public:
 
     //添加报警记录
     bool AddItemAlarmRecord( string strDevnum,time_t startTime,int nMonitoringIndex,int nlimitType,int nalarmTypeId,double dValue,
-                                                const string &sreason,unsigned long long& irecordid );
+                                                const string &sreason,unsigned long long& irecordid,int alarmlevel );
     //更新告警结束记录
     bool AddItemEndAlarmRecord(time_t endTime,unsigned long long irecordid);
 
