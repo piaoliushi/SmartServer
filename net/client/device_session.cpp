@@ -2025,6 +2025,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
 
                     tmp_alarm_info.startTime = time(0);//记录时间
                     tmp_alarm_info.nType = ItemInfo.vItemAlarm[nIndex].iAlarmid;//告警类型
+                    tmp_alarm_info.alarmLevel = ItemInfo.vItemAlarm[nIndex].iAlarmlevel;//告警等级
                     tmp_alarm_info.nLimitId = iLimittype;
                     tmp_alarm_info.nModuleId = ItemInfo.iModDevId;
                     tmp_alarm_info.nModuleType = ItemInfo.iModTypeId;
@@ -2036,6 +2037,7 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                 //没有找到增加该告警监控项
                 tmp_alarm_info.startTime = time(0);//记录时间
                 tmp_alarm_info.nType = ItemInfo.vItemAlarm[nIndex].iAlarmid;//告警类型
+                tmp_alarm_info.alarmLevel = ItemInfo.vItemAlarm[nIndex].iAlarmlevel;//告警等级
                 tmp_alarm_info.nLimitId = iLimittype;//限值类型
                 tmp_alarm_info.nModuleId = ItemInfo.iModDevId;
                 tmp_alarm_info.nModuleType = ItemInfo.iModTypeId;

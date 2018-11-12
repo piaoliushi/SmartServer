@@ -196,7 +196,7 @@ namespace hx_net
                 sValue = curData->mValues[iter->first].sValue;
             else if(nValueType == VALUE_TYPE_BOOL)//bool类型
                 sValue = (curData->mValues[iter->first].fValue>0)?"1":"0";
-            else if(VALUE_TYPE_INT == VALUE_TYPE_INT)
+            else if(nValueType == VALUE_TYPE_INT)
                 sValue = str(boost::format("%d")%(curData->mValues[iter->first].fValue));
 
             cell->set_scellvalue(sValue);

@@ -40,6 +40,8 @@ private:
     boost::recursive_mutex    can_switch_mutex_;
     bool   can_switch_;
 
+    //time_t                 last_switch_time_;//最后一次改变状态时间
+
     DeviceInfo           &d_devInfo;//设备信息
     DevMonitorDataPtr d_curData_ptr;
     boost::recursive_mutex          run_state_mutex_;//设备运行状态互斥量

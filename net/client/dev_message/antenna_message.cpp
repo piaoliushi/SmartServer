@@ -203,8 +203,10 @@ void Antenna_message::restart_task_timeout_timer()
 
 void Antenna_message::schedules_task_time_out(const boost::system::error_code& error)
 {
-    boost::recursive_mutex::scoped_lock lock(can_switch_mutex_);
-    can_switch_ = true;
+     if(error!= boost::asio::error::operation_aborted){
+        boost::recursive_mutex::scoped_lock lock(can_switch_mutex_);
+        can_switch_ = true;
+    }
 }
 
 bool Antenna_message::can_switch_antenna()

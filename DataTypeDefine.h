@@ -284,6 +284,7 @@ typedef struct
 {
     unsigned long long  nAlarmId;   //告警id
     int         nType;      //告警类型
+    int         alarmLevel; //告警等级
     time_t      startTime;  //开始时间
     int         nTargetId;  //指标id
     int         nModuleId;  //模块id
