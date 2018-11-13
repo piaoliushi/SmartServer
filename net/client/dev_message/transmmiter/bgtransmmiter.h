@@ -20,6 +20,7 @@ namespace hx_net
         int BeiGuangFm3KWData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
         int BeiGuangFm5KWData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
         int BeiGuangFm10KWData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
+        int Beiguang618bData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
     private:
         int m_subprotocol;
         int m_addresscode;

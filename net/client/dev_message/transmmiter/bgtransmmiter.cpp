@@ -73,6 +73,23 @@ namespace hx_net
                return kmp(data,nDataLen,cDes,2);
            }
        }
+       case BEIGUANG_FM_618B:
+       {
+           if(data[0] == 0xFE && data[1] == 0xFE)
+           {
+               if(data[3]==0x01)
+                   return 0;
+               else
+                   return 6;
+           }
+           else
+           {
+               unsigned char cDes[2]={0};
+               cDes[0]=0xFE;
+               cDes[1]=0xFE;
+               return kmp(data,nDataLen,cDes,2);
+           }
+       }
        case BEIGUANG_AM_10KW:
        {
            if(nDataLen<3)
@@ -137,6 +154,8 @@ namespace hx_net
        {
            return OnBeiguangFM1KW(data,data_ptr,nDataLen,runstate);
        }
+       case BEIGUANG_FM_618B:
+           return Beiguang618bData(data,data_ptr,nDataLen,runstate);
        case BEIGUANG_AM_10KW:
        {
 
@@ -255,6 +274,32 @@ namespace hx_net
            tmUnit.commandId[3] = 0x03;
            cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
            tmUnit.commandId[3] = 0x02;
+           cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
+       }
+           break;
+       case BEIGUANG_FM_618B:
+       {
+           tmUnit.ackLen = 14;
+           tmUnit.commandId[0] = 0xFE;
+           tmUnit.commandId[1] = 0xFE;
+           tmUnit.commandId[2] = m_addresscode;
+           tmUnit.commandId[3] = 0x01;
+           tmUnit.commandId[4] = 0x00;
+           tmUnit.commandId[5] = 0x00;
+           tmUnit.commandId[6] = 0x00;
+           tmUnit.commandId[7] = 0x00;
+           tmUnit.commandId[8] = 0x00;
+           tmUnit.commandId[9] = 0x00;
+           tmUnit.commandId[10] = 0x00;
+           tmUnit.commandId[11] = 0x00;
+           tmUnit.commandLen = 12;
+           cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+           tmUnit.ackLen = 0;
+           tmUnit.commandLen = 6;
+           tmUnit.commandId[3] = 0x02;
+           tmUnit.commandId[4] = 0x01;
+           cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
+           tmUnit.commandId[4] = 0x02;
            cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
        }
            break;
@@ -587,6 +632,38 @@ namespace hx_net
            data_ptr->mValues[indexpos++] = dtinfo;
            dtinfo.fValue = (data[74+17*i]*256+data[73+17*i])*0.1;
            data_ptr->mValues[indexpos++] = dtinfo;
+       }
+       return RE_SUCCESS;
+   }
+
+   int BgTransmmiter::Beiguang618bData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+   {
+       DataInfo dtinfo;
+       dtinfo.bType = false;
+       dtinfo.fValue = data[5]*256+data[6];
+       data_ptr->mValues[0] = dtinfo;
+       dtinfo.fValue = data[7];
+       data_ptr->mValues[1] = dtinfo;
+       if(data_ptr->mValues[0].fValue>data_ptr->mValues[1].fValue)
+           dtinfo.fValue =sqrt((data_ptr->mValues[0].fValue+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue-data_ptr->mValues[1].fValue));
+       else
+           dtinfo.fValue = 0;
+       data_ptr->mValues[2] = dtinfo;
+       data_ptr->mValues[0].fValue = data_ptr->mValues[0].fValue*0.001;
+
+       dtinfo.fValue = data[8];
+       data_ptr->mValues[3] = dtinfo;
+       dtinfo.fValue = data[9];
+       data_ptr->mValues[4] = dtinfo;
+       dtinfo.fValue = data[10]*0.1;
+       data_ptr->mValues[5] = dtinfo;
+       dtinfo.fValue = data[11]*0.1;
+       data_ptr->mValues[6] = dtinfo;
+       dtinfo.bType = true;
+       for(int i=0;i<7;++i)
+       {
+           dtinfo.fValue = Getbit(data[4],i);
+           data_ptr->mValues[7+i] = dtinfo;
        }
        return RE_SUCCESS;
    }
