@@ -511,6 +511,7 @@ namespace hx_net
         }
             break;
         case LINK_HX_0401_SP:
+        case LINK_HX_0401_AP:
        {
            if(lpParam->cparams().size()<1)
                return;
@@ -579,6 +580,7 @@ namespace hx_net
         }
             break;
         case LINK_HX_0401_SP:
+        case LINK_HX_0401_AP:
         {
             cmdUnit.commandLen = 6;
             cmdUnit.commandId[0] = 0xAA;
@@ -689,6 +691,7 @@ namespace hx_net
         }
             break;
         case LINK_HX_0401_SP:
+        case LINK_HX_0401_AP:
        {
            cmdUnit.commandLen = 6;
            cmdUnit.commandId[0] = 0xAA;
@@ -755,6 +758,7 @@ namespace hx_net
         }
             break;
         case LINK_HX_0401_SP:
+        case LINK_HX_0401_AP:
        {
            if(lpParam->cparams().size()<1)
                return;
@@ -820,6 +824,7 @@ namespace hx_net
                 return RE_HEADERROR;
         }
         case LINK_HX_0401_SP:
+        case LINK_HX_0401_AP:
         {
             if(data[0]==0xAA)
                 return 0;
@@ -936,6 +941,9 @@ namespace hx_net
             break;
         case LINK_HX_9020:
             idecresult = decode_9020(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
+        case LINK_HX_0401_AP:
+            idecresult = decode_0401AP(data,d_curData_ptr,nDataLen,iaddcode);
             break;
         default:
             break;
@@ -1103,6 +1111,7 @@ namespace hx_net
         }
             break;
         case LINK_HX_0401_SP:
+        case LINK_HX_0401_AP:
         {
            CommandUnit tmUnit;
            tmUnit.commandLen = 6;
@@ -2241,5 +2250,82 @@ namespace hx_net
           data_ptr->mValues[3*i+2] = dainfo;
       }
       return RE_SUCCESS;
-  }
+   }
+
+   int Link_message::decode_0401AP(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+   {
+       if(data[1]!=0x44)
+           return RE_CMDACK;
+       iaddcode = d_devInfo.iAddressCode;
+       DataInfo dainfo;
+       dainfo.bType = true;
+       int ichanel;
+       ichanel = data[2];
+       switch(ichanel)
+       {
+       case 0:
+       {
+           dainfo.fValue = 1.0;
+           data_ptr->mValues[0] = dainfo;
+           dainfo.fValue = 0.0;
+           data_ptr->mValues[1] = dainfo;
+           data_ptr->mValues[2] = dainfo;
+           data_ptr->mValues[3] = dainfo;
+       }
+           break;
+       case 1:
+       {
+           dainfo.fValue = 1.0;
+           data_ptr->mValues[1] = dainfo;
+           dainfo.fValue = 0.0;
+           data_ptr->mValues[0] = dainfo;
+           data_ptr->mValues[2] = dainfo;
+           data_ptr->mValues[3] = dainfo;
+       }
+           break;
+       case 2:
+       {
+           dainfo.fValue = 1.0;
+           data_ptr->mValues[2] = dainfo;
+           dainfo.fValue = 0.0;
+           data_ptr->mValues[1] = dainfo;
+           data_ptr->mValues[0] = dainfo;
+           data_ptr->mValues[3] = dainfo;
+       }
+           break;
+       case 3:
+       {
+           dainfo.fValue = 1.0;
+           data_ptr->mValues[3] = dainfo;
+           dainfo.fValue = 0.0;
+           data_ptr->mValues[1] = dainfo;
+           data_ptr->mValues[0] = dainfo;
+           data_ptr->mValues[2] = dainfo;
+       }
+           break;
+       default:
+       {
+           dainfo.fValue = 0.0;
+           data_ptr->mValues[0] = dainfo;
+           data_ptr->mValues[1] = dainfo;
+           data_ptr->mValues[2] = dainfo;
+           data_ptr->mValues[3] = dainfo;
+       }
+           break;
+       }
+       dainfo.fValue = data[3];
+       data_ptr->mValues[4] = dainfo;
+       for(int i=0;i<4;++i)
+       {
+           dainfo.fValue = Getbit(data[4],i);
+           data_ptr->mValues[5+i] = dainfo;
+       }
+       dainfo.bType = false;
+       for(int k=0;k<5;++k)
+       {
+           dainfo.fValue = data[5+k];
+           data_ptr->mValues[9+k] = dainfo;
+       }
+       return RE_SUCCESS;
+   }
 }

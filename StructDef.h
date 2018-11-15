@@ -337,6 +337,8 @@ typedef enum LINK_DEVICE
     LINK_HX_6300            = 21,//汇鑫6300音频处理器
     LINK_HX_6300_AD         = 22,//汇鑫6300模拟/数字音频处理器
     LINK_HX_9020            = 23,//汇鑫9020调幅度测试仪
+    LINK_HX_0401_AP         = 24,//汇鑫0401A+切换器
+
 }LinkDeviceSubProtocol;
 
 //上海全波
