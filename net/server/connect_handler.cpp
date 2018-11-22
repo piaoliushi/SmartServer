@@ -50,7 +50,7 @@ namespace hx_net
             if (now - get_last_hb_time() >180)//超时
 			{
  				close_handler();
-                //cout<<"heartbeat timeout!"<<endl;
+                cout<<"heartbeat timeout!"<<endl;
 				return;
 			}			
 			else

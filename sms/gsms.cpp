@@ -1,4 +1,5 @@
 #include "gsms.h"
+#include<QTextCodec>
 //#include <QWaitCondition>
 Gsms::Gsms(int mdtype,QObject *parent) :
     QObject(parent)
@@ -171,6 +172,21 @@ bool Gsms::GetRecvMessage(SM_PARAM *pSmParam)
     return fSuccess;
 }
 
+
+/*QString utf8ToGb2312(const char *strUtf8)
+{
+
+    QTextCodec* utf8Codec= QTextCodec::codecForName("utf-8");
+    QTextCodec* gb2312Codec = QTextCodec::codecForName("gb2312");
+
+    QString strUnicode= utf8Codec ->toUnicode(strUtf8);
+    QByteArray ByteGb2312= gb2312Codec ->fromUnicode(strUnicode);
+
+    strUtf8= ByteGb2312.data();
+    printf("~~~~~gb2312	strUtf8toGb2312:%s\n", strUtf8);
+    return QString::fromLocal8Bit(strUtf8);//注意这里要fromLocal8Bit()
+}*/
+
 void Gsms::SendSMSContent(string sSmsc, string PhoneNumber, string AlarmContent)
 {
     SM_PARAM SmParam;
@@ -187,7 +203,9 @@ void Gsms::SendSMSContent(string sSmsc, string PhoneNumber, string AlarmContent)
     else
         strcpy(SmParam.SCA, str_SCA.c_str());
     strcpy(SmParam.TPA, PhoneNumber.c_str());
-    strcpy(SmParam.TP_UD, AlarmContent.c_str());
+    //int contentSize = AlarmContent.size();
+    //int newSize =utf8ToGb2312(AlarmContent.c_str()).toLatin1().size();//utf8ToGb2312(AlarmContent.c_str()).toLatin1().data()
+    strcpy(SmParam.TP_UD,AlarmContent.c_str());
     SmParam.TP_PID = 0;
     SmParam.TP_DCS = GSM_UCS2;
 
@@ -364,6 +382,7 @@ int Gsms::gsmSendMessage(SM_PARAM *pSrc)
         gsmString2Bytes(pdu, &nSmscLength, 2);	// 取PDU串中的SMSC信息长度
         nSmscLength++;
         sprintf(cmd, "AT+CMGS=%d\r", nPduLength / 2 - nSmscLength);	// 生成命令
+        cout<<"AT+CMGS---len = "<<nPduLength / 2 - nSmscLength;
         n_cmdresult_=-1;
         boost::recursive_mutex::scoped_lock lock(data_mutex);
         nstate=stSendMessageRequest;

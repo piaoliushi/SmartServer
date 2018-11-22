@@ -326,7 +326,12 @@ void Antenna_message::switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult
 
     if((nHostRunS == dev_running && get_run_state()==antenna_host)
             || (nBackupRunS == dev_running && get_run_state()==antenna_backup))
+    {
+        eErrCode = EC_FAILED;
+        nExcutResult = 9;
         return;
+    }
+
 
     if(m_pSession!=NULL)
         m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,d_cur_task_,0,eErrCode);

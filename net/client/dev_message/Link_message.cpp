@@ -1848,7 +1848,7 @@ namespace hx_net
       iaddcode = data[3]*256+data[4];
       DataInfo dainfo;
       dainfo.bType = false;
-      dainfo.fValue = (data[8]-120)*0.10;
+      dainfo.fValue = data[8];
       data_ptr->mValues[0] = dainfo;
       dainfo.fValue = (data[9]-120)*0.10;
       data_ptr->mValues[1] = dainfo;
@@ -2217,7 +2217,7 @@ namespace hx_net
       iaddcode = data[3]*256+data[4];
       DataInfo dainfo;
       dainfo.bType = false;
-      dainfo.fValue = (data[8]-120)*0.10;
+      dainfo.fValue = data[8];
       data_ptr->mValues[0] = dainfo;
       dainfo.fValue = (data[9]-120)*0.10;
       data_ptr->mValues[1] = dainfo;

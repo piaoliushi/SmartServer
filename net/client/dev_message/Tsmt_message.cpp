@@ -827,7 +827,7 @@ namespace hx_net
                         {
 
                         }else{
-                            eErrCode = EC_OK;
+                            eErrCode = EC_FAILED;//EC_OK
                             nExcutResult = 7;//天线不在位
                             return;
                         }
@@ -839,7 +839,7 @@ namespace hx_net
 
                         bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
                         if(can_excute == false){
-                            eErrCode = EC_OK;
+                            eErrCode = EC_FAILED;//EC_OK
                             nExcutResult = 8;//天线防抖
                             return ;
                         }
@@ -889,10 +889,10 @@ namespace hx_net
                 //关联机器在使用则进行关主机动作
                 if(d_relate_tsmt_ptr_->bUsed==true) {
                     //待处理，由开机指令引起的关机参数，可以依据开机带入的参数来转化为关机参数，暂时不用
-                    //map<int,string>  tmParam;
-                    //if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
-                    //                                            d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam))
-                    //    return ;
+                    map<int,string>  tmParam;
+                    if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
+                                                                d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam))
+                        return ;
 
                     devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
                     commandmsg_->set_sdevid(d_relate_tsmt_ptr_->sDevNum);

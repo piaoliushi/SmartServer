@@ -874,9 +874,9 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId,e_Err
     map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
     if(iter!=dev_agent_and_com[sDevId].first->mapCommand.end()){
         if(iter->second.size()>childId){
-            string strHex;
-            CharStr2HexStr(iter->second[childId].commandId,strHex,iter->second[childId].commandLen);
-            cout<<"command string:"<<strHex<<endl;
+            //string strHex;
+            //CharStr2HexStr(iter->second[childId].commandId,strHex,iter->second[childId].commandLen);
+            //cout<<"command string:"<<strHex<<endl;
 
             eErrCode = EC_CMD_SEND_SUCCEED;
             start_write(iter->second[childId].commandId,iter->second[childId].commandLen);
@@ -2270,7 +2270,8 @@ void device_session::doAction(LinkAction &action, string sStationid, string sDev
     case ACTP_SENDMSG:{//发短信
         string smscontent;
         string strDevtype = GetInst(StationConfig).get_dictionary_value("DeviceType",devType);
-        smscontent = str(boost::format("%1%:%2%(%3%)---%4%--%5%")%strDevtype%sDevName%sDevid%sReason%sStartTime);
+        smscontent = str(boost::format("%1%:%2%(%3%)-%4%-%5%")%strDevtype%sDevName%sDevid%sReason%sStartTime);
+        boost::algorithm::trim(smscontent);
         Action_sendsms(action,smscontent);
     }
         break;

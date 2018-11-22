@@ -279,7 +279,7 @@ namespace hx_net
            break;
        case BEIGUANG_FM_618B:
        {
-           tmUnit.ackLen = 14;
+           tmUnit.ackLen = 23;
            tmUnit.commandId[0] = 0xFE;
            tmUnit.commandId[1] = 0xFE;
            tmUnit.commandId[2] = m_addresscode;
@@ -295,7 +295,7 @@ namespace hx_net
            tmUnit.commandLen = 12;
            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
            tmUnit.ackLen = 0;
-           tmUnit.commandLen = 6;
+           tmUnit.commandLen = 12;
            tmUnit.commandId[3] = 0x02;
            tmUnit.commandId[4] = 0x01;
            cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);

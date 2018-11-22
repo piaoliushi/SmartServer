@@ -32,6 +32,21 @@ DevClient::~DevClient()
 void DevClient::connect_all()
 {
     string sLocalStationId = GetInst(LocalConfig).local_station_id();
+
+    if(GetInst(StationConfig).IsHaveGsm())
+    {
+        ComCommunicationMode cominfo = GetInst(StationConfig).getGsmInfo();
+        if(!m_pGsm_ptr_)
+            m_pGsm_ptr_=boost::shared_ptr<Gsms>(new Gsms(cominfo.iparity_bit));
+
+        if(m_pGsm_ptr_->OpenCom(cominfo.icomport,cominfo.irate))
+        {
+            QObject::connect(m_pGsm_ptr_.get(),SIGNAL(S_state(int,bool)),
+                             GetInst(SvcMgr).get_notify(),SIGNAL(S_gsm_state(int,bool)));
+            m_pGsm_ptr_->gsmInit();
+        }
+    }
+
     //连接本地设备
     {
         boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
@@ -83,19 +98,7 @@ void DevClient::connect_all()
     }*/
 
 
-    if(GetInst(StationConfig).IsHaveGsm())
-    {
-        ComCommunicationMode cominfo = GetInst(StationConfig).getGsmInfo();
-        if(!m_pGsm_ptr_)
-            m_pGsm_ptr_=boost::shared_ptr<Gsms>(new Gsms(cominfo.iparity_bit));
 
-        if(m_pGsm_ptr_->OpenCom(cominfo.icomport,cominfo.irate))
-        {
-            QObject::connect(m_pGsm_ptr_.get(),SIGNAL(S_state(int,bool)),
-                             GetInst(SvcMgr).get_notify(),SIGNAL(S_gsm_state(int,bool)));
-            m_pGsm_ptr_->gsmInit();
-        }
-    }
 
 }
 
@@ -305,8 +308,10 @@ e_ErrorCode DevClient::SendSMSContent(vector<string> &PhoneNumber, string AlarmC
     if(m_pGsm_ptr_&&m_pGsm_ptr_->IsRun())
     {
         vector<string>::iterator iter = PhoneNumber.begin();
-        for(;iter!=PhoneNumber.end();++iter)
+        for(;iter!=PhoneNumber.end();++iter){
+
             m_pGsm_ptr_->SendSMSContent("13800551500",(*iter),AlarmContent);
+        }
         return EC_OK;
     }
 

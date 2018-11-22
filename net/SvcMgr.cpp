@@ -209,8 +209,11 @@ namespace hx_net
 
   //发送短信
   e_ErrorCode    SvcMgr::SendSMSContent(vector<string> &PhoneNumber,string AlarmContent){
-      if(m_pDevMgrPtr)
+      if(m_pDevMgrPtr){
+
           m_pDevMgrPtr->SendSMSContent(PhoneNumber,AlarmContent);
+          //emit
+      }
       return EC_OBJECT_NULL;
   }
 
