@@ -278,31 +278,31 @@ namespace hx_net
        }
            break;
        case BEIGUANG_FM_618B:
-       {
-           tmUnit.ackLen = 23;
-           tmUnit.commandId[0] = 0xFE;
-           tmUnit.commandId[1] = 0xFE;
-           tmUnit.commandId[2] = m_addresscode;
-           tmUnit.commandId[3] = 0x01;
-           tmUnit.commandId[4] = 0x00;
-           tmUnit.commandId[5] = 0x00;
-           tmUnit.commandId[6] = 0x00;
-           tmUnit.commandId[7] = 0x00;
-           tmUnit.commandId[8] = 0x00;
-           tmUnit.commandId[9] = 0x00;
-           tmUnit.commandId[10] = 0x00;
-           tmUnit.commandId[11] = 0x00;
-           tmUnit.commandLen = 12;
-           cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
-           tmUnit.ackLen = 0;
-           tmUnit.commandLen = 12;
-           tmUnit.commandId[3] = 0x02;
-           tmUnit.commandId[4] = 0x01;
-           cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
-           tmUnit.commandId[4] = 0x02;
-           cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
-       }
-           break;
+         {
+             tmUnit.ackLen = 14;
+             tmUnit.commandId[0] = 0xFE;
+             tmUnit.commandId[1] = 0xFE;
+             tmUnit.commandId[2] = m_addresscode;
+             tmUnit.commandId[3] = 0x01;
+             tmUnit.commandId[4] = 0x00;
+             tmUnit.commandId[5] = 0x00;
+             tmUnit.commandId[6] = 0x00;
+             tmUnit.commandId[7] = 0x00;
+             tmUnit.commandId[8] = 0x00;
+             tmUnit.commandId[9] = 0x00;
+             tmUnit.commandId[10] = tmUnit.commandId[2]^tmUnit.commandId[3]^tmUnit.commandId[4];
+             tmUnit.commandLen = 11;
+             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+             tmUnit.ackLen = 6;
+             tmUnit.commandId[3] = 0x02;
+             tmUnit.commandId[4] = 0x01;
+             tmUnit.commandId[10] = tmUnit.commandId[2]^tmUnit.commandId[3]^tmUnit.commandId[4];
+             cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
+             tmUnit.commandId[4] = 0x02;
+             tmUnit.commandId[10] = tmUnit.commandId[2]^tmUnit.commandId[3]^tmUnit.commandId[4];
+             cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
+         }
+             break;
        case BEIGUANG_AM_10KW:
            break;
        case BEIGUANG_AM_1KW:

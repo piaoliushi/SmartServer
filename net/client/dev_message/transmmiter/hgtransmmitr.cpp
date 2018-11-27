@@ -226,49 +226,61 @@ int HgTransmmitr::Hg50KwData(unsigned char *data, DevMonitorDataPtr data_ptr, in
 
 int HgTransmmitr::Hg10KwData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
 {
-    char ResultData[4]={0};
-    int HiByte=-1;
+    char ResultData[10]={0};
+    int HiByte=-1,Bmodel=-1;
     DataInfo dtinfo;
     dtinfo.bType = false;
-    for(int i=0;i<7;i++)
+    int nlastlen = nDataLen;
+    while(nlastlen>13)
     {
-        if(data[13*i +1] != 0x02)
-            continue;
-
-        if(data [13*i +6] == 0x50)//序号以P开头
+        unsigned char cDes[2]={0};
+        cDes[0] = 0x02;
+        cDes[1] = 0x46;
+        int npos = kmp(data,nlastlen,cDes,2);
+        data = data+npos;
+        unsigned char cendDes[1]={0x03};
+        int fendpos =  kmp(data,nlastlen,cendDes,1);
+        if(fendpos<0)
+            break;
+        Bmodel = data[5];// -0x30;
+        for(int i=0;i<(fendpos-8);++i)
         {
-            HiByte = data[13 *i +8] -0x30;
+            ResultData[i] = data[8+i];
+        }
+        if(Bmodel == 0x50)//序号以P开头
+        {
+            HiByte = data[7] -0x30;
             if(HiByte == 1) //输入功率
             {
 
-                ResultData[0] = data[13*i +9];
-                ResultData[1] = data[13*i +10];
-                ResultData[2] = data[13*i +11];
-                ResultData[3] = data[13*i +12];
+
                 dtinfo.fValue = atof(ResultData);
                 data_ptr->mValues[0] = dtinfo;
             }else if(HiByte == 2)//反射功率
             {
-                ResultData[0] = data[13*i +9];
-                ResultData[1] = data[13*i +10];
-                ResultData[2] = data[13*i +11];
-                ResultData[3] = data[13*i +12];
                 dtinfo.fValue = atof(ResultData);
                 data_ptr->mValues[1] = dtinfo;
             }
         }
-        else if(data[13*i +6] == 0x56) //各种电压值
+        else if(Bmodel == 0x56) //各种电压值
         {
-            HiByte = data[13*i+8] - 0x30;//参数编码序号,V01,V02,V03...
-            ResultData[0] = data[13*i +9];
-            ResultData[1] = data[13*i +10];
-            ResultData[2] = data[13*i +11];
-            ResultData[3] = data[13*i +12];
+            HiByte = data[7] - 0x30;//参数编码序号,V01,V02,V03...
             dtinfo.fValue = atof(ResultData);
             data_ptr->mValues[2+HiByte] = dtinfo;
 
         }
+        data = data+fendpos+1;
+        nlastlen = nlastlen-(fendpos+1);
     }
+    if((data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue)<=0)
+    {
+        data_ptr->mValues[2].fValue = 0;
+    }
+    else
+    {
+        data_ptr->mValues[2].fValue = (data_ptr->mValues[0].fValue*1000+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue);
+    }
+    return RE_SUCCESS;
     if((data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue)<=0)
     {
         data_ptr->mValues[2].fValue = 0;
@@ -282,57 +294,64 @@ int HgTransmmitr::Hg10KwData(unsigned char *data, DevMonitorDataPtr data_ptr, in
 
 int HgTransmmitr::Hg10KwexData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
 {
-    char ResultData[4]={0};
-    int HiByte=-1;
-    DataInfo dtinfo;
-    dtinfo.bType = false;
-    for(int i=0;i<12;i++)
-    {
-        if(data[13*i +1] != 0x02)
-            continue;
+    char ResultData[10]={0};
+       int HiByte=-1,Bmodel=-1;
+       DataInfo dtinfo;
+       dtinfo.bType = false;
+       int nlastlen = nDataLen;
+       while(nlastlen>13)
+       {
+           unsigned char cDes[2]={0};
+           cDes[0] = 0x02;
+           cDes[1] = 0x46;
+           int npos = kmp(data,nlastlen,cDes,2);
+           data = data+npos;
+           unsigned char cendDes[1]={0x03};
+           int fendpos =  kmp(data,nlastlen,cendDes,1);
+           if(fendpos<0)
+               break;
+           Bmodel = data[5];// -0x30;
+           for(int i=0;i<(fendpos-8);++i)
+           {
+               ResultData[i] = data[8+i];
+           }
+           if(Bmodel == 0x50)//序号以P开头
+           {
+               HiByte = data[7] -0x30;
+               if(HiByte == 1) //输入功率
+               {
 
-        if(data [13*i +6] == 0x50)//序号以P开头
-        {
-            HiByte = data[13 *i +8] -0x30;
-            if(HiByte == 1) //输入功率
-            {
 
-                ResultData[0] = data[13*i +9];
-                ResultData[1] = data[13*i +10];
-                ResultData[2] = data[13*i +11];
-                ResultData[3] = data[13*i +12];
-                dtinfo.fValue = atof(ResultData);
-                data_ptr->mValues[0] = dtinfo;
-            }else if(HiByte == 2)//反射功率
-            {
-                ResultData[0] = data[13*i +9];
-                ResultData[1] = data[13*i +10];
-                ResultData[2] = data[13*i +11];
-                ResultData[3] = data[13*i +12];
-                dtinfo.fValue = atof(ResultData);
-                data_ptr->mValues[1] = dtinfo;
-            }
-        }
-        else if(data[13*i +6] == 0x56) //各种电压值
-        {
-            HiByte = data[13*i+8] - 0x30;//参数编码序号,V01,V02,V03...
-            ResultData[0] = data[13*i +9];
-            ResultData[1] = data[13*i +10];
-            ResultData[2] = data[13*i +11];
-            ResultData[3] = data[13*i +12];
-            dtinfo.fValue = atof(ResultData);
-            data_ptr->mValues[2+HiByte] = dtinfo;
+                   dtinfo.fValue = atof(ResultData);
+                   data_ptr->mValues[0] = dtinfo;
+               }else if(HiByte == 2)//反射功率
+               {
+                   dtinfo.fValue = atof(ResultData);
+                   data_ptr->mValues[1] = dtinfo;
+               }
+           }
+           else if(Bmodel == 0x56) //各种电压值
+           {
+               HiByte = data[7] - 0x30;//参数编码序号,V01,V02,V03...
+               dtinfo.fValue = atof(ResultData);
+               data_ptr->mValues[2+HiByte] = dtinfo;
 
-        }
-    }
-    if((data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue)<=0)
-    {
-        data_ptr->mValues[2].fValue = 0;
-    }
-    else
-    {
-        data_ptr->mValues[2].fValue = (data_ptr->mValues[0].fValue*1000+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue);
-    }
-    return RE_SUCCESS;
+           }else if(Bmodel == 0x41)
+           {
+               dtinfo.fValue = atof(ResultData);
+               data_ptr->mValues[12] = dtinfo;
+           }
+           data = data+fendpos+1;
+           nlastlen = nlastlen-(fendpos+1);
+       }
+       if((data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue)<=0)
+       {
+           data_ptr->mValues[2].fValue = 0;
+       }
+       else
+       {
+           data_ptr->mValues[2].fValue = (data_ptr->mValues[0].fValue*1000+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue*1000-data_ptr->mValues[1].fValue);
+       }
+       return RE_SUCCESS;
 }
 }

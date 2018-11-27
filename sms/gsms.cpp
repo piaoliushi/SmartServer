@@ -1,5 +1,4 @@
 #include "gsms.h"
-#include<QTextCodec>
 //#include <QWaitCondition>
 Gsms::Gsms(int mdtype,QObject *parent) :
     QObject(parent)
@@ -172,25 +171,9 @@ bool Gsms::GetRecvMessage(SM_PARAM *pSmParam)
     return fSuccess;
 }
 
-
-/*QString utf8ToGb2312(const char *strUtf8)
-{
-
-    QTextCodec* utf8Codec= QTextCodec::codecForName("utf-8");
-    QTextCodec* gb2312Codec = QTextCodec::codecForName("gb2312");
-
-    QString strUnicode= utf8Codec ->toUnicode(strUtf8);
-    QByteArray ByteGb2312= gb2312Codec ->fromUnicode(strUnicode);
-
-    strUtf8= ByteGb2312.data();
-    printf("~~~~~gb2312	strUtf8toGb2312:%s\n", strUtf8);
-    return QString::fromLocal8Bit(strUtf8);//注意这里要fromLocal8Bit()
-}*/
-
 void Gsms::SendSMSContent(string sSmsc, string PhoneNumber, string AlarmContent)
 {
     SM_PARAM SmParam;
-
     memset(&SmParam, 0, sizeof(SM_PARAM));
 
     if(sSmsc.substr(0,2)!="86")
@@ -203,8 +186,6 @@ void Gsms::SendSMSContent(string sSmsc, string PhoneNumber, string AlarmContent)
     else
         strcpy(SmParam.SCA, str_SCA.c_str());
     strcpy(SmParam.TPA, PhoneNumber.c_str());
-    //int contentSize = AlarmContent.size();
-    //int newSize =utf8ToGb2312(AlarmContent.c_str()).toLatin1().size();//utf8ToGb2312(AlarmContent.c_str()).toLatin1().data()
     strcpy(SmParam.TP_UD,AlarmContent.c_str());
     SmParam.TP_PID = 0;
     SmParam.TP_DCS = GSM_UCS2;
@@ -220,7 +201,7 @@ void Gsms::SmThread()
     SM_BUFF buff;			// 接收短消息列表的缓冲区
     SM_PARAM param[256];	// 发送/接收短消息缓冲区
     time_t tmOrg, tmNow;		// 上次和现在的时间，计算超时用
-
+    int sendfial=0;
     //cout<<"thread start"<<endl;
     {
         boost::recursive_mutex::scoped_lock lock(m_run_mutex);
@@ -244,7 +225,7 @@ void Gsms::SmThread()
         }
             break;
         case stSendMessageRequest:
-            time(&tmOrg);
+       //     time(&tmOrg);
             gsmSendMessage(&param[0]);
             memset(&buff, 0, sizeof(SM_BUFF));
             time(&tmOrg);
@@ -254,17 +235,32 @@ void Gsms::SmThread()
         case stSendMessageResponse:
            {
              time(&tmNow);
+             double ninterval = difftime(tmNow,tmOrg);
              boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
              if(n_cmdresult_==0){
-                 cout<<"Send sms error------GSM_OK----stSendMessageResponse----n_cmdresult_="<<n_cmdresult_<<endl;
-                 nState = stBeginRest;
+                 if(ninterval>=1){
+                     //      cout<<"Send sms error------GSM_OK----stSendMessageResponse----n_cmdresult_="<<n_cmdresult_<<",rec num:"<<param[0].TPA<<endl;
+                     nState = stBeginRest;
+                 }
              }
-             else if(n_cmdresult_==1){
-                 nState = stSendMessageWaitIdle;
+             else if(n_cmdresult_==1){                 
+
+                 double ninterval = difftime(tmNow,tmOrg);
+                 if(ninterval>=5){
+                     tmOrg = tmNow;
+                     nState = stSendMessageWaitIdle;
+                     ++sendfial;
+                     if(sendfial>5)
+                     {
+                     //    cout<<"Send sms error------GSM_ERROR----stSendMessageResponse----n_cmdresult_="<<n_cmdresult_<<",rec num:"<<param[0].TPA<<endl;
+                         sendfial = 0;
+                         nState = stBeginRest;
+                         break;
+                     }
+                 }
              }
              else
-             {
-                 double ninterval = difftime(tmNow,tmOrg);
+             {         
                  if(ninterval>=20){
                      nState = stSendMessageWaitIdle;
                  }
@@ -272,7 +268,8 @@ void Gsms::SmThread()
            }
              break;
         case stSendMessageWaitIdle:
-            nState = stSendMessageRequest;		// 直到发送成功为止
+            nState = stSendMessageRequest;
+                // 直到发送成功为止
             //nState = stSendMessageWaitIdle;
             break;
         case stReadMessageRequest:
@@ -382,21 +379,23 @@ int Gsms::gsmSendMessage(SM_PARAM *pSrc)
         gsmString2Bytes(pdu, &nSmscLength, 2);	// 取PDU串中的SMSC信息长度
         nSmscLength++;
         sprintf(cmd, "AT+CMGS=%d\r", nPduLength / 2 - nSmscLength);	// 生成命令
-        cout<<"AT+CMGS---len = "<<nPduLength / 2 - nSmscLength;
         n_cmdresult_=-1;
         boost::recursive_mutex::scoped_lock lock(data_mutex);
         nstate=stSendMessageRequest;
+        cout<<"SM CMD---------"<<cmd<<endl;
         int nwlen = WriteComm(cmd, strlen(cmd));	// 先输出命令串
     }
     else// if(modle_type==tyHwCdma)
     {
         char cmd[1024];
+        cach_receive_.clear();
         sprintf(cmd, "AT^HCMGS=\"%s\"\r", pSrc->TPA);
         boost::recursive_mutex::scoped_lock lock(data_mutex);
         nstate=stSendMessageRequest;
         unsigned char buf[1024];
         m_nSendPduLen = gsmEncodeUcs2(pSrc->TP_UD,&buf[0],strlen(pSrc->TP_UD));
         memcpy(&pdu[0],&buf[0],m_nSendPduLen);
+        cout<<"SM CMD---------"<<cmd<<endl;
         int nwlen = WriteComm(cmd, strlen(cmd));	// 先输出命令串
     }
    /* else
@@ -473,13 +472,31 @@ int Gsms::gsmParseMessageList(SM_PARAM *pMsg, SM_BUFF *pBuff)
 
     return nMsg;
 }
-
 void Gsms::get_sendmsg_cmd_ack()
+{
+    QByteArray qarray = pQSerialport_ptr_->readAll();
+    cach_receive_.append(qarray);
+    if(cach_receive_.size()>=4 && strncmp(cach_receive_.constData(),"\r\n> ",4)==0)
+    {
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        nstate=stSendMessageResponse;
+        pdu[m_nSendPduLen]=0x00;
+        pdu[m_nSendPduLen+1]=0x1A;		// 得到肯定回答，继续输出PDU串
+        WriteComm(pdu, m_nSendPduLen+2);
+        cach_receive_.clear();
+    }
+    else
+    {
+        boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
+        n_cmdresult_ = -1;
+    }
+}
+/*void Gsms::get_sendmsg_cmd_ack()
 {
     cach_receive_.clear();
 
     QByteArray qarray = pQSerialport_ptr_->readAll();
-
+    cout<<"get_sendmsg_cmd_ack:-----readAll===size="<<qarray.size()<<"---value="<<qarray.constData()<<endl;
     if(qarray.size()==4 && strncmp(qarray.constData(),"\r\n> ",4)==0)
     {
         boost::recursive_mutex::scoped_lock lock(data_mutex);
@@ -491,7 +508,7 @@ void Gsms::get_sendmsg_cmd_ack()
         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
         n_cmdresult_ = 1;
     }
-}
+}*/
 
 void Gsms::get_Response_cmd_ack()
 {
@@ -549,6 +566,7 @@ void Gsms::get_CSCA_cmd_ack()
                     cach_receive_.clear();
                     Run();
                     emit S_state(2,true);
+                 //   SendSMSContent("13800551500","13855170942","测试短信");
                 }
             }
         }
@@ -1008,7 +1026,7 @@ int Gsms::gsmEncodePdu(const SM_PARAM *pSrc, char *pDst)
     buf[1] = 0x91;		// 固定: 用国际格式号码
     nDstLength = gsmBytes2String(buf, pDst, 2);		// 转换2个字节到目标PDU串
     nDstLength += gsmInvertNumbers(pSrc->SCA, &pDst[nDstLength], nLength);	// 转换SMSC号码到目标PDU串
-
+    cout<<"SMSC-----"<<pSrc->SCA<<endl;
     // TPDU段基本参数、目标地址等
     nLength = strlen(pSrc->TPA);	// TP-DA地址字符串的长度
     buf[0] = 0x11;					// 是发送短信(TP-MTI=01)，TP-VP用相对格式(TP-VPF=10)
@@ -1017,7 +1035,7 @@ int Gsms::gsmEncodePdu(const SM_PARAM *pSrc, char *pDst)
     buf[3] = 0x91;					// 固定: 用国际格式号码
     nDstLength += gsmBytes2String(buf, &pDst[nDstLength], 4);		// 转换4个字节到目标PDU串
     nDstLength += gsmInvertNumbers(pSrc->TPA, &pDst[nDstLength], nLength);	// 转换TP-DA到目标PDU串
-
+    cout<<"TPA-----"<<pSrc->TPA<<endl;
     // TPDU段协议标识、编码方式、用户信息等
     nLength = strlen(pSrc->TP_UD);	// 用户信息字符串的长度
     buf[0] = pSrc->TP_PID;			// 协议标识(TP-PID)
@@ -1026,17 +1044,20 @@ int Gsms::gsmEncodePdu(const SM_PARAM *pSrc, char *pDst)
     if(pSrc->TP_DCS == GSM_7BIT)
     {
         // 7-bit编码方式
+        cout<<"decode-----GSM_7BIT"<<endl;
         buf[3] = nLength;			// 编码前长度
         nLength = gsmEncode7bit(pSrc->TP_UD, &buf[4], nLength+1) + 4;	// 转换TP-DA到目标PDU串
     }
     else if(pSrc->TP_DCS == GSM_UCS2)
     {
+        cout<<"decode-----GSM_UCS2"<<endl;
         // UCS2编码方式
         buf[3] = gsmEncodeUcs2(pSrc->TP_UD, &buf[4], nLength);	// 转换TP-DA到目标PDU串
         nLength = buf[3] + 4;		// nLength等于该段数据长度
     }
     else
     {
+        cout<<"decode-----GSM_8bit"<<endl;
         // 8-bit编码方式
         buf[3] = gsmEncode8bit(pSrc->TP_UD, &buf[4], nLength);	// 转换TP-DA到目标PDU串
         nLength = buf[3] + 4;		// nLength等于该段数据长度
@@ -1282,22 +1303,23 @@ void Gsms::get_sysinfo_ack()
 
 void Gsms::get_sendmsg_cdma_ack()
 {
-    cach_receive_.clear();
+
 
     QByteArray qarray = pQSerialport_ptr_->readAll();
-
-    if(qarray.size()==4 && strncmp(qarray.constData(),"\r\n> ",4)==0)
+    cach_receive_.append(qarray);
+    if(cach_receive_.size()>=4 && strncmp(cach_receive_.constData(),"\r\n> ",4)==0)
     {
         boost::recursive_mutex::scoped_lock lock(data_mutex);
         nstate=stSendMessageResponse;
         pdu[m_nSendPduLen]=0x00;
         pdu[m_nSendPduLen+1]=0x1A;		// 得到肯定回答，继续输出PDU串
         WriteComm(pdu, m_nSendPduLen+2);
+        cach_receive_.clear();
     }
     else
     {
         boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
-        n_cmdresult_ = 1;
+        n_cmdresult_ = -1;
     }
 }
 
