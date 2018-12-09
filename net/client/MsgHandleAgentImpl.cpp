@@ -223,27 +223,33 @@ namespace hx_net
         return m_pbaseMsg->cur_dev_state();
     }
 
-    void MsgHandleAgentImpl::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
+    void MsgHandleAgentImpl::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode,
                                            bool bSnmp,Snmp *snmp,CTarget *target)
     {
-        if(m_pbaseMsg==NULL)
+        if(m_pbaseMsg==NULL){
+            eErrCode = EC_MSG_HANDEL_OBJ_NULL;
             return ;
-        return m_pbaseMsg->exec_task_now(icmdType,sUser,eErrCode,mapParam,bSnmp,snmp,target);
+        }
+        return m_pbaseMsg->exec_task_now(icmdType,sUser,eErrCode,mapParam,nMode,bSnmp,snmp,target);
     }
 
     //执行通用指令
     void MsgHandleAgentImpl::exec_general_task(int icmdType,string sUser,devCommdMsgPtr lpParam,
                                            e_ErrorCode &eErrCode){
-        if(m_pbaseMsg==NULL)
+        if(m_pbaseMsg==NULL){
+            eErrCode = EC_MSG_HANDEL_OBJ_NULL;
             return ;
+        }
         return m_pbaseMsg->exec_general_task(icmdType,sUser,lpParam,eErrCode);
     }
 
     //执行联动命令
     void MsgHandleAgentImpl::exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,string sUser,e_ErrorCode &eErrCode)
     {
-        if(m_pbaseMsg==NULL)
+        if(m_pbaseMsg==NULL){
+            eErrCode = EC_MSG_HANDEL_OBJ_NULL;
             return ;
+        }
         return m_pbaseMsg->exec_action_task_now(param,actionType,sUser,eErrCode);
     }
 
@@ -305,6 +311,37 @@ namespace hx_net
         if(m_pbaseMsg==NULL)
             return false;
         return m_pbaseMsg->add_new_data(sIp,nChannel,mapData);
+    }
+
+    //获取关联机信息
+    void  MsgHandleAgentImpl::get_relate_dev_info(string &sStationId,string &sDevId,string &sAttenaId)
+    {
+        if(m_pbaseMsg==NULL)
+            return ;
+        return m_pbaseMsg->get_relate_dev_info(sStationId,sDevId,sAttenaId);
+    }
+
+    //是否是天线代理
+    bool MsgHandleAgentImpl::is_anttena_agent()
+    {
+        if(m_pbaseMsg==NULL)
+            return false;
+        return m_pbaseMsg->is_anttena_agent();
+    }
+
+    //是否是软件一键开机
+    bool MsgHandleAgentImpl::is_soft_onekey_open()
+    {
+        if(m_pbaseMsg==NULL)
+            return false;
+        return m_pbaseMsg->is_soft_onekey_open();
+    }
+    //是否是996一键开机
+    bool MsgHandleAgentImpl::is_996_onekey_open()
+    {
+        if(m_pbaseMsg==NULL)
+            return false;
+        return m_pbaseMsg->is_996_onekey_open();
     }
 }
 

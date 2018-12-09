@@ -14,6 +14,23 @@
 
 using namespace std;
 
+
+enum e_CmdExcuteResult
+{
+    CMD_RT_OK         = 0,//成功
+    CMD_RT_FAILURE      = 1,//失败
+    CMD_RT_GOING      = 2,//正在执行
+    CMD_RT_GOING_LOOP = 3,//循环发送指令
+    CMD_RT_FILURE_TIMEOUT = 4,//超时失败
+    CMD_RT_GOING_DETECT_RUN_STATE = 5,//正在检测运行状态
+    CMD_RT_GOING_DETECT_WAIT_ATTENA = 6,//正在等待天线到位
+    CMD_RT_FAILURE_ATTENA_POS_ERROR = 7,//天线位置不对
+    CMD_RT_FAILURE_NO_ALLOW_EXCUTE = 8,//禁止执行开关发射机操作（天线防抖等待）
+    CMD_RT_FAILURE_NO_ALLOW_SWITCH_ATTENA = 9,//禁止倒天线（当前机器正在运行）
+
+
+};
+
 enum dev_alarm_state
 {
 	invalid_alarm =-1,
@@ -49,10 +66,16 @@ enum dev_run_state
 
 enum dev_opr_state
 {
-	dev_no_opr=-1,
+    dev_no_opr = -1,
     dev_opr_excuting,
 	dev_opr_turn_on, //正在开机
+    dev_opr_soft_onekey_turn_on, //正在服务器一键开机
+    dev_opr_996_onekey_turn_on, //正在996一键开机
+    dev_opr_auto_switch_backup,//正在自动倒备机
 	dev_opr_turn_off,//正在关机
+    dev_opr_switch_attena,//正在切换天线
+    dev_opr_996_onekey_turn_off, //正在996关机
+    dev_opr_other_task,// 正在执行其他任务
 };
 
 enum Dev_Type
@@ -293,7 +316,7 @@ struct DevicePropertyEx
         ,data_save_interval(900)//默认15分钟记录一次数据
 		,alarm_detect_max_count(2)//默认报警检测次数为2次
 		,cmd_timeout_interval(10)//10默认命令超时循环间隔为10秒钟
-        ,cmd_excut_timeout_duration(60)//默认命令发送超时时长为2分钟,超过此时间将不再尝试发送控制命令
+        ,cmd_excut_timeout_duration(60)//60默认命令发送超时时长为2分钟,超过此时间将不再尝试发送控制命令
 		,multi_query_send_interval(30)//默认多查询指令交替间隔为30毫秒
 		,zero_power_value(0.02)//默认0.02kw为关机零功率
 		,u0_range_value(220)//默认电压量程（9033A）

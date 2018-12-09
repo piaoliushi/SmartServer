@@ -55,6 +55,12 @@ namespace hx_net
         bool is_disconnected(string sDevId="");
         //获得协议转换器连接状态
         con_state       get_con_state();
+
+        //获取数据返回状态
+        con_state get_data_return_state(string sDevId);
+        //设置数据返回状态
+        void set_data_return_state(string sDevId,bool nState);
+
         //获得设备运行状态（默认连接正常则运行正常）
         dev_run_state   get_run_state(string sDevId);
         void            set_run_state(string sDevId,int nState);
@@ -93,7 +99,10 @@ namespace hx_net
         void send_action_conmmand(map<int,vector<ActionParam> > &param,string sUser,int actionType,e_ErrorCode &opResult);
 
         void set_opr_state(string sdevId,dev_opr_state curState);
-        dev_opr_state get_opr_state(string sdevId);
+        int get_opr_state(string sdevId);
+
+        bool relate_device_exec_now(string sDevId,e_ErrorCode &opResult,int cmdType);
+
 
     protected:
         void start_read_head(int msgLen);//开始接收头
@@ -116,7 +125,8 @@ namespace hx_net
         //判断监测量是否报警
         void check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,bool bMonitor);
 
-        void save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtrconst,const map<int,DeviceMonitorItem> &mapMonitorItem);
+        void save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtrconst,
+                                 const map<int,DeviceMonitorItem> &mapMonitorItem);
 
         bool is_need_save_data(string sDevId);
         //判断当前时间是否需要上传
@@ -124,14 +134,7 @@ namespace hx_net
 
         string next_dev_id();
         string get_devid_by_addcode(int iaddcode);
-        //提交任务
-        //void task_count_increase();
-        //任务递减
-        //void task_count_decrease();
-        //任务数
-        //int  task_count();
-        //等待任务结束
-        //void wait_task_end();
+
         //是否在监测时间段
         bool is_monitor_time(string sDevId);//,int ichannel=0
 
@@ -161,6 +164,11 @@ namespace hx_net
         //分析联动
         void parse_action(vector<LinkAction> &vaction,string &devId,DeviceMonitorItem &ItemInfo,CurItemAlarmInfo &curAlarm);
 
+        //设置当前正在执行的任务类型
+        void set_current_opr_type(string sDevId,string sUser,int cmdType);
+        //根据当前操作码返回错误码
+        void set_current_errorcode_by_oprtype(int curOprState,e_ErrorCode &opResult);
+
     protected:
         void handle_connected(const boost::system::error_code& error);
         void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);//通用消息头（分消息head，body）
@@ -181,7 +189,7 @@ namespace hx_net
         void http_cmd_close_i();
 
         //开始执行任务
-        bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,map<int,string> &mapParam);
+        bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,map<int,string> &mapParam,int nMode=0);
 
 
 
@@ -263,6 +271,9 @@ namespace hx_net
 
 
         urdl::read_stream http_stream_;
+
+        boost::recursive_mutex           data_return_state_mutex_;
+        map<string,bool>   has_data_return_;//用于指示是否有数据返回
 
     };
     typedef boost::shared_ptr<hx_net::device_session> dev_session_ptr;

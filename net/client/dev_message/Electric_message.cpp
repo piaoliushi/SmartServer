@@ -1116,7 +1116,7 @@ void Electric_message::GetSignalCommand(int nChannel, CommandUnit &cmdUnit)
     }
 }
 
-void Electric_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode,map<int,string> &mapParam,
+void Electric_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode,
                                      bool bSnmp, Snmp *snmp, CTarget *target)
 {
     CommandUnit cmdUnit;

@@ -25,7 +25,7 @@ namespace hx_net
 		//通用命令执行
         e_ErrorCode excute_command(string sDevId,int cmdType,string sUser,devCommdMsgPtr lpParam);
         //下发控制指令
-        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam);
+        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam,int nMode=0);
 
 		void RunNetListen();
 
@@ -33,12 +33,16 @@ namespace hx_net
 
 		//获得设备连接
 		con_state get_dev_net_state(string sStationId,string sDevid);
+        //获得设备数据返回状态
+        con_state get_data_return_state(string sStationId,string sDevid);
 		//获得设备运行状态
 		dev_run_state get_dev_run_state(string sStationId,string sDevid);
         //设置设备运行状态
         void set_dev_run_state(string sStationId,string sDevid,int nState);
         //获得设备是否允许控制
         bool dev_can_excute_cmd(string sStationId,string sDevid);
+        //获取设备当前命令执行状态
+        int get_dev_opr_state(string sStationId,string sDevid);
 		//获得设备运行状态
         void get_dev_alarm_state(string sStationId,string sDevid,map<int,map<int,CurItemAlarmInfo> >& cellAlarm);
 		//获得设备基本信息

@@ -98,6 +98,34 @@ namespace hx_net
 	{
 	}
 
+    //是否是天线代理
+    bool Tsmt_message::is_anttena_agent()
+    {
+        return d_antenna_Agent_;
+    }
+
+    //是否是软件一键开机
+    bool Tsmt_message::is_soft_onekey_open()
+    {
+        return d_onekeyopen_soft;
+    }
+
+    //是否是996一键开机
+    bool Tsmt_message::is_996_onekey_open()
+    {
+         return d_onekeyopen_996;
+    }
+
+    void Tsmt_message::get_relate_dev_info(string &sStationId,string &sDevId,string &sAttenaId)
+    {
+        if(d_relate_tsmt_ptr_!=NULL){
+            sStationId = d_relate_tsmt_ptr_->sStationNum;
+            sDevId = d_relate_tsmt_ptr_->sDevNum;
+        }
+        if(d_relate_antenna_ptr_!=NULL && d_antenna_Agent_==false)
+            sAttenaId = d_relate_antenna_ptr_->sDevNum;
+    }
+
     void Tsmt_message::SetProtocol(int mainprotocol,int subprotocol)
     {
         m_Subprotocol =   subprotocol;
@@ -479,27 +507,45 @@ namespace hx_net
         switch(actionType)
         {
         case ACTP_OPEN_DEVICE:
-            exec_task_now(MSG_TRANSMITTER_TURNON_OPR,sUser,eErrCode,curParam);
+            exec_task_now(MSG_TRANSMITTER_TURNON_OPR,sUser,eErrCode,curParam,1);
             break;
         case ACTP_CLOSE_DEVICE:
-            exec_task_now(MSG_TRANSMITTER_TURNOFF_OPR,sUser,eErrCode,curParam);
+            exec_task_now(MSG_TRANSMITTER_TURNOFF_OPR,sUser,eErrCode,curParam,1);
             break;
         }
 
 
     }
 
-    void Tsmt_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
+    void Tsmt_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode,
                                      bool bSnmp,Snmp *snmp,CTarget *target)
     {
+
         //记录当前下发任务信息
         d_cur_task_ = icmdType;
         d_cur_task_param_ = mapParam;
         d_cur_user_ = sUser;//记录当前用户，定时，自动，人工
         if(cmd_excute_is_ok()){
-            eErrCode = EC_OK;
-            m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
+            //关联控制
+            if(nMode)
+                eErrCode = EC_OK;
+            else{//单步控制
+                switch (d_cur_task_) {
+                case MSG_TRANSMITTER_TURNON_OPR:
+                case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:
+                case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR:
+                    eErrCode = EC_DEV_RUN_OK_CANCEL_SEND_CMD;
+                    break;
+                case MSG_TRANSMITTER_TURNOFF_OPR:
+                    eErrCode = EC_DEV_RUN_SHUTDOWN_CANCEL_SEND_CMD;
+                    break;
+                default:
+                    eErrCode = EC_OK;
+                    break;
+                }
+             }
 
+            m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
             return;
         }
         //snmp参数设置专用
@@ -512,15 +558,16 @@ namespace hx_net
 
 
         //执行任务2：正在执行（首次发送指令）
-        int nResult = 2;//2：正在执行（循环发送指令）
+        int nResult = CMD_RT_GOING;//2：正在执行（循环发送指令）
 
         excute_task_cmd(eErrCode,nResult);
 
         //天线防抖，不在位
-        if(nResult == 7 || nResult==8){
+        if(nResult == CMD_RT_FAILURE_ATTENA_POS_ERROR || nResult==CMD_RT_FAILURE_NO_ALLOW_EXCUTE){
             string  sResult = DEV_CMD_RESULT_DESC(nResult);
             GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
             m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
+
             return;
         }
 
@@ -681,7 +728,7 @@ namespace hx_net
              if(cmd_excute_is_ok()){
 
                  //写日志
-                 string  sResult = DEV_CMD_RESULT_DESC(0);//0：成功
+                 string  sResult = DEV_CMD_RESULT_DESC(CMD_RT_OK);//0：成功
                  GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
                 //通知到客户端...
                 m_pSession->notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,d_devInfo.sDevName,d_devInfo.iDevType,d_cur_user_,
@@ -696,7 +743,7 @@ namespace hx_net
                 //超时
                 if(ninterval>=d_devProperty->cmd_excut_timeout_duration) {
                     //写日志
-                    string  sResult = DEV_CMD_RESULT_DESC(4);//4：失败（超时）
+                    string  sResult = DEV_CMD_RESULT_DESC(CMD_RT_FILURE_TIMEOUT);//4：失败（超时）
                     GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
                     //通知到客户端...
                     m_pSession->notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,
@@ -709,7 +756,7 @@ namespace hx_net
                 }else{
                     e_ErrorCode eErrCode = EC_OPR_ON_GOING;
 
-                    int nResult = 3;//3：正在执行（循环发送指令）
+                    int nResult = CMD_RT_GOING_LOOP;//3：正在执行（循环发送指令）
                     excute_task_cmd(eErrCode,nResult);
                     if(eErrCode == EC_OK){
                         m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
@@ -737,7 +784,7 @@ namespace hx_net
                  ++d_curStep;
                  if(is_step_all_exeok())
                  {
-                     string  sResult = DEV_CMD_RESULT_DESC(0);//0：成功
+                     string  sResult = DEV_CMD_RESULT_DESC(CMD_RT_OK);//0：成功
                      GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
                     //通知到客户端...
                     m_pSession->notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,d_devInfo.sDevName,d_devInfo.iDevType,d_cur_user_,
@@ -753,7 +800,7 @@ namespace hx_net
                  {
                      d_OprStartTime = tmCurTime;
                      e_ErrorCode eErrCode = EC_OPR_ON_GOING;
-                     int nResult = 3;
+                     int nResult = CMD_RT_GOING_LOOP;
                      excute_task_cmd(eErrCode,nResult);
                      start_step_task_timeout_timer();
                  }
@@ -764,7 +811,7 @@ namespace hx_net
                  int ntime = getsteptimeout();
                  if(ntime<=0 || ninterval>=ntime) {
                     //写日志
-                    string  sResult = DEV_CMD_RESULT_DESC(4);//4：失败（超时）
+                    string  sResult = DEV_CMD_RESULT_DESC(CMD_RT_FILURE_TIMEOUT);//4：失败（超时）
                     GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
                     //通知到客户端...
                     m_pSession->notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,
@@ -779,7 +826,7 @@ namespace hx_net
                  else{
                     e_ErrorCode eErrCode = EC_OPR_ON_GOING;
 
-                    int nResult = 3;//3：正在执行（循环发送指令）
+                    int nResult = CMD_RT_GOING_LOOP;//3：正在执行（循环发送指令）
                     excute_task_cmd(eErrCode,nResult);
                     if(eErrCode == EC_OK){
                         m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
@@ -800,7 +847,8 @@ namespace hx_net
             return;
         //如果发射机正在监测运行状态，不执行开机操作
         if(is_detecting()){
-            nExcutResult = 5;
+            nExcutResult = CMD_RT_GOING_DETECT_RUN_STATE;
+            eErrCode = EC_DETECT_RUN_STATE;
             return;
         }
         if(d_relate_tsmt_ptr_!=NULL && d_relate_antenna_ptr_!=NULL){
@@ -827,8 +875,9 @@ namespace hx_net
                         {
 
                         }else{
-                            eErrCode = EC_FAILED;//EC_OK
-                            nExcutResult = 7;//天线不在位
+                            //eErrCode = EC_FAILED;//EC_OK
+                            eErrCode = EC_ATTENA_POS_ERROR;
+                            nExcutResult = CMD_RT_FAILURE_ATTENA_POS_ERROR;//天线不在位
                             return;
                         }
                     }
@@ -839,8 +888,9 @@ namespace hx_net
 
                         bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
                         if(can_excute == false){
-                            eErrCode = EC_FAILED;//EC_OK
-                            nExcutResult = 8;//天线防抖
+                            //eErrCode = EC_FAILED;//EC_OK
+                            eErrCode = EC_NO_ALLOW_SWITCH_ATTENA;
+                            nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
                             return ;
                         }
                     }
@@ -850,12 +900,8 @@ namespace hx_net
                         //待处理，由开机指令引起的关机参数，可以依据开机带入的参数来转化为关机参数，暂时不用
                         map<int,string>  tmParam;
                         if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
-                                                                    d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam))
+                                                                    d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam,1))
                             return ;
-
-                      //  devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
-                      //  commandmsg_->set_sdevid(d_relate_tsmt_ptr_->sDevNum);
-                     //   GetInst(SvcMgr).excute_command(d_relate_tsmt_ptr_->sDevNum,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_user_,commandmsg_);
                     }
 
                     //计算目标天线位置
@@ -866,7 +912,7 @@ namespace hx_net
                         //待处理，由开机指令引起的倒天线参数，可以依据开机带入的参数来转化为倒天线参数，暂时不用
                         map<int,string>  tmParam;
                         int nResult = GetInst(SvcMgr).start_exec_task(d_relate_antenna_ptr_->sDevNum,
-                                                                      d_cur_user_,nAntennaCmd,tmParam);
+                                                                      d_cur_user_,nAntennaCmd,tmParam,1);
                         if(EC_OK != nResult){
 
                             return ;
@@ -880,8 +926,9 @@ namespace hx_net
 
                     bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
                     if(can_excute == false){
-                        eErrCode = EC_OK;
-                        nExcutResult = 8;//天线防抖
+                        //eErrCode = EC_OK;
+                        eErrCode = EC_NO_ALLOW_SWITCH_ATTENA_AUTO;//天线防抖不允许倒天线
+                        nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
                         return ;
                     }
                 }
@@ -891,7 +938,7 @@ namespace hx_net
                     //待处理，由开机指令引起的关机参数，可以依据开机带入的参数来转化为关机参数，暂时不用
                     map<int,string>  tmParam;
                     if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
-                                                                d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam))
+                                                                d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam,1))
                         return ;
 
                     devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
@@ -907,7 +954,7 @@ namespace hx_net
                     //待处理，由开机指令引起的倒天线参数，可以依据开机带入的参数来转化为倒天线参数，暂时不用
                     map<int,string>  tmParam;
                     int nResult = GetInst(SvcMgr).start_exec_task(d_relate_antenna_ptr_->sDevNum,
-                                                                  d_cur_user_,nAntennaCmd,tmParam);
+                                                                  d_cur_user_,nAntennaCmd,tmParam,1);
                     if(EC_OK != nResult){
 
                         return ;
@@ -933,7 +980,8 @@ namespace hx_net
         if(!d_ptransmmit)
             return;
         if(is_detecting()){
-            nExcutResult = 5;
+            eErrCode = EC_DETECT_RUN_STATE;
+            nExcutResult = CMD_RT_GOING_DETECT_RUN_STATE;
             return;
         }
 
@@ -969,10 +1017,7 @@ namespace hx_net
         if(!d_ptransmmit)
             return;
         //如果发射机正在监测运行状态，不执行开机操作
-     /*   if(is_detecting()){
-            nExcutResult = 5;
-            return;
-        }*/
+
         if(d_relate_tsmt_ptr_!=NULL && d_relate_antenna_ptr_!=NULL){
             //////-----2018-2-3 15:53-------------/////
             bool bIgnoreAntenna = false;
@@ -997,8 +1042,9 @@ namespace hx_net
                         {
 
                         }else{
-                            eErrCode = EC_OK;
-                            nExcutResult = 7;//天线不在位
+                            //eErrCode = EC_OK;
+                            eErrCode = EC_ATTENA_POS_ERROR;//
+                            nExcutResult = CMD_RT_FAILURE_ATTENA_POS_ERROR;//天线不在位
                             return;
                         }
                     }
@@ -1009,8 +1055,9 @@ namespace hx_net
 
                         bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
                         if(can_excute == false){
-                            eErrCode = EC_OK;
-                            nExcutResult = 8;//天线防抖
+                            //eErrCode = EC_OK;
+                            eErrCode = EC_NO_ALLOW_SWITCH_ATTENA;
+                            nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
                             return ;
                         }
                     }
@@ -1020,7 +1067,7 @@ namespace hx_net
                         //待处理，由开机指令引起的关机参数，可以依据开机带入的参数来转化为关机参数，暂时不用
                         map<int,string>  tmParam;
                         if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
-                                                                    d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam))
+                                                                    d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam,1))
                             return ;
                     }
 
@@ -1032,7 +1079,7 @@ namespace hx_net
                         //待处理，由开机指令引起的倒天线参数，可以依据开机带入的参数来转化为倒天线参数，暂时不用
                         map<int,string>  tmParam;
                         int nResult = GetInst(SvcMgr).start_exec_task(d_relate_antenna_ptr_->sDevNum,
-                                                                      d_cur_user_,nAntennaCmd,tmParam);
+                                                                      d_cur_user_,nAntennaCmd,tmParam,1);
                         if(EC_OK != nResult){
 
                             return ;
@@ -1046,8 +1093,9 @@ namespace hx_net
 
                     bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
                     if(can_excute == false){
-                        eErrCode = EC_OK;
-                        nExcutResult = 8;//天线防抖
+                        //eErrCode = EC_OK;
+                        eErrCode = EC_NO_ALLOW_SWITCH_ATTENA_AUTO;
+                        nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
                         return ;
                     }
                 }
@@ -1067,7 +1115,7 @@ namespace hx_net
                     //待处理，由开机指令引起的倒天线参数，可以依据开机带入的参数来转化为倒天线参数，暂时不用
                     map<int,string>  tmParam;
                     int nResult = GetInst(SvcMgr).start_exec_task(d_relate_antenna_ptr_->sDevNum,
-                                                                  d_cur_user_,nAntennaCmd,tmParam);
+                                                                  d_cur_user_,nAntennaCmd,tmParam,1);
                     if(EC_OK != nResult){
 
                         return ;

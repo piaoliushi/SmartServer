@@ -25,7 +25,7 @@ public:
     void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
     void GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit);
     int  cur_dev_state();
-    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
+    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode=0,
                        bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
     //执行联动命令
     void exec_action_task_now(map<int,vector<ActionParam> > &param,int actionType,
@@ -49,6 +49,15 @@ public:
 
     void exec_general_task(int icmdType, string sUser, devCommdMsgPtr lpParam, e_ErrorCode &eErrCode);
 
+    void get_relate_dev_info(string &sStationId,string &sDevId,string &sAttenaId);
+
+    //是否是天线代理
+    bool is_anttena_agent();
+    //是否是软件一键开机
+    bool is_soft_onekey_open();
+    //是否是996一键开机
+    bool is_996_onekey_open();
+
 protected:
     //任务超时回调
     void  schedules_task_time_out(const boost::system::error_code& error);
@@ -70,6 +79,8 @@ protected:
     int getsteptimeout();
     bool is_step_task_exeok();
     bool is_step_all_exeok();
+
+
 
 private:
     int                             m_Subprotocol;//设备子协议号

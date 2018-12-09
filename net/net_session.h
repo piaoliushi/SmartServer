@@ -30,9 +30,11 @@ namespace hx_net
 		udp::endpoint get_udp_addr();
 
 		virtual con_state       get_con_state(){return con_disconnected;}
+        virtual con_state       get_data_return_state(string sDevId){return con_disconnected;}
         virtual dev_run_state   get_run_state(string sDevId){return dev_unknown;}
         virtual void            set_run_state(string sDevId,int nState){}
         virtual bool            dev_can_excute_cmd(string sDevId){return false;}
+        virtual int             get_opr_state(string sDevid){return -1;}
 		virtual con_state       get_child_con_state(string sId){return con_disconnected;}
         virtual void            set_child_run_state(string sId,dev_run_state s){}
 		virtual dev_run_state   get_child_run_state(string sId){return dev_unknown;}
@@ -42,6 +44,7 @@ namespace hx_net
         virtual void  clear_dev_state(string sDevId){}
 
         virtual void  set_con_state(con_state s){}
+        virtual void  set_data_return_state(string sDevId,bool s){}
         virtual bool  is_connected(){return false;}//string sDevId=""
         virtual void  reset_netstate(){}
 		virtual bool  is_disconnected(string sDevId=""){return false;}
@@ -122,7 +125,8 @@ namespace hx_net
         //发送命令到设备
         virtual void send_cmd_to_dev(string sDevId,int cmdType,int childId,e_ErrorCode &eErrCode){}
         virtual void send_cmd_to_dev(CommandUnit cmdUnit,e_ErrorCode &eErrCode){}
-        virtual bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,map<int,string> &mapParam){return false;}
+        virtual bool start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,
+                                     int cmdType,map<int,string> &mapParam,int nMode=0){return false;}
 
         virtual void init_session_config(){}
         //更新运行图

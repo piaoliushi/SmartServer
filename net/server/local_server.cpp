@@ -91,11 +91,10 @@ namespace hx_net
 	{
         loginAck.set_eresult(EC_FAILED);
 
-        //cout<<"1---start----login---------"<<endl;
         boost::recursive_mutex::scoped_lock lock(mutex_);
         string lgUser;
         string lgClientId = "00000000";//客户端默认id
-        //cout<<"2---start----login-----------"<<endl;
+
         if(sUser.find('_') != -1){
             vector<string> vUserInfo;
             boost::split(vUserInfo,sUser,boost::is_any_of("_"));
@@ -119,7 +118,6 @@ namespace hx_net
 			}
 		}
 
-        //cout<<"3---start----login-----------"<<endl;
 		iter = session_pool_.find(ch_ptr);
 		if(iter!=session_pool_.end())
 		{
@@ -137,9 +135,7 @@ namespace hx_net
 				else
 				{
                     //获取该台站所有用户信息
-                     //cout<<"4---start----login-----------"<<endl;
                     GetInst(DataBaseOperation).GetAllUserInfoByStation(sstationid,loginAck);
-                         //cout<<"5---start----login-----------"<<endl;
 					loginAck.set_eresult(EC_OK);
 					loginAck.set_eusrlevel(tmpUser.nControlLevel);
 					loginAck.set_usrnumber(tmpUser.sNumber);
@@ -159,12 +155,12 @@ namespace hx_net
                     GetInst(SvcMgr).get_notify()->OnClientLogin(remote_add.address().to_string(),remote_add.port(),
                                                                 tmpUser.sName,tmpUser.sNumber);
 
-                     //cout<<"6---start----login-----------"<<endl;
+
                     //查找该用户授权设备，并插入到设备-〉用户映射表
                     vector<string> debnumber;
                     if(GetInst(DataBaseOperation).GetAllAuthorizeDevByUser(tmpUser.sNumber,debnumber,lgClientId))
                     {
-                        //cout<<"7---start----login-----------"<<endl;
+
                         vector<string>::iterator itersNum = debnumber.begin();
                         //vector<string> usrTodev;//用户设备列表
                         for(;itersNum!=debnumber.end();++itersNum)
@@ -173,10 +169,12 @@ namespace hx_net
 
                             //判断设备是否属于本地台站或者是上级台站直连下级台站设备
                             DevBaseInfo devBaseInfo;
-                            GetInst(SvcMgr).dev_base_info(sstationid,devBaseInfo,*itersNum);
+                            //检查授权到客户端与用户的设备是否具有服务授权
+                            if(GetInst(SvcMgr).dev_base_info(sstationid,devBaseInfo,*itersNum) == false)
+                                continue;
 
                             map<int,map<int,CurItemAlarmInfo> > curAlarm;
-                            con_state  netState = GetInst(SvcMgr).get_dev_net_state(sstationid,*itersNum);
+                            con_state  netState = GetInst(SvcMgr).get_data_return_state(sstationid,*itersNum);//get_dev_net_state
                             dev_run_state   runState = GetInst(SvcMgr).get_dev_run_state(sstationid,*itersNum);
                             if(runState >= dev_running && runState < dev_unknown)
                                 netState = con_connected;
@@ -218,14 +216,13 @@ namespace hx_net
                                         tm *local_time = localtime(&iter_a->second.startTime);
                                         strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", local_time);
                                         pCellAlarm->set_sstarttime(str_time);
+                                        pCellAlarm->set_nalarmlevel(iter_a->second.alarmLevel);
                                         pCellAlarm->set_ccellstatus(e_AlarmStatus(iter_a->first));
                                     }
                                 }
                             }
                             devToUser_[*itersNum].push_back(ch_ptr);
                         }
-
-                        //cout<<"8---start----login-----------"<<endl;
 
                     }
                 }

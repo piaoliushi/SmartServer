@@ -108,6 +108,8 @@ void device_session::init_session_config()
         parse_ass_dev_ptr  ass_dev_ptr(new Parse_Ass_Device(iter->second));
         map_dev_ass_parse_ptr_[iter->first] = ass_dev_ptr;
         map_addcode_devid_[iter->second.iAddressCode]=iter->first;
+
+        has_data_return_[iter->first] = false;
     }
     cur_dev_id_ = dev_agent_and_com.begin()->first;
     netAlarm.nAlarmId = -1;//默认值
@@ -177,6 +179,32 @@ void device_session::set_run_state(string sDevId,int nState)
         dev_agent_and_com[sDevId].second->set_run_state(nState);
 }
 
+//获得运行状态
+con_state device_session::get_data_return_state(string sDevId)
+{
+
+    boost::recursive_mutex::scoped_lock llock(data_return_state_mutex_);
+    return (has_data_return_[sDevId]==true)?con_connected:con_disconnected;
+
+}
+
+void device_session::set_data_return_state(string sDevId,bool nState)
+{
+     boost::recursive_mutex::scoped_lock llock(data_return_state_mutex_);
+
+     map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.find(sDevId);
+     if(iter!= modleInfos_.mapDevInfo.end()){
+         if(has_data_return_[sDevId]!=nState){
+
+             has_data_return_[sDevId]=nState;
+             con_state cur_state = (nState==true)?con_connected:con_disconnected;
+             send_net_state_message((*iter).second.sStationNum,(*iter).first
+                                    ,(*iter).second.sDevName,(*iter).second.iDevType
+                                    ,cur_state);
+         }
+     }
+}
+
 bool device_session::dev_can_excute_cmd(string sDevId)
 {
     if(dev_agent_and_com.find(sDevId)!=dev_agent_and_com.end())
@@ -198,10 +226,16 @@ void device_session::set_con_state(con_state curState)
         map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.begin();
         for(;iter!=modleInfos_.mapDevInfo.end();++iter)
         {
-            //广播设备状态到在线客户端GetInst(LocalConfig).local_station_id()
-            send_net_state_message((*iter).second.sStationNum,(*iter).first
-                                   ,(*iter).second.sDevName,(*iter).second.iDevType
-                                   ,othdev_con_state_);
+
+            //广播设备状态到在线客户端
+            if(othdev_con_state_ == con_disconnected){
+
+                //send_net_state_message((*iter).second.sStationNum,(*iter).first
+                //                           ,(*iter).second.sDevName,(*iter).second.iDevType
+                //                           ,othdev_con_state_);
+                set_data_return_state(iter->first,false);
+            }
+
             if(othdev_con_state_== con_connected)
                 GetInst(SvcMgr).get_notify()->OnDevStatus((*iter).first,0);
             else {
@@ -211,7 +245,6 @@ void device_session::set_con_state(con_state curState)
 
             //send_device_data_state_notify((*iter).first);
             //通知http服务器(设备网络异常)
-
             if(iter->second.iDevType == DEVICE_TRANSMITTER){
                 int nMod = (curState==con_connected)?1:0;
                 if(netAlarm.nAlarmId==-1 && nMod==0){
@@ -630,15 +663,15 @@ void device_session::start_read(int msgLen)
 
             udp::endpoint sender_endpoint;
             usocket().async_receive_from(boost::asio::buffer(receive_msg_ptr_->w_ptr(),receive_msg_ptr_->space()),sender_endpoint,//msgLen
-                             //#ifdef USE_STRAND
-                                //         strand_.wrap(
-                                 //#endif
+                             #ifdef USE_STRAND
+                                         strand_.wrap(
+                                 #endif
                                              boost::bind(&device_session::handle_udp_read,this,
                                                          boost::asio::placeholders::error,
                                                          boost::asio::placeholders::bytes_transferred)
-                                 //#ifdef USE_STRAND
-                                 //            )
-                             //#endif
+                                 #ifdef USE_STRAND
+                                             )
+                             #endif
                                          );
         }
     }else if(modleInfos_.iCommunicationMode==CON_MOD_COM){
@@ -851,6 +884,7 @@ void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId,e_Err
     //boost::asio::deadline_timer delay_send_timer(io_service_, boost::posix_time::milliseconds(2));
     //    delay_send_timer.wait();
 
+    eErrCode = EC_CMD_CODE_NOT_FOUND;
     if(modleInfos_.netMode.inet_type == NET_MOD_HTTP){
 
         map<int,vector<CommandUnit> >::iterator iter = dev_agent_and_com[sDevId].first->mapCommand.find(cmdType);
@@ -1344,14 +1378,157 @@ void device_session::set_opr_state(string sdevId,dev_opr_state curState)
     dev_opr_state_[sdevId] = curState;
 }
 
-dev_opr_state  device_session::get_opr_state(string sdevId){
+
+//获取当前设备操作状态及当前正在执行的命令
+int  device_session::get_opr_state(string sdevId){
     boost::recursive_mutex::scoped_lock lock(opr_state_mutex_);
     return dev_opr_state_[sdevId];
 }
 
-//开始执行任务
-bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,int cmdType,map<int,string> &mapParam)
+
+
+
+//关联机器是否有命令正在执行
+bool device_session::relate_device_exec_now(string sDevId,e_ErrorCode &opResult,int cmdType)
 {
+    string sStationId,sRelateId,sAttennaId;
+    dev_agent_and_com[sDevId].second->get_relate_dev_info(sStationId,sRelateId,sAttennaId);
+    if(!sRelateId.empty() &&  !sAttennaId.empty()){
+        //如果有关联机器在开机或者倒备机，不允许再另一台机器开机或者倒备机
+        if(cmdType !=MSG_TRANSMITTER_TURNOFF_OPR ){
+            int relatDevOpr = GetInst(SvcMgr).get_dev_opr_state(sStationId,sRelateId);
+            switch(relatDevOpr){
+            case dev_opr_turn_on:
+                opResult = EC_RELATE_DEV_TURNON_CMD_CANCEL;
+                return true;
+            case dev_opr_996_onekey_turn_on:
+                opResult = EC_RELATE_DEV_996_ONEKEY_TURNON_CMD_CANCEL;
+                return true;
+            case dev_opr_soft_onekey_turn_on:
+                opResult = EC_RELATE_DEV_SOFT_ONEKEY_TURNON_CMD_CANCEL;
+                return true;
+            case dev_opr_switch_attena:
+                opResult = EC_RELATE_DEV_SWITCH_ANTTENA_CMD_CANCEL;
+                return true;
+            case dev_opr_turn_off:
+                opResult = EC_RELATE_DEV_TURNOFF_CMD_CANCEL;
+                return true;
+            case dev_opr_996_onekey_turn_off:
+                opResult = EC_RELATE_DEV_996_ONEKEY_TURNOFF_CMD_CANCEL;
+                return true;
+            case dev_opr_auto_switch_backup:
+                opResult = EC_RELATE_DEV_AUTO_SWITCH_BACKUP_CMD_CANCEL;
+                return true;
+            }
+
+            int backupDevOpr = GetInst(SvcMgr).get_dev_opr_state(sStationId,sAttennaId);
+            switch(backupDevOpr){
+            case dev_opr_turn_on:
+                opResult = EC_RELATE_DEV_TURNON_CMD_CANCEL;
+                return true;
+            case dev_opr_996_onekey_turn_on:
+                opResult = EC_RELATE_DEV_996_ONEKEY_TURNON_CMD_CANCEL;
+                return true;
+            case dev_opr_soft_onekey_turn_on:
+                opResult = EC_RELATE_DEV_SOFT_ONEKEY_TURNON_CMD_CANCEL;
+                return true;
+            case dev_opr_switch_attena:
+                opResult = EC_RELATE_DEV_SWITCH_ANTTENA_CMD_CANCEL;
+                return true;
+            case dev_opr_turn_off:
+                opResult = EC_RELATE_DEV_TURNOFF_CMD_CANCEL;
+                return true;
+            case dev_opr_996_onekey_turn_off:
+                opResult = EC_RELATE_DEV_996_ONEKEY_TURNOFF_CMD_CANCEL;
+                return true;
+            case dev_opr_auto_switch_backup:
+                opResult = EC_RELATE_DEV_AUTO_SWITCH_BACKUP_CMD_CANCEL;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+//设置当前正在执行的任务类型
+void device_session::set_current_opr_type(string sDevId,string sUser,int cmdType)
+{
+    switch(cmdType){
+        case MSG_TRANSMITTER_TURNON_OPR:
+        case MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR:
+        case MSG_TRANSMITTER_LOW_POWER_TURNON_OPR:{
+             if(sUser == "auto")
+                 set_opr_state(sDevId,dev_opr_auto_switch_backup);
+             else if(dev_agent_and_com[sDevId].second->is_996_onekey_open())
+                 set_opr_state(sDevId,dev_opr_996_onekey_turn_on);
+             else if(dev_agent_and_com[sDevId].second->is_soft_onekey_open())
+                 set_opr_state(sDevId,dev_opr_soft_onekey_turn_on);
+             else
+                  set_opr_state(sDevId,dev_opr_turn_on);
+
+        }
+            break;
+        case MSG_TRANSMITTER_TURNOFF_OPR:{
+            if(dev_agent_and_com[sDevId].second->is_996_onekey_open())
+                set_opr_state(sDevId,dev_opr_996_onekey_turn_off);
+            else
+                set_opr_state(sDevId,dev_opr_turn_off);
+        }
+            break;
+        case MSG_ANTENNA_HTOB_OPR:
+        case MSG_ANTENNA_BTOH_OPR:{
+            set_opr_state(sDevId,dev_opr_switch_attena);
+        }
+            break;
+        default:{
+             set_opr_state(sDevId,dev_opr_excuting);
+        }
+            break;
+    }
+}
+
+void device_session::set_current_errorcode_by_oprtype(int curOprState,e_ErrorCode &opResult)
+{
+
+    switch (curOprState) {
+    case dev_opr_turn_on:
+        opResult = EC_UNFINISHED_DEV_TURNON_CMD_CANCEL;
+        break;
+    case dev_opr_soft_onekey_turn_on:
+        opResult = EC_UNFINISHED_DEV_SOFT_ONEKEY_TURNON_CMD_CANCEL;
+        break;
+    case dev_opr_996_onekey_turn_on:
+        opResult = EC_UNFINISHED_DEV_996_ONEKEY_TURNON_CMD_CANCEL;
+        break;
+    case dev_opr_auto_switch_backup:
+        opResult = EC_UNFINISHED_AUTO_SWITCH_BACKUP_CMD_CANCEL;
+        break;
+    case dev_opr_turn_off:
+        opResult = EC_UNFINISHED_DEV_TURNOFF_CMD_CANCEL;
+        break;
+    case dev_opr_switch_attena:
+        opResult =EC_UNFINISHED_DEV_SWITCH_ANTTENA_CMD_CANCEL;
+        break;
+    case dev_opr_996_onekey_turn_off:
+        opResult = EC_UNFINISHED_DEV_996_ONEKEY_TURNOFF_CMD_CANCEL;
+        break;
+    default:
+        opResult = EC_UNFINISHED_CMD_EXIST;
+        break;
+    }
+
+}
+
+//开始执行任务
+bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opResult,
+                                     int cmdType,map<int,string> &mapParam,int nMode)
+{
+
+    //关联机器是否有命令正在执行
+    if(relate_device_exec_now(sDevId,opResult,cmdType)){
+        return false;
+    }
 
     static  char str_time[64];
     time_t curTime = time(0);
@@ -1359,26 +1536,34 @@ bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opR
     strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
 
     if(!is_connected() && short_connect_==false){
-        opResult = EC_NET_ERROR;
+        opResult = EC_DEV_DISCONNECTED;
         return false;
     }
 
+    int curOprState = get_opr_state(sDevId);
+    if(curOprState==dev_no_opr){
 
-    if(get_opr_state(sDevId)==dev_no_opr)
-        set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
+        set_current_opr_type(sDevId,sUser,cmdType);
+
+        //set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
+    }
     else{
-        opResult = EC_OPR_ON_GOING;//正在执行控制命令
+        opResult = EC_UNFINISHED_CMD_EXIST;//存在未完成的控制命令
+        set_current_errorcode_by_oprtype(curOprState,opResult);
+
         return false;//已经有任务正在执行
     }
 
 
     //现在执行任务
     if(modleInfos_.iCommunicationMode==CON_MOD_NET && modleInfos_.netMode.inet_type == NET_MOD_SNMP){
-        dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,mapParam,
+
+        dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,mapParam,nMode,
                                                         true,snmp_ptr_,target_ptr_);
     }
-    else
-        dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,mapParam);
+    else{
+        dev_agent_and_com[sDevId].second->exec_task_now(cmdType,sUser,opResult,mapParam,nMode);
+    }
 
 
     return true;
@@ -1706,6 +1891,7 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
                 if(nMsg_Decode_Result == RE_SUCCESS)
                 {
                     query_timeout_count_ = 0;
+                    set_data_return_state(cur_dev_id_,true);
                 }
             }
            else
@@ -1716,6 +1902,8 @@ void device_session::handle_udp_read(const boost::system::error_code& error,size
                 if(nMsg_Decode_Result == RE_SUCCESS)
                 {
                     query_timeout_count_ = 0;
+                    set_data_return_state(cur_dev_id_,true);
+
                     string sdevid = get_devid_by_addcode(iaddcode);
                     handler_data(sdevid,curData_ptr);
                 }
@@ -1814,6 +2002,8 @@ void device_session::handle_read_body(const boost::system::error_code& error, si
         if(nResult==RE_SUCCESS || nResult==RE_CMDACK)//查询数据解析正确,-2为控制指令返回值
         {
             query_timeout_count_ = 0;
+            set_data_return_state(cur_dev_id_,true);
+
             /*if(boost::detail::thread::singleton<boost::threadpool::pool>::instance()
                     .schedule(boost::bind(&device_session::handler_data,this,cur_dev_id_,curData_ptr)))
             {
@@ -1854,6 +2044,8 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
         if(nResult == RE_SUCCESS || nResult == RE_CMDACK)
         {
             query_timeout_count_ = 0;
+            set_data_return_state(cur_dev_id_,true);
+
             if(cur_msg_q_id_<dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY].size()-1)
             {
                 ++cur_msg_q_id_;
@@ -2252,7 +2444,8 @@ void device_session::send_action_conmmand(map<int,vector<ActionParam> > &param,s
         if(get_opr_state(sDevId)==dev_no_opr)
             set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
         else{
-            opResult = EC_OPR_ON_GOING;//正在执行控制命令
+            //opResult = EC_OPR_ON_GOING;//正在执行控制命令
+            opResult = EC_UNFINISHED_CMD_EXIST;//存在未完成的控制命令
             return;//已经有任务正在执行
         }
     }
@@ -2362,6 +2555,9 @@ void device_session::handle_read_some(const boost::system::error_code &error, si
         if(nResult == RE_SUCCESS || nResult == RE_CMDACK)
         {
             query_timeout_count_ = 0;
+
+            set_data_return_state(cur_dev_id_,true);
+
             if(cur_msg_q_id_<dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY].size()-1)
             {
                 ++cur_msg_q_id_;

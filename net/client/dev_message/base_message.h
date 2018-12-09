@@ -37,7 +37,7 @@ namespace hx_net
         virtual int cur_dev_state(){return -1;}
 
         //执行命令
-        virtual void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
+        virtual void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode=0,
                                    bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL){}
         //执行通用命令
         virtual void exec_general_task(int icmdType,string sUser,devCommdMsgPtr lpParam,
@@ -61,6 +61,14 @@ namespace hx_net
         //添加新告警
         virtual bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime){return false;}
         virtual bool  add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData){return false;}
+
+        virtual void get_relate_dev_info(string &sStationId,string &sDevId,string &sAttenaId){}
+        //是否是天线代理
+        virtual bool is_anttena_agent(){return false;}
+        //是否是软件一键开机
+        virtual bool is_soft_onekey_open(){return false;}
+        //是否是996一键开机
+        virtual bool is_996_onekey_open(){return false;}
 	public:
         static void Char2Hex(unsigned char ch, char* szHex);
 		static void CharStr2HexStr(unsigned char const* pucCharStr, string &pszHexStr, int iSize);

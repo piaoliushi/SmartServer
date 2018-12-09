@@ -176,12 +176,12 @@ namespace hx_net
         return m_msgImpl->cur_dev_state();
     }
 
-    void MsgHandleAgent::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
+    void MsgHandleAgent::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode,
                                        bool bSnmp,Snmp *snmp,CTarget *target)
     {
         if(m_msgImpl==NULL)
             return ;
-        return m_msgImpl->exec_task_now(icmdType,sUser,eErrCode,mapParam,bSnmp,snmp,target);
+        return m_msgImpl->exec_task_now(icmdType,sUser,eErrCode,mapParam,nMode,bSnmp,snmp,target);
     }
 
     //执行通用指令
@@ -254,10 +254,41 @@ namespace hx_net
              return false;
          return m_msgImpl->add_new_alarm(sPrgName,alarmId,nState, startTime);
      }
+
      bool  MsgHandleAgent::add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData)
      {
          if(m_msgImpl==NULL)
              return false;
          return m_msgImpl->add_new_data(sIp,nChannel,mapData);
+     }
+
+     //获取关联机信息
+     void  MsgHandleAgent::get_relate_dev_info(string &sStationId,string &sDevId,string &sAttenaId)
+     {
+         if(m_msgImpl==NULL)
+             return;
+         return m_msgImpl->get_relate_dev_info(sStationId,sDevId,sAttenaId);
+     }
+
+     //是否是天线代理
+     bool MsgHandleAgent::is_anttena_agent()
+     {
+         if(m_msgImpl==NULL)
+             return false;
+         return m_msgImpl->is_anttena_agent();
+     }
+     //是否是软件一键开机
+     bool MsgHandleAgent::is_soft_onekey_open()
+     {
+         if(m_msgImpl==NULL)
+             return false;
+         return m_msgImpl->is_soft_onekey_open();
+     }
+     //是否是996一键开机
+     bool MsgHandleAgent::is_996_onekey_open()
+     {
+         if(m_msgImpl==NULL)
+             return false;
+         return m_msgImpl->is_996_onekey_open();
      }
 }

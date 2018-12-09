@@ -1244,7 +1244,7 @@ namespace hx_net
         }
     }
 
-    void Link_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode,map<int,string> &mapParam,
+    void Link_message::exec_task_now(int icmdType, string sUser, e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode,
                                      bool bSnmp, Snmp *snmp, CTarget *target)
     {
         eErrCode = EC_UNKNOWN;

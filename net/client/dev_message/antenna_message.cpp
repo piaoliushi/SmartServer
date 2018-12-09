@@ -18,6 +18,9 @@ Antenna_message::Antenna_message(session_ptr pSession,boost::asio::io_service& i
     ,d_relate_host_tsmt_ptr_(NULL)
     ,d_relate_backup_tsmt_ptr_(NULL)
     ,can_switch_(true)
+    ,d_antenna_Agent_(false)
+    ,d_onekeyopen_996(false)
+    ,d_onekeyopen_soft(false)
 {
 
     m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
@@ -37,12 +40,36 @@ Antenna_message::Antenna_message(session_ptr pSession,boost::asio::io_service& i
                 d_relate_backup_tsmt_ptr_ = curDev;
         }
     }
+
+
+    map<string,DevProperty>::iterator iter = d_devInfo.map_DevProperty.find("Agent");
+    if(iter!=d_devInfo.map_DevProperty.end())
+         d_antenna_Agent_= true;
+    iter = d_devInfo.map_DevProperty.find("WPBootFor996");
+    if(iter!=d_devInfo.map_DevProperty.end())
+         d_onekeyopen_996= true;
+    iter = d_devInfo.map_DevProperty.find("WPBootForServer");
+    if(iter!=d_devInfo.map_DevProperty.end())
+         d_onekeyopen_soft= true;
+
 }
 
 Antenna_message::~Antenna_message()
 {
      task_timeout_timer_.cancel();
 }
+
+//该接口，sAttenaId此时填充备机id
+void Antenna_message::get_relate_dev_info(string &sStationId,string &sDevId,string &sAttenaId)
+{
+    if(d_relate_host_tsmt_ptr_!=NULL){
+        sStationId = d_relate_host_tsmt_ptr_->sStationNum;
+        sDevId = d_relate_host_tsmt_ptr_->sDevNum;
+    }
+    if(d_relate_backup_tsmt_ptr_!=NULL)
+        sAttenaId = d_relate_backup_tsmt_ptr_->sDevNum;
+}
+
 
 int Antenna_message::check_msg_header(unsigned char *data, int nDataLen, CmdType cmdType, int number)
 {
@@ -314,7 +341,7 @@ void Antenna_message::switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult
     }
 
     if(!can_switch_antenna()){
-        eErrCode = EC_UNKNOWN;
+        eErrCode = EC_NO_ALLOW_SWITCH_ATTENA;//EC_UNKNOWN;
         return;
     }
 
@@ -324,10 +351,15 @@ void Antenna_message::switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult
     dev_run_state nBackupRunS = GetInst(SvcMgr).get_dev_run_state(d_relate_backup_tsmt_ptr_->sStationNum,
                                d_relate_backup_tsmt_ptr_->sDevNum);
 
-    if((nHostRunS == dev_running && get_run_state()==antenna_host)
-            || (nBackupRunS == dev_running && get_run_state()==antenna_backup))
+    if(nHostRunS == dev_running && get_run_state()==antenna_host)
     {
-        eErrCode = EC_FAILED;
+        eErrCode = EC_CUR_HOST_RUN_SWITCH_CMD_CANCEL;//EC_FAILED;
+        nExcutResult = 9;
+        return;
+    }
+    else if(nBackupRunS == dev_running && get_run_state()==antenna_backup)
+    {
+        eErrCode = EC_CUR_BACKUP_RUN_SWITCH_CMD_CANCEL;//EC_FAILED;
         nExcutResult = 9;
         return;
     }
@@ -357,7 +389,7 @@ void Antenna_message::excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult)
 }
 
 
-void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
+void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode,
                            bool bSnmp,Snmp *snmp,CTarget *target)
 {
     eErrCode = EC_UNKNOWN;
@@ -366,7 +398,16 @@ void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrC
     d_cur_task_ = icmdType;
     d_cur_user_ = sUser;
     if(cmd_excute_is_ok()){
-        eErrCode = EC_OK;
+        if(nMode)//mode等于1代表是内部调用，必须返回EC_OK
+            eErrCode = EC_OK;
+        else{
+            if(icmdType == MSG_ANTENNA_HTOB_OPR)
+                eErrCode = EC_ANTEENA_BACKUP_CMD_CANCEL;
+            else if(icmdType == MSG_ANTENNA_BTOH_OPR)
+                eErrCode = EC_ANTEENA_HOST_CMD_CANCEL;
+            else
+                eErrCode = EC_OK;
+        }
         m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
         return;
     }

@@ -36,7 +36,7 @@ namespace hx_net
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
         void GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit);
         void GetAllCmd(CommandAttribute &cmdAll);
-        int   getChannelCount();
+        int  getChannelCount();
 		bool isBelongChannel(int nChnnel,int monitorItemId);
 		bool isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr);
 		bool ItemValueIsAlarm(DevMonitorDataPtr curDataPtr,int monitorItemId,dev_alarm_state &curState);
@@ -44,8 +44,8 @@ namespace hx_net
 		bool isRegister();
 		void getRegisterCommand(CommandUnit &cmdUnit);
 
-        int   cur_dev_state();
-        void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
+        int  cur_dev_state();
+        void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode=0,
                            bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
 
         //执行通用指令
@@ -71,6 +71,17 @@ namespace hx_net
         //添加新告警
         bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime);
         bool  add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData);
+
+        //获取关联机信息
+        void  get_relate_dev_info(string &sStationId,string &sDevId,string &sAttenaId);
+
+        //是否是天线代理
+        bool is_anttena_agent();
+        //是否是软件一键开机
+        bool is_soft_onekey_open();
+        //是否是996一键开机
+        bool is_996_onekey_open();
+
 	private:
 		MsgHandleAgentImpl *m_msgImpl;
 	};

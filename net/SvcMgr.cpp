@@ -118,6 +118,15 @@ namespace hx_net
 			return m_pDevMgrPtr->get_dev_net_state(sStationId,sDevid);
 		return con_disconnected;
 	}
+
+    //获得设备数据返回状态
+    con_state SvcMgr::get_data_return_state(string sStationId,string sDevid)
+    {
+        if(m_pDevMgrPtr)
+            return m_pDevMgrPtr->get_data_return_state(sStationId,sDevid);
+        return con_disconnected;
+    }
+
 	//获得设备运行状态
 	dev_run_state SvcMgr::get_dev_run_state(string sStationId,string sDevid)
 	{
@@ -139,6 +148,14 @@ namespace hx_net
         if(m_pDevMgrPtr)
             return m_pDevMgrPtr->dev_can_excute_cmd(sStationId,sDevid);
         return false;
+    }
+
+    //获取设备当前命令执行状态
+    int SvcMgr::get_dev_opr_state(string sStationId,string sDevid)
+    {
+        if(m_pDevMgrPtr)
+            return m_pDevMgrPtr->get_dev_opr_state(sStationId,sDevid);
+        return -1;
     }
 
 	//获得设备运行状态
@@ -165,20 +182,15 @@ namespace hx_net
 		if(m_pDevMgrPtr)
 		{
             e_ErrorCode eResult = m_pDevMgrPtr->excute_command(sDevId,cmdType,sUser,lpParam);
-            /*if(eResult==EC_DEVICE_NOT_FOUND||eResult==EC_OBJECT_NULL)
-            {
-                if (m_pClientMgrPtr)
-                    return m_pClientMgrPtr->excute_command(cmdType,lpParam);
-            }else*/
-                return eResult;
+            return eResult;
 		}
 		return EC_OBJECT_NULL;
 	}
 
-    e_ErrorCode SvcMgr:: start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam)
+    e_ErrorCode SvcMgr::start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam,int nMode)
     {
         if(m_pDevMgrPtr)
-            return m_pDevMgrPtr->start_exec_task(sDevId,sUser,cmdType,mapParam);
+            return m_pDevMgrPtr->start_exec_task(sDevId,sUser,cmdType,mapParam,nMode);
         return EC_OBJECT_NULL;
     }
 
@@ -212,7 +224,6 @@ namespace hx_net
       if(m_pDevMgrPtr){
 
           m_pDevMgrPtr->SendSMSContent(PhoneNumber,AlarmContent);
-          //emit
       }
       return EC_OBJECT_NULL;
   }

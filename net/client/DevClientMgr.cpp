@@ -65,6 +65,13 @@ namespace hx_net
 			return _devclientptr->get_dev_net_state(sStationId,sDevid);
 		return con_disconnected;
 	}
+    //获得设备数据返回状态
+    con_state DevClientMgr::get_data_return_state(string sStationId,string sDevid)
+    {
+        if(_devclientptr)
+            return _devclientptr->get_data_return_state(sStationId,sDevid);
+        return con_disconnected;
+    }
 	//获得设备运行状态
 	dev_run_state DevClientMgr::get_dev_run_state(string sStationId,string sDevid)
 	{
@@ -94,6 +101,14 @@ namespace hx_net
         return false;
     }
 
+    //获取设备当前命令执行状态
+    int DevClientMgr::get_dev_opr_state(string sStationId,string sDevid)
+    {
+        if(_devclientptr)
+            return _devclientptr->get_dev_opr_state(sStationId,sDevid);
+        return -1;
+    }
+
 	//获得设备基本信息
 	bool DevClientMgr::dev_base_info(string sStationId,DevBaseInfo& devInfo,string sdevId)
 	{
@@ -103,10 +118,10 @@ namespace hx_net
 	}
 
     //开始执行控制任务
-    e_ErrorCode DevClientMgr::start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam)
+    e_ErrorCode DevClientMgr::start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam,int nMode)
     {
         if(_devclientptr)
-            return _devclientptr->start_exec_task(sDevId,sUser,cmdType,mapParam);
+            return _devclientptr->start_exec_task(sDevId,sUser,cmdType,mapParam,nMode);
         return EC_OBJECT_NULL;
     }
     //更新运行图

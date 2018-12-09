@@ -137,6 +137,24 @@ con_state DevClient::get_dev_net_state(string sStationId,string sDevid)
     }
     return con_disconnected;
 }
+
+//获得设备数据返回状态
+con_state DevClient::get_data_return_state(string sStationId,string sDevid)
+{
+
+    boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
+    std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
+    for(;iter!=device_pool_.end();++iter)
+    {
+        if(iter->first.stationId == sStationId)
+        {
+            if(iter->second->is_contain_dev(sDevid))
+                return iter->second->get_data_return_state(sDevid);
+        }
+    }
+    return con_disconnected;
+}
+
 //获得设备运行状态
 dev_run_state DevClient::get_dev_run_state(string sStationId,string sDevid)
 {
@@ -186,6 +204,22 @@ bool DevClient::dev_can_excute_cmd(string sStationId,string sDevid)
     return false;
 }
 
+//获取设备当前命令执行状态
+int DevClient::get_dev_opr_state(string sStationId,string sDevid)
+{
+    boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
+    std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
+    for(;iter!=device_pool_.end();++iter)
+    {
+        if(iter->first.stationId == sStationId)
+        {
+            if(iter->second->is_contain_dev(sDevid))
+                return iter->second->get_opr_state(sDevid);
+         }
+    }
+    return -1;
+}
+
 //获得设备告警状态
 void DevClient::get_dev_alarm_state(string sStationId,string sDevid,map<int,map<int,CurItemAlarmInfo> >& cellAlarm)
 {
@@ -219,14 +253,14 @@ bool DevClient::dev_base_info(string sStationId,DevBaseInfo& devInfo,string sDev
     return bRtValue;
 }
 
-e_ErrorCode DevClient::start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam)
+e_ErrorCode DevClient::start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam,int nMode)
 {
     e_ErrorCode opr_rlt = EC_DEVICE_NOT_FOUND;
     boost::recursive_mutex::scoped_lock lock(device_pool_mutex_);
     std::map<DevKey,session_ptr>::iterator iter = device_pool_.begin();
     for(;iter!=device_pool_.end();++iter){
             if(iter->second->is_contain_dev(sDevId)){
-                iter->second->start_exec_task(sDevId,sUser,opr_rlt,cmdType,mapParam);
+                iter->second->start_exec_task(sDevId,sUser,opr_rlt,cmdType,mapParam,nMode);
                 return opr_rlt;
             }
     }
@@ -275,7 +309,7 @@ e_ErrorCode DevClient::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo
             return opr_rlt;
         }
     }
-   return EC_OBJECT_NULL;
+   return opr_rlt;
 }
 
 int DevClient::get_modle_online_count()
@@ -333,7 +367,7 @@ e_ErrorCode  DevClient::SendActionCommand(map<int,vector<ActionParam> > &param,s
              return opr_rlt;
          }
      }
-    return EC_OBJECT_NULL;
+    return opr_rlt;
 }
 
 }

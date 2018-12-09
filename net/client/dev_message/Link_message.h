@@ -22,7 +22,7 @@ public:
     void GetAllCmd(CommandAttribute &cmdAll);
     void Link_Callback(int reason, Snmp *session,Pdu &pdu, SnmpTarget &target);
 
-    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,
+    void exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode=0,
                                        bool bSnmp=false,Snmp *snmp=NULL,CTarget *target=NULL);
     void exec_general_task(int icmdType,string sUser,devCommdMsgPtr lpParam,
                                            e_ErrorCode &eErrCode);

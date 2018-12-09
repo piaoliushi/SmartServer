@@ -47,6 +47,8 @@ namespace hx_net
 		bool dev_base_info(string sStationId,DevBaseInfo& devInfo,string sdevId="local");
 		//获得设备连接状态
 		con_state get_dev_net_state(string sStationId,string sDevid);
+        //获得设备数据返回状态
+        con_state get_data_return_state(string sStationId,string sDevid);
 		//获得设备运行状态
 		dev_run_state get_dev_run_state(string sStationId,string sDevid);
         //设置设备运行状态
@@ -56,6 +58,9 @@ namespace hx_net
 
         //获得设备是否允许控制
         bool dev_can_excute_cmd(string sStationId,string sDevid);
+
+        //获取设备当前命令执行状态
+        int get_dev_opr_state(string sStationId,string sDevid);
 		
 		//发送设备数据通知
         void send_monitor_data_to_client(string sStationid,string sDevid,devDataNfyMsgPtr &dataPtrToClient);
@@ -72,8 +77,8 @@ namespace hx_net
 		loginAckMsgPtr  get_child_station_dev_status();
 		//执行通用指令
         e_ErrorCode excute_command(string sDevId,int cmdType,string sUser,devCommdMsgPtr lpParam);
-
-        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam);
+        //启动控制任务（mode:0-单步任务，mode:1-配合任务）
+        e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam,int nMode=0);
 
         //更新运行图
        e_ErrorCode update_monitor_time(string sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
