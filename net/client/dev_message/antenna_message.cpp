@@ -223,7 +223,7 @@ void Antenna_message::restart_task_timeout_timer()
 {
 
     task_timeout_timer_.cancel();
-    task_timeout_timer_.expires_from_now(boost::posix_time::seconds(180));
+    task_timeout_timer_.expires_from_now(boost::posix_time::seconds(60));
     task_timeout_timer_.async_wait(boost::bind(&Antenna_message::schedules_task_time_out,
         this,boost::asio::placeholders::error));
 }
