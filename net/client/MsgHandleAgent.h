@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <map>
 //#include "device_message.h"
 #include "../share_ptr_object_define.h"
@@ -66,7 +66,10 @@ namespace hx_net
         bool dev_can_excute_cmd();
 
         //是否需要清除告警
-        bool  is_need_clear_alarm();//{return false;}
+        bool  is_need_clear_alarm();
+
+        //设备运行检测是否准备好（暂时只对发射机有效）
+        bool  device_run_detect_is_ok();
 
         //添加新告警
         bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime);

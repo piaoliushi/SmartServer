@@ -1,4 +1,4 @@
-#include "Tsmt_message.h"
+﻿#include "Tsmt_message.h"
 #include "../../../LocalConfig.h"
 #include "../../../StationConfig.h"
 #include "./net/SvcMgr.h"
@@ -236,6 +236,8 @@ namespace hx_net
         return (get_run_state()==dev_running)?true:false;
     }
 
+
+
     bool Tsmt_message::is_shut_down()
     {
         return (get_run_state()==dev_shutted_down)?true:false;
@@ -244,6 +246,13 @@ namespace hx_net
     bool Tsmt_message::is_detecting()
     {
         return (get_run_state()==dev_detecting)?true:false;
+    }
+
+
+    bool Tsmt_message::device_run_detect_is_ok()
+    {
+        int curState = get_run_state();
+        return (curState==dev_detecting || curState==dev_unknown)?false:true;
     }
 
     void Tsmt_message::reset_run_state()
@@ -921,48 +930,49 @@ namespace hx_net
                 }
 
             }else{
+                if(d_onekeyopen_996==false){
+                    //判断天线是否是代理
+                    if(d_antenna_Agent_ == false){
 
-                if(d_antenna_Agent_ == false){
-
-                    bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
-                    if(can_excute == false){
-                        //eErrCode = EC_OK;
-                        eErrCode = EC_NO_ALLOW_SWITCH_ATTENA_AUTO;//天线防抖不允许倒天线
-                        nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
-                        return ;
+                        bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
+                        if(can_excute == false){
+                            //eErrCode = EC_OK;
+                            eErrCode = EC_NO_ALLOW_SWITCH_ATTENA_AUTO;//天线防抖不允许倒天线
+                            nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
+                            return ;
+                        }
                     }
-                }
 
-                //关联机器在使用则进行关主机动作
-                if(d_relate_tsmt_ptr_->bUsed==true) {
-                    //待处理，由开机指令引起的关机参数，可以依据开机带入的参数来转化为关机参数，暂时不用
-                    map<int,string>  tmParam;
-                    if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
-                                                                d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam,1))
-                        return ;
+                    //关联机器在使用则进行关主机动作
+                    if(d_relate_tsmt_ptr_->bUsed==true) {
+                        //待处理，由开机指令引起的关机参数，可以依据开机带入的参数来转化为关机参数，暂时不用
+                        map<int,string>  tmParam;
+                        if(EC_OK != GetInst(SvcMgr).start_exec_task(d_relate_tsmt_ptr_->sDevNum,
+                                                                    d_cur_user_,MSG_TRANSMITTER_TURNOFF_OPR,tmParam,1))
+                            return ;
 
-                    devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
-                    commandmsg_->set_sdevid(d_relate_tsmt_ptr_->sDevNum);
-                    GetInst(SvcMgr).excute_command(d_relate_tsmt_ptr_->sDevNum,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_user_,commandmsg_);
-                }
+                        devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
+                        commandmsg_->set_sdevid(d_relate_tsmt_ptr_->sDevNum);
+                        GetInst(SvcMgr).excute_command(d_relate_tsmt_ptr_->sDevNum,MSG_TRANSMITTER_TURNOFF_OPR,d_cur_user_,commandmsg_);
+                    }
 
-                //计算目标天线位置
-                e_MsgType nAntennaCmd = (d_Host_== 0)?MSG_ANTENNA_BTOH_OPR:MSG_ANTENNA_HTOB_OPR;
+                    //计算目标天线位置
+                    e_MsgType nAntennaCmd = (d_Host_== 0)?MSG_ANTENNA_BTOH_OPR:MSG_ANTENNA_HTOB_OPR;
 
-                //验证并切换天线
-                if(d_antenna_Agent_ == false){//如果天线是代理，不进行倒天线动作
-                    //待处理，由开机指令引起的倒天线参数，可以依据开机带入的参数来转化为倒天线参数，暂时不用
-                    map<int,string>  tmParam;
-                    int nResult = GetInst(SvcMgr).start_exec_task(d_relate_antenna_ptr_->sDevNum,
-                                                                  d_cur_user_,nAntennaCmd,tmParam,1);
-                    if(EC_OK != nResult){
+                    //验证并切换天线
+                    if(d_antenna_Agent_ == false){//如果天线是代理，不进行倒天线动作
+                        //待处理，由开机指令引起的倒天线参数，可以依据开机带入的参数来转化为倒天线参数，暂时不用
+                        map<int,string>  tmParam;
+                        int nResult = GetInst(SvcMgr).start_exec_task(d_relate_antenna_ptr_->sDevNum,
+                                                                      d_cur_user_,nAntennaCmd,tmParam,1);
+                        if(EC_OK != nResult){
 
-                        return ;
+                            return ;
+                        }
                     }
                 }
 
             }
-
         }
 
         if(!d_bUse_snmp){

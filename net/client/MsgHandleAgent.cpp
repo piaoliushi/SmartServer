@@ -1,4 +1,4 @@
-#include "MsgHandleAgent.h"
+﻿#include "MsgHandleAgent.h"
 #include "MsgHandleAgentImpl.h"
 #include "./snmp_pp/snmp_pp.h"
 #ifdef SNMP_PP_NAMESPACE
@@ -223,6 +223,13 @@ namespace hx_net
         if(m_msgImpl==NULL)
             return;
         return m_msgImpl->set_run_state(curState);
+    }
+
+    bool  MsgHandleAgent::device_run_detect_is_ok()
+    {
+        if(m_msgImpl==NULL)
+            return true;
+        return m_msgImpl->device_run_detect_is_ok();
     }
 
      void MsgHandleAgent::reset_run_state()

@@ -1,4 +1,4 @@
-#include "MsgHandleAgentImpl.h"
+﻿#include "MsgHandleAgentImpl.h"
 #include "./dev_message/Envir_message.h"
 //#include "./dev_message/Hx_message.h"
 #include "./dev_message/Tsmt_message.h"
@@ -274,6 +274,13 @@ namespace hx_net
         if(m_pbaseMsg==NULL)
             return;
         return m_pbaseMsg->set_run_state(curState);
+    }
+
+    bool  MsgHandleAgentImpl::device_run_detect_is_ok()
+    {
+        if(m_pbaseMsg==NULL)
+            return true;
+        return m_pbaseMsg->device_run_detect_is_ok();
     }
 
     void MsgHandleAgentImpl::reset_run_state()

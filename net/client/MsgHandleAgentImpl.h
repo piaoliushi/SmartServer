@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "MsgHandleAgentImpl.h"
 #include "./dev_message/base_message.h"
 
@@ -56,6 +56,8 @@ namespace hx_net
         bool dev_can_excute_cmd();
         //是否需要清除告警
         bool  is_need_clear_alarm();
+
+        bool  device_run_detect_is_ok();
         //添加新告警
         bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime);
         bool  add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData);

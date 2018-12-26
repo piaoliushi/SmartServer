@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "../../../DataType.h"
 #include "base_message.h"
 using namespace std;
@@ -46,6 +46,8 @@ public:
 
     //是否需要清除告警
     bool  is_need_clear_alarm();
+
+    bool device_run_detect_is_ok();
 
     void exec_general_task(int icmdType, string sUser, devCommdMsgPtr lpParam, e_ErrorCode &eErrCode);
 

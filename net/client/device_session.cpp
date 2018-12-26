@@ -1776,8 +1776,9 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
                                                      curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     }
 
-    //检测当前报警状态
-    check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
+    //检测当前报警状态(设备运行状态需准备好)
+    if(dev_agent_and_com[sDevId].second->device_run_detect_is_ok())
+        check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
 
     //如果在监测时间段则保存当前记录
     if(bIsMonitorTime)
@@ -2290,6 +2291,7 @@ void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPt
 {
     //非检测时间段不进行报警检测,同时清除当前告警
     //存在主备关系的设备，清空非运行设备告警-----add by lk for 2018-1-4
+    //bool is_exit = false;
     if(bMonitor!=true){
         clear_dev_alarm(sDevId);
         return;
