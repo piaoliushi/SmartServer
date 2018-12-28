@@ -74,6 +74,7 @@ namespace hx_net
            }
        }
        case BEIGUANG_FM_618B:
+       case BEIGUANG_CDR_1KW:
        {
            if(data[0] == 0xFE && data[1] == 0xFE)
            {
@@ -90,6 +91,7 @@ namespace hx_net
                return kmp(data,nDataLen,cDes,2);
            }
        }
+
        case BEIGUANG_AM_10KW:
        {
            if(nDataLen<3)
@@ -163,6 +165,10 @@ namespace hx_net
        case BEIGUANG_AM_1KW:
        {
            return BGAm1KwData(data,data_ptr,nDataLen,runstate);
+       }
+       case BEIGUANG_CDR_1KW:
+       {
+           return BeiguangCDR1KwData(data,data_ptr,nDataLen,runstate);
        }
        default:
            return RE_NOPROTOCOL;
@@ -323,7 +329,27 @@ namespace hx_net
            tmUnit.commandId[1] = 0x09;
            cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
        }
-
+           break;
+       case BEIGUANG_CDR_1KW:{
+           tmUnit.ackLen = 55;
+           tmUnit.commandId[0] = 0xFE;
+           tmUnit.commandId[1] = 0xFE;
+           tmUnit.commandId[2] = m_addresscode;
+           tmUnit.commandId[3] = 0x01;
+           tmUnit.commandId[4] = 0x00;
+           tmUnit.commandId[5] = 0x00;
+           tmUnit.commandLen = 6;
+           cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+           tmUnit.commandId[3] = 0x02;
+           tmUnit.commandId[4] = 0x01;
+           tmUnit.commandId[5] = 0x01;
+           cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
+           tmUnit.commandId[5] = 0x00;
+           cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
+           tmUnit.commandId[4] = 0x00;
+           cmdAll.mapCommand[MSG_DEV_RESET_OPR].push_back(tmUnit);
+       }
+           break;
        }
    }
 
@@ -664,6 +690,447 @@ namespace hx_net
        {
            dtinfo.fValue = Getbit(data[4],i);
            data_ptr->mValues[7+i] = dtinfo;
+       }
+       return RE_SUCCESS;
+   }
+
+   int BgTransmmiter::BeiguangCDR1KwData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+   {
+       DataInfo dtinfo;
+       dtinfo.bType = false;
+       dtinfo.fValue = data[45]*255+data[46];
+       data_ptr->mValues[0] = dtinfo;
+       dtinfo.fValue = data[47]*255+data[48];
+       data_ptr->mValues[1] = dtinfo;
+       if(data_ptr->mValues[0].fValue>data_ptr->mValues[1].fValue)
+       {
+           dtinfo.fValue = sqrt((data_ptr->mValues[0].fValue+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue-data_ptr->mValues[1].fValue));
+       }
+       else{
+           dtinfo.fValue = 0;
+       }
+       data_ptr->mValues[2] = dtinfo;
+       dtinfo.bType = true;
+       for(int i=0;i<8;++i)
+       {
+           dtinfo.fValue = Getbit(data[44],i);
+           data_ptr->mValues[3+i] = dtinfo;
+       }
+       dtinfo.bType = false;
+       dtinfo.fValue = data[49];
+       data_ptr->mValues[11] = dtinfo;
+       for(int i=0;i<4;++i)
+       {
+           dtinfo.fValue = data[50+i]*0.1;
+           data_ptr->mValues[12+i] = dtinfo;
+       }
+       dtinfo.fValue = data[54];
+       data_ptr->mValues[16] = dtinfo;
+       dtinfo.bType = true;
+       if(data[4]==0x00)
+       {
+           dtinfo.fValue = 1;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+       }
+       data_ptr->mValues[17] = dtinfo;
+       if(data[4]==0x02)
+       {
+           dtinfo.fValue = 1;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+       }
+       data_ptr->mValues[18] = dtinfo;
+       if(data[4]==0x04)
+       {
+           dtinfo.fValue = 1;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+       }
+       data_ptr->mValues[19] = dtinfo;
+       for(int i=0;i<5;++i)
+       {
+           dtinfo.fValue = Getbit(data[5],i);
+           data_ptr->mValues[20+i] = dtinfo;
+       }
+       if(data[6]==0x00)
+       {
+           dtinfo.fValue = 1;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+       }
+       data_ptr->mValues[25] = dtinfo;
+       if(data[6]==0x02)
+       {
+           dtinfo.fValue = 1;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+       }
+       data_ptr->mValues[26] = dtinfo;
+       //激励数据
+       dtinfo.bType = false;
+       dtinfo.fValue = (((data[9]*256+data[10])*256+data[11])*256+data[12])*0.000001;
+       data_ptr->mValues[27] = dtinfo;
+       dtinfo.fValue = (data[13]*256+data[14])*0.1;
+       data_ptr->mValues[28] = dtinfo;
+       dtinfo.bType = true;
+       int wkmode = data[15]&0x03;
+       if(wkmode==0x00)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[29] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[30] = dtinfo;
+           data_ptr->mValues[31] = dtinfo;
+           data_ptr->mValues[32] = dtinfo;
+       }
+       else if(wkmode == 0x01)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[30] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[29] = dtinfo;
+           data_ptr->mValues[31] = dtinfo;
+           data_ptr->mValues[32] = dtinfo;
+       }
+       else if(wkmode == 0x02)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[31] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[29] = dtinfo;
+           data_ptr->mValues[30] = dtinfo;
+           data_ptr->mValues[32] = dtinfo;
+       }
+       else
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[32] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[29] = dtinfo;
+           data_ptr->mValues[30] = dtinfo;
+           data_ptr->mValues[31] = dtinfo;
+       }
+       dtinfo.fValue = Getbit(data[15],3);
+       data_ptr->mValues[33] = dtinfo;
+       for(int i=5;i<8;++i)
+       {
+           dtinfo.fValue = Getbit(data[15],i);
+           data_ptr->mValues[29+i] = dtinfo;
+       }
+       int inpmode = data[16]&0x03;
+       if(inpmode==0x00)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[37] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[38] = dtinfo;
+           data_ptr->mValues[39] = dtinfo;
+       }
+       else if(inpmode == 0x01)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[38] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[37] = dtinfo;
+           data_ptr->mValues[39] = dtinfo;
+       }
+       else if(inpmode == 0x02)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[39] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[37] = dtinfo;
+           data_ptr->mValues[38] = dtinfo;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+           data_ptr->mValues[37] = dtinfo;
+           data_ptr->mValues[38] = dtinfo;
+           data_ptr->mValues[39] = dtinfo;
+       }
+       dtinfo.fValue = Getbit(data[16],2)==0 ? 1:0;
+       data_ptr->mValues[40] = dtinfo;
+       dtinfo.fValue = Getbit(data[16],3)==0 ? 1:0;
+       data_ptr->mValues[41] = dtinfo;
+       int admode = (data[16]>>4)&0x03;
+       if(admode==0x00)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[42] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[43] = dtinfo;
+           data_ptr->mValues[44] = dtinfo;
+       }
+       else if(admode == 0x01)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[43] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[42] = dtinfo;
+           data_ptr->mValues[44] = dtinfo;
+       }
+       else if(admode == 0x02)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[44] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[42] = dtinfo;
+           data_ptr->mValues[43] = dtinfo;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+           data_ptr->mValues[42] = dtinfo;
+           data_ptr->mValues[43] = dtinfo;
+           data_ptr->mValues[44] = dtinfo;
+       }
+       int adinpmode = (data[16]>>6)&0x03;
+       if(adinpmode==0x00)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[45] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[46] = dtinfo;
+           data_ptr->mValues[47] = dtinfo;
+       }
+       else if(adinpmode == 0x01)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[46] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[45] = dtinfo;
+           data_ptr->mValues[47] = dtinfo;
+       }
+       else if(adinpmode == 0x02)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[47] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[45] = dtinfo;
+           data_ptr->mValues[46] = dtinfo;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+           data_ptr->mValues[45] = dtinfo;
+           data_ptr->mValues[46] = dtinfo;
+           data_ptr->mValues[47] = dtinfo;
+       }
+       //data[17]
+       dtinfo.bType = false;
+       dtinfo.fValue = (data[18]*256+data[19])*0.1;
+       data_ptr->mValues[48] = dtinfo;
+       dtinfo.fValue = (data[20]*256+data[21]);
+       data_ptr->mValues[49] = dtinfo;
+       dtinfo.fValue = (data[22]*256+data[23]);
+       data_ptr->mValues[50] = dtinfo;
+       //data[24]-data[29]
+       for(int i=0;i<3;++i)
+       {
+          dtinfo.fValue =  (data[30+2*i]*256+data[31+2*i])*0.1;
+          data_ptr->mValues[51+i] = dtinfo;
+       }
+       dtinfo.fValue =  data[36]&0x3F;
+       data_ptr->mValues[54] = dtinfo;
+       dtinfo.bType = true;
+       int trsmode = (data[36]>>6)&0x03;
+       if(trsmode==0x00)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[55] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[56] = dtinfo;
+           data_ptr->mValues[57] = dtinfo;
+       }
+       else if(trsmode == 0x01)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[56] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[55] = dtinfo;
+           data_ptr->mValues[57] = dtinfo;
+       }
+       else if(trsmode == 0x02)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[57] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[55] = dtinfo;
+           data_ptr->mValues[56] = dtinfo;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+           data_ptr->mValues[55] = dtinfo;
+           data_ptr->mValues[56] = dtinfo;
+           data_ptr->mValues[57] = dtinfo;
+       }
+       trsmode = data[37]&0x03;
+       if(trsmode==0x00)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[58] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[59] = dtinfo;
+           data_ptr->mValues[60] = dtinfo;
+           data_ptr->mValues[61] = dtinfo;
+       }
+       else if(trsmode == 0x01)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[59] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[58] = dtinfo;
+           data_ptr->mValues[60] = dtinfo;
+           data_ptr->mValues[61] = dtinfo;
+       }
+       else if(trsmode == 0x02)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[60] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[58] = dtinfo;
+           data_ptr->mValues[59] = dtinfo;
+           data_ptr->mValues[61] = dtinfo;
+       }
+       else
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[61] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[58] = dtinfo;
+           data_ptr->mValues[59] = dtinfo;
+           data_ptr->mValues[60] = dtinfo;
+       }
+       trsmode = (data[37]>>2)&0x03;
+       if(trsmode==0x00)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[62] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[63] = dtinfo;
+           data_ptr->mValues[64] = dtinfo;
+       }
+       else if(trsmode == 0x01)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[63] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[62] = dtinfo;
+           data_ptr->mValues[64] = dtinfo;
+       }
+       else if(trsmode == 0x02)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[64] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[62] = dtinfo;
+           data_ptr->mValues[63] = dtinfo;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+           data_ptr->mValues[62] = dtinfo;
+           data_ptr->mValues[63] = dtinfo;
+           data_ptr->mValues[64] = dtinfo;
+       }
+       trsmode = (data[37]>>4)&0x03;
+       if(trsmode==0x00)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[65] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[66] = dtinfo;
+           data_ptr->mValues[67] = dtinfo;
+       }
+       else if(trsmode == 0x01)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[66] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[65] = dtinfo;
+           data_ptr->mValues[67] = dtinfo;
+       }
+       else if(trsmode == 0x02)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[67] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[65] = dtinfo;
+           data_ptr->mValues[66] = dtinfo;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+           data_ptr->mValues[65] = dtinfo;
+           data_ptr->mValues[66] = dtinfo;
+           data_ptr->mValues[67] = dtinfo;
+       }
+       trsmode = (data[37]>>6)&0x03;
+       if(trsmode==0x00)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[68] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[69] = dtinfo;
+           data_ptr->mValues[70] = dtinfo;
+       }
+       else if(trsmode == 0x01)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[69] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[68] = dtinfo;
+           data_ptr->mValues[70] = dtinfo;
+       }
+       else if(trsmode == 0x02)
+       {
+           dtinfo.fValue = 1;
+           data_ptr->mValues[70] = dtinfo;
+           dtinfo.fValue = 0;
+           data_ptr->mValues[68] = dtinfo;
+           data_ptr->mValues[69] = dtinfo;
+       }
+       else
+       {
+           dtinfo.fValue = 0;
+           data_ptr->mValues[68] = dtinfo;
+           data_ptr->mValues[69] = dtinfo;
+           data_ptr->mValues[70] = dtinfo;
+       }
+       for(int i=0;i<8;++i)
+       {
+           dtinfo.fValue = Getbit(data[38],i);
+           data_ptr->mValues[71+i] = dtinfo;
+       }
+       for(int i=0;i<2;++i)
+       {
+           dtinfo.fValue = Getbit(data[39],i);
+           data_ptr->mValues[79+i] = dtinfo;
+       }
+       for(int i=0;i<4;++i)
+       {
+           dtinfo.fValue = Getbit(data[40],i);
+           data_ptr->mValues[81+i] = dtinfo;
+       }
+       dtinfo.fValue = Getbit(data[40],5);
+       data_ptr->mValues[85] = dtinfo;
+       for(int i=0;i<3;++i)
+       {
+           dtinfo.fValue = Getbit(data[41],i);
+           data_ptr->mValues[86+i] = dtinfo;
        }
        return RE_SUCCESS;
    }

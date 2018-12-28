@@ -2464,8 +2464,8 @@ void device_session::doAction(LinkAction &action, string sStationid, string sDev
     {
     case ACTP_SENDMSG:{//发短信
         string smscontent;
-        string strDevtype = GetInst(StationConfig).get_dictionary_value("DeviceType",devType);
-        smscontent = str(boost::format("%1%:%2%(%3%)-%4%-%5%")%strDevtype%sDevName%sDevid%sReason%sStartTime);
+        //string strDevtype = GetInst(StationConfig).get_dictionary_value("DeviceType",devType);
+        smscontent = str(boost::format("%1%-%2%-%3%")%sDevName%sReason%sStartTime);
         boost::algorithm::trim(smscontent);
         Action_sendsms(action,smscontent);
     }

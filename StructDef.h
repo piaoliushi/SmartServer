@@ -135,6 +135,7 @@ typedef enum BGPROTOCOL
 	BEIGUANG_FM_10KW      = 7,
 	BEIGUANG_AM_1KW       = 8,
     BEIGUANG_FM_618B      = 10,
+    BEIGUANG_CDR_1KW      = 11,
 }BgSubProtocol,*pBgSubProtocol;
 
 typedef enum CDPROTOCOL

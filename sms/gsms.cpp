@@ -369,6 +369,8 @@ int Gsms::gsmSendMessage(SM_PARAM *pSrc)
 {
     if(modle_type==tyGsm)
     {
+        cach_receive_.clear();
+
         int nPduLength;		// PDU串长度
         unsigned char nSmscLength;	// SMSC串长度
         char cmd[16];		// 命令串
@@ -472,7 +474,7 @@ int Gsms::gsmParseMessageList(SM_PARAM *pMsg, SM_BUFF *pBuff)
 
     return nMsg;
 }
-void Gsms::get_sendmsg_cmd_ack()
+/*void Gsms::get_sendmsg_cmd_ack()
 {
     QByteArray qarray = pQSerialport_ptr_->readAll();
     cach_receive_.append(qarray);
@@ -483,6 +485,24 @@ void Gsms::get_sendmsg_cmd_ack()
         pdu[m_nSendPduLen]=0x00;
         pdu[m_nSendPduLen+1]=0x1A;		// 得到肯定回答，继续输出PDU串
         WriteComm(pdu, m_nSendPduLen+2);
+        cach_receive_.clear();
+    }
+    else
+    {
+        boost::recursive_mutex::scoped_lock lock(m_cmdresult_mutex);
+        n_cmdresult_ = -1;
+    }
+}*/
+
+void Gsms::get_sendmsg_cmd_ack()
+{
+    QByteArray qarray = pQSerialport_ptr_->readAll();
+    cach_receive_.append(qarray);
+    if(cach_receive_.size()>=4 && strncmp(cach_receive_.constData(),"\r\n> ",4)==0)
+    {
+        boost::recursive_mutex::scoped_lock lock(data_mutex);
+        nstate=stSendMessageResponse;
+        WriteComm(pdu, strlen(pdu));
         cach_receive_.clear();
     }
     else
@@ -509,6 +529,7 @@ void Gsms::get_sendmsg_cmd_ack()
         n_cmdresult_ = 1;
     }
 }*/
+
 
 void Gsms::get_Response_cmd_ack()
 {
