@@ -237,8 +237,8 @@ bool Bohui_Protocol::appendUpsReportBodyMsg(xml_document<> &xmlMsg,map<string,xm
         string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
         if(curData->mValues[cell_iter->first].bType==true)
             sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
-        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
-        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));//boost::lexical_cast<std::string>()
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",mapTypeToStr[cell_iter->second.iTargetId].first.c_str()));
         xml_Quality->append_node(xml_Quality_Index);
     }
     return true;
@@ -367,10 +367,10 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
          xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
 
          if(nDevType==DEVICE_ELEC || nDevType==DEVICE_TEMP)
-             xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Unit",xmlMsg.allocate_string(cell_iter->second.sUnit.c_str())));
+             xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Unit",xmlMsg.allocate_string(cell_iter->second.sUnit.c_str())));//boost::lexical_cast<std::string>()
 
          if(nDevType!=DEVICE_SMOKE && nDevType!=DEVICE_WATER)
-             xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
+             xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",mapTypeToStr[cell_iter->second.iTargetId].first.c_str()));
 
         xml_dev_node ->append_node(xml_Quality_Index);
      }
@@ -411,8 +411,8 @@ bool Bohui_Protocol::appendTransmitterReportBodyMsg(xml_document<> &xmlMsg,map<s
          if(sCurValue.length()>0 && cell_iter->first == 501)
              xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sCurValue.c_str())));
          else
-             xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
-         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
+             xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));//boost::lexical_cast<std::string>()
+         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",mapTypeToStr[cell_iter->second.iTargetId].first.c_str()));
          xml_Quality->append_node(xml_Quality_Index);
 
      }
@@ -512,8 +512,8 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
                 if(sCurValue.length()>0 && cell_iter->first == 501)
                     xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(sCurValue.c_str())));
                 else
-                    xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(sValue.c_str())));
-                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
+                    xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Value",xml_reportMsg.allocate_string(sValue.c_str())));//boost::lexical_cast<std::string>()
+                xml_Quality_Index->append_attribute(xml_reportMsg.allocate_attribute("Desc",mapTypeToStr[cell_iter->second.iTargetId].first.c_str()));
                 xml_Quality->append_node(xml_Quality_Index);
 
             }
