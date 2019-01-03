@@ -1,4 +1,4 @@
-#include "LngdTransmmit.h"
+﻿#include "LngdTransmmit.h"
 #include "../../../../utility.h"
 namespace hx_net{
 	LngdTransmmit::LngdTransmmit(int subprotocol,int addresscode)
@@ -236,7 +236,7 @@ namespace hx_net{
             else
                 dtinfo.fValue = 0;
             data_ptr->mValues[2] = dtinfo;
-            for(int i=0;i>6;++i)
+            for(int i=0;i<6;++i)
             {
                 dtinfo.fValue = data[7+2*i]*256+data[8+2*i];
                 data_ptr->mValues[3+i] = dtinfo;
