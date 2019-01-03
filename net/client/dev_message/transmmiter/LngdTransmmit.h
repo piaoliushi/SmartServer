@@ -1,5 +1,5 @@
-#ifndef CDTRANSMMITER_H
-#define CDTRANSMMITER_H
+#ifndef LNGDTRANSMMITER_H
+#define LNGDTRANSMMITER_H
 #include "Transmmiter.h"
 namespace hx_net{
 	class LngdTransmmit:public Transmmiter
@@ -14,10 +14,10 @@ namespace hx_net{
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
 		void GetAllCmd(CommandAttribute &cmdAll);
 	private:
-		
+        int Ls68DbData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& runstate);
 	private:
 		int m_subprotocol;
 		int m_addresscode;
 	};
 }
-#endif // CDTRANSMMITER_H
+#endif // LNGDTRANSMMITER_H

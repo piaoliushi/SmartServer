@@ -20,6 +20,7 @@
 #include "./transmmiter/rstransmmit.h"
 #include "./transmmiter/rvrtransmmit.h"
 #include "./transmmiter/astransmmit.h"
+#include "./transmmiter/LngdTransmmit.h"
 
 #include "../../../database/DataBaseOperation.h"
 using namespace db;
@@ -481,6 +482,7 @@ namespace hx_net
             d_ptransmmit = new CKangteTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case LIAONING_HS:
+            d_ptransmmit = new LngdTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
         case SHANGHAI_MZ:
             break;
