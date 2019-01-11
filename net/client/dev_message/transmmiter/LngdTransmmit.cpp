@@ -210,11 +210,11 @@ namespace hx_net{
             tmUnit.commandId[6] = (uscrc&0x00FF);
             tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
-            tmUnit.commandId[1] = 0x01;
-            uscrc = CRC16_A001(tmUnit.commandId,6);
-            tmUnit.commandId[6] = (uscrc&0x00FF);
-            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
-            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            //tmUnit.commandId[1] = 0x01;
+            //uscrc = CRC16_A001(tmUnit.commandId,6);
+           // tmUnit.commandId[6] = (uscrc&0x00FF);
+            //tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            //cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
         }
