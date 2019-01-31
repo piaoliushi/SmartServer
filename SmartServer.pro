@@ -91,7 +91,9 @@ SOURCES += main.cpp\
     net/client/dev_message/transmmiter/rstransmmit.cpp \
     net/client/dev_message/transmmiter/rvrtransmmit.cpp \
     net/client/dev_message/transmmiter/astransmmit.cpp \
-    yaolog.cpp
+    yaolog.cpp \
+    net/client/dev_message/transmmiter/zctransmmit.cpp \
+    net/client/dev_message/transmmiter/zttransmmit.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -179,7 +181,9 @@ HEADERS  += \
     net/client/dev_message/transmmiter/rstransmmit.h \
     net/client/dev_message/transmmiter/rvrtransmmit.h \
     net/client/dev_message/transmmiter/astransmmit.h \
-    yaolog.h
+    yaolog.h \
+    net/client/dev_message/transmmiter/zctransmmit.h \
+    net/client/dev_message/transmmiter/zttransmmit.h
 
 FORMS    += mainwindow.ui
 

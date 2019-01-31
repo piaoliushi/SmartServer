@@ -21,6 +21,7 @@
 #include "./transmmiter/rvrtransmmit.h"
 #include "./transmmiter/astransmmit.h"
 #include "./transmmiter/LngdTransmmit.h"
+#include "./transmmiter/zttransmmit.h"
 
 #include "../../../database/DataBaseOperation.h"
 using namespace db;
@@ -503,6 +504,9 @@ namespace hx_net
             break;
         case RVR:
             d_ptransmmit = new RvrTransmmit(boost::shared_ptr<hx_net::Tsmt_message>(this),d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+            break;
+        case ZHENGTAI:
+            d_ptransmmit = new ZtTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
 
         }

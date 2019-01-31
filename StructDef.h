@@ -97,6 +97,7 @@ typedef enum PROTOCOL
     GSBR                  = 27, //高斯贝尔
     ZHC                   = 29, //众传
     RVR                   = 30, //RVR系列
+    ZHENGTAI              = 31, //正泰
 
 }Protocol,*pProtocol;
 
@@ -388,7 +389,12 @@ typedef enum RVRPROTOCOL
     RSM_FM_OCBD = 1, //调频开关板协议
     ETL3100     = 2, //泰诺克etl3100
 }RvrSubProtocol;
-
+//正泰
+typedef enum ZTPROTOCOL
+{
+    ZT_AM_10KW = 0,
+    ZT_AM_1KW  = 1,
+}ZtSubProtocol;
 
 typedef struct CStepMDUnit
 {

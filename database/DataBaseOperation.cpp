@@ -1335,14 +1335,14 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
 
             QDateTime qdt = QDateTime::fromTime_t(iter->second[i].tStartTime);
             insertQuery.bindValue(":starttime",qdt);
-            if(iter->second[i].bMonitorFlag==false)
+            if(iter->second[i].bRunModeFlag==false)//bMonitorFlag
                 insertCmdcloseQuery.bindValue(":starttime",qdt.addSecs(20));//不监测关机时间退后20秒
             else
                 insertCmdopenQuery.bindValue(":starttime",qdt.addSecs(-20));//监测开机时间退后20秒
 
             qdt = QDateTime::fromTime_t(iter->second[i].tEndTime);
             insertQuery.bindValue(":endtime",qdt);
-            if(iter->second[i].bMonitorFlag==true)
+            if(iter->second[i].bRunModeFlag==true)//bMonitorFlag
                 insertCmdcloseQuery.bindValue(":starttime",qdt.addSecs(20));//监测关机时间退后20秒
             else
                 insertCmdopenQuery.bindValue(":starttime",qdt.addSecs(-20));//监测开机时间退后20秒
