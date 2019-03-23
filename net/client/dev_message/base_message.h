@@ -29,9 +29,12 @@ namespace hx_net
 		virtual int stop(){return -1;}
 		virtual	bool is_auto_run(){return false;}
 
-		virtual int  getChannelCount(){return 0;}
-		virtual bool isBelongChannel(int nChnnel,int monitorItemId){return false;}
-		virtual bool isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr){return true;}
+        //virtual int  getChannelCount(){return 0;}
+        //virtual bool isBelongChannel(int nChnnel,int monitorItemId){return false;}
+        //virtual bool isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr){return true;}
+
+        virtual int getBelongChannelIdFromMonitorItem(int monitorItemId){return 0;}
+
 		virtual bool ItemValueIsAlarm(DevMonitorDataPtr curDataPtr,int monitorItemId,dev_alarm_state &curState){return false;}
 
         virtual int cur_dev_state(){return -1;}

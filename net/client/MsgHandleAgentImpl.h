@@ -28,9 +28,11 @@ namespace hx_net
         void GetAllCmd(CommandAttribute &cmdAll);
 		void GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit);
         void GetSignalCommand(int cmmType,int nIndex,CommandUnit &cmdUnit);
-		int getChannelCount();
-		bool isBelongChannel(int nChnnel,int monitorItemId);
-		bool isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr);
+        //int getChannelCount();
+        //bool isBelongChannel(int nChnnel,int monitorItemId);
+        //bool isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr);
+        int getBelongChannelIdFromMonitorItem(int monitorItemId);
+
 		bool ItemValueIsAlarm(DevMonitorDataPtr curDataPtr,int monitorItemId,dev_alarm_state &curState);
 
 		bool isRegister();

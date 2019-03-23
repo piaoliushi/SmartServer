@@ -314,7 +314,7 @@ bool DataBaseOperation::GetDevMonitorSch(QSqlDatabase &db, string strDevnum,map<
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery schquery(db);
     QString strSql=QString("select id,ObjectNumber,WeekDay,Enable,StartTime,EndTime,datetype,month,day, \
-                           alarmendtime,mode from Monitoring_Scheduler where ObjectNumber='%1'").arg(QString::fromStdString(strDevnum));
+                           alarmendtime,mode,channelid from Monitoring_Scheduler where ObjectNumber='%1'").arg(QString::fromStdString(strDevnum));
             schquery.prepare(strSql);
             if(schquery.exec()){
             while(schquery.next()) {
@@ -328,6 +328,7 @@ bool DataBaseOperation::GetDevMonitorSch(QSqlDatabase &db, string strDevnum,map<
             msch.iMonitorDay = schquery.value(8).toInt();
             msch.tAlarmEndTime = schquery.value(9).toDateTime().toTime_t();
             msch.bRunModeFlag = schquery.value(10).toBool();
+            msch.iChannelId = schquery.value(11).toInt();
             mapMonitorSch[iMonitorType].push_back(msch);
 }
 }

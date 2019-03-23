@@ -4,6 +4,10 @@
 #include "./dev_message/104/iec104_types.h"
 #include "../SvcMgr.h"
 #include "LocalConfig.h"
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QVariant>
+
 //#include <glog/logging.h>
 //--------------------remark--------------------------------------//
 //@author:liukun
@@ -339,14 +343,21 @@ e_ErrorCode   DevClient::response_http_msg(string sUrl,string &sContent,string s
 //发送短信
 e_ErrorCode DevClient::SendSMSContent(vector<string> &PhoneNumber, string AlarmContent)
 {
-    if(m_pGsm_ptr_&&m_pGsm_ptr_->IsRun())
+    if(m_pGsm_ptr_->GetModleType()!=Gsms::tyWt)
     {
-        vector<string>::iterator iter = PhoneNumber.begin();
-        for(;iter!=PhoneNumber.end();++iter){
+        if(m_pGsm_ptr_&&m_pGsm_ptr_->IsRun())
+        {
+            vector<string>::iterator iter = PhoneNumber.begin();
+            for(;iter!=PhoneNumber.end();++iter){
 
-            m_pGsm_ptr_->SendSMSContent("13800551500",(*iter),AlarmContent);
+                m_pGsm_ptr_->SendSMSContent("13800551500",(*iter),AlarmContent);
+            }
+            return EC_OK;
         }
-        return EC_OK;
+    }
+    else
+    {
+        return SendWtSMSContent(PhoneNumber,AlarmContent);
     }
 
     return EC_OBJECT_NULL;
@@ -368,6 +379,33 @@ e_ErrorCode  DevClient::SendActionCommand(map<int,vector<ActionParam> > &param,s
          }
      }
     return opr_rlt;
+}
+
+e_ErrorCode DevClient::SendWtSMSContent(vector<string> &PhoneNumber, string AlarmContent)
+{
+    QSqlDatabase db= QSqlDatabase::addDatabase("QODBC");
+    QString dsn = "DRIVER={SQL SERVER};SERVER=127.0.0.1;DATABASE=LsmpDataBase;UID=sa;PWD=1234;";
+    db.setDatabaseName(dsn);
+    if(!db.open())
+    {
+        return EC_FAILED;
+    }
+    QSqlQuery inquery(db);
+    QString strSql=QString("insert into calltask (phone,voice_text,sms_text,task_type,voice_source) values(:phone,:voice_text,:sms_text,1,1)");
+    inquery.prepare(strSql);
+    inquery.bindValue(":voice_text",QString::fromStdString(AlarmContent));
+    inquery.bindValue(":sms_text",QString::fromStdString(AlarmContent));
+    vector<string>::iterator iter = PhoneNumber.begin();
+    for(;iter!=PhoneNumber.end();++iter){
+        inquery.bindValue(":phone",QString::fromStdString((*iter)));
+        if(!inquery.exec())
+        {
+            db.close();
+            return EC_FAILED;
+        }
+    }
+    db.close();
+    return EC_OK;
 }
 
 }

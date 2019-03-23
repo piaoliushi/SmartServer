@@ -128,40 +128,49 @@ namespace hx_net
         return m_msgImpl->GetAllCmd(cmdAll);
     }
 
-	int MsgHandleAgent::getChannelCount()
+    int MsgHandleAgent::getBelongChannelIdFromMonitorItem(int monitorItemId)
+    {
+        if(m_msgImpl==NULL)
+            return -1;
+        return m_msgImpl->getBelongChannelIdFromMonitorItem(monitorItemId);
+    }
+
+    /*int MsgHandleAgent::getChannelCount()
 	{
 		if(m_msgImpl==NULL)
 			return -1;
 		return m_msgImpl->getChannelCount();
 	}
 
-	bool MsgHandleAgent::isBelongChannel(int nChnnel,int monitorItemId)
+    bool MsgHandleAgent::isBelongChannel(int nChnnel,int monitorItemId)
 	{
 		if(m_msgImpl==NULL)
 			return false;
 		return m_msgImpl->isBelongChannel(nChnnel,monitorItemId);
 	}
 
-	bool MsgHandleAgent::ItemValueIsAlarm(DevMonitorDataPtr curDataPtr,int monitorItemId,dev_alarm_state &curState)
-	{
-		if(m_msgImpl==NULL)
-			return false;
-		return m_msgImpl->ItemValueIsAlarm(curDataPtr,monitorItemId,curState);
-	}
 
-	bool MsgHandleAgent::isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr)
+
+    bool MsgHandleAgent::isMonitorChannel(int nChnnel,DevMonitorDataPtr curDataPtr)
 	{
 		if(m_msgImpl==NULL)
 			return false;
 		return m_msgImpl->isMonitorChannel(nChnnel,curDataPtr);
-	}
+    }*/
 
+    bool MsgHandleAgent::ItemValueIsAlarm(DevMonitorDataPtr curDataPtr,int monitorItemId,dev_alarm_state &curState)
+    {
+        if(m_msgImpl==NULL)
+            return false;
+        return m_msgImpl->ItemValueIsAlarm(curDataPtr,monitorItemId,curState);
+    }
 	bool MsgHandleAgent::isRegister()
 	{
 		if(m_msgImpl==NULL)
 			return false;
 		return m_msgImpl->isRegister();
 	}
+
 	void MsgHandleAgent::getRegisterCommand(CommandUnit &cmdUnit)
 	{
 		if(m_msgImpl==NULL)

@@ -1,6 +1,10 @@
 ﻿#include "Link_message.h"
 #include"../../../utility.h"
-//#include "./snmp_pp/snmp_pp.h"
+#include "../../../StationConfig.h"
+#include <QString>
+#include "../../../database/DataBaseOperation.h"
+using namespace db;
+
 
 #define NUM_SYS_VBS	6
 //信号电平
@@ -15,14 +19,15 @@
 #define totalrate    "1.3.6.1.4.1.8201.5.7.1.1.5.0"
 //频率
 #define frequency	"1.3.6.1.4.1.8201.5.7.1.1.7.0"
-#include <QString>
+
+
 namespace hx_net
 {
 
     Link_message::Link_message(session_ptr pSession,DeviceInfo &devInfo)
         :m_pSession(pSession)
         ,d_devInfo(devInfo)
-        //,d_task_queue_ptr(new TaskQueue< DevMonitorDataPtr >)
+        ,curRoute_(-1)
     {
         initOid();
         if(IsStandardCommand())
@@ -264,7 +269,7 @@ namespace hx_net
         query_pdu += vbl;
     }
 
-    int Link_message::decode_0401AV(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    int Link_message::decode_0401AV(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode,int &curChannel)
     {
         // aa 41 11 00 01 00 06 00 00 33 10 43 55
         iaddcode = data[3]*256+data[4];
@@ -280,6 +285,7 @@ namespace hx_net
         if(ichanel>=0 && ichanel<4)
         {
             data_ptr->mValues[ichanel].fValue = 1.0;
+            curChannel = ichanel;//通道
         }
 
 
@@ -309,7 +315,7 @@ namespace hx_net
         return 0;
     }
 
-    int Link_message::decode_0401DA(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    int Link_message::decode_0401DA(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode,int &curChannel)
     {
         iaddcode = data[3]*256+data[4];
         DataInfo dainfo;
@@ -324,6 +330,7 @@ namespace hx_net
         if(ichanel>=0 && ichanel<4)
         {
             data_ptr->mValues[ichanel].fValue = 1.0;
+            curChannel = ichanel;
         }
         if(ichanel==4)
             data_ptr->mValues[15].fValue = 1.0;
@@ -365,7 +372,7 @@ namespace hx_net
         return 0;
     }
 
-    int Link_message::decode_0401DABS(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    int Link_message::decode_0401DABS(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode,int &curChannel)
     {
         iaddcode = data[3]*256+data[4];
         int nCmd = data[2];
@@ -383,6 +390,7 @@ namespace hx_net
             if(ichanel>=0 && ichanel<4)
             {
                 data_ptr->mValues[ichanel].fValue = 1.0;
+                curChannel = ichanel;
             }
             if(ichanel==4)
                 data_ptr->mValues[15].fValue = 1.0;
@@ -445,7 +453,7 @@ namespace hx_net
         return 0;
     }
 
-    void Link_message::GetSwitchCmd(devCommdMsgPtr lpParam, CommandUnit &cmdUnit)
+    void Link_message::GetSwitchCmd(devCommdMsgPtr lpParam, CommandUnit &cmdUnit, int &objChannel)
     {
         switch (d_devInfo.nSubProtocol){
         case LINK_HX_0401_AV:{
@@ -491,6 +499,8 @@ namespace hx_net
             cmdUnit.commandId[11] = 0x00;
             cmdUnit.commandId[12] = nChannel;
             cmdUnit.commandId[13] = 0x55;
+
+            objChannel = nChannel;
         }
             break;
         case LINK_HX_0214_DA:
@@ -508,6 +518,8 @@ namespace hx_net
             cmdUnit.commandId[7] = atoi(lpParam->cparams(0).sparamvalue().c_str());
             cmdUnit.commandId[8] = atoi(lpParam->cparams(1).sparamvalue().c_str());
             cmdUnit.commandId[9] = 0x55;
+
+           // objChannel = nChannel;
         }
             break;
         case LINK_HX_0401_SP:
@@ -515,21 +527,25 @@ namespace hx_net
        {
            if(lpParam->cparams().size()<1)
                return;
+           int nChannel = atoi(lpParam->cparams(0).sparamvalue().c_str());
            cmdUnit.commandLen = 6;
            cmdUnit.commandId[0] = 0xAA;
            cmdUnit.commandId[1] = 0x22;
-           cmdUnit.commandId[2] = atoi(lpParam->cparams(0).sparamvalue().c_str());
+           cmdUnit.commandId[2] = nChannel;
            cmdUnit.commandId[3] = 0x00;
            cmdUnit.commandId[4] = cmdUnit.commandId[1]^cmdUnit.commandId[2];
            cmdUnit.commandId[5] = 0x55;
+
+           objChannel = nChannel;
        }
            break;
         case LINK_JC_5103:
         {
             if(lpParam->cparams().size()<1)
                 return;
-            int nChan = atoi(lpParam->cparams(0).sparamvalue().c_str());
-            GetSwitchCmdByChannel(nChan,cmdUnit);
+            int nChannel = atoi(lpParam->cparams(0).sparamvalue().c_str());
+            objChannel = nChannel;
+            GetSwitchCmdByChannel(nChannel,cmdUnit);
         }
             break;
         default:
@@ -914,24 +930,27 @@ namespace hx_net
         if(data_ptr!=NULL)
             d_curData_ptr = data_ptr;
         int idecresult = RE_UNKNOWDEV;
+
+
+        int newChannel = -1;
         switch (d_devInfo.nSubProtocol) {
         case LINK_HX_0401_AV:
-            idecresult = decode_0401AV(data,d_curData_ptr,nDataLen,iaddcode);
+            idecresult = decode_0401AV(data,d_curData_ptr,nDataLen,iaddcode,newChannel);
             break;
         case LINK_HX_0401_DA:
-            idecresult = decode_0401DA(data,d_curData_ptr,nDataLen,iaddcode);
+            idecresult = decode_0401DA(data,d_curData_ptr,nDataLen,iaddcode,newChannel);
             break;
         case LINK_HX_0401_DABS:
-            idecresult = decode_0401DABS(data,d_curData_ptr,nDataLen,iaddcode);
+            idecresult = decode_0401DABS(data,d_curData_ptr,nDataLen,iaddcode,newChannel);
             break;
         case LINK_HX_0214_DA:
             idecresult = decode_0214DA(data,d_curData_ptr,nDataLen,iaddcode);
             break;
         case LINK_HX_0401_SP:
-            idecresult = decode_0401SP(data,d_curData_ptr,nDataLen,iaddcode);
+            idecresult = decode_0401SP(data,d_curData_ptr,nDataLen,iaddcode,newChannel);
             break;
         case LINK_JC_5103:
-            idecresult = decode_JC5103(data,d_curData_ptr,nDataLen,iaddcode);
+            idecresult = decode_JC5103(data,d_curData_ptr,nDataLen,iaddcode,newChannel);
             break;
         case LINK_HX_6300:
             idecresult = decode_6300(data,d_curData_ptr,nDataLen,iaddcode);
@@ -943,7 +962,7 @@ namespace hx_net
             idecresult = decode_9020(data,d_curData_ptr,nDataLen,iaddcode);
             break;
         case LINK_HX_0401_AP:
-            idecresult = decode_0401AP(data,d_curData_ptr,nDataLen,iaddcode);
+            idecresult = decode_0401AP(data,d_curData_ptr,nDataLen,iaddcode,newChannel);
             break;
         default:
             break;
@@ -953,6 +972,22 @@ namespace hx_net
             if(IsStandardCommand()){
                 m_pSession->start_handler_data(iaddcode,d_curData_ptr);
             }
+
+            //判断切换器当前路是否有变化
+            boost::recursive_mutex::scoped_lock ch_locker(switch_channel_mutex);
+            if(newChannel>=0 && curRoute_>=0 && newChannel!=curRoute_){
+                //记录数据库
+                curRoute_ = newChannel;
+
+                string  sResult = DEV_CMD_RESULT_DESC(CMD_RT_OK);
+                if(curRoute_<=CMD_RT_SWITCH_CHANGE_BACKUP_FOURTH-15)
+                    sResult = DEV_CMD_RESULT_DESC(CMD_RT_SWITCH_CHANGE_HOST+curRoute_);
+
+                GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
+            }else if(curRoute_<0){
+                curRoute_ = newChannel;
+            }
+
         }
         return idecresult;
     }
@@ -1279,19 +1314,18 @@ namespace hx_net
 
     void Link_message::exec_general_task(int icmdType, string sUser, devCommdMsgPtr lpParam, e_ErrorCode &eErrCode)
     {
+
         eErrCode = EC_UNKNOWN;
         CommandUnit cmdUnit;
         cmdUnit.commandLen = 0;
+
+        int objChannel = -1;
         switch (icmdType) {
         case MSG_CONTROL_MOD_SWITCH_OPR:
-        {
             GetControlModCmd(lpParam,cmdUnit);
-        }
             break;
         case MSG_0401_SWITCH_OPR://通道切换
-        {
-            GetSwitchCmd(lpParam,cmdUnit);
-        }
+            GetSwitchCmd(lpParam,cmdUnit,objChannel);
             break;
         case MSG_GENERAL_COMMAND_OPR://
             GetSignalCommand(lpParam,cmdUnit);
@@ -1303,7 +1337,16 @@ namespace hx_net
         }
         if(cmdUnit.commandLen>0)
         {
+            boost::recursive_mutex::scoped_lock ch_locker(switch_channel_mutex);
+            d_cur_task_ = icmdType;
+            d_cur_user_ = sUser;//记录当前用户，定时，自动，人工
+
             eErrCode = EC_OK;
+            string  sResult = DEV_CMD_RESULT_DESC(CMD_RT_GOING);
+            if(objChannel>=0 && objChannel<=CMD_RT_GOING_SWITCH_TO_BACKUP_FOURTH-10)
+                sResult = DEV_CMD_RESULT_DESC(CMD_RT_GOING_SWITCH_TO_HOST+objChannel);
+
+            GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
             m_pSession->send_cmd_to_dev(cmdUnit,eErrCode);
         }
     }
@@ -1751,6 +1794,8 @@ namespace hx_net
             data_ptr->mValues[0] = dainfo;
             dainfo.fValue = 0;
             data_ptr->mValues[1] = dainfo;
+
+             curRoute_ = data[7]-1;
         }
         else if(data[7]==0x02)
         {
@@ -1758,12 +1803,16 @@ namespace hx_net
             data_ptr->mValues[0] = dainfo;
             dainfo.fValue = 1;
             data_ptr->mValues[1] = dainfo;
+            curRoute_ = data[7]-1;
         }
         else {
             dainfo.fValue = 1;
             data_ptr->mValues[0] = dainfo;
             data_ptr->mValues[1] = dainfo;
         }
+
+
+
         for(int i=0;i<16;++i)
         {
             dainfo.fValue = data[8+i];
@@ -1773,7 +1822,7 @@ namespace hx_net
         return 0;
     }
 
-   int Link_message::decode_0401SP(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+   int Link_message::decode_0401SP(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode,int &curChannel)
    {
        if(data[1]!=0x44)
            return RE_CMDACK;
@@ -1782,6 +1831,9 @@ namespace hx_net
        dainfo.bType = true;
        int ichanel;
        ichanel = data[2];
+
+       curChannel = ichanel;
+
        switch(ichanel)
        {
        case 0:
@@ -1857,177 +1909,7 @@ namespace hx_net
       return RE_SUCCESS;
   }
 
-
-  /* int Link_message::decode_JC5103(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
-  {
-       int nresult = RE_CMDACK;
-       int lastlen = nDataLen;
-       while(lastlen>10){
-           if(data[4]==0x52 && data[5]==0x53)
-           {
-               iaddcode = data[1];
-               int nDataType;
-               char cNum[10]={0};
-               data = data+6;
-               int iLastNum=(nDataLen-6);
-               DataInfo dainfo;
-               while(1)
-               {
-                   nDataType = data[0];
-                   if(nDataType==0xFE  || iLastNum<3)
-                       break;
-                   int iReadNum = 1;
-                   for(int jpos=0;iLastNum>iReadNum && jpos<10;++jpos)
-                   {
-                       if(data[iReadNum]!=0x20)
-                       {
-                           cNum[jpos] = data[iReadNum];
-                           ++iReadNum;
-                       }
-                       else
-                       {
-                           ++iReadNum;
-                           break;
-                       }
-                   }
-                   data = data+iReadNum;
-                   iLastNum -= iReadNum;
-                   switch(nDataType)
-                   {
-                   case 0x21:
-                   {
-                       dainfo.bType = true;
-                       dainfo.fValue = atoi(cNum);// == 1? 0:1
-                       data_ptr->mValues[0] = dainfo;
-                   }
-                       break;
-                   case 0x22:
-                   {
-                       dainfo.bType = true;
-                       dainfo.fValue = atoi(cNum);// == 1? 0:1
-                       data_ptr->mValues[1] = dainfo;
-                   }
-                       break;
-                   case 0x23:
-                   {
-                       dainfo.bType = true;
-                       dainfo.fValue = atoi(cNum);// == 1? 0:1
-                       data_ptr->mValues[2] = dainfo;
-                   }
-                       break;
-                   case 0x24:
-                   {
-                       dainfo.bType = true;
-                       dainfo.fValue = atoi(cNum);// == 1? 0:1
-                       data_ptr->mValues[3] = dainfo;
-                   }
-                       break;
-                   case 0x25:
-                   {
-                       dainfo.bType = false;
-                       dainfo.fValue = atof(cNum);
-                       data_ptr->mValues[4] = dainfo;
-                   }
-                       break;
-                   case 0x26:
-                   {
-                       dainfo.bType = false;
-                       dainfo.fValue = atof(cNum);
-                       data_ptr->mValues[5] = dainfo;
-                   }
-                       break;
-                   case 0x27:
-                   {
-                       dainfo.bType = false;
-                       dainfo.fValue = atof(cNum);
-                       data_ptr->mValues[6] = dainfo;
-                   }
-                       break;
-                   case 0x28:
-                   {
-                       dainfo.bType = false;
-                       dainfo.fValue = atof(cNum);
-                       data_ptr->mValues[7] = dainfo;
-                   }
-                       break;
-                   case 0x29:
-                   {
-                       dainfo.bType = false;
-                       dainfo.fValue = atof(cNum);
-                       data_ptr->mValues[8] = dainfo;
-                   }
-                       break;
-                   case 0x2A:
-                   {
-                       dainfo.bType = false;
-                       dainfo.fValue = atof(cNum);
-                       data_ptr->mValues[9] = dainfo;
-                   }
-                       break;
-                   case 0x2B:
-                   {
-                       dainfo.bType = false;
-                       dainfo.fValue = atof(cNum);
-                       data_ptr->mValues[10] = dainfo;
-                   }
-                       break;
-                   case 0x2C:
-                   {
-                       dainfo.bType = true;
-                       dainfo.fValue = atoi(cNum);// == 1? 0:1
-                       data_ptr->mValues[11] = dainfo;
-                   }
-                       break;
-                   case 0x2D:
-                   {
-                       dainfo.bType = false;
-                       dainfo.fValue = atof(cNum);
-                       data_ptr->mValues[12] = dainfo;
-                   }
-                       break;
-                   case 0x2E:
-                   {
-                       dainfo.bType = true;
-                       dainfo.fValue = atoi(cNum);
-                       data_ptr->mValues[11] = dainfo;
-                   }
-                       break;
-                   }
-
-                   memset(&cNum,0,10);
-               }
-               nresult = RE_SUCCESS;
-               break;
-           }else if(data[4]==0x53 && data[5]==0x43)
-           {
-               DAS_5103_ACK(data);
-               for(int i=9;i<lastlen;++i)
-               {
-                   if(data[i]==0x04)
-                   {
-                       data = data+i+1;
-                       lastlen = lastlen-i-1;
-                       break;
-                   }
-               }
-           }
-           else
-           {
-               for(int i=9;i<lastlen;++i)
-               {
-                   if(data[i]==0x04)
-                   {
-                       data = data+i+1;
-                       lastlen = lastlen-i-1;
-                       break;
-                   }
-               }
-           }
-       }
-       return nresult;
-  }*/
-
-   int Link_message::decode_JC5103(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+   int Link_message::decode_JC5103(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode,int &curChannel)
   {
       int nresult = RE_CMDACK;
       int lastlen = nDataLen;
@@ -2154,6 +2036,8 @@ namespace hx_net
                       dainfo.bType = false;
                       dainfo.fValue = atof(cNum);
                       data_ptr->mValues[10] = dainfo;
+
+                      curChannel = dainfo.fValue;
                   }
                       break;
                   case 0x2C:
@@ -2252,7 +2136,7 @@ namespace hx_net
       return RE_SUCCESS;
    }
 
-   int Link_message::decode_0401AP(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+   int Link_message::decode_0401AP(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode,int &curChannel)
    {
        if(data[1]!=0x44)
            return RE_CMDACK;
@@ -2261,6 +2145,9 @@ namespace hx_net
        dainfo.bType = true;
        int ichanel;
        ichanel = data[2];
+
+       curChannel = ichanel;
+
        switch(ichanel)
        {
        case 0:
@@ -2327,5 +2214,16 @@ namespace hx_net
            data_ptr->mValues[9+k] = dainfo;
        }
        return RE_SUCCESS;
+   }
+
+   int Link_message::getBelongChannelIdFromMonitorItem(int monitorItemId)
+   {
+        switch (d_devInfo.nSubProtocol) {
+        case LINK_HX_9020:{
+            return monitorItemId/3;
+        }
+        }
+
+       return 0;
    }
 }

@@ -1627,7 +1627,7 @@ bool device_session::is_need_report_data(string sDevId)
 
 
 //是否在监测时间段--------2016-4-1 ----完成
-bool device_session::is_monitor_time(string sDevId)
+bool device_session::is_monitor_time(string sDevId,map<int,bool> &mapIsMonitorChl)
 {
     time_t curTime = time(0);
     tm *pnowTime = localtime(&curTime);
@@ -1643,7 +1643,9 @@ bool device_session::is_monitor_time(string sDevId)
                 continue;
 
             if(curTime>=(*iter).tStartTime && curTime<(*iter).tEndTime && (*iter).bMonitorFlag){
-                return (*iter).bRunModeFlag;
+
+                mapIsMonitorChl[(*iter).iChannelId] = (*iter).bRunModeFlag;//记录通道是否监测
+                //return (*iter).bRunModeFlag;
             }
         }
     }
@@ -1666,7 +1668,9 @@ bool device_session::is_monitor_time(string sDevId)
                 tm *pSetTimeE = localtime(&((*iter).tEndTime));
                 unsigned long set_tm_e = pSetTimeE->tm_hour*3600+pSetTimeE->tm_min*60+pSetTimeE->tm_sec;
                 if(cur_tm>=set_tm_s && cur_tm<set_tm_e && (*iter).bMonitorFlag){
-                    return (*iter).bRunModeFlag;
+
+                    mapIsMonitorChl[(*iter).iChannelId] = (*iter).bRunModeFlag;//记录通道是否监测
+                    //return (*iter).bRunModeFlag;
                 }
             }
         }
@@ -1692,7 +1696,8 @@ bool device_session::is_monitor_time(string sDevId)
                     tm *pSetTimeE = localtime(&((*iter).tEndTime));
                     unsigned long set_tm_e = pSetTimeE->tm_hour*3600+pSetTimeE->tm_min*60+pSetTimeE->tm_sec;
                     if(cur_tm>=set_tm_s && cur_tm<set_tm_e){
-                        return (*iter).bRunModeFlag;
+                        mapIsMonitorChl[(*iter).iChannelId] = (*iter).bRunModeFlag;//记录通道是否监测
+                        //return (*iter).bRunModeFlag;
                     }
                 }
             }
@@ -1731,7 +1736,13 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     if(curDataPtr->mValues.size()<=0)
         return;
     //是否在运行图时间
-    bool bIsMonitorTime = is_monitor_time(sDevId);
+    //初始化监测标志（默认都监测）
+    map<int,bool> curDevIsMonitorChl;
+    for(int i=0;i<modleInfos_.mapDevInfo[sDevId].iChanSize;++i){
+        curDevIsMonitorChl[i]=true;
+    }
+
+    bool bIsMonitorTime = is_monitor_time(sDevId,curDevIsMonitorChl);
 
     //打包发送http消息到上级平台
     int nDevType = modleInfos_.mapDevInfo[sDevId].iDevType;
@@ -1778,15 +1789,19 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 
     //检测当前报警状态(设备运行状态需准备好)
     if(dev_agent_and_com[sDevId].second->device_run_detect_is_ok())
-        check_alarm_state(sDevId,curDataPtr,bIsMonitorTime);
+        check_alarm_state(sDevId,curDataPtr,curDevIsMonitorChl);//bIsMonitorTime
 
     //如果在监测时间段则保存当前记录
-    if(bIsMonitorTime)
-        save_monitor_record(sDevId,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+    //if(bIsMonitorTime)
+    //有任意通道在监测时段则保存数据
+    for(int i=0;i<curDevIsMonitorChl.size();++i){
+        if(curDevIsMonitorChl[i]){
+            save_monitor_record(sDevId,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+            break;
+        }
+    }
 
 
-    //任务数递减
-    //task_count_decrease();
     return;
 }
 
@@ -1804,6 +1819,23 @@ void device_session::clear_dev_alarm(string sDevId)
         iter->second.clear();
     }
     mapItemAlarm[sDevId].clear();
+}
+
+
+//清理设备未设置的告警项
+void device_session::clear_dev_item_alarm(string sDevId,int nitemId)
+{
+    boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
+    map<int,map<int,CurItemAlarmInfo> >::iterator iter = mapItemAlarm[sDevId].find(nitemId);
+    if(iter==mapItemAlarm[sDevId].end())
+        return ;
+    map<int,CurItemAlarmInfo>::iterator typeIter = iter->second.begin();
+    for(;typeIter!=iter->second.end();++typeIter) {
+        //写入恢复记录,通知客户端
+        //.......
+        record_alarm_and_notify(sDevId,0, 0,1,modleInfos_.mapDevInfo[sDevId].map_MonitorItem[iter->first],typeIter->second);
+    }
+    iter->second.clear();
 }
 
 void device_session::handle_connected(const boost::system::error_code& error)
@@ -2287,15 +2319,22 @@ void device_session::clear_all_alarm()
     //mapItemAlarmRecord.clear();   //报警记录清除
 }
 
-void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,bool bMonitor)
+void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,map<int,bool> &mapIsMonitorChl)//bool bMonitor
 {
     //非检测时间段不进行报警检测,同时清除当前告警
     //存在主备关系的设备，清空非运行设备告警-----add by lk for 2018-1-4
-    //bool is_exit = false;
-    if(bMonitor!=true){
-        clear_dev_alarm(sDevId);
+
+    map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.find(sDevId);
+    if(iter== modleInfos_.mapDevInfo.end())
         return;
+    if(modleInfos_.mapDevInfo[sDevId].bMulChannel == false){
+
+        if(mapIsMonitorChl[0]!=true){//bMonitor!=true
+            clear_dev_alarm(sDevId);
+            return;
+        }
     }
+
 
     //判断发射机关联关系
     if(dev_agent_and_com[sDevId].second->is_need_clear_alarm()){
@@ -2303,12 +2342,22 @@ void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPt
         return;
     }
 
-    map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.find(sDevId);
-    if(iter== modleInfos_.mapDevInfo.end())
-        return;
+
     bool bTmpAlarmNow = false;
     map<int,DeviceMonitorItem>::iterator iterItem = iter->second.map_MonitorItem.begin();
     for(;iterItem!=iter->second.map_MonitorItem.end();++iterItem){
+
+        //判断是否为多通道设备，按通道清除非监测时段告警
+        if(modleInfos_.mapDevInfo[sDevId].bMulChannel == true){
+            int curChannel = dev_agent_and_com[sDevId].second->getBelongChannelIdFromMonitorItem(iterItem->first);
+            if(curChannel>=0){
+                if(mapIsMonitorChl[curChannel]!=true){//bMonitor!=true
+                    clear_dev_item_alarm(sDevId,iterItem->first);
+                    return;
+                }
+            }
+        }
+
         map<int,DataInfo>::iterator findIter = curDataPtr->mValues.find(iterItem->first);
         if(findIter!=curDataPtr->mValues.end()){
             double dbValue =curDataPtr->mValues[iterItem->first].fValue;
@@ -2410,28 +2459,15 @@ void  device_session::update_dev_alarm_config(string sDevId,DeviceInfo &devInfo)
         for(;iterItem!=modleInfos_.mapDevInfo[sDevId].map_MonitorItem.end();++iterItem){
             boost::recursive_mutex::scoped_lock alarm_lock(update_alarm_config_mutex_);
             iterItem->second.vItemAlarm = devInfo.map_MonitorItem[iterItem->first].vItemAlarm;
-            if(iterItem->second.vItemAlarm.size() ==0)
+            if(iterItem->second.vItemAlarm.size() ==0){
                 clear_dev_item_alarm(sDevId,iterItem->first);
+            }
             //.....清理之前已产生的告警
         }
     }
 }
 
-//清理设备未设置的告警项
-void device_session::clear_dev_item_alarm(string sDevId,int nitemId)
-{
-    boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
-    map<int,map<int,CurItemAlarmInfo> >::iterator iter = mapItemAlarm[sDevId].find(nitemId);
-    if(iter==mapItemAlarm[sDevId].end())
-        return ;
-    map<int,CurItemAlarmInfo>::iterator typeIter = iter->second.begin();
-    for(;typeIter!=iter->second.end();++typeIter) {
-        //写入恢复记录,通知客户端
-        //.......
-        record_alarm_and_notify(sDevId,0, 0,1,modleInfos_.mapDevInfo[sDevId].map_MonitorItem[iter->first],typeIter->second);
-    }
-    iter->second.clear();
-}
+
 
 //发送联动指令
 void device_session::send_action_conmmand(map<int,vector<ActionParam> > &param,string sUser,int actionType,e_ErrorCode &opResult){

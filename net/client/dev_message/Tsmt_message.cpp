@@ -156,7 +156,7 @@ namespace hx_net
                 //设置运行状态
                 set_run_state(irunstate);
             }
-            //
+
             d_checkData_ptr = d_curData_ptr;
             if(d_ptransmmit->IsStandardCommand()){
                 m_pSession->start_handler_data(d_devInfo.sDevNum,d_curData_ptr);

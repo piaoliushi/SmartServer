@@ -123,7 +123,7 @@ namespace hx_net
         void http_close_all();
 
         //判断监测量是否报警
-        void check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,bool bMonitor);
+        void check_alarm_state(string sDevId,DevMonitorDataPtr curDataPtr,map<int,bool> &mapIsMonitorChl);//bool bMonitor
 
         void save_monitor_record(string sDevId,DevMonitorDataPtr curDataPtrconst,
                                  const map<int,DeviceMonitorItem> &mapMonitorItem);
@@ -136,7 +136,7 @@ namespace hx_net
         string get_devid_by_addcode(int iaddcode);
 
         //是否在监测时间段
-        bool is_monitor_time(string sDevId);//,int ichannel=0
+        bool is_monitor_time(string sDevId,map<int,bool> &mapIsMonitorChl);//,int ichannel=0
 
         void sendSmsToUsers(int nLevel,string &sContent);
 

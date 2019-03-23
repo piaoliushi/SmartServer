@@ -95,6 +95,9 @@ namespace hx_net
         //发送联动命令
         e_ErrorCode  SendActionCommand(map<int,vector<ActionParam> > &param,string sUser,int actionType);
 
+        //旺通短信发送
+        e_ErrorCode SendWtSMSContent(vector<string> &PhoneNumber, string AlarmContent);
+
 	private:
 		boost::recursive_mutex         device_pool_mutex_;
 		std::map<DevKey,session_ptr>   device_pool_;

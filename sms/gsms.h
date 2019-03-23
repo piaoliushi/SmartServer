@@ -65,6 +65,7 @@ public:
     enum{
         tyGsm    = 0,//通用GSM
         tyHwCdma = 1,//华为CDMA323
+        tyWt     = 2,//旺通中间件
     }SmsType;
     explicit Gsms(int mdtype=0,QObject *parent = 0);
     ~Gsms();
@@ -91,6 +92,7 @@ public:
     int gsmParseMessageList(SM_PARAM* pMsg, SM_BUFF* pBuff);
     bool IsRun(){boost::recursive_mutex::scoped_lock lock(m_run_mutex);
                  return b_run_;}
+    int GetModleType(){return modle_type;}
 signals:
  //   void S_have_model(bool bhave);
  //   void S_init_result(bool bSucces);
