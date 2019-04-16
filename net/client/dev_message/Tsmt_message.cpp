@@ -343,8 +343,19 @@ namespace hx_net
     //检测发射机运行状态
     void Tsmt_message::detect_run_state(DevMonitorDataPtr curDataPtr)
     {
-        //float  zeroValue = d_devProperty->zero_power_value;
-        if(curDataPtr->mValues[0].fValue >d_devProperty->zero_power_value)
+
+        bool brun = false;
+        if(!curDataPtr->mValues[d_devProperty->iCheckRunIndex].bType)
+        {
+            if(curDataPtr->mValues[d_devProperty->iCheckRunIndex].fValue >d_devProperty->zero_power_value)
+                brun = true;
+        }
+        else
+        {
+           if(int(curDataPtr->mValues[d_devProperty->iCheckRunIndex].fValue)!=int(d_devProperty->zero_power_value))
+               brun = true;
+        }
+        if(brun)
         {
             if(is_running())
                 return;

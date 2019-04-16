@@ -2353,7 +2353,7 @@ void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPt
             if(curChannel>=0){
                 if(mapIsMonitorChl[curChannel]!=true){//bMonitor!=true
                     clear_dev_item_alarm(sDevId,iterItem->first);
-                    return;
+                    continue;
                 }
             }
         }

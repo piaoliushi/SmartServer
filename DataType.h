@@ -347,6 +347,7 @@ struct DevicePropertyEx
         ,is_digital_item_adjust_(false)//是否进行数字量判断
         ,digital_detect_during_time_(10)//10秒钟检测时间
         ,is_step_open_close(false)//分步骤开关机
+        ,iCheckRunIndex(0)
 	{
 		
 	}
@@ -388,7 +389,8 @@ struct DevicePropertyEx
 	double     power_limit_value_;//功率门限值
 	bool    is_digital_item_adjust_;//是否进行数字量判断
 	int     digital_detect_during_time_;//数字量检测时长
-     bool    is_step_open_close;//是否分多步开关机
+    bool    is_step_open_close;//是否分多步开关机
+    int     iCheckRunIndex;//判断开机的监控量序号 add by ws 2019-04-08
 
 };
 typedef boost::shared_ptr<DevicePropertyEx> pDevicePropertyExPtr;

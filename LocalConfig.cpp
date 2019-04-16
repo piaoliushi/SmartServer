@@ -206,6 +206,10 @@ bool LocalConfig::load_local_config(const char* sFileName)
                 xml_property = xml_device->first_node("zero_power_value");
                 if(xml_property)
                     tmpPropertyEx->zero_power_value = strtod(xml_property->value(),NULL);
+                //关机判定监控量序号 add by ws 2019-04-08
+                xml_property = xml_device->first_node("check_run_index");
+                if(xml_property)
+                    tmpPropertyEx->iCheckRunIndex = atoi(xml_property->value());
                 //9033A电压矫正系数
                 xml_property = xml_device->first_node("ubb_ratio_value");
                 if(xml_property)
