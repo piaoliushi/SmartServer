@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "base_message.h"
 #include "./snmp_pp/snmp_pp.h"
 using namespace std;

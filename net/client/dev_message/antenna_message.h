@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../../../DataType.h"
 #include "base_message.h"
 using namespace std;
@@ -27,7 +27,6 @@ public:
 
     void switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult);
     bool can_switch_antenna();
-    //该接口，sAttenaId此时填充备机id
     void get_relate_dev_info(string &sStationId,string &sDevId,string &sAttenaId);
 protected:
     int   parse_HX_981(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
@@ -35,21 +34,21 @@ protected:
     void  restart_task_timeout_timer();
     void  schedules_task_time_out(const boost::system::error_code& error);
 private:
-    dev_session_ptr  m_pSession;//关联连接对象
-    boost::asio::deadline_timer     task_timeout_timer_;//控制任务执行定时器
+    dev_session_ptr  m_pSession;
+    boost::asio::deadline_timer     task_timeout_timer_;
 
     boost::recursive_mutex    can_switch_mutex_;
     bool   can_switch_;
-    DeviceInfo           &d_devInfo;//设备信息
+    DeviceInfo           &d_devInfo;
     DevMonitorDataPtr d_curData_ptr;
-    boost::recursive_mutex          run_state_mutex_;//设备运行状态互斥量
+    boost::recursive_mutex          run_state_mutex_;
     int dev_run_state_;
-    string                 d_cur_user_;//当前用户
-    int                    d_cur_task_;//当前任务
-    DeviceInfo            *d_relate_host_tsmt_ptr_;//关联主发射机
-    DeviceInfo            *d_relate_backup_tsmt_ptr_;//关联备发射机
-    bool                   d_antenna_Agent_;//天线代理标志
-    bool                   d_onekeyopen_996;//996一键开机标志
-    bool                   d_onekeyopen_soft;//通用软件一键开机标志
+    string                 d_cur_user_;
+    int                    d_cur_task_;
+    DeviceInfo            *d_relate_host_tsmt_ptr_;
+    DeviceInfo            *d_relate_backup_tsmt_ptr_;
+    bool                   d_antenna_Agent_;
+    bool                   d_onekeyopen_996;
+    bool                   d_onekeyopen_soft;
 };
 }

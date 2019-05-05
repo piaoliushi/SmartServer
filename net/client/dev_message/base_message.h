@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../device_session.h"
 #include "../device_message.h"
 using namespace std;

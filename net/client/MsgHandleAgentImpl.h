@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "MsgHandleAgentImpl.h"
 #include "./dev_message/base_message.h"
 

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "../../../DataType.h"
 #include "base_message.h"
 using namespace std;

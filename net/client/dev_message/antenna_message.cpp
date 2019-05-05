@@ -59,7 +59,6 @@ Antenna_message::~Antenna_message()
      task_timeout_timer_.cancel();
 }
 
-//该接口，sAttenaId此时填充备机id
 void Antenna_message::get_relate_dev_info(string &sStationId,string &sDevId,string &sAttenaId)
 {
     if(d_relate_host_tsmt_ptr_!=NULL){
@@ -135,7 +134,6 @@ void Antenna_message::GetSignalCommand(devCommdMsgPtr lpParam, CommandUnit &cmdU
         {
             if(lpParam->cparams_size()<1)
                 break;
-            //默认命令备机->主机
             cmdUnit.ackLen=0;
             cmdUnit.commandLen=11;
             cmdUnit.commandId[0]=0xAA;
@@ -345,7 +343,6 @@ void Antenna_message::switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult
         return;
     }
 
-    //天线在位执行开机，否则返回
     dev_run_state nHostRunS = GetInst(SvcMgr).get_dev_run_state(d_relate_host_tsmt_ptr_->sStationNum,
                                d_relate_host_tsmt_ptr_->sDevNum);
     dev_run_state nBackupRunS = GetInst(SvcMgr).get_dev_run_state(d_relate_backup_tsmt_ptr_->sStationNum,
@@ -398,7 +395,7 @@ void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrC
     d_cur_task_ = icmdType;
     d_cur_user_ = sUser;
     if(cmd_excute_is_ok()){
-        if(nMode)//mode等于1代表是内部调用，必须返回EC_OK
+        if(nMode)
             eErrCode = EC_OK;
         else{
             if(icmdType == MSG_ANTENNA_HTOB_OPR)
