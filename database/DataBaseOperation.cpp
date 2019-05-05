@@ -712,7 +712,7 @@ bool DataBaseOperation::GetItemAlarmConfig(QSqlDatabase &db, string strDevnum,in
             acfig.iLimittype = alarmconfigquery.value(2).toInt();
             acfig.iLinkageEnable = alarmconfigquery.value(3).toInt();
             if(acfig.iLinkageEnable>0)
-            GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
+                GetLinkAction(db,alarmconfigquery.value(4).toString().toStdString(),acfig.vLinkAction);
             acfig.iDelaytime = alarmconfigquery.value(5).toInt();
             acfig.strLinkageRoleNumber = alarmconfigquery.value(6).toString().toStdString();
             acfig.iAlarmtype = alarmconfigquery.value(7).toInt();//0:监控量 1:整机
@@ -1267,8 +1267,6 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
                 return false;
             }
 
-
-
             mapSch[sDevNum.toStdString()] = vecSch;
         }
 
@@ -1279,36 +1277,52 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
 
     map<string,vector<Monitoring_Scheduler> >::iterator iter= mapSch.begin();
     for(;iter!=mapSch.end();++iter){
+        bool needClearCtlRuntime = false;
+        bool needClearMonitorRuntime = false;
+        //统计是否需要清除
+        vector<Monitoring_Scheduler>::iterator iter_need_clear = iter->second.begin();
+        for(;iter_need_clear!=iter->second.end();++iter_need_clear){
+            if((*iter_need_clear).iCtlType==0 || (*iter_need_clear).iCtlType==2)
+                needClearCtlRuntime = true;
+            if((*iter_need_clear).iCtlType==0 || (*iter_need_clear).iCtlType==1)
+                needClearMonitorRuntime = true;
+        }
+
         QString sDevNum = QString::fromStdString(iter->first);
         QSqlQuery qsDel(db);
         QString strSql=QString("delete from monitoring_scheduler where objectnumber=:objectnumber");
-        qsDel.prepare(strSql);
-        qsDel.bindValue(":objectnumber",sDevNum);
-        if(!qsDel.exec()){
-            cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel---error!"<<endl;
-            db.rollback();
-            resValue = 3;
-            ConnectionPool::closeConnection(db);
-            return false;
+        //清理监测运行图记录
+        if(needClearMonitorRuntime == true){
+            qsDel.prepare(strSql);
+            qsDel.bindValue(":objectnumber",sDevNum);
+            if(!qsDel.exec()){
+                cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel---error!"<<endl;
+                db.rollback();
+                resValue = 3;
+                ConnectionPool::closeConnection(db);
+                return false;
+            }
         }
-
-        strSql = QString("delete from command_scheduler where objectnumber=:objectnumber and (commandtype=15 or commandtype=19)");
-        qsDel.prepare(strSql);
-        qsDel.bindValue(":objectnumber",sDevNum);
-        if(!qsDel.exec()) {
-            cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel2---error!"<<endl;
-            db.rollback();
-            resValue = 3;
-            ConnectionPool::closeConnection(db);
-            return false;
+        //清理控制运行图记录
+        if(needClearCtlRuntime == true){
+            strSql = QString("delete from command_scheduler where objectnumber=:objectnumber and (commandtype=15 or commandtype=19)");
+            qsDel.prepare(strSql);
+            qsDel.bindValue(":objectnumber",sDevNum);
+            if(!qsDel.exec()) {
+                cout<<qsDel.lastError().text().toStdString()<<"SetAlarmTime---qsDel2---error!"<<endl;
+                db.rollback();
+                resValue = 3;
+                ConnectionPool::closeConnection(db);
+                return false;
+            }
         }
 
 
         QSqlQuery insertQuery(db);//0:星期 1:月 2:天
         strSql = QString("insert into monitoring_scheduler(objectnumber,weekday,enable,starttime,endtime,datetype,month,day,alarmendtime,mode) \
                          values(:objectnumber,:weekday,:enable,:starttime,:endtime,:datetype,:month,:day,:alarmendtime,:mode)");
-                         insertQuery.prepare(strSql);
-                insertQuery.bindValue(":objectnumber",sDevNum);
+        insertQuery.prepare(strSql);
+        insertQuery.bindValue(":objectnumber",sDevNum);
 
         QString strCmd = QString("insert into command_scheduler(objectnumber,paramnumber,enable,weekday,starttime,commandtype,hasparam,datetype,month,day,commandendtime) \
                                  values(:objectnumber,'',1,:weekday,:starttime,:commandtype,0,:datetype,:month,:day,:commandendtime)");
@@ -1320,10 +1334,12 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
         insertCmdcloseQuery.prepare(strCmd);
         insertCmdcloseQuery.bindValue(":objectnumber",sDevNum);
         insertCmdcloseQuery.bindValue(":commandtype",19);
+
         for(int i=0;i<iter->second.size();++i){
             //Command_Scheduler cmmdSch;
             int shutype = iter->second[i].iMonitorType;
             insertQuery.bindValue(":datetype",shutype);
+
             insertCmdopenQuery.bindValue(":datetype",shutype);
             insertCmdcloseQuery.bindValue(":datetype",shutype);
 
@@ -1332,10 +1348,9 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
 
             int nMode = (iter->second[i].bRunModeFlag==false)?0:1;
             insertQuery.bindValue(":mode",nMode);
-
-
             QDateTime qdt = QDateTime::fromTime_t(iter->second[i].tStartTime);
             insertQuery.bindValue(":starttime",qdt);
+
             if(iter->second[i].bRunModeFlag==false)//bMonitorFlag
                 insertCmdcloseQuery.bindValue(":starttime",qdt.addSecs(20));//不监测关机时间退后20秒
             else
@@ -1365,27 +1380,33 @@ bool DataBaseOperation::SetAlarmTime( map<string,vector<Monitoring_Scheduler> > 
             insertCmdopenQuery.bindValue(":day",iter->second[i].iMonitorDay);
             insertCmdopenQuery.bindValue(":commandendtime",qAlarmendDt);
 
-            if(!insertQuery.exec())  {
-                cout<<insertQuery.lastError().text().toStdString()<<"SetAlarmTime---insertQuery---error!"<<endl;
-                db.rollback();
-                resValue = 3;
-                ConnectionPool::closeConnection(db);
-                return false;
+            if(iter->second[i].iCtlType == 0 || iter->second[i].iCtlType == 1){
+                if(!insertQuery.exec())  {
+                    cout<<insertQuery.lastError().text().toStdString()<<"SetAlarmTime---insertQuery---error!"<<endl;
+                    db.rollback();
+                    resValue = 3;
+                    ConnectionPool::closeConnection(db);
+                    return false;
+                }
             }
-            if(!insertCmdopenQuery.exec()) {
-                cout<<insertCmdopenQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdopenQuery---error!"<<endl;
-                db.rollback();
-                resValue = 3;
-                ConnectionPool::closeConnection(db);
-                return false;
+
+            if(iter->second[i].iCtlType == 0 || iter->second[i].iCtlType == 2){
+                if(!insertCmdopenQuery.exec()) {
+                    cout<<insertCmdopenQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdopenQuery---error!"<<endl;
+                    db.rollback();
+                    resValue = 3;
+                    ConnectionPool::closeConnection(db);
+                    return false;
+                }
+                if(!insertCmdcloseQuery.exec()) {
+                    cout<<insertCmdcloseQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdcloseQuery---error!"<<endl;
+                    db.rollback();
+                    resValue = 3;
+                    ConnectionPool::closeConnection(db);
+                    return false;
+                }
             }
-            if(!insertCmdcloseQuery.exec()) {
-                cout<<insertCmdcloseQuery.lastError().text().toStdString()<<"SetAlarmTime---insertCmdcloseQuery---error!"<<endl;
-                db.rollback();
-                resValue = 3;
-                ConnectionPool::closeConnection(db);
-                return false;
-            }
+
         }
 
     }

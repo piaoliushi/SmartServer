@@ -68,6 +68,7 @@ typedef struct _tag_M_Sch
         iMonitorDay=-1;
         bRunModeFlag=false;//默认非监测时段
         iChannelId=0;
+        iCtlType =0;//0:监测+控制运行图，1：监测运行库，2：控制运行库
 
     }
 
@@ -81,6 +82,7 @@ typedef struct _tag_M_Sch
     time_t   tEndTime;         //结束时间
     time_t   tAlarmEndTime;    //月运行计划终止日期
     int      iChannelId;       //通道编号
+    int      iCtlType;
 }Monitoring_Scheduler;
 
 typedef struct

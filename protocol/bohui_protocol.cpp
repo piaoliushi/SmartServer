@@ -1019,6 +1019,12 @@ int Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<
                 return BH_ERROR;
             tmSch.bMonitorFlag = true;
             tmSch.bRunModeFlag = atoi(attrType->value());//监测标志0:停播
+            //add by liukun for 2019-5-5 添加控制类型
+            rapidxml::xml_attribute<char> * attrCtlType = setnode->first_attribute("CtlType");
+            if(attrCtlType!=NULL){
+                tmSch.iCtlType = atoi(attrCtlType->value());
+            }
+
             //开始时间
             QDateTime qdt;
             rapidxml::xml_attribute<char> * attrStarttime = setnode->first_attribute("StartTime");
