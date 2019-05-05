@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <map>
 //#include "device_message.h"
 #include "../share_ptr_object_define.h"
