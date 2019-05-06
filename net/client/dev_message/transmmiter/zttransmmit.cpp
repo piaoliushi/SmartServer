@@ -4,6 +4,8 @@ namespace hx_net
 {
    ZtTransmmit::ZtTransmmit(int subprotocol,int addresscode)
        :Transmmiter()
+       ,m_subprotocol(subprotocol)
+       ,m_addresscode(addresscode)
    {
    }
 
