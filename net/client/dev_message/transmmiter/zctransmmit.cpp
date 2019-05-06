@@ -1,5 +1,6 @@
 #include "zctransmmit.h"
-namespace hx_net{
+namespace hx_net
+{
    ZcTransmmit::ZcTransmmit(int subprotocol,int addresscode)
    :Transmmiter()
    ,m_subprotocol(subprotocol)
