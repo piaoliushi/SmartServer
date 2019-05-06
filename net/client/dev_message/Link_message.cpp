@@ -1,4 +1,4 @@
-﻿#include "Link_message.h"
+#include "Link_message.h"
 #include"../../../utility.h"
 #include "../../../StationConfig.h"
 #include <QString>
