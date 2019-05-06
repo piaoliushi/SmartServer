@@ -1,4 +1,4 @@
-﻿#include "LngdTransmmit.h"
+#include "LngdTransmmit.h"
 #include "../../../../utility.h"
 namespace hx_net{
 	LngdTransmmit::LngdTransmmit(int subprotocol,int addresscode)
