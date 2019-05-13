@@ -22,6 +22,7 @@
 #include "./transmmiter/astransmmit.h"
 #include "./transmmiter/LngdTransmmit.h"
 #include "./transmmiter/zttransmmit.h"
+#include "./transmmiter/huakangtransmmit.h"
 
 #include "../../../database/DataBaseOperation.h"
 using namespace db;
@@ -519,6 +520,10 @@ namespace hx_net
         case ZHENGTAI:
             d_ptransmmit = new ZtTransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
             break;
+        case WUXI_HUAKANG:
+            d_ptransmmit = new HuaKangtransmmit(d_devInfo.nSubProtocol,d_devInfo.iAddressCode);
+            break;
+
 
         }
     }

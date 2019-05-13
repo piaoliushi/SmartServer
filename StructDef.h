@@ -98,6 +98,7 @@ typedef enum PROTOCOL
     ZHC                   = 29, //众传
     RVR                   = 30, //RVR系列
     ZHENGTAI              = 31, //正泰
+    WUXI_HUAKANG          = 32,//无锡华康
 
 }Protocol,*pProtocol;
 
@@ -408,10 +409,17 @@ typedef struct CStepMDUnit
     float         fvalue;
     int           stcmdtimeout;
 }StepCommandUnit;
+
 typedef struct
 {
     map<int,StepCommandUnit> mapstepopencmd;
     map<int,StepCommandUnit> mapstepclosecmd;
 }StepCommandAttribute;
+
+//无锡华康
+typedef enum HKPROTOCOL
+{
+    HK_FM_1KW = 0,
+}HkSubProtocol;
 
 #endif
