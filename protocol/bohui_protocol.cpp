@@ -1036,7 +1036,7 @@ int Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<
                     qdt=QDateTime::fromString(attrStarttime->value(),"yyyy-MM-dd hh:mm:ss");
             }else{
                 qdt=QDateTime::fromString(attrStarttime->value(),"hh:mm:ss");
-                qdt.setDate(QDate(1970,2,1));
+                qdt.setDate(QDate(1980,1,1));
             }
             if(qdt.isValid())
                 tmSch.tStartTime = qdt.toTime_t();
@@ -1052,7 +1052,7 @@ int Bohui_Protocol::_parse_alarm_run_time(xml_node<> *root_node,int &nValue,map<
                     qdt=QDateTime::fromString(attrEndtime->value(),"yyyy-MM-dd hh:mm:ss");
             }else{
                 qdt=QDateTime::fromString(attrEndtime->value(),"hh:mm:ss");
-                qdt.setDate(QDate(1970,2,1));
+                qdt.setDate(QDate(1980,1,1));
             }
             if(qdt.isValid())
                 tmSch.tEndTime = qdt.toTime_t();
