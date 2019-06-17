@@ -94,7 +94,8 @@ namespace hx_net
     void net_session::send_monitor_data_message(string sStationid,string sDevid,int devType,
                                             unchar_ptr curData,DeviceMonitorItem &mapMonitorItem)
 	{
-        /*devDataNfyMsgPtr dev_cur_data_ptr(new DevDataNotify);
+        /*
+        devDataNfyMsgPtr dev_cur_data_ptr(new DevDataNotify);
 		dev_cur_data_ptr->set_edevtype(devType);
 		dev_cur_data_ptr->set_sstationid(sStationid);
 		dev_cur_data_ptr->set_sdevid(sDevid);
@@ -112,8 +113,7 @@ namespace hx_net
 		cell->set_ecelltype((e_CellType)mapMonitorItem.nMonitoringType);
 		cell->set_scellid(boost::lexical_cast<string>(mapMonitorItem.nMonitoringIndex-59));
 		cell->set_scellname(QString::fromLocal8Bit(mapMonitorItem.sMonitoringName.c_str()).toUtf8().data());
-
-		cell->set_baudiovalue(&curData->at(0),curData->size());//
+        cell->set_baudiovalue(&curData->at(0),curData->size());
 		if(dev_cur_data_tosvr_ptr!=0)
 		{
 			if(mapMonitorItem.bIsUpload==true)
