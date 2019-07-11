@@ -343,6 +343,8 @@ e_ErrorCode   DevClient::response_http_msg(string sUrl,string &sContent,string s
 //发送短信
 e_ErrorCode DevClient::SendSMSContent(vector<string> &PhoneNumber, string AlarmContent)
 {
+    if(!m_pGsm_ptr_)
+        return EC_FAILED;
     if(m_pGsm_ptr_->GetModleType()!=Gsms::tyWt)
     {
         if(m_pGsm_ptr_&&m_pGsm_ptr_->IsRun())

@@ -1909,7 +1909,8 @@ namespace hx_net
       return RE_SUCCESS;
   }
 
-   int Link_message::decode_JC5103(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode,int &curChannel)
+   int Link_message::decode_JC5103(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen,
+                                   int &iaddcode,int &curChannel)
   {
       int nresult = RE_CMDACK;
       int lastlen = nDataLen;

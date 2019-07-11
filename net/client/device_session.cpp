@@ -77,6 +77,7 @@ void device_session::init_session_config()
         pDevicePropertyExPtr dev_config_ptr = GetInst(LocalConfig).device_property_ex((*iter).first);
         //初始化解析库
         pars_agent->Init(dev_config_ptr);
+
         //保存moxa下的设备自定义配置信息
         run_config_ptr[(*iter).first]=dev_config_ptr;
         //获取默认命令配置
@@ -84,6 +85,8 @@ void device_session::init_session_config()
 
         //将配置文件中的自定义命令更新到command_;
         GetInst(LocalConfig).device_cmd((*iter).first,*tmpCommand);
+
+
 
         dev_agent_and_com[iter->first]=pair<CommandAttrPtr,HMsgHandlePtr>(tmpCommand,pars_agent);
 
@@ -1598,7 +1601,7 @@ bool device_session::is_need_save_data(string sDevId)
     time_t tmCurTime;
     time(&tmCurTime);
     double ninterval = difftime(tmCurTime,tmLastSaveTime[sDevId]);
-    if(ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
+    if(ninterval>0 && ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
         return false;
     tmLastSaveTime[sDevId] = tmCurTime;
     return true;

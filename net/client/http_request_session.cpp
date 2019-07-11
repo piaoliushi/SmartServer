@@ -80,7 +80,7 @@ http_request_session::~http_request_session(void)
                                                                          this,boost::asio::placeholders::error));
                   }else{
                       boost::system::error_code ec;
-                      //cout<<"http_stream_.open----------start!!!"<<endl;
+                      cout<<"http_stream_.open----------start!!!"<<endl;
                       http_stream_.open(task_.first, ec);
                       cout<<"task size:------"<<_taskqueueptr->get_Task_Size()<<"-------"<<ec.message()<<endl;
                       http_stream_.close();
@@ -121,8 +121,10 @@ http_request_session::~http_request_session(void)
      double ninterval = difftime(tmCurTime,oldtime);
 
      int nReportSpan = GetInst(LocalConfig).report_span();
-     if(ninterval<nReportSpan)//间隔保存时间 need amend;
-         return false;
+     if(ninterval>0 && ninterval<nReportSpan)//间隔保存时间 need amend;
+     {
+          return false;
+     }
      oldtime = tmCurTime;
      return true;
  }
@@ -259,6 +261,8 @@ http_request_session::~http_request_session(void)
 
               if(sReportMsg.empty()==false)
                   putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+              else
+                  cout<<"sReportMsg is empty----stop put!"<<endl;
               xml_link_reportMsg.clear();
               xml_link_mapQualityMsg.clear();
               xml_link_mapDevMsg.clear();

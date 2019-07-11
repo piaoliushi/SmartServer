@@ -114,6 +114,7 @@ private:
     int                   d_curStep;//分步骤开关机当前步骤号
     StepCommandAttribute  d_step_oc_cmd;
     DevMonitorDataPtr      d_checkData_ptr;
+
 };
 typedef boost::shared_ptr<hx_net::Tsmt_message>  Tsmt_message_ptr;
 typedef boost::weak_ptr<hx_net::Tsmt_message>    Tsmt_message_weak_ptr;
