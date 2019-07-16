@@ -74,7 +74,7 @@ http_request_session::~http_request_session(void)
                http_stream_.set_ignore_return_content(true);
               try
               {
-                  cout<<task_.second<<endl;
+                  //cout<<task_.second<<endl;
                   if(asycFlag_==true){
                         http_stream_.async_open(task_.first,boost::bind(&http_request_session::open_handler,
                                                                          this,boost::asio::placeholders::error));
@@ -82,14 +82,15 @@ http_request_session::~http_request_session(void)
                       boost::system::error_code ec;
                       cout<<"http_stream_.open----------start!!!"<<endl;
                       http_stream_.open(task_.first, ec);
-                      cout<<"task size:------"<<_taskqueueptr->get_Task_Size()<<"-------"<<ec.message()<<endl;
+                      cout<<"http_stream_.open success ---task size:--"<<_taskqueueptr->get_Task_Size()<<"---"<<ec.message()<<endl;
                       http_stream_.close();
                   }
               }
-              catch (...)
+              catch (boost::system::error_code& e)
               {
                   http_stream_.close();
-                  std::cerr << "open url error ! "<< std::endl;
+                  std::cerr<< "open url error ! " << e.message() << std::endl;
+                  //std::cerr << "open url error ! "<< std::endl;
               }
 
           }
