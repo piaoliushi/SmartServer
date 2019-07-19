@@ -226,8 +226,9 @@ http_request_session::~http_request_session(void)
                   rapidxml::print(std::back_inserter(sReportMsg), xml_tsmt_reportMsg, 0);
               }
 
-              if(sReportMsg.empty()==false)
-                  putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+              if(sReportMsg.empty()==false){
+                  //putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+              }
               xml_tsmt_reportMsg.clear();
               xml_tsmt_mapQualityMsg.clear();
               xml_tsmt_mapDevMsg.clear();
@@ -266,16 +267,17 @@ http_request_session::~http_request_session(void)
                   rapidxml::print(std::back_inserter(sReportMsg), xml_link_reportMsg, 0);
               }
 
-              if(sReportMsg.empty()==false)
-                  putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+              if(sReportMsg.empty()==false){
+                  //putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+                  cout<<"link dev putHttpMessage--devid="<<sDevid<<endl;
+              }
               else
                   cout<<"sReportMsg is empty----stop put!"<<endl;
+
+              link_report_span_ = time(0);
               xml_link_reportMsg.clear();
               xml_link_mapQualityMsg.clear();
               xml_link_mapDevMsg.clear();
-
-              link_report_span_ = time(0);
-
           }else{
               //添加数据,且检查该设备在时间段内是否已经添加过了
               Bohui_Protocol  bh_ptcl;
@@ -284,7 +286,8 @@ http_request_session::~http_request_session(void)
                   bh_ptcl.appendLinkReportBodyMsg(xml_link_reportMsg,xml_link_mapQualityMsg,sDevid,nDevType,
                                                       curData,mapMonitorItem);
                   xml_link_mapDevMsg[sDevid] = NULL;
-              }
+              }else
+                  cout<<"repeated  link device-----------id="<<sDevid<<endl;
           }
       }
 
