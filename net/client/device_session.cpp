@@ -1601,7 +1601,7 @@ bool device_session::is_need_save_data(string sDevId)
     time_t tmCurTime;
     time(&tmCurTime);
     double ninterval = difftime(tmCurTime,tmLastSaveTime[sDevId]);
-    if(ninterval>0 && ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
+    if(ninterval>=0 && ninterval<run_config_ptr[sDevId]->data_save_interval)//间隔保存时间 need amend;
         return false;
     tmLastSaveTime[sDevId] = tmCurTime;
     return true;

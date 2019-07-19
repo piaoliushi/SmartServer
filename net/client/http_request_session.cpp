@@ -12,8 +12,8 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
     ,http_stream_(http_io_service_)
 {
     env_report_span_  = time(0);
-    tsmt_report_span_ = time(0);
-    link_report_span_ = time(0);
+    tsmt_report_span_ = env_report_span_;//time(0);
+    link_report_span_ = env_report_span_;//time(0);
 
     deal_thread_.reset(new boost::thread(boost::bind(&http_request_session::openUrl,this)));
 }
@@ -123,10 +123,12 @@ http_request_session::~http_request_session(void)
      double ninterval = difftime(tmCurTime,oldtime);
 
      int nReportSpan = GetInst(LocalConfig).report_span();
-     if(ninterval>0 && ninterval<nReportSpan)//间隔保存时间 need amend;
+     if(ninterval>=0 && ninterval<nReportSpan)//间隔保存时间 need amend;
           return false;
 
+     //cout<<"nReportSpan----oldtime="<<oldtime<<"---curtime="<<tmCurTime<<"---interval="<<ninterval<<endl;
      //oldtime = tmCurTime;//外部赋值
+
      return true;
  }
 
@@ -139,7 +141,6 @@ http_request_session::~http_request_session(void)
  {
      //动环数据收集发送
       if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE && nDevType!=DEVICE_SWITCH){
-           return;
            boost::recursive_mutex::scoped_lock lock(http_env_stream_mutex_);
            if(is_need_report_data(env_report_span_) || bImmediately==true){
                //发送数据
@@ -165,20 +166,21 @@ http_request_session::~http_request_session(void)
                    }
                     if(nDevType==DEVICE_UPS){
                         map<string,xml_node<>* >::iterator iter = xml_env_mapQualityMsgEx.begin();
-                        for(;iter!=xml_env_mapQualityMsgEx.end();++iter)
+                        for(;iter!=xml_env_mapQualityMsgEx.end();++iter){
                             pHeadMsg->append_node(iter->second);
+                        }
                     }else{
                         map<int,xml_node<>* >::iterator iter = xml_env_mapQualityMsg.begin();
                         for(;iter!=xml_env_mapQualityMsg.end();++iter)
                             pHeadMsg->append_node(iter->second);
                     }
 
-
                    rapidxml::print(std::back_inserter(sReportMsg), xml_env_reportMsg, 0);
                }
 
                if(sReportMsg.empty()==false)
                    putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+
                xml_env_reportMsg.clear();
                if(nDevType==DEVICE_UPS)
                     xml_env_mapQualityMsgEx.clear();
@@ -207,7 +209,6 @@ http_request_session::~http_request_session(void)
            }
 
       }else if(nDevType == DEVICE_TRANSMITTER){//发射机
-          return;
           boost::recursive_mutex::scoped_lock lock(http_tsmt_stream_mutex_);
           if(is_need_report_data(tsmt_report_span_)|| bImmediately==true){
               //发送数据
@@ -227,7 +228,7 @@ http_request_session::~http_request_session(void)
               }
 
               if(sReportMsg.empty()==false){
-                  //putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+                  putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
               }
               xml_tsmt_reportMsg.clear();
               xml_tsmt_mapQualityMsg.clear();
@@ -247,7 +248,9 @@ http_request_session::~http_request_session(void)
           }
 
       }
-      else if((nDevType >= DEVICE_GS_RECIVE && nDevType <= DEVICE_ADAPTER) || nDevType==DEVICE_SWITCH){//链路设备
+      else if((nDevType >= DEVICE_GS_RECIVE && nDevType <= DEVICE_ADAPTER) || nDevType==DEVICE_SWITCH)
+      {
+          //链路设备
           boost::recursive_mutex::scoped_lock lock(http_link_stream_mutex_);
           if(is_need_report_data(link_report_span_)|| bImmediately==true){
 
@@ -274,10 +277,13 @@ http_request_session::~http_request_session(void)
               else
                   cout<<"sReportMsg is empty----stop put!"<<endl;
 
-              link_report_span_ = time(0);
+
               xml_link_reportMsg.clear();
               xml_link_mapQualityMsg.clear();
               xml_link_mapDevMsg.clear();
+
+              link_report_span_ = time(0);
+
           }else{
               //添加数据,且检查该设备在时间段内是否已经添加过了
               Bohui_Protocol  bh_ptcl;
