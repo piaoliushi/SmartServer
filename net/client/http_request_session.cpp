@@ -139,7 +139,7 @@ http_request_session::~http_request_session(void)
  {
      //动环数据收集发送
       if(nDevType>DEVICE_TRANSMITTER && nDevType<DEVICE_GS_RECIVE && nDevType!=DEVICE_SWITCH){
-
+           return;
            boost::recursive_mutex::scoped_lock lock(http_env_stream_mutex_);
            if(is_need_report_data(env_report_span_) || bImmediately==true){
                //发送数据
@@ -207,7 +207,7 @@ http_request_session::~http_request_session(void)
            }
 
       }else if(nDevType == DEVICE_TRANSMITTER){//发射机
-
+          return;
           boost::recursive_mutex::scoped_lock lock(http_tsmt_stream_mutex_);
           if(is_need_report_data(tsmt_report_span_)|| bImmediately==true){
               //发送数据
@@ -268,7 +268,7 @@ http_request_session::~http_request_session(void)
               }
 
               if(sReportMsg.empty()==false){
-                  //putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
+                  putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
                   cout<<"link dev putHttpMessage--devid="<<sDevid<<endl;
               }
               else
