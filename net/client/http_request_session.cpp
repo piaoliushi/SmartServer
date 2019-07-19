@@ -292,8 +292,7 @@ http_request_session::~http_request_session(void)
                   bh_ptcl.appendLinkReportBodyMsg(xml_link_reportMsg,xml_link_mapQualityMsg,sDevid,nDevType,
                                                       curData,mapMonitorItem);
                   xml_link_mapDevMsg[sDevid] = NULL;
-              }else
-                  cout<<"repeated  link device-----------id="<<sDevid<<endl;
+              }
           }
       }
 
