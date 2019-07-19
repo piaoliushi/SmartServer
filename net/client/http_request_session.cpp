@@ -66,7 +66,7 @@ http_request_session::~http_request_session(void)
               urdl::read_stream http_stream_(http_io_service_);
               //调用子类work，处理具体任务
                urdl::option_set common_options;
-               common_options.set_option(urdl::http::max_redirects(0));
+               common_options.set_option(urdl::http::max_redirects(1));
                http_stream_.set_option(urdl::http::request_method("POST"));
                http_stream_.set_option(urdl::http::request_content_type("text/plain"));
                http_stream_.set_option(urdl::http::request_content(task_.second));
@@ -90,10 +90,11 @@ http_request_session::~http_request_session(void)
               {
                   http_stream_.close();
                   std::cerr<< "open url error ! " << e.message() << std::endl;
-                  //std::cerr << "open url error ! "<< std::endl;
               }
 
+              boost::this_thread::sleep(boost::posix_time::millisec(50));
           }
+
      } while (!isExit());
  }
 
@@ -123,10 +124,9 @@ http_request_session::~http_request_session(void)
 
      int nReportSpan = GetInst(LocalConfig).report_span();
      if(ninterval>0 && ninterval<nReportSpan)//间隔保存时间 need amend;
-     {
           return false;
-     }
-     oldtime = tmCurTime;
+
+     //oldtime = tmCurTime;//外部赋值
      return true;
  }
 
@@ -185,6 +185,9 @@ http_request_session::~http_request_session(void)
                else
                     xml_env_mapQualityMsg.clear();
                xml_env_mapDevMsg.clear();
+
+               env_report_span_ = time(0);
+
            }else{
                //添加数据,且检查该设备在时间段内是否已经添加过了
                Bohui_Protocol  bh_ptcl;
@@ -228,6 +231,9 @@ http_request_session::~http_request_session(void)
               xml_tsmt_reportMsg.clear();
               xml_tsmt_mapQualityMsg.clear();
               xml_tsmt_mapDevMsg.clear();
+
+              tsmt_report_span_ = time(0);
+
           }else{
               //添加数据,且检查该设备在时间段内是否已经添加过了
               Bohui_Protocol  bh_ptcl;
@@ -267,6 +273,8 @@ http_request_session::~http_request_session(void)
               xml_link_reportMsg.clear();
               xml_link_mapQualityMsg.clear();
               xml_link_mapDevMsg.clear();
+
+              link_report_span_ = time(0);
 
           }else{
               //添加数据,且检查该设备在时间段内是否已经添加过了
