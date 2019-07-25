@@ -3,6 +3,7 @@
 #include "../net_session.h"
 #include "../taskqueue.h"
 #include <urdl/read_stream.hpp>
+#include <urdl/istream.hpp>
 #include "./rapidxml/rapidxml.hpp"
 #include "./rapidxml/rapidxml_utils.hpp"
 #include "./rapidxml/rapidxml_print.hpp"
@@ -48,7 +49,8 @@ private:
     boost::shared_ptr<boost::thread> deal_thread_;//网络监听线程
     bool d_bExit_;
     bool asycFlag_;
-    urdl::read_stream http_stream_;
+    //urdl::read_stream http_stream_;
+    urdl::istream  http_stream2_;
 
 
     boost::recursive_mutex         http_env_stream_mutex_; //动环上报对象互斥量

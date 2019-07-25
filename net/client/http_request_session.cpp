@@ -2,6 +2,7 @@
 #include "./protocol/bohui_protocol.h"
 #include "./protocol/bohui_const_define.h"
 #include "LocalConfig.h"
+#include "yaolog.h"
 namespace hx_net {
 
 http_request_session::http_request_session(boost::asio::io_service& io_service,bool bAsycFlag)
@@ -9,7 +10,8 @@ http_request_session::http_request_session(boost::asio::io_service& io_service,b
     ,asycFlag_(bAsycFlag)//
     ,_taskqueueptr(new TaskQueue< pair<string,string> >)
     ,d_bExit_(false)
-    ,http_stream_(http_io_service_)
+    //,http_stream_(http_io_service_)
+
 {
     env_report_span_  = time(0);
     tsmt_report_span_ = env_report_span_;//time(0);
@@ -63,33 +65,43 @@ http_request_session::~http_request_session(void)
          //从队列中取任务进行处理
          pair<string,string> task_ = _taskqueueptr->GetTask();
          if(!task_.first.empty()){
-              urdl::read_stream http_stream_(http_io_service_);
+              //urdl::read_stream http_stream_(http_io_service_);
+              //urdl::istream http_stream2_();
               //调用子类work，处理具体任务
                urdl::option_set common_options;
                common_options.set_option(urdl::http::max_redirects(1));
-               http_stream_.set_option(urdl::http::request_method("POST"));
-               http_stream_.set_option(urdl::http::request_content_type("text/plain"));
-               http_stream_.set_option(urdl::http::request_content(task_.second));
-               http_stream_.set_options(common_options);
-               http_stream_.set_ignore_return_content(true);
+               http_stream2_.set_option(urdl::http::request_method("POST"));
+               http_stream2_.set_option(urdl::http::request_content_type("text/plain"));
+               http_stream2_.set_option(urdl::http::request_content(task_.second));
+               http_stream2_.set_options(common_options);
+               //http_stream2_.set_ignore_return_content(true);
               try
               {
                   cout<<task_.second<<endl;
                   if(asycFlag_==true){
-                        http_stream_.async_open(task_.first,boost::bind(&http_request_session::open_handler,
-                                                                         this,boost::asio::placeholders::error));
+                        //http_stream_.async_open(task_.first,boost::bind(&http_request_session::open_handler,
+                        //                                                 this,boost::asio::placeholders::error));
                   }else{
                       boost::system::error_code ec;
-                      cout<<"http_stream_.open----------start!!!"<<endl;
-                      http_stream_.open(task_.first, ec);
-                      cout<<"http_stream_.open success ---task size:--"<<_taskqueueptr->get_Task_Size()<<"---"<<ec.message()<<endl;
-                      http_stream_.close();
+                      //cout<<"http_stream_.open----------start!!!"<<endl;
+                      LOG__("info", "http_stream_.open----------start!!!");
+                      http_stream2_.open_timeout(3000);
+                      http_stream2_.open(task_.first);//, ec
+                      if(!http_stream2_){
+                          // If the open operation timed out then:
+                          if(http_stream2_.error() == boost::system::errc::timed_out)
+                              LOG__("info", "http_stream_.open timeout");
+                      }
+                      //cout<<"http_stream_.open success ---task size:--"<<_taskqueueptr->get_Task_Size()<<"---"<<ec.message()<<endl;
+                      LOG__("info", "http_stream_.open success ---task size:--%d",_taskqueueptr->get_Task_Size());
+                      http_stream2_.close();
                   }
               }
               catch (boost::system::error_code& e)
               {
-                  http_stream_.close();
-                  std::cerr<< "open url error ! " << e.message() << std::endl;
+                  http_stream2_.close();
+                  //std::cerr<< "open url error ! " << std::endl;
+                  LOG__("info", "open url error ! ");
               }
 
               boost::this_thread::sleep(boost::posix_time::millisec(50));
@@ -105,11 +117,11 @@ http_request_session::~http_request_session(void)
    {
 
        //std::cerr << "open URL ok !!!: ";
-        http_stream_.close();
+        //http_stream_.close();
    }else {
 
      //std::cerr << "Unable to open URL: ";
-     http_stream_.close();
+     //http_stream_.close();
      std::cerr << ec.message() << std::endl;
    }
 

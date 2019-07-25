@@ -19,6 +19,10 @@ enum DEVType
     DEVICE_SWITCH            = 7,  //切换设备
     //DEVICE_GPS_TIME          = 8,  //GPS授时器
     DEVICE_UPS               = 8, //UPS
+    DEVICE_VMS_INFRARED      = 9, //红外
+    DEVICE_VMS_CAMERA        = 10,//摄像头
+    DEVICE_VMS_ENTRANCE_GUARD = 11,//门禁
+    DEVICE_GEN               = 12,//发电机
     DEVICE_GS_RECIVE         =100, //卫星接收机
     DEVICE_MW                =101, //微波接收机
     DEVICE_TR                =102, //光收发器

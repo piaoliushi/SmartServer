@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     QApplication::setQuitOnLastWindowClosed(false);
 #endif
 
-#if 0
+#if 1
     YAOLOG_INIT;
     YAOLOG_CREATE("info", true, YaoUtil::LOG_TYPE_TEXT);
     YAOLOG_SET_LOG_ATTR(
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
             true, false, true, true, NULL);
     YAOLOG_SET_LOGFILE_ATTR("info", false, true, true,NULL,NULL);
 
-    LOG__("info", "My name is ! I'm %d!",  29);
+    LOG__("info", "Server log start!");
 #endif
 
 
