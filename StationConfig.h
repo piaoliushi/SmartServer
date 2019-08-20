@@ -73,18 +73,22 @@ public:
 	 bool get_media_dev_info(int ndevAddr,MediaDeviceParamInfo& mediaDevInfo);
      //获得数据字典值
      string get_dictionary_value(string sType,int nCode);
-
+     //是否有gsm
      bool IsHaveGsm(){return bHave_GSM_model;}
+     //获取gms网络配置信息
      ComCommunicationMode getGsmInfo(){return Gsm_model_info;}
-
+     //获取设备属性
      bool get_dev_propery(string sDevId,string sName,string &sValue);
+     //获取提醒配置信息
+     map<string,Remind_Scheduler>&  get_all_remind_info();
+     //获取单个提醒配置信息
+     Remind_Scheduler*  get_remind_info(string sNumber);
 
 private:
 	vector<TransmitterInformation>mapTransmitterInfo;//台站id为索引
     vector<AntennaInformation> mapAntennaInfo;//台站id为索引
     vector<AssociateInfo> mapAssociateInfo;//台站id为索引
     vector<ModleInfo> mapModleInfo;
-    //vector<ModleInfo> mapTransmitAgentInfo;//发射机代理
 	vector<MediaDeviceParamInfo> vecUploadDevInfo;//上传设备
 	vector<MediaDeviceParamInfo> vecMediaDevInfo;//主动连接媒体设备
 	vector<SendMSInfo> vSmsInfo;
@@ -98,5 +102,7 @@ private:
 
     bool                 bHave_GSM_model;
     ComCommunicationMode Gsm_model_info;
+
+    map<string,Remind_Scheduler>  mapRemindInfo;//本地服务负责的提醒任务
 };
 #endif

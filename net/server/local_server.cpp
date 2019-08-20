@@ -1,6 +1,7 @@
 #include "local_server.h"
 #include "connect_handler.h"
 #include "../SvcMgr.h"
+#include "../../StationConfig.h"
 #include "../../DataType.h"
 #include "../../LocalConfig.h"
 #include "../../database/DataBaseOperation.h"
@@ -23,8 +24,11 @@ namespace hx_net
 		:io_service_pool_(io_service_pool_size)//设置io pool尺寸
 		,taskwork_(taskwork)//引用任务队列 
         ,acceptor_(io_service_pool_.get_io_service(),tcp::endpoint(tcp::v4(),port))
+        ,schedules_remind_timer_(io_service_pool_.get_io_service())
 	{
 		start_accept();
+
+        start_remind_schedules_timer();//启动提醒定时器
 	}
 
     LocalServer::~LocalServer()
@@ -110,7 +114,6 @@ namespace hx_net
 		std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.begin();
         for(;iter!=session_pool_.end();++iter){
 
-            //if(sUser==(*iter).second.usr_)
             if(lgClientId==(*iter).second.client_id_)
             {
 				loginAck.set_eresult(EC_USR_REPEAT_LOGIN);//已登陆
@@ -534,34 +537,6 @@ namespace hx_net
 	}
 
 	//移出连接,清理登陆信息
-//    int LocalServer::remove_connection_handler(session_ptr ch_ptr)
-//	{
-//		boost::recursive_mutex::scoped_lock lock(mutex_);
-//		std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.find(ch_ptr);
-//		if(iter!=session_pool_.end())
-//		{
-//			string curUsr = (*iter).second.usr_;
-//			string curPsw = (*iter).second.psw_;
-//			string curUsrId = (*iter).second.usr_number_;
-//			tcp::endpoint remote_add = (*iter).second.endPoint_;
-//			GetInst(SvcMgr).get_notify()->OnClientOffline(remote_add.address().to_string(),remote_add.port());
-//			(*iter).first->close_i();
-//            std::map<string,vector<session_ptr> >::iterator itersession = devToUser_.begin();
-//            for(;itersession!=devToUser_.end();++itersession)
-//            {
-//                vector<session_ptr>::iterator itervect= (*itersession).second.begin();
-//                for(;itervect!=(*itersession).second.end();++itervect){
-//                    if((*itervect) == iter->first){
-//                        (*itersession).second.erase(itervect);
-//                        break;
-//                    }
-//                }
-//            }
-//			session_pool_.erase(iter);
-//			return 0;
-//		}
-//		return -1;
-//	}
 
     int LocalServer::remove_connection_handler(session_ptr ch_ptr)
     {
@@ -569,9 +544,6 @@ namespace hx_net
         std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.find(ch_ptr);
         if(iter!=session_pool_.end())
         {
-            //string curUsr = (*iter).second.usr_;
-            //string curPsw = (*iter).second.psw_;
-            //string curUsrId = (*iter).second.usr_number_;
             tcp::endpoint remote_add = (*iter).second.endPoint_;
             GetInst(SvcMgr).get_notify()->OnClientOffline(remote_add.address().to_string(),remote_add.port());
             (*iter).first->close_i();
@@ -586,15 +558,6 @@ namespace hx_net
                     }
                 }
             }
-           /* map<session_ptr,HandlerKey>::iterator useriter = session_pool_.find(ch_ptr);
-            if(useriter!=session_pool_.end())
-            {
-                time_t curTm=time(0);
-                e_ErrorCode errorCode;
-                UserInformation sUserInfo;
-                GetInst(DataBaseOperation).GetUserInfo((*useriter).second.usr_,sUserInfo);
-                handSignInAndOut(ch_ptr,false,curTm,sUserInfo,errorCode);
-            }*/
             session_pool_.erase(iter);
             return 0;
         }
@@ -618,5 +581,83 @@ namespace hx_net
 		}
 		return 0;
 	}
+
+
+    //启动提醒任务定时器
+    void LocalServer::start_remind_schedules_timer()
+    {
+        schedules_remind_timer_.expires_from_now(boost::posix_time::seconds(1));
+        schedules_remind_timer_.async_wait(boost::bind(&LocalServer::schedules_remind_time_out,
+                                                     this,boost::asio::placeholders::error));
+    }
+
+    //定时提醒任务回调
+    void LocalServer::schedules_remind_time_out(const boost::system::error_code& error)
+    {
+        time_t curTime = time(0);
+        tm *pCurTime = localtime(&curTime);
+
+        static  char str_time[64];
+        strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
+        unsigned long cur_tm = pCurTime->tm_hour*3600+pCurTime->tm_min*60+pCurTime->tm_sec;
+        map<string,Remind_Scheduler>&mapRemind = GetInst(StationConfig).get_all_remind_info();
+        map<string,Remind_Scheduler>::iterator witer = mapRemind.begin();
+        for(;witer!=mapRemind.end();++witer)
+        {
+            //按天控制
+            if((witer->second).iDateType == RUN_TIME_DAY){
+                //在５秒内
+                if(curTime>=(witer->second).tExecuteTime && curTime<(witer->second).tExecuteTime+5){
+
+
+                }
+
+                Remind_Scheduler* remindSch = GetInst(StationConfig).get_remind_info((*cmd_iter).remindnumber);
+                if(remindSch!=0){
+                    std::vector<string>::iterator it;
+                     it = std::find(A.begin(), A.end(), B[i]);
+                    if (it == A.end()){
+                      C.push_back(B[i]);
+                    }
+                }
+            }
+            //按星期控制
+            if((witer->second).iDateType == RUN_TIME_WEEK){
+
+
+                pCurTime = localtime(&curTime);
+                //vector<int>::iterator iter_week = std::find((witer->second).vWeek.begin(),;
+                for(;iter_week!=(witer->second).vWeek.end();++iter_week){
+
+                    if((pCurTime->tm_wday)== (*iter_week)%7){
+
+                        tm *pSetTimeS = localtime(&((witer->second).tExecuteTime));
+                        unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
+                        if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
+
+                            //通知客户端正在执行
+                        }
+                    }
+                }
+
+            }
+
+            //按月控制
+            if((witer->second).iDateType == RUN_TIME_MONTH){
+
+                pCurTime = localtime(&curTime);
+                if((pCurTime->tm_mon+1)== (witer->second).iMonth || (witer->second).iMonth==0){
+                    tm *pSetTimeS = localtime(&((witer->second).tExecuteTime));
+                    unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
+                    if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
+                        e_ErrorCode eResult = EC_OBJECT_NULL;
+
+                        //通知客户端正在执行
+                    }
+                }
+            }
+        }
+        start_remind_schedules_timer();
+    }
 
 }

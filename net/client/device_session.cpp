@@ -1276,7 +1276,10 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
                             notify_client_execute_result(witer->second.sStationNum,witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
                                                          (*cmd_iter).iCommandType,pCurTime,true,eResult);
                     }
+
                 }
+
+
             }
 
             //按月控制
@@ -1368,7 +1371,7 @@ void device_session::notify_client_execute_result(string sStationId,string sDevI
     }
     //发送给客户端
     if(bNtfFlash){
-        //GetInst(LocalConfig).local_station_id()
+
         send_command_execute_result_message(sStationId,sDevId,
                                             devType,devName,user,(e_MsgType)cmdAckMsgType,
                                             (e_ErrorCode)eResult);//DEVICE_TRANSMITTER

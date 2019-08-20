@@ -163,7 +163,8 @@ typedef enum SGPROTOCOL
 	SHANGUANG_AM_50KW     = 3,//陕广中波50kw
 	SHANXI_CD_3_5KW       = 4,//陕西762 3/5KW川大协议
     SHANXI_AM_10KW        = 5,//中波10Kw
-    SHANXI_3KW_PDM        = 6 //如意3KwPDM
+    SHANXI_3KW_PDM        = 6,//如意3KwPDM
+    SHANXI_1KW_PDM        = 7 //如意1KwPDM
 }SgSubProtocol;
 
 typedef enum HGPROTOCOL
@@ -256,6 +257,8 @@ typedef enum EDAPROTOCOL
     AMS_PM800            = 22,
     AMS_PM1200           = 23,
     PRD_PES_3100         = 24,//普尔顿PES_3100系列
+    ZY_MULTI_ELEC        = 25,//杭州逐翌多功能配电柜表头
+    YISITE_EA89II        = 26,//易事特UPS-EA89II型
     ABB_104              = 100,//ABB104电表
 }EdaSubProtocol;
 
@@ -273,6 +276,7 @@ typedef enum WSPROTOCOL
     C2000_A2_8020       = 6,
     C2000_SDD8020_BB3   = 7,
     NT511_AD            = 8,
+    C2000_D2_DCTZ02     = 9,
 
 }WsSubProtocol;
 

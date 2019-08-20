@@ -3,6 +3,7 @@
 #include <QSqlError>
 #include <QDateTime>
 #include <QVariant>
+#include <QStringList>
 #include "../rapidxml/rapidxml_print.hpp"
 #include "../rapidxml/rapidxml_utils.hpp"
 #include "../protocol/bohui_const_define.h"
@@ -115,7 +116,7 @@ bool DataBaseOperation::GetDataDictionary(map<int,pair<string,string> >& mapDicr
     }
     while(query.next()) {
         mapDicry[query.value(0).toInt()] = pair<string,string>(query.value(1).toString().toStdString(),query.value(2).toString().toStdString());
-        //cout<<query.value(1).toString().toStdString()<<query.value(2).toString().toStdString()<<endl;
+        //cout<<query.value(0).toString().toStdString()<<endl;//<<query.value(2).toString().toStdString()
     }
     ConnectionPool::closeConnection(db);
     return true;
@@ -198,6 +199,15 @@ bool DataBaseOperation::GetDevInfo(QSqlDatabase &db, string strDevnum,DeviceInfo
                     GetCmd(db,strDevnum,device.vCommSch);
                     //获得设备属性信息
                     GetDevProperty(db,strDevnum,device.map_DevProperty);
+                    if(device.bMulChannel && device.iChanSize>1){
+                         for(int i=1;i<device.iChanSize;++i){
+                            map<string,DevProperty> chlPropertyEx;
+                            if(GetDevProperty(db,strDevnum,chlPropertyEx,i))
+                            {
+                                device.map_DevChannelPropertyEx[i] = chlPropertyEx;
+                            }
+                         }
+                    }
                     //获得告警配置
                     GetAlarmConfig(db,strDevnum,device.map_AlarmConfig);
                     //获得关联配置
@@ -376,37 +386,36 @@ bool DataBaseOperation::GetCmd(QSqlDatabase &db, string strDevnum,vector<Command
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlQuery cmdschquery(db);
     QString strSql=QString("select id,CommandType,WeekDay,StartTime,HasParam,ParamNumber,month,day,commandendtime,\
-                           datetype,param1,UseP2,param2,channelid from Command_Scheduler where ObjectNumber='%1' and Enable=1").arg(QString::fromStdString(strDevnum));
+                           datetype,param1,UseP2,param2,channelid,remindnumber from Command_Scheduler where ObjectNumber='%1' and Enable=1").arg(QString::fromStdString(strDevnum));
 
             cmdschquery.prepare(strSql);
             if(cmdschquery.exec()){
-            while(cmdschquery.next()){
-            Command_Scheduler cmd_sch;
-            cmd_sch.gid = cmdschquery.value(0).toInt();
-            cmd_sch.iCommandType = cmdschquery.value(1).toInt();
-            cmd_sch.iWeek = cmdschquery.value(2).toInt();
-            cmd_sch.tExecuteTime = cmdschquery.value(3).toDateTime().toTime_t();
-            cmd_sch.iHasParam = cmdschquery.value(4).toInt();
-            if(cmd_sch.iHasParam>=1){
-            //    string sparnum = cmdschquery.value(5).toString().toStdString();
-            //    GetCmdParam(db,sparnum,cmd_sch.cParam);
-            cmd_sch.cParam.sParam1 = cmdschquery.value(10).toString().toStdString();
-            cmd_sch.cParam.bUseP2 = cmdschquery.value(11).toBool();
-            cmd_sch.cParam.sParam2 = cmdschquery.value(12).toString().toStdString();
-}
-            cmd_sch.iMonitorMonth = cmdschquery.value(6).toInt();
-            cmd_sch.iMonitorDay = cmdschquery.value(7).toInt();
-            cmd_sch.tCmdEndTime = cmdschquery.value(8).toDateTime().toTime_t();
-            cmd_sch.iDateType = cmdschquery.value(9).toInt();
-            cmd_sch.iChannelId = cmdschquery.value(13).toInt();//add by lk 2017-8-17
-            vcmdsch.push_back(cmd_sch);
-}
-}
+                while(cmdschquery.next()){
+                    Command_Scheduler cmd_sch;
+                    cmd_sch.gid = cmdschquery.value(0).toInt();
+                    cmd_sch.iCommandType = cmdschquery.value(1).toInt();
+                    cmd_sch.iWeek = cmdschquery.value(2).toInt();
+                    cmd_sch.tExecuteTime = cmdschquery.value(3).toDateTime().toTime_t();
+                    cmd_sch.iHasParam = cmdschquery.value(4).toInt();
+                    if(cmd_sch.iHasParam>=1){
+                        cmd_sch.cParam.sParam1 = cmdschquery.value(10).toString().toStdString();
+                        cmd_sch.cParam.bUseP2 = cmdschquery.value(11).toBool();
+                        cmd_sch.cParam.sParam2 = cmdschquery.value(12).toString().toStdString();
+                    }
+                    cmd_sch.iMonitorMonth = cmdschquery.value(6).toInt();
+                    cmd_sch.iMonitorDay = cmdschquery.value(7).toInt();
+                    cmd_sch.tCmdEndTime = cmdschquery.value(8).toDateTime().toTime_t();
+                    cmd_sch.iDateType = cmdschquery.value(9).toInt();
+                    cmd_sch.iChannelId = cmdschquery.value(13).toInt();//add by lk 2017-8-17
+                    cmd_sch.remindnumber = cmdschquery.value(14).toString();
+                    vcmdsch.push_back(cmd_sch);
+                }
+            }
             else{
-            cout<<cmdschquery.lastError().text().toStdString()<<"GetCmd---cmdschquery---error!"<<endl;
-            return false;
-}
-            return true;
+                cout<<cmdschquery.lastError().text().toStdString()<<"GetCmd---cmdschquery---error!"<<endl;
+                return false;
+            }
+      return true;
 }
 //根据设备id填充台站编号
 bool DataBaseOperation::GetObjOwnerStationNum(QSqlDatabase &db,string strObjnum,string &sDevOwnerStationId)
@@ -461,6 +470,7 @@ bool DataBaseOperation::GetDevMonItem(QSqlDatabase &db, string strDevnum,QString
                     item.iModDevId = itemschquery.value(11).toInt();
                     item.cmdSnmpOid = itemschquery.value(12).toString().toStdString();
                     map_item[item.iItemIndex] = item;
+            //cout<<"iTargetId =" <<item.iTargetId<<endl;
              }
         } else{
                 cout<<itemschquery.lastError().text().toStdString()<<"GetDevMonItem---itemschquery---error!"<<endl;
@@ -470,7 +480,7 @@ bool DataBaseOperation::GetDevMonItem(QSqlDatabase &db, string strDevnum,QString
 }
 
 //获取设备属性信息
-bool DataBaseOperation::GetDevProperty(QSqlDatabase &db, string strDevnum,map<string,DevProperty>& map_property )
+bool DataBaseOperation::GetDevProperty(QSqlDatabase &db, string strDevnum,map<string,DevProperty>& map_property ,int nChnlId)
 {
     //boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     if(!db.isOpen() || !db.isValid()) {
@@ -479,8 +489,8 @@ bool DataBaseOperation::GetDevProperty(QSqlDatabase &db, string strDevnum,map<st
     }
 
     QSqlQuery itemschquery(db);
-    QString strSql=QString("select a.BasePropertyNumber,a.PropertyValueType,a.PropertyValue,b.PropertyName from Device_Property_Role_Bind a,Base_Property b \
-                           where a.DeviceNumber='%1' and b.BasePropertyNumber=a.BasePropertyNumber").arg(QString::fromStdString(strDevnum));
+    QString strSql=QString("select a.BasePropertyNumber,a.PropertyValueType,a.PropertyValue,b.PropertyName,a.channelid from Device_Property_Role_Bind a,Base_Property b \
+                           where a.DeviceNumber='%1' and a.channelid='%2' and b.BasePropertyNumber=a.BasePropertyNumber").arg(QString::fromStdString(strDevnum)).arg(nChnlId);
     itemschquery.prepare(strSql);
         if(itemschquery.exec()) {
             while(itemschquery.next()) {
@@ -1871,5 +1881,89 @@ bool DataBaseOperation::AddExcuteCommandLog(const string sDevNum,int nCommandTyp
     return true;
 
 }
+
+//获取提醒事件配置信息
+bool DataBaseOperation::GetRemindInfoByServer(const string sServerNumber,map<string,Remind_Scheduler> &remindSch)
+{
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {
+        std::cout<<"GetRemindInfoByServer error  ------ the database is interrupt"<<std::endl;
+        return false;
+    }
+    QSqlQuery remindSchquery(db);
+    QString strSql=QString("select remindnumber,remindtype,datetype,weekday,time,month,day,agentserver,originator,targetobject,"
+                           "remindcontent,needconfirm,confirmtimeout,advanceseconds from remind_notify_scheduler where agentserver='%1' and Enable=1").arg(QString::fromStdString(sServerNumber));
+
+    remindSchquery.prepare(strSql);
+    if(remindSchquery.exec()){
+        while(remindSchquery.next()){
+            Remind_Scheduler  remind_sch;
+            remind_sch.sRemindNumber = remindSchquery.value(0).toString().toStdString();
+            remind_sch.iRemindType = remindSchquery.value(1).toInt();
+            remind_sch.iDateType = remindSchquery.value(2).toInt();
+            QString weekDay =  remindSchquery.value(3).toString();
+            QStringList weekList = weekDay.replace("{","").replace("}","").split(",");
+            for(int i = 0; i< weekList.size();++i)
+               remind_sch.vWeek.push_back(weekList.at(i).toInt());
+            remind_sch.tExecuteTime = remindSchquery.value(4).toDateTime().toTime_t();
+            remind_sch.iMonth = remindSchquery.value(5).toInt();
+            remind_sch.iDay = remindSchquery.value(6).toInt();
+            remind_sch.sAgentServerNumber = remindSchquery.value(7).toString().toStdString();
+            remind_sch.iOriginator = remindSchquery.value(8).toInt();
+            remind_sch.iTargetObject = remindSchquery.value(9).toInt();
+            remind_sch.sRemindContent = remindSchquery.value(10).toString().toStdString();
+            remind_sch.bNeedConfirm = remindSchquery.value(11).toBool();
+            remind_sch.iConfirmTimeout = remindSchquery.value(12).toInt();
+            remind_sch.iAdvanceSeconds = remindSchquery.value(13).toInt();
+
+            remindSch[remind_sch.sRemindNumber] = remind_sch;
+        }
+    }
+    else{
+        cout<<remindSchquery.lastError().text().toStdString()<<"GetRemindInfoByServer---remindSchquery---error!"<<endl;
+        return false;
+    }
+    return true;
+}
+
+//添加提醒时间触发日志
+bool DataBaseOperation::AddRemindItemLog(const string sRemindNumber,int confirmType,const string sConfirmUser,string sConfirmMessage,
+                      int nConfirmState,const time_t notifyTime ,const time_t confirmTime ,int &newId)
+{
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {
+        std::cout<<"AddRemindItemLog error  ------ the database is interrupt"<<std::endl;
+        return false;
+    }
+    QSqlQuery insertRemindQuery(db);
+
+
+    QString strSql = QString("insert into remind_nofity_record(remindnumber,remindtime,confirmtime,"
+                     "confirmuser,confirmstate,remindtype,confirmcontent) values(:remindnumber,"
+                     ":remindtime,:confirmtime,:confirmuser,:confirmstate,:remindtype,:confirmcontent)");
+    insertRemindQuery.prepare(strSql);
+    insertRemindQuery.bindValue(":remindnumber",QString::fromStdString(sRemindNumber));
+    insertRemindQuery.bindValue(":remindtype",confirmType);
+    insertRemindQuery.bindValue(":confirmstate",nConfirmState);
+    insertRemindQuery.bindValue(":remindtime",QDateTime::fromTime_t(notifyTime));
+    insertRemindQuery.bindValue(":confirmtime",QDateTime::fromTime_t(confirmTime));
+    insertRemindQuery.bindValue(":confirmuser",QString::fromStdString(sConfirmUser));
+    insertRemindQuery.bindValue(":confirmcontent",QString::fromStdString(sConfirmMessage));
+
+    if(!insertRemindQuery.exec()){
+        cout<<insertRemindQuery.lastError().text().toStdString()<<"AddRemindItemLog---inquery---error!"<<endl;
+        ConnectionPool::closeConnection(db);
+        return false;
+    }
+
+    newId = insertRemindQuery.lastInsertId().toInt();
+
+
+    ConnectionPool::closeConnection(db);
+    return true;
+}
+
 
 }

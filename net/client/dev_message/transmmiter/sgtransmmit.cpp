@@ -118,6 +118,7 @@ namespace hx_net{
               }
           }
               break;
+          case SHANXI_1KW_PDM:
           case SHANXI_3KW_PDM:{
               if(data[0]==0xCA && data[1]==m_addresscode)
               {
@@ -148,9 +149,11 @@ namespace hx_net{
           case SHANXI_CD_3_5KW:
               break;
           case SHANXI_AM_10KW:
-              break;
+              return SX_10KwAmData(data,data_ptr,nDataLen,runstate);
           case SHANXI_3KW_PDM:
               return RY_3KwPdmData(data,data_ptr,nDataLen,runstate);
+          case SHANXI_1KW_PDM:
+              return RY_1KwPdmData(data,data_ptr,nDataLen,runstate);
           }
           return RE_NOPROTOCOL;
       }
@@ -160,6 +163,7 @@ namespace hx_net{
           switch(m_subprotocol)
           {
           case SHANXI_3KW_PDM:
+          case SHANXI_1KW_PDM:
               return true;
           }
           return false;
@@ -283,6 +287,7 @@ namespace hx_net{
               cmdAll.mapCommand[MSG_DEV_RESET_OPR].push_back(tmUnit);
           }
               break;
+          case SHANXI_1KW_PDM:
           case SHANXI_3KW_PDM:{
               CommandUnit tmUnit;
               tmUnit.commandLen = 6;
@@ -413,6 +418,157 @@ namespace hx_net{
           data_ptr->mValues[7] = dainfo;
           dainfo.fValue = (data[17]*256+data[16]);
           data_ptr->mValues[8] = dainfo;
+          return RE_SUCCESS;
+      }
+
+      int SgTransmmit::RY_1KwPdmData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+      {
+          if(data[2]!=0x10)
+              return RE_CMDACK;
+          DataInfo dainfo;
+          int nbase=4;
+          dainfo.bType = false;
+          char data1=AsciiToInt(data[nbase+6]);
+          char data2=AsciiToInt(data[nbase+7]);
+          char data3=AsciiToInt(data[nbase+8]);
+          char data4=AsciiToInt(data[nbase+9]);
+          char data5=AsciiToInt(data[nbase+10]);
+          char data6=AsciiToInt(data[nbase+11]);
+          dainfo.bType = false;
+          dainfo.fValue = (((data2&0x0F)<<4)|(data1&0x0F))*0.01+(((((((data6&0x0F)<<4)|(data5&0x0F))<<4)|(data4&0x0F))<<4)|(data3&0x0F));
+          data_ptr->mValues[0] = dainfo;
+          data1=AsciiToInt(data[nbase+12]);
+          data2=AsciiToInt(data[nbase+13]);
+          data3=AsciiToInt(data[nbase+14]);
+          data4=AsciiToInt(data[nbase+15]);
+          data5=AsciiToInt(data[nbase+16]);
+          data6=AsciiToInt(data[nbase+17]);
+          dainfo.fValue = (((data2&0x0F)<<4)|(data1&0x0F))*0.01+(((((((data6&0x0F)<<4)|(data5&0x0F))<<4)|(data4&0x0F))<<4)|(data3&0x0F));
+          data_ptr->mValues[1] = dainfo;
+          if(data_ptr->mValues[0].fValue>data_ptr->mValues[1].fValue)
+          {
+              dainfo.fValue = sqrt((data_ptr->mValues[0].fValue+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue-data_ptr->mValues[1].fValue));
+          }
+          else{
+              dainfo.fValue = 0;
+          }
+          data_ptr->mValues[2] = dainfo;
+          data1=AsciiToInt(data[nbase]);
+          data2=AsciiToInt(data[nbase+1]);
+          data3=AsciiToInt(data[nbase+2]);
+          data4=AsciiToInt(data[nbase+3]);
+          data5=AsciiToInt(data[nbase+4]);
+          data6=AsciiToInt(data[nbase+5]);
+          dainfo.fValue = (((data2&0x0F)<<4)|(data1&0x0F))*0.01+(((((((data6&0x0F)<<4)|(data5&0x0F))<<4)|(data4&0x0F))<<4)|(data3&0x0F));
+          data_ptr->mValues[3] = dainfo;
+
+          for(int i=0;i<4;++i)
+          {
+              data1=AsciiToInt(data[nbase+18+6*i]);
+              data2=AsciiToInt(data[nbase+19+6*i]);
+              data3=AsciiToInt(data[nbase+20+6*i]);
+              data4=AsciiToInt(data[nbase+21+6*i]);
+              data5=AsciiToInt(data[nbase+22+6*i]);
+              data6=AsciiToInt(data[nbase+23+6*i]);
+              dainfo.fValue = (((data2&0x0F)<<4)|(data1&0x0F))*0.01+(((((((data6&0x0F)<<4)|(data5&0x0F))<<4)|(data4&0x0F))<<4)|(data3&0x0F));
+              data_ptr->mValues[4+i] = dainfo;
+          }
+          for(int j=0;j<2;++j)
+          {
+              data3=AsciiToInt(data[nbase+42+4*j]);
+              data4=AsciiToInt(data[nbase+43+4*j]);
+              data5=AsciiToInt(data[nbase+44+4*j]);
+              data6=AsciiToInt(data[nbase+45+4*j]);
+              dainfo.fValue = ((((((data6&0x0F)<<4)|(data5&0x0F))<<4)|(data4&0x0F))<<4)|(data3&0x0F);
+              data_ptr->mValues[8+j] = dainfo;
+          }
+          dainfo.bType = true;
+          for(int k=0;k<4;++k)
+          {
+              data1=AsciiToInt(data[nbase+56+k]);
+              for(int i=0;i<4;++i)
+              {
+                  dainfo.fValue = Getbit(data1,i);
+                  data_ptr->mValues[10+k*4+i] = dainfo;
+              }
+          }
+          return RE_SUCCESS;
+      }
+
+      int SgTransmmit::SX_10KwAmData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+      {
+          int ndlen = nDataLen;
+          while(ndlen>16)
+          {
+              int ndtype = data[15];
+              if(ndtype==0xd2)
+              {
+                  DataInfo dainfo;
+                  dainfo.bType = false;
+                  int index=0;
+                  BYTE dhigh,dlow;
+                  for(int i=0;i<2;++i)
+                  {
+                      dhigh = data[16+i*2];
+                      dlow = data[17+i*2];
+                      dainfo.fValue = (((dhigh<<8)|dlow)-0x07FF)/409.6 * (((dhigh<<8)|dlow)-0x07FF)/409.6;
+                      data_ptr->mValues[i] = dainfo;
+                  }
+                  if(data_ptr->mValues[0].fValue>data_ptr->mValues[1].fValue)
+                  {
+                      dainfo.fValue = sqrt((data_ptr->mValues[0].fValue+data_ptr->mValues[1].fValue)/(data_ptr->mValues[0].fValue-data_ptr->mValues[1].fValue));
+                  }
+                  else{
+                      dainfo.fValue = 0;
+                  }
+                  for(int j=0;j<11;++j)
+                  {
+                      dhigh = data[20+j*2];
+                      dlow = data[21+j*2];
+                      dainfo.fValue = (((dhigh<<8)|dlow)-0x07FF)/409.6;
+                      data_ptr->mValues[j+3] = dainfo;
+                  }
+                  dhigh = data[42];
+                  dlow = data[43];
+                  dainfo.fValue = ((dhigh<<8)|dlow);
+                  data_ptr->mValues[14] = dainfo;
+                  data+=50;
+                  ndlen -= 50;
+              }
+              else if(ndtype==0xd1)
+              {
+                  DataInfo dainfo;
+                  dainfo.bType = true;
+                  int index=15;
+                  BYTE dbyt;
+                  for(int j=0;j<3;++j)
+                  {
+                      dbyt = data[16+j];
+                      for(int i=0;i<8;++i)
+                      {
+                          dainfo.fValue = Getbit(dbyt,i);
+                          data_ptr->mValues[index++] = dainfo;
+                      }
+                  }
+                  for(int j=0;j<2;++j)
+                  {
+                      dbyt = data[19+j];
+                      for(int i=0;i<5;++i)
+                      {
+                          dainfo.fValue = Getbit(dbyt,i);
+                          data_ptr->mValues[index++] = dainfo;
+                      }
+                  }
+
+                  data+=27;
+                  ndlen -= 27;
+              }
+              else
+              {
+                  data+=11;
+                  ndlen -= 11;
+              }
+          }
           return RE_SUCCESS;
       }
 

@@ -436,6 +436,7 @@ bool Bohui_Protocol::appendLinkReportBodyMsg(xml_document<> &xmlMsg,map<string,x
 
     map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
     for(;cell_iter!=mapMonitorItem.end();++cell_iter){
+
         if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
             continue;
         if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
@@ -449,7 +450,7 @@ bool Bohui_Protocol::appendLinkReportBodyMsg(xml_document<> &xmlMsg,map<string,x
         if(curData->mValues[cell_iter->first].bType==true)
             sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
-        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str()));
+        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",xmlMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str())));
         xml_dev_node->append_node(xml_Quality_Index);
     }
 
@@ -806,6 +807,30 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
                 xml_linkdev_list->append_node(xml_device);
                 xml_device->append_attribute(xml_doc.allocate_attribute("DevID",(*iter).second.sDevNum.c_str()));
                 xml_device->append_attribute(xml_doc.allocate_attribute("DevName",(*iter).second.sDevName.c_str()));
+
+                //判断是否是多通道设备，添加通道节点map_DevChannelPropertyEx
+                if((*iter).second.iChanSize>1 && (*iter).second.bMulChannel){
+
+                    xml_node<> *xml_device_channel = xml_doc.allocate_node(node_element,"Channel");
+                    xml_device->append_node(xml_device_channel);
+
+                    xml_device_channel->append_attribute(xml_doc.allocate_attribute("id","0"));
+                    map<string,DevProperty>::iterator iter_pro = (*iter).second.map_DevProperty.begin();
+                    for(;iter_pro!=(*iter).second.map_DevProperty.end();++iter_pro){
+                        xml_device_channel->append_attribute(xml_doc.allocate_attribute((*iter_pro).second.property_name.c_str(),(*iter_pro).second.property_value.c_str()));
+                    }
+                    map<int,map<string,DevProperty>>::iterator iter_pro_ex = (*iter).second.map_DevChannelPropertyEx.begin();
+                    for(;iter_pro_ex!=(*iter).second.map_DevChannelPropertyEx.end();++iter_pro_ex){
+
+                        xml_device_channel = xml_doc.allocate_node(node_element,"Channel");
+                        xml_device->append_node(xml_device_channel);
+                        xml_device_channel->append_attribute(xml_doc.allocate_attribute("id",xml_doc.allocate_string(boost::lexical_cast<std::string>(iter_pro_ex->first).c_str())));
+                        map<string,DevProperty>::iterator iter_child_pro = (*iter_pro_ex).second.begin();
+                        for(;iter_child_pro!=(*iter_pro_ex).second.end();++iter_child_pro){
+                            xml_device_channel->append_attribute(xml_doc.allocate_attribute((*iter_child_pro).second.property_name.c_str(),(*iter_child_pro).second.property_value.c_str()));
+                        }
+                    }
+                }
             }else{
 
                  if(nCmdType==BH_POTO_TransmitterQuery){

@@ -39,8 +39,6 @@ public:
     //获得所有设备信息
     bool GetAllDevInfo(vector<ModleInfo>& v_Linkinfo,string sStationId,string sServerId);
 
-
-
     //获得数据字典映射表(不包含设备类型字段)
     bool GetDataDictionary(map<int,pair<string,string> >& mapDicry);
 
@@ -119,6 +117,13 @@ public:
     //添加命令执行日志
     bool AddExcuteCommandLog(const string sDevNum,int nCommandType,const string sResult,const string sUser);
 
+    //获取提醒事件配置信息
+    bool GetRemindInfoByServer(const string sServerNumber,map<string,Remind_Scheduler> &remindSch);
+
+    //添加提醒时间触发日志
+    bool AddRemindItemLog(const string sRemindNumber,int confirmType,const string sConfirmUser,string sConfirmMessage,
+                          int nConfirmState,const time_t notifyTime ,const time_t confirmTime ,int &newId);
+
 
 protected:
     void StartReOpen();
@@ -126,7 +131,7 @@ protected:
     bool GetCmdParam(QSqlDatabase &db,string strCmdnum,CmdParam& param);
     bool GetCmd(QSqlDatabase &db,string strDevnum,vector<Command_Scheduler>& vcmdsch);
     bool GetDevMonItem(QSqlDatabase &db,string strDevnum,QString qsPrtocolNum,map<int,DeviceMonitorItem>& map_item);
-    bool GetDevProperty(QSqlDatabase &db,string strDevnum,map<string,DevProperty>& map_property);
+    bool GetDevProperty(QSqlDatabase &db,string strDevnum,map<string,DevProperty>& map_property,int nChnlId=0);
     //根据设备id填充台站编号
     bool GetObjOwnerStationNum(QSqlDatabase &db,string strObjnum,string &sDevOwnerStationId);
     //bool GetNetProperty(QSqlDatabase &db,string strConTypeNumber,NetCommunicationMode& nmode);

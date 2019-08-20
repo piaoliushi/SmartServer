@@ -128,6 +128,13 @@ namespace hx_net
                     return data[5];
                 }
                     break;
+                case C2000_D2_DCTZ02:
+                {
+                    if(data[0]!=0x00 || data[1]!=0x01)
+                        return RE_HEADERROR;
+                    return data[4]*256+data[5];
+                }
+                    break;
                 case NT511_AD:
                 {
                     if(data[0]!=d_devInfo.iAddressCode || data[1]!=0x03)
@@ -194,6 +201,12 @@ namespace hx_net
                     m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                     return iresult;
                 }
+                case C2000_D2_DCTZ02:
+                {
+                    int iresult = C2000_D2_DSRZ_Data(data,d_curData_ptr,nDataLen,iaddcode);
+                    m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                    return iresult;
+                }
                 default:
 					return RE_NOPROTOCOL;
 				}
@@ -233,6 +246,7 @@ namespace hx_net
         case C2000_A2_8020:
         case C2000_SDD8020_BB3:
         case NT511_AD:
+        case C2000_D2_DCTZ02:
             return true;
 
 
@@ -322,6 +336,26 @@ namespace hx_net
 						cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
 					}
 					break;
+                case C2000_D2_DCTZ02:
+                {
+                    CommandUnit tmUnit;
+                    tmUnit.commandId[0] = 0x00;
+                    tmUnit.commandId[1] = 0x01;
+                    tmUnit.commandId[2] = 0x00;
+                    tmUnit.commandId[3] = 0x00;
+                    tmUnit.commandId[4] = 0x00;
+                    tmUnit.commandId[5] = 0x06;
+                    tmUnit.commandId[6] = d_devInfo.iAddressCode;
+                    tmUnit.commandId[7] = 0x03;
+                    tmUnit.commandId[8] = 0x01;
+                    tmUnit.commandId[9] = 0x2C;
+                    tmUnit.commandId[10] = 0x00;
+                    tmUnit.commandId[11] = 0x08;
+                    tmUnit.commandLen = 12;
+                    tmUnit.ackLen = 6;
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                }
+                    break;
 				case FRT_X06A:
 					{
 						CommandUnit tmUnit;
@@ -508,14 +542,19 @@ namespace hx_net
 
     int Envir_message::EnvironTHB11RS( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
 	{
-		DataInfo dainfo;
-		dainfo.bType = false;
-		dainfo.fValue = float(((data[3]<<8)|data[4])/10.0);
-		data_ptr->mValues[0] = dainfo;
-		dainfo.fValue = float(((data[5]<<8)|data[6])/10.0);
-		data_ptr->mValues[1] = dainfo;
+        DataInfo dainfo;
+        dainfo.bType = false;
+        int iflag = Getbit(data[3],7);
+        dainfo.fValue = float((((data[3]&&0x7F)<<8)|data[4])/10.0);
+        if(iflag==1)
+        {
+            dainfo.fValue = dainfo.fValue*(-1);
+        }
+        data_ptr->mValues[0] = dainfo;
+        dainfo.fValue = float(((data[5]<<8)|data[6])/10.0);
+        data_ptr->mValues[1] = dainfo;
         iaddcode = data[0];
-		return RE_SUCCESS;
+        return RE_SUCCESS;
 	}
 
     int Envir_message::KD40RData( unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode )
@@ -860,7 +899,26 @@ namespace hx_net
 
         //cout<<"wendu="<<data_ptr->mValues[0].fValue<<"--"<<data_ptr->mValues[1].fValue<<"--"<<data_ptr->mValues[2].fValue<<endl;
 
-         return RE_SUCCESS;
+        return RE_SUCCESS;
+    }
+
+    int Envir_message::C2000_D2_DSRZ_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        int nnum = data[8]/4;
+        iaddcode = data[6];
+        DataInfo dainfo;
+        dainfo.bType = false;
+        for(int i=0;i<nnum;++i)
+        {
+            float fdat=0;
+            *(((char*)(&fdat) + 0)) = data[12+4*i];
+            *(((char*)(&fdat) + 1)) = data[11+4*i];
+            *(((char*)(&fdat) + 2)) = data[10+4*i];
+            *(((char*)(&fdat) + 3)) = data[9+4*i];
+            dainfo.fValue = fdat;
+            data_ptr->mValues[i] = dainfo;
+        }
+        return RE_SUCCESS;
     }
 
 }

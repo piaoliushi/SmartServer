@@ -37,6 +37,8 @@ protected:
 
     int NT511_AD_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen,
                       int &iaddcode);
+    int C2000_D2_DSRZ_Data(unsigned char *data, DevMonitorDataPtr data_ptr,
+                       int nDataLen, int &iaddcode);
 private:
     dev_session_ptr       m_pSession;//关联连接对象
     DeviceInfo           &d_devInfo;//设备信息

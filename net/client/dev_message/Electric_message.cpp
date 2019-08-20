@@ -119,9 +119,15 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
                                                    || data[1]==0x01 || data[1]==0x02))
                 return data[2]+2;
             else
-                return -1;
+                return RE_HEADERROR;
         }
-
+        case YISITE_EA89II:
+        {
+            if(data[0]==d_devInfo.iAddressCode && data[1]==0x04)
+                return data[2]+2;
+            else
+                return RE_HEADERROR;
+        }
         case ABB_104: {
             if(data[0]==START) {
                 int nBodyLen = data[1];
@@ -130,7 +136,7 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
                 else
                     return nBodyLen;
             }else
-                return -1;
+                return RE_HEADERROR;
         }
         case HX_ELEC_CTR:{
             if(data[0]==0x55 && data[2]==0xF3)
@@ -150,7 +156,7 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
         }
         case HX_MD9703:
         {
-            if(data[0]==0xAA && data[2]==0x97)
+            if(data[0]==0xAA && data[1]==0x97)
                 return data[5]*256+data[6];
             else
                 return -1;
@@ -171,6 +177,7 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             else
                 return -1;
         }
+
         case ACR_NET_EM:
         case ACR_PZ:
         case ACR_ARD_2L:{
@@ -229,6 +236,10 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
                 return data[2]+2;
             else
                 return RE_HEADERROR;
+        }
+        case ZY_MULTI_ELEC:
+        {
+            return 60;
         }
         }
     }
@@ -352,6 +363,16 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
             m_pSession->start_handler_data(iaddcode,d_curData_ptr);
             return iresult;
         }
+        case ZY_MULTI_ELEC:{
+            int iresult = decode_ZYMULTI_Elec(data,d_curData_ptr,nDataLen,iaddcode);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
+        case YISITE_EA89II:{
+            int iresult = decode_EA89II(data,d_curData_ptr,nDataLen,iaddcode);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
         }
         break;
     }
@@ -388,6 +409,8 @@ bool Electric_message::IsStandardCommand()
         case AMS_PM800:
         case AMS_PM1200:
         case PRD_PES_3100:
+        case ZY_MULTI_ELEC:
+        case YISITE_EA89II:
             return true;
         }
         return false;
@@ -1023,7 +1046,39 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
-
+        case ZY_MULTI_ELEC:{
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 3;
+            tmUnit.commandLen = 8;
+            tmUnit.commandId[0] = d_devInfo.iAddressCode;
+            tmUnit.commandId[1] = 0x03;
+            tmUnit.commandId[2] = 0x00;
+            tmUnit.commandId[3] = 0x00;
+            tmUnit.commandId[4] = 0x00;
+            tmUnit.commandId[5] = 0x1D;
+            unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case YISITE_EA89II:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 3;
+            tmUnit.commandLen = 8;
+            tmUnit.commandId[0] = d_devInfo.iAddressCode;
+            tmUnit.commandId[1] = 0x04;
+            tmUnit.commandId[2] = 0x00;
+            tmUnit.commandId[3] = 0x04;
+            tmUnit.commandId[4] = 0x00;
+            tmUnit.commandId[5] = 0x49;
+            unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+            tmUnit.commandId[6] = (uscrc&0x00FF);
+            tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
         }
     }
         break;
@@ -2225,6 +2280,163 @@ int Electric_message::decode_PES3100(unsigned char *data, DevMonitorDataPtr data
     }
     dainfo.fValue=(data[9]*256+data[10])*0.01;
     data_ptr->mValues[14] = dainfo;
+    return RE_SUCCESS;
+}
+
+int Electric_message::decode_ZYMULTI_Elec(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+  //  iaddcode = data[0];
+    iaddcode = d_devInfo.iAddressCode;
+ //   if(data[0]!=d_devInfo.iAddressCode || data[1]!=0x03 || data[2]!=0x3A)
+   //     return RE_CMDACK;
+    DataInfo dainfo;
+    dainfo.bType = false;
+    dainfo.fValue = (data[3]*256+data[4])*0.1*m_Ubb;
+    data_ptr->mValues[0] = dainfo;
+    dainfo.fValue = (data[5]*256+data[6])*0.1*m_Ubb;
+    data_ptr->mValues[1] = dainfo;
+    dainfo.fValue = (data[7]*256+data[8])*0.1*m_Ubb;
+    data_ptr->mValues[2] = dainfo;
+    dainfo.fValue = (data[9]*256+data[10])*0.001*m_Ibb;
+    data_ptr->mValues[3] = dainfo;
+    dainfo.fValue = (data[11]*256+data[12])*0.001*m_Ibb;
+    data_ptr->mValues[4] = dainfo;
+    dainfo.fValue = (data[13]*256+data[14])*0.001*m_Ibb;
+    data_ptr->mValues[5] = dainfo;
+    dainfo.fValue = (data[15]*256+data[16])*0.001*m_Ibb;
+    data_ptr->mValues[6] = dainfo;
+
+    dainfo.fValue = (data[17]*256+data[18])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[7] = dainfo;
+    dainfo.fValue = (data[19]*256+data[20])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[8] = dainfo;
+    dainfo.fValue = (data[21]*256+data[22])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[9] = dainfo;
+    dainfo.fValue = (data[23]*256+data[24])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[10] = dainfo;
+
+    dainfo.fValue = (data[25]*256+data[26])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[11] = dainfo;
+    dainfo.fValue = (data[27]*256+data[28])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[12] = dainfo;
+    dainfo.fValue = (data[29]*256+data[30])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[13] = dainfo;
+    dainfo.fValue = (data[31]*256+data[32])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[14] = dainfo;
+
+    dainfo.fValue = (data[33]*256+data[34])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[15] = dainfo;
+    dainfo.fValue = (data[35]*256+data[36])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[16] = dainfo;
+    dainfo.fValue = (data[37]*256+data[38])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[17] = dainfo;
+    dainfo.fValue = (data[39]*256+data[40])*0.001*m_Ibb*m_Ubb;
+    data_ptr->mValues[18] = dainfo;
+
+    dainfo.fValue = (data[41]*256+data[42])*0.001;
+    data_ptr->mValues[19] = dainfo;
+    dainfo.fValue = (data[43]*256+data[44])*0.001;
+    data_ptr->mValues[20] = dainfo;
+    dainfo.fValue = (data[45]*256+data[46])*0.001;
+    data_ptr->mValues[21] = dainfo;
+    dainfo.fValue = (data[47]*256+data[48])*0.001;
+    data_ptr->mValues[22] = dainfo;
+
+    dainfo.fValue = (data[49]*256+data[50])*0.1*m_Ubb;
+    data_ptr->mValues[23] = dainfo;
+    dainfo.fValue = (data[51]*256+data[52])*0.1*m_Ubb;
+    data_ptr->mValues[24] = dainfo;
+    dainfo.fValue = (data[53]*256+data[54])*0.1*m_Ubb;
+    data_ptr->mValues[25] = dainfo;
+
+    dainfo.fValue = (data[55]*256+data[56])*0.01;
+    data_ptr->mValues[26] = dainfo;
+    dainfo.fValue = (data[57]*256+data[58])*0.01;
+    data_ptr->mValues[27] = dainfo;
+    dainfo.fValue = (data[59]*256+data[60])*0.01;
+    data_ptr->mValues[28] = dainfo;
+
+    return RE_SUCCESS;
+}
+
+int Electric_message::decode_EA89II(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    iaddcode = data[0];
+    DataInfo dainfo;
+    dainfo.bType = false;
+
+    // 3 4
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = (data[3+2*i]*256+data[4+2*i])*0.01;
+        data_ptr->mValues[i] = dainfo;
+    }
+    // 9 10
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = (data[9+2*i]*256+data[10+2*i])*0.1;
+        data_ptr->mValues[i+3] = dainfo;
+    }
+    // 15 16
+    // 21 22
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = (data[21+2*i]*256+data[22+2*i])*0.1;
+        data_ptr->mValues[i+6] = dainfo;
+    }
+    //29 30
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = (data[29+2*i]*256+data[30+2*i])*0.1;
+        data_ptr->mValues[i+9] = dainfo;
+    }
+    //35 36
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = (data[35+2*i]*256+data[36+2*i])*0.01;
+        data_ptr->mValues[i+12] = dainfo;
+    }
+    //41 42 *3
+    //47 48 *6
+    for(int i=0;i<6;++i)
+    {
+        dainfo.fValue = (data[47+2*i]*256+data[48+2*i])*0.1;
+        data_ptr->mValues[i+15] = dainfo;
+    }
+    //59 60 *3
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = (data[59+2*i]*256+data[60+2*i])*0.01;
+        data_ptr->mValues[i+21] = dainfo;
+    }
+    // 65 66 *6
+    for(int i=0;i<6;++i)
+    {
+        dainfo.fValue = (data[65+2*i]*256+data[66+2*i])*0.1;
+        data_ptr->mValues[i+24] = dainfo;
+    }
+    //77 78*3
+    //83 84*3
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = (data[83+2*i]*256+data[84+2*i])*0.01;
+        data_ptr->mValues[i+30] = dainfo;
+    }
+    //87 88 *3
+    for(int i=0;i<3;++i)
+    {
+        dainfo.fValue = (data[89+2*i]*256+data[90+2*i])*0.1;
+        data_ptr->mValues[i+33] = dainfo;
+    }
+    //93 94*17
+    dainfo.fValue = (data[129]*256+data[130])*0.1;
+    data_ptr->mValues[36] = dainfo;
+    dainfo.fValue = (data[131]*256+data[132])*0.1;
+    data_ptr->mValues[37] = dainfo;
+    dainfo.fValue = (data[137]*256+data[138])*0.1;
+    data_ptr->mValues[38] = dainfo;
+    dainfo.fValue = (data[147]*256+data[148])*0.1;
+    data_ptr->mValues[38] = dainfo;
     return RE_SUCCESS;
 }
 

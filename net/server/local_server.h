@@ -85,6 +85,10 @@ public:
         //获取用户与当前客户端id下的设备授权信息
         void get_authorize_info_by_user(session_ptr ch_ptr,string sUserNum,string sClientNum,LoginAck &loginAck);
 
+        //启动提醒任务定时器
+        void start_remind_schedules_timer();
+        //定时提醒任务回调
+        void schedules_remind_time_out(const boost::system::error_code& error);
 	private:	
 		
 		TaskQueue<msgPointer>& taskwork_;//引用一个任务队列
@@ -99,6 +103,7 @@ public:
         boost::recursive_mutex sign_mutex_;
         std::vector<UserSignInInfo> sign_in_users_;//当前签到用户
 		
+        boost::asio::deadline_timer   schedules_remind_timer_;
 	};
 }
 

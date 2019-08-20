@@ -30,6 +30,9 @@ bool StationConfig::load_station_config()
     if(!GetInst(DataBaseOperation).GetGSMInfo(bHave_GSM_model,Gsm_model_info))
         return false;
 
+    if(!GetInst(DataBaseOperation).GetRemindInfoByServer(sLocalServerId,mapRemindInfo))
+        return false;
+
     return true;
 }
 
@@ -279,4 +282,18 @@ bool StationConfig::get_dev_propery(string sDevId,string sName,string &sValue){
     }
 
     return false;
+}
+
+//获取提醒配置信息
+map<string,Remind_Scheduler>&  StationConfig::get_all_remind_info()
+{
+    return mapRemindInfo;
+}
+
+Remind_Scheduler*  StationConfig::get_remind_info(string sNumber)
+{
+    map<string,Remind_Scheduler>::iterator iter_remind = mapRemindInfo.find(sNumber);
+    if(iter_remind!=mapRemindInfo.end())
+        return &(iter_remind->second);
+    return 0;
 }

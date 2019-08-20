@@ -112,6 +112,7 @@ typedef struct _tag_Command_Scheduler
     int      iHasParam;      //是否带参
     CmdParam cParam;         //参数
     int      iChannelId;     //通道编号
+    string   remindnumber;   //提醒编号
 }Command_Scheduler;
 
 typedef struct
@@ -244,7 +245,8 @@ typedef struct
     map<int,DeviceMonitorItem>                map_MonitorItem; //设备监控量
     map<int,vector<Monitoring_Scheduler> >    vMonitorSch;     //监控计划
     vector<Command_Scheduler>                 vCommSch;        //控制计划
-    map<string,DevProperty>                   map_DevProperty; //设备属性列表
+    map<string,DevProperty>                   map_DevProperty; //设备属性列表（基本属性配置在0通道）
+    map<int,map<string,DevProperty>>          map_DevChannelPropertyEx;//扩展通道属性（不包括0通道）
     map<int,Alarm_config >                    map_AlarmConfig; //设备告警配置
     map<int,vector<AssDevChan> >              map_AssDevChan;  //设备关联设置
 }DeviceInfo,*pDeviceInfo;
@@ -347,5 +349,35 @@ typedef struct
     string sName;
     string sValue;
 }taskParam;
+
+
+//提醒计划结构
+typedef struct _tag_Remind_Sch
+{
+
+    _tag_Remind_Sch(){
+        iConfirmTimeout = 180;
+        iAdvanceSeconds = 0;
+        bNeedConfirm = false;
+        bIsNotify = false;
+    }
+    string   sRemindNumber;       //唯一标识
+    int      iRemindType;         //命令类型
+    int      iDateType;           //时间类型
+    vector<int>      vWeek;       //星期(1-7)
+    int      iMonth;       //月（0-12，0=all）
+    int      iDay;         //日(1-31)
+    time_t   tExecuteTime;        //执行时间
+    string   sAgentServerNumber;  //转发服务ID
+    int      iOriginator;         //发起者类型
+    int      iTargetObject;       //接收者类型
+    bool     bNeedConfirm;        //是否需要确认
+    int      iConfirmTimeout;     //确认超时时间（秒）
+    int      iAdvanceSeconds;     //提前发送时间（秒）
+    string   sRemindContent;      //提醒内容
+
+    bool     bIsNotify;           //是否已经通知
+
+}Remind_Scheduler;
 
 #endif
