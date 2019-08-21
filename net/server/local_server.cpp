@@ -626,8 +626,10 @@ namespace hx_net
 
 
                 pCurTime = localtime(&curTime);
-                //vector<int>::iterator iter_week = std::find((witer->second).vWeek.begin(),;
-                for(;iter_week!=(witer->second).vWeek.end();++iter_week){
+                vector<int>::iterator iter_week = std::find((witer->second).vWeek.begin(),
+                                                            (witer->second).vWeek.end(),(*iter_week)%7);
+
+                /* for(;iter_week!=(witer->second).vWeek.end();++iter_week){
 
                     if((pCurTime->tm_wday)== (*iter_week)%7){
 
@@ -638,7 +640,7 @@ namespace hx_net
                             //通知客户端正在执行
                         }
                     }
-                }
+                }*/
 
             }
 
