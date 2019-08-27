@@ -20,19 +20,24 @@ namespace hx_net{
         switch(m_subprotocol)
         {
         case HUIXIN_993:{
-            if(data[0]==0x55 && data[2]==0xF3)
+            if(data[0]==0x55) //&& data[2]==0xF3)
             {
-                if(data[1]< 0x99 )
-                    return RE_SUCCESS;
+              //  if(data[1]< 0x99 )
+              //      return RE_SUCCESS;
+                return data[1];
             }
             else
+            {
+                return RE_HEADERROR;
+            }
+          /*  else
             {
                 unsigned char cDes[3]={0};
                 cDes[0]=0x55;
                 cDes[1] = 0x65;
                 cDes[2] = 0xF3;
                 return kmp(data,nDataLen,cDes,3);
-            }
+            }*/
         }
             break;
         case ANHUI_994:
@@ -88,6 +93,7 @@ namespace hx_net{
         case HUIXIN_996:
         case HUIXIN_996_QBEX:
         case HUIXIN_996_HRRISEX:
+        case HUIXIN_993:
             return true;
 		}
 		return false;
@@ -210,7 +216,7 @@ namespace hx_net{
             if(m_subprotocol == ANHUI_994)
                 tmUnit.ackLen = 56;
             else
-                tmUnit.ackLen = 104;
+                tmUnit.ackLen = 3;
             tmUnit.commandId[0]=0x55;
             tmUnit.commandId[1]=0x02;
             tmUnit.commandId[2]=0xF3;
@@ -222,7 +228,7 @@ namespace hx_net{
 
 
 
-
+            tmUnit.ackLen = 0;
             tmUnit.commandLen = 7;
             tmUnit.commandId[0]=0x55;
             tmUnit.commandId[1]=0x03;
@@ -390,16 +396,20 @@ namespace hx_net{
             dtinfo.fValue = fAnalogData[index];
             data_ptr->mValues[index] = dtinfo;
         }
-        dtinfo.bType = true;
-        for(int j=0;j<3;++j)
+        if(nDataLen>100)
         {
-            for(int i=0;i<8;++i)
+            dtinfo.bType = true;
+            int nstate = nDataLen-100;
+            for(int j=0;j<nstate;++j)
             {
-                dtinfo.fValue = Getbit(data[99+j],i);
-                data_ptr->mValues[25+j*8+i] = dtinfo;
+                for(int i=0;i<8;++i)
+                {
+                    dtinfo.fValue = Getbit(data[99+j],i);
+                    data_ptr->mValues[25+j*8+i] = dtinfo;
+                }
             }
         }
-        return 0;
+        return RE_SUCCESS;
     }
 
     int AhhxTransmmit::Md996Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)

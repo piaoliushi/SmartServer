@@ -1232,6 +1232,8 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
         vector<Command_Scheduler>::iterator cmd_iter = witer->second.vCommSch.begin();
         for(;cmd_iter!=witer->second.vCommSch.end();++cmd_iter)
         {
+
+            Remind_Scheduler* curRemindItem = GetInst(StationConfig).get_device_remind_info((*cmd_iter).remindnumber);
             //控制参数提取
             map<int,string> mapParam;//保存参数
             //携带参数
@@ -1284,16 +1286,33 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
 
             //按月控制
             if((*cmd_iter).iDateType == RUN_TIME_MONTH){
-                if(curTime> (*cmd_iter).tCmdEndTime &&  (*cmd_iter).tCmdEndTime>0)
-                    continue;//超过运行图终止时间且终止时间不为0,则跳过
+
                 pCurTime = localtime(&curTime);
-                if((pCurTime->tm_mon+1)== (*cmd_iter).iMonitorMonth || (*cmd_iter).iMonitorMonth==0){
+                int curMonth = pCurTime->tm_mon;
+
+                if((curMonth+1)== (*cmd_iter).iMonitorMonth || (*cmd_iter).iMonitorMonth==0){
+                    //创建执行时间
+                    tm setDateTime;
+                    setDateTime.tm_mday = (*cmd_iter).iMonitorDay;
+                    setDateTime.tm_mon = (*cmd_iter).iMonitorMonth-1;
+                    setDateTime.tm_year = pCurTime->tm_year;
                     tm *pSetTimeS = localtime(&((*cmd_iter).tExecuteTime));
-                    unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
-                    if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
+                    setDateTime.tm_sec = pSetTimeS->tm_sec;
+                    setDateTime.tm_min = pSetTimeS->tm_min;
+                    setDateTime.tm_hour = pSetTimeS->tm_hour;
+
+                    time_t setDateTm = mktime(&setDateTime);
+                    double diffspan = difftime(curTime, setDateTm);//1-2
+
+                    //unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
+                    //if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
+                    if(diffspan>=0 && diffspan<5){
+
+
+                        pCurTime = localtime(&curTime);
                         e_ErrorCode eResult = EC_OBJECT_NULL;
                         bool bRslt = start_exec_task(witer->first,"timer",eResult,(*cmd_iter).iCommandType,
-                                                     mapParam);//(*cmd_iter).iChannelId
+                                                     mapParam);
                         //通知客户端正在执行
                         if(bRslt==true)
                             notify_client_execute_result(witer->second.sStationNum,witer->first,witer->second.sDevName,witer->second.iDevType,"timer",
@@ -1306,6 +1325,9 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
     }
     start_task_schedules_timer();
 }
+
+
+
 
 void device_session::notify_test_message(string sDevId)
 {

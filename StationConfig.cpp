@@ -33,6 +33,8 @@ bool StationConfig::load_station_config()
     if(!GetInst(DataBaseOperation).GetRemindInfoByServer(sLocalServerId,mapRemindInfo))
         return false;
 
+    if(!GetInst(DataBaseOperation).GetRemindInfoByServer("00000000",mapDeviceCmdRemindInfo))
+        return false;
     return true;
 }
 
@@ -290,10 +292,10 @@ map<string,Remind_Scheduler>&  StationConfig::get_all_remind_info()
     return mapRemindInfo;
 }
 
-Remind_Scheduler*  StationConfig::get_remind_info(string sNumber)
+Remind_Scheduler*  StationConfig::get_device_remind_info(string sNumber)
 {
-    map<string,Remind_Scheduler>::iterator iter_remind = mapRemindInfo.find(sNumber);
-    if(iter_remind!=mapRemindInfo.end())
+    map<string,Remind_Scheduler>::iterator iter_remind = mapDeviceCmdRemindInfo.find(sNumber);
+    if(iter_remind!=mapDeviceCmdRemindInfo.end())
         return &(iter_remind->second);
     return 0;
 }

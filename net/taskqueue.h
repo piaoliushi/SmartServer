@@ -19,7 +19,7 @@ namespace hx_net
 		void SubmitTask(const Task& task)
 		{
             boost::recursive_mutex::scoped_lock lock(mutex_);
-            if(list_.size()>500)
+            if(list_.size()>200)
                 list_.pop_front();
 			list_.push_back(task);//将任务拷贝到list
 			worktobedone_.notify_all();

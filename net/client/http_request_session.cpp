@@ -85,7 +85,7 @@ http_request_session::~http_request_session(void)
                       boost::system::error_code ec;
                       //cout<<"http_stream_.open----------start!!!"<<endl;
                       LOG__("info", "http_stream_.open----------start!!!");
-                      http_stream2_.open_timeout(10000);
+                      http_stream2_.open_timeout(5000);
                       http_stream2_.open(task_.first);//, ec
                       if(!http_stream2_){
                           // If the open operation timed out then:

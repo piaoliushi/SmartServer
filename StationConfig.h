@@ -82,7 +82,7 @@ public:
      //获取提醒配置信息
      map<string,Remind_Scheduler>&  get_all_remind_info();
      //获取单个提醒配置信息
-     Remind_Scheduler*  get_remind_info(string sNumber);
+     Remind_Scheduler*  get_device_remind_info(string sNumber);
 
 private:
 	vector<TransmitterInformation>mapTransmitterInfo;//台站id为索引
@@ -104,5 +104,6 @@ private:
     ComCommunicationMode Gsm_model_info;
 
     map<string,Remind_Scheduler>  mapRemindInfo;//本地服务负责的提醒任务
+    map<string,Remind_Scheduler>  mapDeviceCmdRemindInfo;//设备控制提醒任务
 };
 #endif

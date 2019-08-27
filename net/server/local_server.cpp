@@ -28,7 +28,7 @@ namespace hx_net
 	{
 		start_accept();
 
-        start_remind_schedules_timer();//启动提醒定时器
+        //start_remind_schedules_timer();//启动提醒定时器
 	}
 
     LocalServer::~LocalServer()
@@ -602,61 +602,57 @@ namespace hx_net
         unsigned long cur_tm = pCurTime->tm_hour*3600+pCurTime->tm_min*60+pCurTime->tm_sec;
         map<string,Remind_Scheduler>&mapRemind = GetInst(StationConfig).get_all_remind_info();
         map<string,Remind_Scheduler>::iterator witer = mapRemind.begin();
-        for(;witer!=mapRemind.end();++witer)
-        {
+        for(;witer!=mapRemind.end();++witer){
             //按天控制
             if((witer->second).iDateType == RUN_TIME_DAY){
                 //在５秒内
-                if(curTime>=(witer->second).tExecuteTime && curTime<(witer->second).tExecuteTime+5){
-
+                tm *pSetTimeS = localtime(&((witer->second).tExecuteTime));
+                unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
+                if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
+                    cout<<"this is a day scheduler!++++++++++++++++"<<str_time<<endl;
 
                 }
 
-                Remind_Scheduler* remindSch = GetInst(StationConfig).get_remind_info((*cmd_iter).remindnumber);
-                if(remindSch!=0){
-                    std::vector<string>::iterator it;
-                     it = std::find(A.begin(), A.end(), B[i]);
-                    if (it == A.end()){
-                      C.push_back(B[i]);
-                    }
-                }
             }
             //按星期控制
             if((witer->second).iDateType == RUN_TIME_WEEK){
 
-
                 pCurTime = localtime(&curTime);
                 vector<int>::iterator iter_week = std::find((witer->second).vWeek.begin(),
-                                                            (witer->second).vWeek.end(),(*iter_week)%7);
-
-                /* for(;iter_week!=(witer->second).vWeek.end();++iter_week){
-
-                    if((pCurTime->tm_wday)== (*iter_week)%7){
-
-                        tm *pSetTimeS = localtime(&((witer->second).tExecuteTime));
-                        unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
-                        if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
-
-                            //通知客户端正在执行
-                        }
+                                                            (witer->second).vWeek.end(),pCurTime->tm_wday%7);
+                if(iter_week!=(witer->second).vWeek.end()){
+                    tm *pSetTimeS = localtime(&((witer->second).tExecuteTime));
+                    unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
+                    if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
+                         //通知客户端正在执行
+                        cout<<"this is a week scheduler!------------------"<<str_time<<endl;
                     }
-                }*/
-
+                }
             }
 
             //按月控制
             if((witer->second).iDateType == RUN_TIME_MONTH){
 
                 pCurTime = localtime(&curTime);
-                if((pCurTime->tm_mon+1)== (witer->second).iMonth || (witer->second).iMonth==0){
-                    tm *pSetTimeS = localtime(&((witer->second).tExecuteTime));
-                    unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
-                    if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
-                        e_ErrorCode eResult = EC_OBJECT_NULL;
+                Remind_Scheduler curSch = (witer->second);
+                //创建提醒时间
+                tm remindDateTime;
+                remindDateTime.tm_mday = curSch.iDay;
+                remindDateTime.tm_mon = curSch.iMonth-1;
+                remindDateTime.tm_year = pCurTime->tm_year;
+                tm *premindTimeS = localtime(&(curSch.tExecuteTime));
+                remindDateTime.tm_sec = premindTimeS->tm_sec;
+                remindDateTime.tm_min = premindTimeS->tm_min;
+                remindDateTime.tm_hour = premindTimeS->tm_hour;
+                time_t remindDateTm = mktime(&remindDateTime);
+                double diffspan = difftime(curTime, remindDateTm-curSch.iAdvanceSeconds);
+                if(diffspan>=0 && diffspan<5){
 
-                        //通知客户端正在执行
-                    }
+                    cout<<"this is a month scheduler!*****************"<<str_time<<endl;
+                     e_ErrorCode eResult = EC_OBJECT_NULL;
+
                 }
+
             }
         }
         start_remind_schedules_timer();

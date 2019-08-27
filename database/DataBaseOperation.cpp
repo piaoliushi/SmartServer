@@ -407,7 +407,7 @@ bool DataBaseOperation::GetCmd(QSqlDatabase &db, string strDevnum,vector<Command
                     cmd_sch.tCmdEndTime = cmdschquery.value(8).toDateTime().toTime_t();
                     cmd_sch.iDateType = cmdschquery.value(9).toInt();
                     cmd_sch.iChannelId = cmdschquery.value(13).toInt();//add by lk 2017-8-17
-                    cmd_sch.remindnumber = cmdschquery.value(14).toString();
+                    cmd_sch.remindnumber = cmdschquery.value(14).toString().toStdString();
                     vcmdsch.push_back(cmd_sch);
                 }
             }
@@ -1892,9 +1892,15 @@ bool DataBaseOperation::GetRemindInfoByServer(const string sServerNumber,map<str
         return false;
     }
     QSqlQuery remindSchquery(db);
-    QString strSql=QString("select remindnumber,remindtype,datetype,weekday,time,month,day,agentserver,originator,targetobject,"
-                           "remindcontent,needconfirm,confirmtimeout,advanceseconds from remind_notify_scheduler where agentserver='%1' and Enable=1").arg(QString::fromStdString(sServerNumber));
+    //QString strSql=QString("select remindnumber,remindtype,datetype,weekday,time,month,day,agentserver,originator,targetobject,"
+    //                       "remindcontent,needconfirm,confirmtimeout,advanceseconds from remind_notify_scheduler where agentserver='%1' and Enable=1").arg(QString::fromStdString(sServerNumber));
 
+    QString strSql=QString("select remindnumber,remindtype,datetype,weekday,time,month,day,agentserver,originator,targetobject"
+                            ",remindcontent,needconfirm,confirmtimeout,advanceseconds from remind_notify_scheduler where agentserver='%1' union all"
+                            " select remindnumber,remindtype,datetype,weekday,time,month,day,agentserver,originator,targetobject"
+                            ",remindcontent,needconfirm,confirmtimeout,advanceseconds from remind_notify_scheduler where remindnumber in(select remindnumber "
+                            "from command_scheduler where objectnumber in(select objectnumber from platform_server_purview"
+                            " where servernumber='%2'))").arg(QString::fromStdString(sServerNumber)).arg(QString::fromStdString(sServerNumber));
     remindSchquery.prepare(strSql);
     if(remindSchquery.exec()){
         while(remindSchquery.next()){
