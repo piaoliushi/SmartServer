@@ -1934,7 +1934,7 @@ bool DataBaseOperation::GetRemindInfoByServer(const string sServerNumber,map<str
 }
 
 //添加提醒时间触发日志
-bool DataBaseOperation::AddRemindItemLog(const string sRemindNumber,int confirmType,const string sConfirmUser,string sConfirmMessage,
+bool DataBaseOperation::AddRemindItemLog(const string sRemindNumber,int remindtype,const string sConfirmUser,string sConfirmMessage,
                       int nConfirmState,const time_t notifyTime ,const time_t confirmTime ,int &newId)
 {
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
@@ -1946,15 +1946,15 @@ bool DataBaseOperation::AddRemindItemLog(const string sRemindNumber,int confirmT
     QSqlQuery insertRemindQuery(db);
 
 
-    QString strSql = QString("insert into remind_nofity_record(remindnumber,remindtime,confirmtime,"
+    QString strSql = QString("insert into remind_notify_record(remindnumber,remindtime,"
                      "confirmuser,confirmstate,remindtype,confirmcontent) values(:remindnumber,"
-                     ":remindtime,:confirmtime,:confirmuser,:confirmstate,:remindtype,:confirmcontent)");
+                     ":remindtime,:confirmuser,:confirmstate,:remindtype,:confirmcontent)");
     insertRemindQuery.prepare(strSql);
     insertRemindQuery.bindValue(":remindnumber",QString::fromStdString(sRemindNumber));
-    insertRemindQuery.bindValue(":remindtype",confirmType);
+    insertRemindQuery.bindValue(":remindtype",remindtype);
     insertRemindQuery.bindValue(":confirmstate",nConfirmState);
     insertRemindQuery.bindValue(":remindtime",QDateTime::fromTime_t(notifyTime));
-    insertRemindQuery.bindValue(":confirmtime",QDateTime::fromTime_t(confirmTime));
+    //insertRemindQuery.bindValue(":confirmtime",QDateTime::fromTime_t(confirmTime));//confirmtime,
     insertRemindQuery.bindValue(":confirmuser",QString::fromStdString(sConfirmUser));
     insertRemindQuery.bindValue(":confirmcontent",QString::fromStdString(sConfirmMessage));
 
@@ -1964,8 +1964,16 @@ bool DataBaseOperation::AddRemindItemLog(const string sRemindNumber,int confirmT
         return false;
     }
 
-    newId = insertRemindQuery.lastInsertId().toInt();
 
+    newId = insertRemindQuery.lastInsertId().toInt();
+    QString queryMaxId = QString("select currval('remind_notify_record_seq')");
+    insertRemindQuery.prepare(queryMaxId);//nextval
+    if(insertRemindQuery.exec()){
+        while(insertRemindQuery.next()){
+
+            newId = insertRemindQuery.value(0).toInt();
+        }
+    }
 
     ConnectionPool::closeConnection(db);
     return true;

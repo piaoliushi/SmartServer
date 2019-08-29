@@ -28,7 +28,7 @@ namespace hx_net
 	{
 		start_accept();
 
-        //start_remind_schedules_timer();//启动提醒定时器
+        start_remind_schedules_timer();//启动提醒定时器
 	}
 
     LocalServer::~LocalServer()
@@ -609,7 +609,7 @@ namespace hx_net
                 tm *pSetTimeS = localtime(&((witer->second).tExecuteTime));
                 unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
                 if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
-                    cout<<"this is a day scheduler!++++++++++++++++"<<str_time<<endl;
+                    //cout<<"this is a day scheduler!++++++++++++++++"<<str_time<<endl;
 
                 }
 
@@ -623,9 +623,20 @@ namespace hx_net
                 if(iter_week!=(witer->second).vWeek.end()){
                     tm *pSetTimeS = localtime(&((witer->second).tExecuteTime));
                     unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
-                    if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
+                    if(cur_tm == set_tm_s ){//&& cur_tm<(set_tm_s+5)
                          //通知客户端正在执行
                         cout<<"this is a week scheduler!------------------"<<str_time<<endl;
+
+                        int nConfirmState = -1;//无需确认
+                        if((witer->second).bNeedConfirm)
+                            nConfirmState = 0;//待确认
+
+                        int newId = -1;
+                        GetInst(DataBaseOperation).AddRemindItemLog((witer->second).sRemindNumber,(witer->second).iRemindType,"","",
+                                              nConfirmState,curTime,-1,newId);
+
+
+                        cout<<"return remind record id = "<<newId<<endl;
                     }
                 }
             }
@@ -648,7 +659,7 @@ namespace hx_net
                 double diffspan = difftime(curTime, remindDateTm-curSch.iAdvanceSeconds);
                 if(diffspan>=0 && diffspan<5){
 
-                    cout<<"this is a month scheduler!*****************"<<str_time<<endl;
+                    //cout<<"this is a month scheduler!*****************"<<str_time<<endl;
                      e_ErrorCode eResult = EC_OBJECT_NULL;
 
                 }

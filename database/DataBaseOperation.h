@@ -121,7 +121,7 @@ public:
     bool GetRemindInfoByServer(const string sServerNumber,map<string,Remind_Scheduler> &remindSch);
 
     //添加提醒时间触发日志
-    bool AddRemindItemLog(const string sRemindNumber,int confirmType,const string sConfirmUser,string sConfirmMessage,
+    bool AddRemindItemLog(const string sRemindNumber,int remindtype,const string sConfirmUser,string sConfirmMessage,
                           int nConfirmState,const time_t notifyTime ,const time_t confirmTime ,int &newId);
 
 

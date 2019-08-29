@@ -1903,7 +1903,7 @@ void device_session::handle_connected(const boost::system::error_code& error)
     }
     else	{
 
-        cout<< error.message() << std::endl;
+        //cout<< error.message() << std::endl;
         close_i();
         start_connect_timer();
     }
@@ -2382,6 +2382,30 @@ void device_session::check_alarm_state(string sDevId,DevMonitorDataPtr curDataPt
                 if(mapIsMonitorChl[curChannel]!=true){//bMonitor!=true
                     clear_dev_item_alarm(sDevId,iterItem->first);
                     continue;
+                }else{
+
+                    if(modleInfos_.mapDevInfo[sDevId].nDevProtocol==LINK_DEVICE &&
+                            modleInfos_.mapDevInfo[sDevId].nSubProtocol==LINK_HX_9020)
+                    {
+                        bool bcheck = true;
+                        map<int,vector<AssDevChan> >::iterator assiter = modleInfos_.mapDevInfo[sDevId].map_AssDevChan.find(curChannel);
+                        if(assiter!=modleInfos_.mapDevInfo[sDevId].map_AssDevChan.end())
+                        {
+                            vector<AssDevChan>::iterator vaiter =  modleInfos_.mapDevInfo[sDevId].map_AssDevChan[curChannel].begin();
+                            for(;vaiter!=modleInfos_.mapDevInfo[sDevId].map_AssDevChan[curChannel].end();++vaiter)
+                            {
+                                dev_run_state ass_tsmt_s = GetInst(SvcMgr).get_dev_run_state(modleInfos_.mapDevInfo[sDevId].sStationNum,(*vaiter).sAstNum);
+                                if((*vaiter).iAssType==DEVICE_TRANSMITTER && ass_tsmt_s!=dev_running)
+                                {
+                                    bcheck = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if(!bcheck)
+                            continue;
+                    }
+
                 }
             }
         }
