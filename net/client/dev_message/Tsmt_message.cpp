@@ -157,6 +157,13 @@ namespace hx_net
                 //设置运行状态
                 set_run_state(irunstate);
             }
+            //不再运行的发射机将三大指标置零
+            if(get_run_state()==dev_shutted_down)
+            {
+                d_curData_ptr->mValues[0].fValue=0;
+                d_curData_ptr->mValues[1].fValue=0;
+                d_curData_ptr->mValues[2].fValue=0;
+            }
 
             d_checkData_ptr = d_curData_ptr;
             if(d_ptransmmit->IsStandardCommand()){

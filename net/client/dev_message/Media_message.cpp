@@ -57,6 +57,14 @@ namespace hx_net
                 return int((data[3]<<8)|data[2])-3;
             }
         }
+        case MD_761:{
+            if(data[0]!=0x7E || data[2]!=0x22)
+                return RE_HEADERROR;
+            else
+            {
+                return int((data[6]<<8)|data[5]);
+            }
+        }
         case DTMB_BD:{
             if(data[0]!=0x7E)
                 return RE_HEADERROR;
@@ -88,6 +96,9 @@ namespace hx_net
             break;
         case DTMB_BD:
             idecresult =  DtmbBDData(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
+        case MD_761:
+            idecresult = Md761Data(data,d_curData_ptr,nDataLen,iaddcode);
             break;
         }
 
@@ -132,6 +143,7 @@ namespace hx_net
         case MD_740BD_II:
         case MD_760BD_IV:
         case DTMB_BD:
+        case MD_761:
 			return true;
 		}
 		return false;
@@ -186,10 +198,27 @@ namespace hx_net
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
+
         case MD_760BD_IV:{
             CommandUnit tmUnit;
             tmUnit.commandLen = 0;
             tmUnit.ackLen = 7;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case MD_761:{
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 9;
+            tmUnit.ackLen = 7;
+            tmUnit.commandId[0] = 0x7E;
+            tmUnit.commandId[1] = 0x21;
+            tmUnit.commandId[2] = 0x22;
+            tmUnit.commandId[3] = (d_devInfo.iAddressCode&0x00FF);
+            tmUnit.commandId[4] = ((d_devInfo.iAddressCode&0xFF00)>>8);
+            tmUnit.commandId[5] = 0x02;
+            tmUnit.commandId[6] = 0x00;
+            tmUnit.commandId[7] = 0x22;
+            tmUnit.commandId[8] = 0x55;
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
             break;
@@ -450,6 +479,116 @@ namespace hx_net
         }
         return RE_SUCCESS;
     }
+#if 0
+    int Media_message::Md761Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        if(data[2]!=0x22)
+            return RE_CMDACK;
+        if(nDataLen<88)
+            return RE_NOPROTOCOL;
+        int index = 0;
+        iaddcode = data[4]*256+data[3];
+        DataInfo dtinfo;
+        for(int i=0;i<6;++i)
+        {
+            dtinfo.bType = false;
+            dtinfo.fValue = data[12*i+7];
+            data_ptr->mValues[index++] = dtinfo;
+            int nfreq = data[12*i+8]+data[12*i+9]*256;
+            dtinfo.fValue = (data[12*i+7]==0x00 ? nfreq*0.01 : nfreq);
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.fValue = data[12*i+10];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.fValue = data[12*i+11];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.bType = true;
+            dtinfo.fValue = data[12*i+12];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.fValue = data[12*i+13];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.bType = false;
+            dtinfo.fValue = data[12*i+14];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.fValue = data[12*i+15];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.fValue = data[12*i+16];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.bType = true;
+            for(int j=0;j<4;++j)
+            {
+                dtinfo.fValue = Getbit(data[12*i+17],j);
+                data_ptr->mValues[index++] = dtinfo;
+            }
+        }
+        return RE_SUCCESS;
+    }
+#endif;
+    int Media_message::Md761Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+       if(data[2]!=0x22)
+           return RE_CMDACK;
+       if(nDataLen<88)
+           return RE_NOPROTOCOL;
+       int index = 0;
+       iaddcode = data[4]*256+data[3];
+       DataInfo dtinfo;
+       for(int i=0;i<6;++i)
+       {
+           dtinfo.bType = false;
+           dtinfo.fValue = data[12*i+7];
+           data_ptr->mValues[index++] = dtinfo;
+           int nfreq = data[12*i+8]+data[12*i+9]*256;
+           dtinfo.fValue = (data[12*i+7]==0x00 ? nfreq*0.01 : nfreq);
+           data_ptr->mValues[index++] = dtinfo;
+           dtinfo.fValue = data[12*i+10];
+           data_ptr->mValues[index++] = dtinfo;
+           dtinfo.fValue = data[12*i+11];
+           data_ptr->mValues[index++] = dtinfo;
+           dtinfo.bType = true;
+           dtinfo.fValue = data[12*i+12];
+           data_ptr->mValues[index++] = dtinfo;
+           dtinfo.fValue = data[12*i+13];
+           data_ptr->mValues[index++] = dtinfo;
+           dtinfo.bType = false;
+           dtinfo.fValue = data[12*i+14];
+           data_ptr->mValues[index++] = dtinfo;
+           dtinfo.fValue = data[12*i+15];
+           data_ptr->mValues[index++] = dtinfo;
+           dtinfo.fValue = data[12*i+16];
+           data_ptr->mValues[index++] = dtinfo;
+           dtinfo.bType = true;
+           int nlock = int(data_ptr->mValues[4+13*i].fValue);
+           int nPower = int(data_ptr->mValues[9+13*i].fValue);
+           int nLeftVu = int(data_ptr->mValues[10+13*i].fValue);
+           int nRightVu = int(data_ptr->mValues[11+13*i].fValue);
+           for(int j=0;j<4;++j)
+           {
+               dtinfo.fValue = Getbit(data[12*i+17],j);
+               data_ptr->mValues[index++] = dtinfo;
+           }
+
+           if(nlock==0 && nPower==1)
+           {
+               dtinfo.fValue = 1.0;
+           }
+           else
+           {
+               dtinfo.fValue = 0;
+           }
+           data_ptr->mValues[78+2*i] = dtinfo;
+
+           if((nlock &&  nLeftVu &&  nRightVu) || int(dtinfo.fValue)==1)
+           {
+               dtinfo.fValue = 1.0;
+           }
+           else
+           {
+               dtinfo.fValue = 0;
+           }
+           data_ptr->mValues[79+2*i] = dtinfo;
+       }
+       return RE_SUCCESS;
+    }
 
     //添加数据(http消息)
     bool  Media_message::add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData)
@@ -465,5 +604,24 @@ namespace hx_net
         if(GetInst(DataBaseOperation).AddItemMonitorRecord(d_devInfo.sDevNum,tmCurTime,mapData,d_devInfo.map_MonitorItem))
             tmLastSaveTime[nChannel] = tmCurTime;
         return true;
+    }
+
+    int Media_message::getBelongChannelIdFromMonitorItem(int monitorItemId)
+    {
+        switch (d_devInfo.nSubProtocol) {
+        case MD_740P:
+        {
+            return monitorItemId/6;
+        }
+        case MD_740BD_II:{
+            return monitorItemId/7;
+        }
+        case MD_760BD_IV:{
+            return monitorItemId/20;
+        }
+        case MD_761:{
+            return (monitorItemId>77 ? (monitorItemId-78)/2 : monitorItemId/13);
+        }
+        }
     }
 }

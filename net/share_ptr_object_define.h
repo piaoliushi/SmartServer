@@ -63,5 +63,8 @@ namespace hx_net
     typedef boost::shared_ptr<WebSocketMessage>         webSocketMsgPtr;
     typedef boost::weak_ptr<WebSocketMessage>           webSocketMsgWeakPtr;
 
+    typedef boost::shared_ptr<RemindEventNotify>        remindEventNotifyPtr;
+    typedef boost::weak_ptr<RemindEventNotify>          remindEventNotifyWeakPtr;
+
 }
 #endif

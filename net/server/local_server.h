@@ -70,16 +70,10 @@ public:
         //用户交接班
         void user_handover(session_ptr ch_ptr,string sCurUsr,string sNewUser,
                            string sNewPassword,const string &sContents,LoginAck &loginAck);
-        //用户签到
-        //void user_signin_out(session_ptr ch_ptr,string sSignInUsr,string sSignInPsw,signInOutAckMsgPtr signinPtr,int bIn);
+        //通知客户端事件(定时提醒)
+        bool send_remind_message(int eventType,int remindType,int nDispatcherType,int needConfirm,
+                                 int timeOutLen,int advanceSeconds,string  &sRemindContent,int tokenId,string sHappenTime,string sReserved);
 
-        //收集当前签到人信息
-        //void addSignInUsersToLoginAck(session_ptr ch_ptr,const UserInformation &sUser,LoginAck &loginAck);
-        //签到签退操作
-        //void handSignInAndOut(session_ptr ch_ptr,bool bIsIn,time_t &curTm,const UserInformation &sUser
-        //                      ,e_ErrorCode &eError);
-        //通知客户端签到结果
-        //void notify_other_client_signin_result(session_ptr ch_ptr,int bIn,const UserSignInInfo &sUser);
     protected:
         void user_switch_login(session_ptr ch_ptr,string sNewUser,string sPassword,LoginAck &loginAck,UserInformation &tmpUser);
         //获取用户与当前客户端id下的设备授权信息
@@ -100,8 +94,8 @@ public:
 
         std::map<string,vector<session_ptr> > devToUser_;//通过Dev获得对应的连接
 
-        boost::recursive_mutex sign_mutex_;
-        std::vector<UserSignInInfo> sign_in_users_;//当前签到用户
+        //boost::recursive_mutex sign_mutex_;
+        //std::vector<UserSignInInfo> sign_in_users_;//当前签到用户
 		
         boost::asio::deadline_timer   schedules_remind_timer_;
 	};

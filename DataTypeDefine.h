@@ -115,12 +115,16 @@ typedef struct _tag_Command_Scheduler
     string   remindnumber;   //提醒编号
 }Command_Scheduler;
 
-typedef struct
+typedef struct _tag_Dev_Property
 {
+    _tag_Dev_Property(){
+        property_value_unit=-1;
+    }
     string property_num;
     string property_name;
     int    property_type;
     string property_value;
+    int    property_value_unit;
 }DevProperty;
 
 typedef struct
@@ -350,7 +354,30 @@ typedef struct
     string sValue;
 }taskParam;
 
+enum RemindConfirmState
+{
+  RMD_S_NONEED_CONFIRM  = -1,//不需要确认
+  RMD_S_WAIT_CONFIRM    =  0,//待确认
+  RMD_S_TIMEOUT_CONFIRM =  1,//已确认（人工）
+  RMD_S_FINISH_CONFIRM  =  2,//未确认（超时）
+  RMD_S_SEND_ERROR      =  3,//未发送（内部错误）
+};
 
+enum e_EventType
+{
+    EVENT_LOCAL_MSG  = 0,//本地事件
+    EVENT_AGENT_MSG  = 1,//代理消息
+};
+
+enum{
+  REMIND_TYPE_TIME_TRUNON   = 0,//定时开机
+  REMIND_TYPE_TIME_TRUNOFF  = 1,//定时关机
+  REMIND_TYPE_MANUAL_CHECK  = 2,//人工巡机
+  REMIND_TYPE_DATE_REPAIR   = 3,//定期维修
+  REMIND_TYPE_HANDOVER      = 4,//交接班
+  REMIND_TYPE_EARLY_WARNING = 5,//安播预警
+  REMIND_TYPE_CUSTOM        = 6,//自定义
+};
 //提醒计划结构
 typedef struct _tag_Remind_Sch
 {
@@ -365,8 +392,8 @@ typedef struct _tag_Remind_Sch
     int      iRemindType;         //命令类型
     int      iDateType;           //时间类型
     vector<int>      vWeek;       //星期(1-7)
-    int      iMonth;       //月（0-12，0=all）
-    int      iDay;         //日(1-31)
+    int      iMonth;              //月（0-12，0=all）
+    int      iDay;                //日(1-31)
     time_t   tExecuteTime;        //执行时间
     string   sAgentServerNumber;  //转发服务ID
     int      iOriginator;         //发起者类型
@@ -379,5 +406,7 @@ typedef struct _tag_Remind_Sch
     bool     bIsNotify;           //是否已经通知
 
 }Remind_Scheduler;
+
+
 
 #endif

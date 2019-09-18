@@ -256,6 +256,7 @@ namespace hx_net
 	
 	void Envir_message::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)
 	{
+
 	}
 
 	void Envir_message::GetAllCmd( CommandAttribute &cmdAll )

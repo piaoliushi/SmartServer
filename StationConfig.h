@@ -19,6 +19,10 @@ using namespace std;
 
 #define DEV_CMD_OPR_TYPE(Y)    GetInst(StationConfig).get_dictionary_value("CommandType",Y)
 
+#define REMIND_ORIGINATOR_TYPE(Y)    GetInst(StationConfig).get_dictionary_value("remind_notify_originator",Y)
+#define REMIND_TARGET_TYPE(Y)    GetInst(StationConfig).get_dictionary_value("remind_notify_target",Y)
+#define REMIND_TYPE(Y)    GetInst(StationConfig).get_dictionary_value("remind_notify_type",Y)
+#define REMIND_STATE(Y)    GetInst(StationConfig).get_dictionary_value("remind_notify_state",Y)
 
 class StationConfig
 {
@@ -83,6 +87,8 @@ public:
      map<string,Remind_Scheduler>&  get_all_remind_info();
      //获取单个提醒配置信息
      Remind_Scheduler*  get_device_remind_info(string sNumber);
+
+
 
 private:
 	vector<TransmitterInformation>mapTransmitterInfo;//台站id为索引

@@ -107,6 +107,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* DeviceCommandResultNotify_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   DeviceCommandResultNotify_reflection_ = NULL;
+const ::google::protobuf::Descriptor* RemindEventNotify_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  RemindEventNotify_reflection_ = NULL;
+const ::google::protobuf::Descriptor* RemindEventAck_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  RemindEventAck_reflection_ = NULL;
 const ::google::protobuf::Descriptor* WebSocketMessage_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   WebSocketMessage_reflection_ = NULL;
@@ -642,7 +648,50 @@ void protobuf_AssignDesc_protocol_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceCommandResultNotify));
-  WebSocketMessage_descriptor_ = file->message_type(27);
+  RemindEventNotify_descriptor_ = file->message_type(27);
+  static const int RemindEventNotify_offsets_[10] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, ntokenid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, eeventtype_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, eremindtype_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, sdispatcher_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, shappentime_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, scontent_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, nneedconfirm_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, ntimeout_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, nadvanceseconds_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, sreserved_),
+  };
+  RemindEventNotify_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      RemindEventNotify_descriptor_,
+      RemindEventNotify::default_instance_,
+      RemindEventNotify_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventNotify, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(RemindEventNotify));
+  RemindEventAck_descriptor_ = file->message_type(28);
+  static const int RemindEventAck_offsets_[5] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventAck, ntokenid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventAck, nconfirmstate_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventAck, sconfirmuser_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventAck, sconfirmcontent_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventAck, sreserved_),
+  };
+  RemindEventAck_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      RemindEventAck_descriptor_,
+      RemindEventAck::default_instance_,
+      RemindEventAck_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventAck, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(RemindEventAck, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(RemindEventAck));
+  WebSocketMessage_descriptor_ = file->message_type(29);
   static const int WebSocketMessage_offsets_[12] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WebSocketMessage, nmsgtype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(WebSocketMessage, smsgtype_),
@@ -743,6 +792,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     DeviceCommandResultNotify_descriptor_, &DeviceCommandResultNotify::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    RemindEventNotify_descriptor_, &RemindEventNotify::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    RemindEventAck_descriptor_, &RemindEventAck::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     WebSocketMessage_descriptor_, &WebSocketMessage::default_instance());
 }
 
@@ -807,6 +860,10 @@ void protobuf_ShutdownFile_protocol_2eproto() {
   delete DeviceCommandMsg_reflection_;
   delete DeviceCommandResultNotify::default_instance_;
   delete DeviceCommandResultNotify_reflection_;
+  delete RemindEventNotify::default_instance_;
+  delete RemindEventNotify_reflection_;
+  delete RemindEventAck::default_instance_;
+  delete RemindEventAck_reflection_;
   delete WebSocketMessage::default_instance_;
   delete WebSocketMessage_reflection_;
 }
@@ -898,64 +955,73 @@ void protobuf_AddDesc_protocol_2eproto() {
     "(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010eDevType\030\003 \001(\005\022\020\n\010"
     "sDevName\030\004 \001(\t\022\036\n\010eErrorId\030\005 \001(\0162\014.e_Err"
     "orCode\022\021\n\tsOperUser\030\006 \001(\t\022\036\n\007cParams\030\007 \003"
-    "(\0132\r.CommandParam\"\332\003\n\020WebSocketMessage\022\020"
-    "\n\010nMsgType\030\001 \002(\005\022\020\n\010sMsgType\030\002 \002(\t\022\036\n\013ms"
-    "gLoginReq\030\003 \001(\0132\t.LoginReq\022\036\n\013msgLoginAc"
-    "k\030\004 \001(\0132\t.LoginAck\022&\n\016monitorDataNty\030\005 \001"
-    "(\0132\016.DevDataNotify\022,\n\017devNetStatusNty\030\006 "
-    "\001(\0132\023.DevNetStatusNotify\022.\n\020devWorkStatu"
-    "sNty\030\007 \001(\0132\024.DevWorkStatusNotify\0220\n\021devA"
-    "larmStatusNty\030\010 \001(\0132\025.DevAlarmStatusNoti"
-    "fy\0224\n\020commandResultNty\030\t \001(\0132\032.DeviceCom"
-    "mandResultNotify\022#\n\014msgTurnOnReq\030\n \001(\0132\r"
-    ".TurnOnDevMsg\022%\n\rmsgTurnOffNty\030\013 \001(\0132\016.T"
-    "urnOffDevMsg\022(\n\rmsgCommandReq\030\014 \001(\0132\021.De"
-    "viceCommandMsg*\351\014\n\013e_ErrorCode\022\t\n\005EC_OK\020"
-    "\000\022\r\n\tEC_FAILED\020\001\022\024\n\020EC_USR_NOT_FOUND\020\002\022\031"
-    "\n\025EC_USR_NOT_PERMISSION\020\003\022\024\n\020EC_USR_PSW_"
-    "ERROR\020\004\022\027\n\023EC_USR_REPEAT_LOGIN\020\005\022\020\n\014EC_N"
-    "ET_ERROR\020\006\022\024\n\020EC_LOGOUT_FAILED\020\007\022\027\n\023EC_C"
-    "ONFIGREQ_FAILED\020\010\022\024\n\020EC_TURNON_FAILED\020\t\022"
-    "\025\n\021EC_TURNOFF_FAILED\020\n\022\032\n\026EC_ANTENNA_HTO"
-    "B_FAILED\020\013\022\032\n\026EC_ANTENNA_BTOH_FAILED\020\014\022\027"
-    "\n\023EC_DEVICE_NOT_FOUND\020\r\022\022\n\016EC_OBJECT_NUL"
-    "L\020\016\022\023\n\017EC_OPR_ON_GOING\020\017\022\032\n\026EC_SEND_SMS_"
-    "MSG_FAILED\020\020\022\027\n\023EC_DEV_DISCONNECTED\020\021\022\027\n"
-    "\023EC_CMD_SEND_SUCCEED\020\022\022\016\n\nEC_UNKNOWN\020\023\022\032"
-    "\n\026EC_MSG_HANDEL_OBJ_NULL\020\024\022\027\n\023EC_ATTENA_"
-    "POS_ERROR\020\025\022\026\n\022EC_NO_ALLOW_EXCUTE\020\026\022\035\n\031E"
-    "C_NO_ALLOW_SWITCH_ATTENA\020\027\022\031\n\025EC_DETECT_"
-    "WAIT_ATTENA\020\030\022\027\n\023EC_DETECT_RUN_STATE\020\031\022\031"
-    "\n\025EC_CMD_FILURE_TIMEOUT\020\032\022\027\n\023EC_CMD_HAND"
-    "OVER_996\020\033\022!\n\035EC_DEV_RUN_OK_CANCEL_SEND_"
-    "CMD\020\034\022\"\n\036EC_NO_ALLOW_SWITCH_ATTENA_AUTO\020"
-    "\035\022\031\n\025EC_CMD_CODE_NOT_FOUND\020\036\022\033\n\027EC_UNFIN"
-    "ISHED_CMD_EXIST\020\037\022\'\n#EC_DEV_RUN_SHUTDOWN"
-    "_CANCEL_SEND_CMD\020 \022\036\n\032EC_ANTEENA_HOST_CM"
-    "D_CANCEL\020!\022 \n\034EC_ANTEENA_BACKUP_CMD_CANC"
-    "EL\020\"\022#\n\037EC_RELATE_DEV_TURNON_CMD_CANCEL\020"
-    "#\022$\n EC_RELATE_DEV_TURNOFF_CMD_CANCEL\020$\022"
-    ".\n*EC_RELATE_DEV_996_ONEKEY_TURNON_CMD_C"
-    "ANCEL\020%\022/\n+EC_RELATE_DEV_996_ONEKEY_TURN"
-    "OFF_CMD_CANCEL\020&\022/\n+EC_RELATE_DEV_SOFT_O"
-    "NEKEY_TURNON_CMD_CANCEL\020\'\022+\n\'EC_RELATE_D"
-    "EV_SWITCH_ANTTENA_CMD_CANCEL\020(\022/\n+EC_REL"
-    "ATE_DEV_AUTO_SWITCH_BACKUP_CMD_CANCEL\020)\022"
-    "\'\n#EC_UNFINISHED_DEV_TURNON_CMD_CANCEL\020*"
-    "\022(\n$EC_UNFINISHED_DEV_TURNOFF_CMD_CANCEL"
-    "\020+\0222\n.EC_UNFINISHED_DEV_996_ONEKEY_TURNO"
-    "N_CMD_CANCEL\020,\0223\n/EC_UNFINISHED_DEV_SOFT"
-    "_ONEKEY_TURNON_CMD_CANCEL\020-\022/\n+EC_UNFINI"
-    "SHED_DEV_SWITCH_ANTTENA_CMD_CANCEL\020.\0223\n/"
-    "EC_UNFINISHED_DEV_996_ONEKEY_TURNOFF_CMD"
-    "_CANCEL\020/\022/\n+EC_UNFINISHED_AUTO_SWITCH_B"
-    "ACKUP_CMD_CANCEL\0200\022%\n!EC_CUR_HOST_RUN_SW"
-    "ITCH_CMD_CANCEL\0201\022\'\n#EC_CUR_BACKUP_RUN_S"
-    "WITCH_CMD_CANCEL\0202*%\n\ne_CellType\022\013\n\007DIGI"
-    "TAL\020\000\022\n\n\006ANALOG\020\001*b\n\re_AlarmStatus\022\t\n\005UP"
-    "PER\020\000\022\t\n\005LOWER\020\001\022\n\n\006UPUPER\020\002\022\014\n\010LOWLOWER"
-    "\020\003\022\t\n\005STATE\020\004\022\n\n\006DEVICE\020\005\022\n\n\006RESUME\020\006*)\n"
-    "\ne_AlarmMod\022\014\n\010MOD_CELL\020\000\022\r\n\tMOD_OTHER\020\001", 5520);
+    "(\0132\r.CommandParam\"\336\001\n\021RemindEventNotify\022"
+    "\020\n\010nTokenId\030\001 \002(\004\022\022\n\neEventType\030\002 \001(\005\022\023\n"
+    "\013eRemindType\030\003 \001(\005\022\023\n\013sDispatcher\030\004 \001(\t\022"
+    "\023\n\013sHappenTime\030\005 \001(\t\022\020\n\010sContent\030\006 \001(\t\022\024"
+    "\n\014nNeedConfirm\030\007 \001(\005\022\020\n\010nTimeout\030\010 \001(\005\022\027"
+    "\n\017nAdvanceSeconds\030\t \001(\005\022\021\n\tsReserved\030\n \001"
+    "(\t\"{\n\016RemindEventAck\022\020\n\010nTokenId\030\001 \002(\005\022\025"
+    "\n\rnConfirmState\030\002 \001(\005\022\024\n\014sConfirmUser\030\003 "
+    "\001(\t\022\027\n\017sConfirmContent\030\004 \001(\t\022\021\n\tsReserve"
+    "d\030\005 \001(\t\"\332\003\n\020WebSocketMessage\022\020\n\010nMsgType"
+    "\030\001 \002(\005\022\020\n\010sMsgType\030\002 \002(\t\022\036\n\013msgLoginReq\030"
+    "\003 \001(\0132\t.LoginReq\022\036\n\013msgLoginAck\030\004 \001(\0132\t."
+    "LoginAck\022&\n\016monitorDataNty\030\005 \001(\0132\016.DevDa"
+    "taNotify\022,\n\017devNetStatusNty\030\006 \001(\0132\023.DevN"
+    "etStatusNotify\022.\n\020devWorkStatusNty\030\007 \001(\013"
+    "2\024.DevWorkStatusNotify\0220\n\021devAlarmStatus"
+    "Nty\030\010 \001(\0132\025.DevAlarmStatusNotify\0224\n\020comm"
+    "andResultNty\030\t \001(\0132\032.DeviceCommandResult"
+    "Notify\022#\n\014msgTurnOnReq\030\n \001(\0132\r.TurnOnDev"
+    "Msg\022%\n\rmsgTurnOffNty\030\013 \001(\0132\016.TurnOffDevM"
+    "sg\022(\n\rmsgCommandReq\030\014 \001(\0132\021.DeviceComman"
+    "dMsg*\351\014\n\013e_ErrorCode\022\t\n\005EC_OK\020\000\022\r\n\tEC_FA"
+    "ILED\020\001\022\024\n\020EC_USR_NOT_FOUND\020\002\022\031\n\025EC_USR_N"
+    "OT_PERMISSION\020\003\022\024\n\020EC_USR_PSW_ERROR\020\004\022\027\n"
+    "\023EC_USR_REPEAT_LOGIN\020\005\022\020\n\014EC_NET_ERROR\020\006"
+    "\022\024\n\020EC_LOGOUT_FAILED\020\007\022\027\n\023EC_CONFIGREQ_F"
+    "AILED\020\010\022\024\n\020EC_TURNON_FAILED\020\t\022\025\n\021EC_TURN"
+    "OFF_FAILED\020\n\022\032\n\026EC_ANTENNA_HTOB_FAILED\020\013"
+    "\022\032\n\026EC_ANTENNA_BTOH_FAILED\020\014\022\027\n\023EC_DEVIC"
+    "E_NOT_FOUND\020\r\022\022\n\016EC_OBJECT_NULL\020\016\022\023\n\017EC_"
+    "OPR_ON_GOING\020\017\022\032\n\026EC_SEND_SMS_MSG_FAILED"
+    "\020\020\022\027\n\023EC_DEV_DISCONNECTED\020\021\022\027\n\023EC_CMD_SE"
+    "ND_SUCCEED\020\022\022\016\n\nEC_UNKNOWN\020\023\022\032\n\026EC_MSG_H"
+    "ANDEL_OBJ_NULL\020\024\022\027\n\023EC_ATTENA_POS_ERROR\020"
+    "\025\022\026\n\022EC_NO_ALLOW_EXCUTE\020\026\022\035\n\031EC_NO_ALLOW"
+    "_SWITCH_ATTENA\020\027\022\031\n\025EC_DETECT_WAIT_ATTEN"
+    "A\020\030\022\027\n\023EC_DETECT_RUN_STATE\020\031\022\031\n\025EC_CMD_F"
+    "ILURE_TIMEOUT\020\032\022\027\n\023EC_CMD_HANDOVER_996\020\033"
+    "\022!\n\035EC_DEV_RUN_OK_CANCEL_SEND_CMD\020\034\022\"\n\036E"
+    "C_NO_ALLOW_SWITCH_ATTENA_AUTO\020\035\022\031\n\025EC_CM"
+    "D_CODE_NOT_FOUND\020\036\022\033\n\027EC_UNFINISHED_CMD_"
+    "EXIST\020\037\022\'\n#EC_DEV_RUN_SHUTDOWN_CANCEL_SE"
+    "ND_CMD\020 \022\036\n\032EC_ANTEENA_HOST_CMD_CANCEL\020!"
+    "\022 \n\034EC_ANTEENA_BACKUP_CMD_CANCEL\020\"\022#\n\037EC"
+    "_RELATE_DEV_TURNON_CMD_CANCEL\020#\022$\n EC_RE"
+    "LATE_DEV_TURNOFF_CMD_CANCEL\020$\022.\n*EC_RELA"
+    "TE_DEV_996_ONEKEY_TURNON_CMD_CANCEL\020%\022/\n"
+    "+EC_RELATE_DEV_996_ONEKEY_TURNOFF_CMD_CA"
+    "NCEL\020&\022/\n+EC_RELATE_DEV_SOFT_ONEKEY_TURN"
+    "ON_CMD_CANCEL\020\'\022+\n\'EC_RELATE_DEV_SWITCH_"
+    "ANTTENA_CMD_CANCEL\020(\022/\n+EC_RELATE_DEV_AU"
+    "TO_SWITCH_BACKUP_CMD_CANCEL\020)\022\'\n#EC_UNFI"
+    "NISHED_DEV_TURNON_CMD_CANCEL\020*\022(\n$EC_UNF"
+    "INISHED_DEV_TURNOFF_CMD_CANCEL\020+\0222\n.EC_U"
+    "NFINISHED_DEV_996_ONEKEY_TURNON_CMD_CANC"
+    "EL\020,\0223\n/EC_UNFINISHED_DEV_SOFT_ONEKEY_TU"
+    "RNON_CMD_CANCEL\020-\022/\n+EC_UNFINISHED_DEV_S"
+    "WITCH_ANTTENA_CMD_CANCEL\020.\0223\n/EC_UNFINIS"
+    "HED_DEV_996_ONEKEY_TURNOFF_CMD_CANCEL\020/\022"
+    "/\n+EC_UNFINISHED_AUTO_SWITCH_BACKUP_CMD_"
+    "CANCEL\0200\022%\n!EC_CUR_HOST_RUN_SWITCH_CMD_C"
+    "ANCEL\0201\022\'\n#EC_CUR_BACKUP_RUN_SWITCH_CMD_"
+    "CANCEL\0202*%\n\ne_CellType\022\013\n\007DIGITAL\020\000\022\n\n\006A"
+    "NALOG\020\001*b\n\re_AlarmStatus\022\t\n\005UPPER\020\000\022\t\n\005L"
+    "OWER\020\001\022\n\n\006UPUPER\020\002\022\014\n\010LOWLOWER\020\003\022\t\n\005STAT"
+    "E\020\004\022\n\n\006DEVICE\020\005\022\n\n\006RESUME\020\006*)\n\ne_AlarmMo"
+    "d\022\014\n\010MOD_CELL\020\000\022\r\n\tMOD_OTHER\020\001", 5870);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
   DevDataNotify::default_instance_ = new DevDataNotify();
@@ -987,6 +1053,8 @@ void protobuf_AddDesc_protocol_2eproto() {
   CommandParam::default_instance_ = new CommandParam();
   DeviceCommandMsg::default_instance_ = new DeviceCommandMsg();
   DeviceCommandResultNotify::default_instance_ = new DeviceCommandResultNotify();
+  RemindEventNotify::default_instance_ = new RemindEventNotify();
+  RemindEventAck::default_instance_ = new RemindEventAck();
   WebSocketMessage::default_instance_ = new WebSocketMessage();
   DevDataNotify::default_instance_->InitAsDefaultInstance();
   DevDataNotify_eCellMsg::default_instance_->InitAsDefaultInstance();
@@ -1017,6 +1085,8 @@ void protobuf_AddDesc_protocol_2eproto() {
   CommandParam::default_instance_->InitAsDefaultInstance();
   DeviceCommandMsg::default_instance_->InitAsDefaultInstance();
   DeviceCommandResultNotify::default_instance_->InitAsDefaultInstance();
+  RemindEventNotify::default_instance_->InitAsDefaultInstance();
+  RemindEventAck::default_instance_->InitAsDefaultInstance();
   WebSocketMessage::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_protocol_2eproto);
 }
@@ -12321,6 +12391,1135 @@ void DeviceCommandResultNotify::Swap(DeviceCommandResultNotify* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = DeviceCommandResultNotify_descriptor_;
   metadata.reflection = DeviceCommandResultNotify_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int RemindEventNotify::kNTokenIdFieldNumber;
+const int RemindEventNotify::kEEventTypeFieldNumber;
+const int RemindEventNotify::kERemindTypeFieldNumber;
+const int RemindEventNotify::kSDispatcherFieldNumber;
+const int RemindEventNotify::kSHappenTimeFieldNumber;
+const int RemindEventNotify::kSContentFieldNumber;
+const int RemindEventNotify::kNNeedConfirmFieldNumber;
+const int RemindEventNotify::kNTimeoutFieldNumber;
+const int RemindEventNotify::kNAdvanceSecondsFieldNumber;
+const int RemindEventNotify::kSReservedFieldNumber;
+#endif  // !_MSC_VER
+
+RemindEventNotify::RemindEventNotify()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:RemindEventNotify)
+}
+
+void RemindEventNotify::InitAsDefaultInstance() {
+}
+
+RemindEventNotify::RemindEventNotify(const RemindEventNotify& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:RemindEventNotify)
+}
+
+void RemindEventNotify::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
+  _cached_size_ = 0;
+  ntokenid_ = GOOGLE_ULONGLONG(0);
+  eeventtype_ = 0;
+  eremindtype_ = 0;
+  sdispatcher_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  shappentime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  scontent_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  nneedconfirm_ = 0;
+  ntimeout_ = 0;
+  nadvanceseconds_ = 0;
+  sreserved_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+RemindEventNotify::~RemindEventNotify() {
+  // @@protoc_insertion_point(destructor:RemindEventNotify)
+  SharedDtor();
+}
+
+void RemindEventNotify::SharedDtor() {
+  if (sdispatcher_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sdispatcher_;
+  }
+  if (shappentime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete shappentime_;
+  }
+  if (scontent_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete scontent_;
+  }
+  if (sreserved_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sreserved_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void RemindEventNotify::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* RemindEventNotify::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return RemindEventNotify_descriptor_;
+}
+
+const RemindEventNotify& RemindEventNotify::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_protocol_2eproto();
+  return *default_instance_;
+}
+
+RemindEventNotify* RemindEventNotify::default_instance_ = NULL;
+
+RemindEventNotify* RemindEventNotify::New() const {
+  return new RemindEventNotify;
+}
+
+void RemindEventNotify::Clear() {
+#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
+  &reinterpret_cast<RemindEventNotify*>(16)->f) - \
+   reinterpret_cast<char*>(16))
+
+#define ZR_(first, last) do {                              \
+    size_t f = OFFSET_OF_FIELD_(first);                    \
+    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
+    ::memset(&first, 0, n);                                \
+  } while (0)
+
+  if (_has_bits_[0 / 32] & 255) {
+    ZR_(ntokenid_, eremindtype_);
+    ZR_(nneedconfirm_, ntimeout_);
+    if (has_sdispatcher()) {
+      if (sdispatcher_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        sdispatcher_->clear();
+      }
+    }
+    if (has_shappentime()) {
+      if (shappentime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        shappentime_->clear();
+      }
+    }
+    if (has_scontent()) {
+      if (scontent_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        scontent_->clear();
+      }
+    }
+  }
+  if (_has_bits_[8 / 32] & 768) {
+    nadvanceseconds_ = 0;
+    if (has_sreserved()) {
+      if (sreserved_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        sreserved_->clear();
+      }
+    }
+  }
+
+#undef OFFSET_OF_FIELD_
+#undef ZR_
+
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool RemindEventNotify::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:RemindEventNotify)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required uint64 nTokenId = 1;
+      case 1: {
+        if (tag == 8) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                 input, &ntokenid_)));
+          set_has_ntokenid();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_eEventType;
+        break;
+      }
+
+      // optional int32 eEventType = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_eEventType:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &eeventtype_)));
+          set_has_eeventtype();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(24)) goto parse_eRemindType;
+        break;
+      }
+
+      // optional int32 eRemindType = 3;
+      case 3: {
+        if (tag == 24) {
+         parse_eRemindType:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &eremindtype_)));
+          set_has_eremindtype();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_sDispatcher;
+        break;
+      }
+
+      // optional string sDispatcher = 4;
+      case 4: {
+        if (tag == 34) {
+         parse_sDispatcher:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_sdispatcher()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->sdispatcher().data(), this->sdispatcher().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "sdispatcher");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(42)) goto parse_sHappenTime;
+        break;
+      }
+
+      // optional string sHappenTime = 5;
+      case 5: {
+        if (tag == 42) {
+         parse_sHappenTime:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_shappentime()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->shappentime().data(), this->shappentime().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "shappentime");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(50)) goto parse_sContent;
+        break;
+      }
+
+      // optional string sContent = 6;
+      case 6: {
+        if (tag == 50) {
+         parse_sContent:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_scontent()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->scontent().data(), this->scontent().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "scontent");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(56)) goto parse_nNeedConfirm;
+        break;
+      }
+
+      // optional int32 nNeedConfirm = 7;
+      case 7: {
+        if (tag == 56) {
+         parse_nNeedConfirm:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &nneedconfirm_)));
+          set_has_nneedconfirm();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(64)) goto parse_nTimeout;
+        break;
+      }
+
+      // optional int32 nTimeout = 8;
+      case 8: {
+        if (tag == 64) {
+         parse_nTimeout:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &ntimeout_)));
+          set_has_ntimeout();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(72)) goto parse_nAdvanceSeconds;
+        break;
+      }
+
+      // optional int32 nAdvanceSeconds = 9;
+      case 9: {
+        if (tag == 72) {
+         parse_nAdvanceSeconds:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &nadvanceseconds_)));
+          set_has_nadvanceseconds();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(82)) goto parse_sReserved;
+        break;
+      }
+
+      // optional string sReserved = 10;
+      case 10: {
+        if (tag == 82) {
+         parse_sReserved:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_sreserved()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->sreserved().data(), this->sreserved().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "sreserved");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:RemindEventNotify)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:RemindEventNotify)
+  return false;
+#undef DO_
+}
+
+void RemindEventNotify::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:RemindEventNotify)
+  // required uint64 nTokenId = 1;
+  if (has_ntokenid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(1, this->ntokenid(), output);
+  }
+
+  // optional int32 eEventType = 2;
+  if (has_eeventtype()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->eeventtype(), output);
+  }
+
+  // optional int32 eRemindType = 3;
+  if (has_eremindtype()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->eremindtype(), output);
+  }
+
+  // optional string sDispatcher = 4;
+  if (has_sdispatcher()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sdispatcher().data(), this->sdispatcher().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sdispatcher");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      4, this->sdispatcher(), output);
+  }
+
+  // optional string sHappenTime = 5;
+  if (has_shappentime()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->shappentime().data(), this->shappentime().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "shappentime");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      5, this->shappentime(), output);
+  }
+
+  // optional string sContent = 6;
+  if (has_scontent()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->scontent().data(), this->scontent().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "scontent");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      6, this->scontent(), output);
+  }
+
+  // optional int32 nNeedConfirm = 7;
+  if (has_nneedconfirm()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->nneedconfirm(), output);
+  }
+
+  // optional int32 nTimeout = 8;
+  if (has_ntimeout()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(8, this->ntimeout(), output);
+  }
+
+  // optional int32 nAdvanceSeconds = 9;
+  if (has_nadvanceseconds()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(9, this->nadvanceseconds(), output);
+  }
+
+  // optional string sReserved = 10;
+  if (has_sreserved()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sreserved().data(), this->sreserved().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sreserved");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      10, this->sreserved(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+  // @@protoc_insertion_point(serialize_end:RemindEventNotify)
+}
+
+::google::protobuf::uint8* RemindEventNotify::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:RemindEventNotify)
+  // required uint64 nTokenId = 1;
+  if (has_ntokenid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(1, this->ntokenid(), target);
+  }
+
+  // optional int32 eEventType = 2;
+  if (has_eeventtype()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->eeventtype(), target);
+  }
+
+  // optional int32 eRemindType = 3;
+  if (has_eremindtype()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->eremindtype(), target);
+  }
+
+  // optional string sDispatcher = 4;
+  if (has_sdispatcher()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sdispatcher().data(), this->sdispatcher().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sdispatcher");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->sdispatcher(), target);
+  }
+
+  // optional string sHappenTime = 5;
+  if (has_shappentime()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->shappentime().data(), this->shappentime().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "shappentime");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        5, this->shappentime(), target);
+  }
+
+  // optional string sContent = 6;
+  if (has_scontent()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->scontent().data(), this->scontent().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "scontent");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->scontent(), target);
+  }
+
+  // optional int32 nNeedConfirm = 7;
+  if (has_nneedconfirm()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->nneedconfirm(), target);
+  }
+
+  // optional int32 nTimeout = 8;
+  if (has_ntimeout()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(8, this->ntimeout(), target);
+  }
+
+  // optional int32 nAdvanceSeconds = 9;
+  if (has_nadvanceseconds()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(9, this->nadvanceseconds(), target);
+  }
+
+  // optional string sReserved = 10;
+  if (has_sreserved()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sreserved().data(), this->sreserved().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sreserved");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        10, this->sreserved(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:RemindEventNotify)
+  return target;
+}
+
+int RemindEventNotify::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required uint64 nTokenId = 1;
+    if (has_ntokenid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::UInt64Size(
+          this->ntokenid());
+    }
+
+    // optional int32 eEventType = 2;
+    if (has_eeventtype()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->eeventtype());
+    }
+
+    // optional int32 eRemindType = 3;
+    if (has_eremindtype()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->eremindtype());
+    }
+
+    // optional string sDispatcher = 4;
+    if (has_sdispatcher()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->sdispatcher());
+    }
+
+    // optional string sHappenTime = 5;
+    if (has_shappentime()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->shappentime());
+    }
+
+    // optional string sContent = 6;
+    if (has_scontent()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->scontent());
+    }
+
+    // optional int32 nNeedConfirm = 7;
+    if (has_nneedconfirm()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->nneedconfirm());
+    }
+
+    // optional int32 nTimeout = 8;
+    if (has_ntimeout()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->ntimeout());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional int32 nAdvanceSeconds = 9;
+    if (has_nadvanceseconds()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->nadvanceseconds());
+    }
+
+    // optional string sReserved = 10;
+    if (has_sreserved()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->sreserved());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void RemindEventNotify::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const RemindEventNotify* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const RemindEventNotify*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void RemindEventNotify::MergeFrom(const RemindEventNotify& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_ntokenid()) {
+      set_ntokenid(from.ntokenid());
+    }
+    if (from.has_eeventtype()) {
+      set_eeventtype(from.eeventtype());
+    }
+    if (from.has_eremindtype()) {
+      set_eremindtype(from.eremindtype());
+    }
+    if (from.has_sdispatcher()) {
+      set_sdispatcher(from.sdispatcher());
+    }
+    if (from.has_shappentime()) {
+      set_shappentime(from.shappentime());
+    }
+    if (from.has_scontent()) {
+      set_scontent(from.scontent());
+    }
+    if (from.has_nneedconfirm()) {
+      set_nneedconfirm(from.nneedconfirm());
+    }
+    if (from.has_ntimeout()) {
+      set_ntimeout(from.ntimeout());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_nadvanceseconds()) {
+      set_nadvanceseconds(from.nadvanceseconds());
+    }
+    if (from.has_sreserved()) {
+      set_sreserved(from.sreserved());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void RemindEventNotify::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void RemindEventNotify::CopyFrom(const RemindEventNotify& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool RemindEventNotify::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
+
+  return true;
+}
+
+void RemindEventNotify::Swap(RemindEventNotify* other) {
+  if (other != this) {
+    std::swap(ntokenid_, other->ntokenid_);
+    std::swap(eeventtype_, other->eeventtype_);
+    std::swap(eremindtype_, other->eremindtype_);
+    std::swap(sdispatcher_, other->sdispatcher_);
+    std::swap(shappentime_, other->shappentime_);
+    std::swap(scontent_, other->scontent_);
+    std::swap(nneedconfirm_, other->nneedconfirm_);
+    std::swap(ntimeout_, other->ntimeout_);
+    std::swap(nadvanceseconds_, other->nadvanceseconds_);
+    std::swap(sreserved_, other->sreserved_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata RemindEventNotify::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = RemindEventNotify_descriptor_;
+  metadata.reflection = RemindEventNotify_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int RemindEventAck::kNTokenIdFieldNumber;
+const int RemindEventAck::kNConfirmStateFieldNumber;
+const int RemindEventAck::kSConfirmUserFieldNumber;
+const int RemindEventAck::kSConfirmContentFieldNumber;
+const int RemindEventAck::kSReservedFieldNumber;
+#endif  // !_MSC_VER
+
+RemindEventAck::RemindEventAck()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:RemindEventAck)
+}
+
+void RemindEventAck::InitAsDefaultInstance() {
+}
+
+RemindEventAck::RemindEventAck(const RemindEventAck& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:RemindEventAck)
+}
+
+void RemindEventAck::SharedCtor() {
+  ::google::protobuf::internal::GetEmptyString();
+  _cached_size_ = 0;
+  ntokenid_ = 0;
+  nconfirmstate_ = 0;
+  sconfirmuser_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  sconfirmcontent_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  sreserved_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+RemindEventAck::~RemindEventAck() {
+  // @@protoc_insertion_point(destructor:RemindEventAck)
+  SharedDtor();
+}
+
+void RemindEventAck::SharedDtor() {
+  if (sconfirmuser_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sconfirmuser_;
+  }
+  if (sconfirmcontent_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sconfirmcontent_;
+  }
+  if (sreserved_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sreserved_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void RemindEventAck::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* RemindEventAck::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return RemindEventAck_descriptor_;
+}
+
+const RemindEventAck& RemindEventAck::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_protocol_2eproto();
+  return *default_instance_;
+}
+
+RemindEventAck* RemindEventAck::default_instance_ = NULL;
+
+RemindEventAck* RemindEventAck::New() const {
+  return new RemindEventAck;
+}
+
+void RemindEventAck::Clear() {
+#define OFFSET_OF_FIELD_(f) (reinterpret_cast<char*>(      \
+  &reinterpret_cast<RemindEventAck*>(16)->f) - \
+   reinterpret_cast<char*>(16))
+
+#define ZR_(first, last) do {                              \
+    size_t f = OFFSET_OF_FIELD_(first);                    \
+    size_t n = OFFSET_OF_FIELD_(last) - f + sizeof(last);  \
+    ::memset(&first, 0, n);                                \
+  } while (0)
+
+  if (_has_bits_[0 / 32] & 31) {
+    ZR_(ntokenid_, nconfirmstate_);
+    if (has_sconfirmuser()) {
+      if (sconfirmuser_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        sconfirmuser_->clear();
+      }
+    }
+    if (has_sconfirmcontent()) {
+      if (sconfirmcontent_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        sconfirmcontent_->clear();
+      }
+    }
+    if (has_sreserved()) {
+      if (sreserved_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        sreserved_->clear();
+      }
+    }
+  }
+
+#undef OFFSET_OF_FIELD_
+#undef ZR_
+
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool RemindEventAck::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:RemindEventAck)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // required int32 nTokenId = 1;
+      case 1: {
+        if (tag == 8) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &ntokenid_)));
+          set_has_ntokenid();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_nConfirmState;
+        break;
+      }
+
+      // optional int32 nConfirmState = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_nConfirmState:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &nconfirmstate_)));
+          set_has_nconfirmstate();
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(26)) goto parse_sConfirmUser;
+        break;
+      }
+
+      // optional string sConfirmUser = 3;
+      case 3: {
+        if (tag == 26) {
+         parse_sConfirmUser:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_sconfirmuser()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->sconfirmuser().data(), this->sconfirmuser().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "sconfirmuser");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_sConfirmContent;
+        break;
+      }
+
+      // optional string sConfirmContent = 4;
+      case 4: {
+        if (tag == 34) {
+         parse_sConfirmContent:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_sconfirmcontent()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->sconfirmcontent().data(), this->sconfirmcontent().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "sconfirmcontent");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(42)) goto parse_sReserved;
+        break;
+      }
+
+      // optional string sReserved = 5;
+      case 5: {
+        if (tag == 42) {
+         parse_sReserved:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_sreserved()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->sreserved().data(), this->sreserved().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "sreserved");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:RemindEventAck)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:RemindEventAck)
+  return false;
+#undef DO_
+}
+
+void RemindEventAck::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:RemindEventAck)
+  // required int32 nTokenId = 1;
+  if (has_ntokenid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->ntokenid(), output);
+  }
+
+  // optional int32 nConfirmState = 2;
+  if (has_nconfirmstate()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->nconfirmstate(), output);
+  }
+
+  // optional string sConfirmUser = 3;
+  if (has_sconfirmuser()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sconfirmuser().data(), this->sconfirmuser().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sconfirmuser");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      3, this->sconfirmuser(), output);
+  }
+
+  // optional string sConfirmContent = 4;
+  if (has_sconfirmcontent()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sconfirmcontent().data(), this->sconfirmcontent().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sconfirmcontent");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      4, this->sconfirmcontent(), output);
+  }
+
+  // optional string sReserved = 5;
+  if (has_sreserved()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sreserved().data(), this->sreserved().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sreserved");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      5, this->sreserved(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+  // @@protoc_insertion_point(serialize_end:RemindEventAck)
+}
+
+::google::protobuf::uint8* RemindEventAck::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:RemindEventAck)
+  // required int32 nTokenId = 1;
+  if (has_ntokenid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->ntokenid(), target);
+  }
+
+  // optional int32 nConfirmState = 2;
+  if (has_nconfirmstate()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->nconfirmstate(), target);
+  }
+
+  // optional string sConfirmUser = 3;
+  if (has_sconfirmuser()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sconfirmuser().data(), this->sconfirmuser().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sconfirmuser");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        3, this->sconfirmuser(), target);
+  }
+
+  // optional string sConfirmContent = 4;
+  if (has_sconfirmcontent()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sconfirmcontent().data(), this->sconfirmcontent().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sconfirmcontent");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->sconfirmcontent(), target);
+  }
+
+  // optional string sReserved = 5;
+  if (has_sreserved()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->sreserved().data(), this->sreserved().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "sreserved");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        5, this->sreserved(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:RemindEventAck)
+  return target;
+}
+
+int RemindEventAck::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // required int32 nTokenId = 1;
+    if (has_ntokenid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->ntokenid());
+    }
+
+    // optional int32 nConfirmState = 2;
+    if (has_nconfirmstate()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->nconfirmstate());
+    }
+
+    // optional string sConfirmUser = 3;
+    if (has_sconfirmuser()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->sconfirmuser());
+    }
+
+    // optional string sConfirmContent = 4;
+    if (has_sconfirmcontent()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->sconfirmcontent());
+    }
+
+    // optional string sReserved = 5;
+    if (has_sreserved()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->sreserved());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void RemindEventAck::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const RemindEventAck* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const RemindEventAck*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void RemindEventAck::MergeFrom(const RemindEventAck& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_ntokenid()) {
+      set_ntokenid(from.ntokenid());
+    }
+    if (from.has_nconfirmstate()) {
+      set_nconfirmstate(from.nconfirmstate());
+    }
+    if (from.has_sconfirmuser()) {
+      set_sconfirmuser(from.sconfirmuser());
+    }
+    if (from.has_sconfirmcontent()) {
+      set_sconfirmcontent(from.sconfirmcontent());
+    }
+    if (from.has_sreserved()) {
+      set_sreserved(from.sreserved());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void RemindEventAck::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void RemindEventAck::CopyFrom(const RemindEventAck& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool RemindEventAck::IsInitialized() const {
+  if ((_has_bits_[0] & 0x00000001) != 0x00000001) return false;
+
+  return true;
+}
+
+void RemindEventAck::Swap(RemindEventAck* other) {
+  if (other != this) {
+    std::swap(ntokenid_, other->ntokenid_);
+    std::swap(nconfirmstate_, other->nconfirmstate_);
+    std::swap(sconfirmuser_, other->sconfirmuser_);
+    std::swap(sconfirmcontent_, other->sconfirmcontent_);
+    std::swap(sreserved_, other->sreserved_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata RemindEventAck::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = RemindEventAck_descriptor_;
+  metadata.reflection = RemindEventAck_reflection_;
   return metadata;
 }
 

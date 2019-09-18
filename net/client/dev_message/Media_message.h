@@ -20,6 +20,8 @@ public:
     bool  add_new_alarm(string sPrgName,int alarmId,int nState,time_t  startTime);
     //添加媒体设备指标数据
     bool  add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData);
+
+    int getBelongChannelIdFromMonitorItem(int monitorItemId);
 protected:
     void  record_alarm_and_notify(string &prgName,int nMod,CurItemAlarmInfo &curAlarm);
      void GetResultData(DevMonitorDataPtr data_ptr);
@@ -28,6 +30,7 @@ private:
     int Md740BDData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
     int Md760BDData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
     int DtmbBDData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
+    int Md761Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
 private:
     session_ptr         m_pSession;//关联连接对象
     DeviceInfo           &d_devInfo;//设备信息

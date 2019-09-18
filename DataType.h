@@ -347,7 +347,7 @@ struct DevicePropertyEx
         ,is_digital_item_adjust_(false)//是否进行数字量判断
         ,digital_detect_during_time_(10)//10秒钟检测时间
         ,is_step_open_close(false)//分步骤开关机
-        ,iCheckRunIndex(0)
+        ,iCheckRunIndex(0)//监测开关机的监控量
 	{
 		
 	}
@@ -536,12 +536,7 @@ enum ActionType
     ACTP_SOUND_LIGHT_ALARM,//声光告警
 };
 
-enum RemindConfirmState
-{
-  RMD_S_NONEED_CONFIRM  = -1,//不需要确认
-  RMD_S_WAIT_CONFIRM    =  0,//待确认
-  RMD_S_TIMEOUT_CONFIRM =  1,//确认超时
-  RMD_S_FINISH_CONFIRM  =  2,//已确认
-};
+
+
 
 #endif

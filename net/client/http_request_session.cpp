@@ -3,6 +3,7 @@
 #include "./protocol/bohui_const_define.h"
 #include "LocalConfig.h"
 #include "yaolog.h"
+#include <QString>
 namespace hx_net {
 
 http_request_session::http_request_session(boost::asio::io_service& io_service,bool bAsycFlag)
@@ -77,23 +78,23 @@ http_request_session::~http_request_session(void)
                //http_stream2_.set_ignore_return_content(true);
               try
               {
-                  cout<<task_.second<<endl;
+                  //cout<<QString::fromStdString(task_.second).toLocal8Bit().data()<<endl;
                   if(asycFlag_==true){
                         //http_stream_.async_open(task_.first,boost::bind(&http_request_session::open_handler,
                         //                                                 this,boost::asio::placeholders::error));
                   }else{
                       boost::system::error_code ec;
                       //cout<<"http_stream_.open----------start!!!"<<endl;
-                      LOG__("info", "http_stream_.open----------start!!!");
+                      //LOG__("info", "http_stream_.open----------start!!!");
                       http_stream2_.open_timeout(5000);
-                      http_stream2_.open(task_.first);//, ec
+                      http_stream2_.open(task_.first);
                       if(!http_stream2_){
                           // If the open operation timed out then:
-                          if(http_stream2_.error() == boost::system::errc::timed_out)
-                              LOG__("info", "http_stream_.open timeout");
+                          //if(http_stream2_.error() == boost::system::errc::timed_out)
+                              //LOG__("info", "http_stream_.open timeout");
                       }
                       //cout<<"http_stream_.open success ---task size:--"<<_taskqueueptr->get_Task_Size()<<"---"<<ec.message()<<endl;
-                      LOG__("info", "http_stream_.open success ---task size:--%d",_taskqueueptr->get_Task_Size());
+                      //LOG__("info", "http_stream_.open success ---task size:--%d",_taskqueueptr->get_Task_Size());
                       http_stream2_.close();
                   }
               }
@@ -260,7 +261,8 @@ http_request_session::~http_request_session(void)
           }
 
       }
-      else if((nDevType >= DEVICE_GS_RECIVE && nDevType <= DEVICE_ADAPTER) || nDevType==DEVICE_SWITCH)
+      else if((nDevType >= DEVICE_GS_RECIVE && nDevType <= DEVICE_ADAPTER)
+              || nDevType==DEVICE_SWITCH || nDevType == DEVICE_MEDIA)
       {
           //链路设备
           boost::recursive_mutex::scoped_lock lock(http_link_stream_mutex_);
@@ -336,7 +338,7 @@ http_request_session::~http_request_session(void)
  {
      string sReportMsg;
      Bohui_Protocol  bh_ptcl;
-     bh_ptcl.createReportAlarmDataMsg(-1,BH_POTO_CommunicationReport,sDevid,alarmInfo,nMod,reason,sReportMsg);
+     bh_ptcl.createReportAlarmDataMsg(-1,BH_POTO_CommunicationReport,sDevid,alarmInfo,nMod,reason,sReportMsg,alarmInfo.alarmLevel);
      if(sReportMsg.empty()==false)
          putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
  }

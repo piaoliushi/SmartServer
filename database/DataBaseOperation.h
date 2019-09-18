@@ -122,7 +122,10 @@ public:
 
     //添加提醒时间触发日志
     bool AddRemindItemLog(const string sRemindNumber,int remindtype,const string sConfirmUser,string sConfirmMessage,
-                          int nConfirmState,const time_t notifyTime ,const time_t confirmTime ,int &newId);
+                          int nConfirmState,const time_t notifyTime ,int &newId);
+
+    //更新提醒时间触发日志
+    bool UpdateRemindItemLog(int sRemindRecordId,const string sConfirmUser,string sConfirmMessage,int nConfirmState);
 
 
 protected:

@@ -61,6 +61,8 @@ class TurnOffDevMsg;
 class CommandParam;
 class DeviceCommandMsg;
 class DeviceCommandResultNotify;
+class RemindEventNotify;
+class RemindEventAck;
 class WebSocketMessage;
 
 enum DevNetStatus_e_NetStatus {
@@ -3763,6 +3765,329 @@ class DeviceCommandResultNotify : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static DeviceCommandResultNotify* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class RemindEventNotify : public ::google::protobuf::Message {
+ public:
+  RemindEventNotify();
+  virtual ~RemindEventNotify();
+
+  RemindEventNotify(const RemindEventNotify& from);
+
+  inline RemindEventNotify& operator=(const RemindEventNotify& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const RemindEventNotify& default_instance();
+
+  void Swap(RemindEventNotify* other);
+
+  // implements Message ----------------------------------------------
+
+  RemindEventNotify* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const RemindEventNotify& from);
+  void MergeFrom(const RemindEventNotify& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required uint64 nTokenId = 1;
+  inline bool has_ntokenid() const;
+  inline void clear_ntokenid();
+  static const int kNTokenIdFieldNumber = 1;
+  inline ::google::protobuf::uint64 ntokenid() const;
+  inline void set_ntokenid(::google::protobuf::uint64 value);
+
+  // optional int32 eEventType = 2;
+  inline bool has_eeventtype() const;
+  inline void clear_eeventtype();
+  static const int kEEventTypeFieldNumber = 2;
+  inline ::google::protobuf::int32 eeventtype() const;
+  inline void set_eeventtype(::google::protobuf::int32 value);
+
+  // optional int32 eRemindType = 3;
+  inline bool has_eremindtype() const;
+  inline void clear_eremindtype();
+  static const int kERemindTypeFieldNumber = 3;
+  inline ::google::protobuf::int32 eremindtype() const;
+  inline void set_eremindtype(::google::protobuf::int32 value);
+
+  // optional string sDispatcher = 4;
+  inline bool has_sdispatcher() const;
+  inline void clear_sdispatcher();
+  static const int kSDispatcherFieldNumber = 4;
+  inline const ::std::string& sdispatcher() const;
+  inline void set_sdispatcher(const ::std::string& value);
+  inline void set_sdispatcher(const char* value);
+  inline void set_sdispatcher(const char* value, size_t size);
+  inline ::std::string* mutable_sdispatcher();
+  inline ::std::string* release_sdispatcher();
+  inline void set_allocated_sdispatcher(::std::string* sdispatcher);
+
+  // optional string sHappenTime = 5;
+  inline bool has_shappentime() const;
+  inline void clear_shappentime();
+  static const int kSHappenTimeFieldNumber = 5;
+  inline const ::std::string& shappentime() const;
+  inline void set_shappentime(const ::std::string& value);
+  inline void set_shappentime(const char* value);
+  inline void set_shappentime(const char* value, size_t size);
+  inline ::std::string* mutable_shappentime();
+  inline ::std::string* release_shappentime();
+  inline void set_allocated_shappentime(::std::string* shappentime);
+
+  // optional string sContent = 6;
+  inline bool has_scontent() const;
+  inline void clear_scontent();
+  static const int kSContentFieldNumber = 6;
+  inline const ::std::string& scontent() const;
+  inline void set_scontent(const ::std::string& value);
+  inline void set_scontent(const char* value);
+  inline void set_scontent(const char* value, size_t size);
+  inline ::std::string* mutable_scontent();
+  inline ::std::string* release_scontent();
+  inline void set_allocated_scontent(::std::string* scontent);
+
+  // optional int32 nNeedConfirm = 7;
+  inline bool has_nneedconfirm() const;
+  inline void clear_nneedconfirm();
+  static const int kNNeedConfirmFieldNumber = 7;
+  inline ::google::protobuf::int32 nneedconfirm() const;
+  inline void set_nneedconfirm(::google::protobuf::int32 value);
+
+  // optional int32 nTimeout = 8;
+  inline bool has_ntimeout() const;
+  inline void clear_ntimeout();
+  static const int kNTimeoutFieldNumber = 8;
+  inline ::google::protobuf::int32 ntimeout() const;
+  inline void set_ntimeout(::google::protobuf::int32 value);
+
+  // optional int32 nAdvanceSeconds = 9;
+  inline bool has_nadvanceseconds() const;
+  inline void clear_nadvanceseconds();
+  static const int kNAdvanceSecondsFieldNumber = 9;
+  inline ::google::protobuf::int32 nadvanceseconds() const;
+  inline void set_nadvanceseconds(::google::protobuf::int32 value);
+
+  // optional string sReserved = 10;
+  inline bool has_sreserved() const;
+  inline void clear_sreserved();
+  static const int kSReservedFieldNumber = 10;
+  inline const ::std::string& sreserved() const;
+  inline void set_sreserved(const ::std::string& value);
+  inline void set_sreserved(const char* value);
+  inline void set_sreserved(const char* value, size_t size);
+  inline ::std::string* mutable_sreserved();
+  inline ::std::string* release_sreserved();
+  inline void set_allocated_sreserved(::std::string* sreserved);
+
+  // @@protoc_insertion_point(class_scope:RemindEventNotify)
+ private:
+  inline void set_has_ntokenid();
+  inline void clear_has_ntokenid();
+  inline void set_has_eeventtype();
+  inline void clear_has_eeventtype();
+  inline void set_has_eremindtype();
+  inline void clear_has_eremindtype();
+  inline void set_has_sdispatcher();
+  inline void clear_has_sdispatcher();
+  inline void set_has_shappentime();
+  inline void clear_has_shappentime();
+  inline void set_has_scontent();
+  inline void clear_has_scontent();
+  inline void set_has_nneedconfirm();
+  inline void clear_has_nneedconfirm();
+  inline void set_has_ntimeout();
+  inline void clear_has_ntimeout();
+  inline void set_has_nadvanceseconds();
+  inline void clear_has_nadvanceseconds();
+  inline void set_has_sreserved();
+  inline void clear_has_sreserved();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::google::protobuf::uint64 ntokenid_;
+  ::google::protobuf::int32 eeventtype_;
+  ::google::protobuf::int32 eremindtype_;
+  ::std::string* sdispatcher_;
+  ::std::string* shappentime_;
+  ::std::string* scontent_;
+  ::google::protobuf::int32 nneedconfirm_;
+  ::google::protobuf::int32 ntimeout_;
+  ::std::string* sreserved_;
+  ::google::protobuf::int32 nadvanceseconds_;
+  friend void  protobuf_AddDesc_protocol_2eproto();
+  friend void protobuf_AssignDesc_protocol_2eproto();
+  friend void protobuf_ShutdownFile_protocol_2eproto();
+
+  void InitAsDefaultInstance();
+  static RemindEventNotify* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class RemindEventAck : public ::google::protobuf::Message {
+ public:
+  RemindEventAck();
+  virtual ~RemindEventAck();
+
+  RemindEventAck(const RemindEventAck& from);
+
+  inline RemindEventAck& operator=(const RemindEventAck& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const RemindEventAck& default_instance();
+
+  void Swap(RemindEventAck* other);
+
+  // implements Message ----------------------------------------------
+
+  RemindEventAck* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const RemindEventAck& from);
+  void MergeFrom(const RemindEventAck& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // required int32 nTokenId = 1;
+  inline bool has_ntokenid() const;
+  inline void clear_ntokenid();
+  static const int kNTokenIdFieldNumber = 1;
+  inline ::google::protobuf::int32 ntokenid() const;
+  inline void set_ntokenid(::google::protobuf::int32 value);
+
+  // optional int32 nConfirmState = 2;
+  inline bool has_nconfirmstate() const;
+  inline void clear_nconfirmstate();
+  static const int kNConfirmStateFieldNumber = 2;
+  inline ::google::protobuf::int32 nconfirmstate() const;
+  inline void set_nconfirmstate(::google::protobuf::int32 value);
+
+  // optional string sConfirmUser = 3;
+  inline bool has_sconfirmuser() const;
+  inline void clear_sconfirmuser();
+  static const int kSConfirmUserFieldNumber = 3;
+  inline const ::std::string& sconfirmuser() const;
+  inline void set_sconfirmuser(const ::std::string& value);
+  inline void set_sconfirmuser(const char* value);
+  inline void set_sconfirmuser(const char* value, size_t size);
+  inline ::std::string* mutable_sconfirmuser();
+  inline ::std::string* release_sconfirmuser();
+  inline void set_allocated_sconfirmuser(::std::string* sconfirmuser);
+
+  // optional string sConfirmContent = 4;
+  inline bool has_sconfirmcontent() const;
+  inline void clear_sconfirmcontent();
+  static const int kSConfirmContentFieldNumber = 4;
+  inline const ::std::string& sconfirmcontent() const;
+  inline void set_sconfirmcontent(const ::std::string& value);
+  inline void set_sconfirmcontent(const char* value);
+  inline void set_sconfirmcontent(const char* value, size_t size);
+  inline ::std::string* mutable_sconfirmcontent();
+  inline ::std::string* release_sconfirmcontent();
+  inline void set_allocated_sconfirmcontent(::std::string* sconfirmcontent);
+
+  // optional string sReserved = 5;
+  inline bool has_sreserved() const;
+  inline void clear_sreserved();
+  static const int kSReservedFieldNumber = 5;
+  inline const ::std::string& sreserved() const;
+  inline void set_sreserved(const ::std::string& value);
+  inline void set_sreserved(const char* value);
+  inline void set_sreserved(const char* value, size_t size);
+  inline ::std::string* mutable_sreserved();
+  inline ::std::string* release_sreserved();
+  inline void set_allocated_sreserved(::std::string* sreserved);
+
+  // @@protoc_insertion_point(class_scope:RemindEventAck)
+ private:
+  inline void set_has_ntokenid();
+  inline void clear_has_ntokenid();
+  inline void set_has_nconfirmstate();
+  inline void clear_has_nconfirmstate();
+  inline void set_has_sconfirmuser();
+  inline void clear_has_sconfirmuser();
+  inline void set_has_sconfirmcontent();
+  inline void clear_has_sconfirmcontent();
+  inline void set_has_sreserved();
+  inline void clear_has_sreserved();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::google::protobuf::int32 ntokenid_;
+  ::google::protobuf::int32 nconfirmstate_;
+  ::std::string* sconfirmuser_;
+  ::std::string* sconfirmcontent_;
+  ::std::string* sreserved_;
+  friend void  protobuf_AddDesc_protocol_2eproto();
+  friend void protobuf_AssignDesc_protocol_2eproto();
+  friend void protobuf_ShutdownFile_protocol_2eproto();
+
+  void InitAsDefaultInstance();
+  static RemindEventAck* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -10243,6 +10568,738 @@ inline ::google::protobuf::RepeatedPtrField< ::CommandParam >*
 DeviceCommandResultNotify::mutable_cparams() {
   // @@protoc_insertion_point(field_mutable_list:DeviceCommandResultNotify.cParams)
   return &cparams_;
+}
+
+// -------------------------------------------------------------------
+
+// RemindEventNotify
+
+// required uint64 nTokenId = 1;
+inline bool RemindEventNotify::has_ntokenid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void RemindEventNotify::set_has_ntokenid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void RemindEventNotify::clear_has_ntokenid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void RemindEventNotify::clear_ntokenid() {
+  ntokenid_ = GOOGLE_ULONGLONG(0);
+  clear_has_ntokenid();
+}
+inline ::google::protobuf::uint64 RemindEventNotify::ntokenid() const {
+  // @@protoc_insertion_point(field_get:RemindEventNotify.nTokenId)
+  return ntokenid_;
+}
+inline void RemindEventNotify::set_ntokenid(::google::protobuf::uint64 value) {
+  set_has_ntokenid();
+  ntokenid_ = value;
+  // @@protoc_insertion_point(field_set:RemindEventNotify.nTokenId)
+}
+
+// optional int32 eEventType = 2;
+inline bool RemindEventNotify::has_eeventtype() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void RemindEventNotify::set_has_eeventtype() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void RemindEventNotify::clear_has_eeventtype() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void RemindEventNotify::clear_eeventtype() {
+  eeventtype_ = 0;
+  clear_has_eeventtype();
+}
+inline ::google::protobuf::int32 RemindEventNotify::eeventtype() const {
+  // @@protoc_insertion_point(field_get:RemindEventNotify.eEventType)
+  return eeventtype_;
+}
+inline void RemindEventNotify::set_eeventtype(::google::protobuf::int32 value) {
+  set_has_eeventtype();
+  eeventtype_ = value;
+  // @@protoc_insertion_point(field_set:RemindEventNotify.eEventType)
+}
+
+// optional int32 eRemindType = 3;
+inline bool RemindEventNotify::has_eremindtype() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void RemindEventNotify::set_has_eremindtype() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void RemindEventNotify::clear_has_eremindtype() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void RemindEventNotify::clear_eremindtype() {
+  eremindtype_ = 0;
+  clear_has_eremindtype();
+}
+inline ::google::protobuf::int32 RemindEventNotify::eremindtype() const {
+  // @@protoc_insertion_point(field_get:RemindEventNotify.eRemindType)
+  return eremindtype_;
+}
+inline void RemindEventNotify::set_eremindtype(::google::protobuf::int32 value) {
+  set_has_eremindtype();
+  eremindtype_ = value;
+  // @@protoc_insertion_point(field_set:RemindEventNotify.eRemindType)
+}
+
+// optional string sDispatcher = 4;
+inline bool RemindEventNotify::has_sdispatcher() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void RemindEventNotify::set_has_sdispatcher() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void RemindEventNotify::clear_has_sdispatcher() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void RemindEventNotify::clear_sdispatcher() {
+  if (sdispatcher_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sdispatcher_->clear();
+  }
+  clear_has_sdispatcher();
+}
+inline const ::std::string& RemindEventNotify::sdispatcher() const {
+  // @@protoc_insertion_point(field_get:RemindEventNotify.sDispatcher)
+  return *sdispatcher_;
+}
+inline void RemindEventNotify::set_sdispatcher(const ::std::string& value) {
+  set_has_sdispatcher();
+  if (sdispatcher_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sdispatcher_ = new ::std::string;
+  }
+  sdispatcher_->assign(value);
+  // @@protoc_insertion_point(field_set:RemindEventNotify.sDispatcher)
+}
+inline void RemindEventNotify::set_sdispatcher(const char* value) {
+  set_has_sdispatcher();
+  if (sdispatcher_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sdispatcher_ = new ::std::string;
+  }
+  sdispatcher_->assign(value);
+  // @@protoc_insertion_point(field_set_char:RemindEventNotify.sDispatcher)
+}
+inline void RemindEventNotify::set_sdispatcher(const char* value, size_t size) {
+  set_has_sdispatcher();
+  if (sdispatcher_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sdispatcher_ = new ::std::string;
+  }
+  sdispatcher_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:RemindEventNotify.sDispatcher)
+}
+inline ::std::string* RemindEventNotify::mutable_sdispatcher() {
+  set_has_sdispatcher();
+  if (sdispatcher_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sdispatcher_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:RemindEventNotify.sDispatcher)
+  return sdispatcher_;
+}
+inline ::std::string* RemindEventNotify::release_sdispatcher() {
+  clear_has_sdispatcher();
+  if (sdispatcher_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = sdispatcher_;
+    sdispatcher_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void RemindEventNotify::set_allocated_sdispatcher(::std::string* sdispatcher) {
+  if (sdispatcher_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sdispatcher_;
+  }
+  if (sdispatcher) {
+    set_has_sdispatcher();
+    sdispatcher_ = sdispatcher;
+  } else {
+    clear_has_sdispatcher();
+    sdispatcher_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:RemindEventNotify.sDispatcher)
+}
+
+// optional string sHappenTime = 5;
+inline bool RemindEventNotify::has_shappentime() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void RemindEventNotify::set_has_shappentime() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void RemindEventNotify::clear_has_shappentime() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void RemindEventNotify::clear_shappentime() {
+  if (shappentime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    shappentime_->clear();
+  }
+  clear_has_shappentime();
+}
+inline const ::std::string& RemindEventNotify::shappentime() const {
+  // @@protoc_insertion_point(field_get:RemindEventNotify.sHappenTime)
+  return *shappentime_;
+}
+inline void RemindEventNotify::set_shappentime(const ::std::string& value) {
+  set_has_shappentime();
+  if (shappentime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    shappentime_ = new ::std::string;
+  }
+  shappentime_->assign(value);
+  // @@protoc_insertion_point(field_set:RemindEventNotify.sHappenTime)
+}
+inline void RemindEventNotify::set_shappentime(const char* value) {
+  set_has_shappentime();
+  if (shappentime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    shappentime_ = new ::std::string;
+  }
+  shappentime_->assign(value);
+  // @@protoc_insertion_point(field_set_char:RemindEventNotify.sHappenTime)
+}
+inline void RemindEventNotify::set_shappentime(const char* value, size_t size) {
+  set_has_shappentime();
+  if (shappentime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    shappentime_ = new ::std::string;
+  }
+  shappentime_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:RemindEventNotify.sHappenTime)
+}
+inline ::std::string* RemindEventNotify::mutable_shappentime() {
+  set_has_shappentime();
+  if (shappentime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    shappentime_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:RemindEventNotify.sHappenTime)
+  return shappentime_;
+}
+inline ::std::string* RemindEventNotify::release_shappentime() {
+  clear_has_shappentime();
+  if (shappentime_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = shappentime_;
+    shappentime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void RemindEventNotify::set_allocated_shappentime(::std::string* shappentime) {
+  if (shappentime_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete shappentime_;
+  }
+  if (shappentime) {
+    set_has_shappentime();
+    shappentime_ = shappentime;
+  } else {
+    clear_has_shappentime();
+    shappentime_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:RemindEventNotify.sHappenTime)
+}
+
+// optional string sContent = 6;
+inline bool RemindEventNotify::has_scontent() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void RemindEventNotify::set_has_scontent() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void RemindEventNotify::clear_has_scontent() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void RemindEventNotify::clear_scontent() {
+  if (scontent_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    scontent_->clear();
+  }
+  clear_has_scontent();
+}
+inline const ::std::string& RemindEventNotify::scontent() const {
+  // @@protoc_insertion_point(field_get:RemindEventNotify.sContent)
+  return *scontent_;
+}
+inline void RemindEventNotify::set_scontent(const ::std::string& value) {
+  set_has_scontent();
+  if (scontent_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    scontent_ = new ::std::string;
+  }
+  scontent_->assign(value);
+  // @@protoc_insertion_point(field_set:RemindEventNotify.sContent)
+}
+inline void RemindEventNotify::set_scontent(const char* value) {
+  set_has_scontent();
+  if (scontent_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    scontent_ = new ::std::string;
+  }
+  scontent_->assign(value);
+  // @@protoc_insertion_point(field_set_char:RemindEventNotify.sContent)
+}
+inline void RemindEventNotify::set_scontent(const char* value, size_t size) {
+  set_has_scontent();
+  if (scontent_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    scontent_ = new ::std::string;
+  }
+  scontent_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:RemindEventNotify.sContent)
+}
+inline ::std::string* RemindEventNotify::mutable_scontent() {
+  set_has_scontent();
+  if (scontent_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    scontent_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:RemindEventNotify.sContent)
+  return scontent_;
+}
+inline ::std::string* RemindEventNotify::release_scontent() {
+  clear_has_scontent();
+  if (scontent_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = scontent_;
+    scontent_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void RemindEventNotify::set_allocated_scontent(::std::string* scontent) {
+  if (scontent_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete scontent_;
+  }
+  if (scontent) {
+    set_has_scontent();
+    scontent_ = scontent;
+  } else {
+    clear_has_scontent();
+    scontent_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:RemindEventNotify.sContent)
+}
+
+// optional int32 nNeedConfirm = 7;
+inline bool RemindEventNotify::has_nneedconfirm() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void RemindEventNotify::set_has_nneedconfirm() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void RemindEventNotify::clear_has_nneedconfirm() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void RemindEventNotify::clear_nneedconfirm() {
+  nneedconfirm_ = 0;
+  clear_has_nneedconfirm();
+}
+inline ::google::protobuf::int32 RemindEventNotify::nneedconfirm() const {
+  // @@protoc_insertion_point(field_get:RemindEventNotify.nNeedConfirm)
+  return nneedconfirm_;
+}
+inline void RemindEventNotify::set_nneedconfirm(::google::protobuf::int32 value) {
+  set_has_nneedconfirm();
+  nneedconfirm_ = value;
+  // @@protoc_insertion_point(field_set:RemindEventNotify.nNeedConfirm)
+}
+
+// optional int32 nTimeout = 8;
+inline bool RemindEventNotify::has_ntimeout() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void RemindEventNotify::set_has_ntimeout() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void RemindEventNotify::clear_has_ntimeout() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void RemindEventNotify::clear_ntimeout() {
+  ntimeout_ = 0;
+  clear_has_ntimeout();
+}
+inline ::google::protobuf::int32 RemindEventNotify::ntimeout() const {
+  // @@protoc_insertion_point(field_get:RemindEventNotify.nTimeout)
+  return ntimeout_;
+}
+inline void RemindEventNotify::set_ntimeout(::google::protobuf::int32 value) {
+  set_has_ntimeout();
+  ntimeout_ = value;
+  // @@protoc_insertion_point(field_set:RemindEventNotify.nTimeout)
+}
+
+// optional int32 nAdvanceSeconds = 9;
+inline bool RemindEventNotify::has_nadvanceseconds() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void RemindEventNotify::set_has_nadvanceseconds() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void RemindEventNotify::clear_has_nadvanceseconds() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void RemindEventNotify::clear_nadvanceseconds() {
+  nadvanceseconds_ = 0;
+  clear_has_nadvanceseconds();
+}
+inline ::google::protobuf::int32 RemindEventNotify::nadvanceseconds() const {
+  // @@protoc_insertion_point(field_get:RemindEventNotify.nAdvanceSeconds)
+  return nadvanceseconds_;
+}
+inline void RemindEventNotify::set_nadvanceseconds(::google::protobuf::int32 value) {
+  set_has_nadvanceseconds();
+  nadvanceseconds_ = value;
+  // @@protoc_insertion_point(field_set:RemindEventNotify.nAdvanceSeconds)
+}
+
+// optional string sReserved = 10;
+inline bool RemindEventNotify::has_sreserved() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void RemindEventNotify::set_has_sreserved() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void RemindEventNotify::clear_has_sreserved() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void RemindEventNotify::clear_sreserved() {
+  if (sreserved_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sreserved_->clear();
+  }
+  clear_has_sreserved();
+}
+inline const ::std::string& RemindEventNotify::sreserved() const {
+  // @@protoc_insertion_point(field_get:RemindEventNotify.sReserved)
+  return *sreserved_;
+}
+inline void RemindEventNotify::set_sreserved(const ::std::string& value) {
+  set_has_sreserved();
+  if (sreserved_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sreserved_ = new ::std::string;
+  }
+  sreserved_->assign(value);
+  // @@protoc_insertion_point(field_set:RemindEventNotify.sReserved)
+}
+inline void RemindEventNotify::set_sreserved(const char* value) {
+  set_has_sreserved();
+  if (sreserved_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sreserved_ = new ::std::string;
+  }
+  sreserved_->assign(value);
+  // @@protoc_insertion_point(field_set_char:RemindEventNotify.sReserved)
+}
+inline void RemindEventNotify::set_sreserved(const char* value, size_t size) {
+  set_has_sreserved();
+  if (sreserved_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sreserved_ = new ::std::string;
+  }
+  sreserved_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:RemindEventNotify.sReserved)
+}
+inline ::std::string* RemindEventNotify::mutable_sreserved() {
+  set_has_sreserved();
+  if (sreserved_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sreserved_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:RemindEventNotify.sReserved)
+  return sreserved_;
+}
+inline ::std::string* RemindEventNotify::release_sreserved() {
+  clear_has_sreserved();
+  if (sreserved_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = sreserved_;
+    sreserved_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void RemindEventNotify::set_allocated_sreserved(::std::string* sreserved) {
+  if (sreserved_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sreserved_;
+  }
+  if (sreserved) {
+    set_has_sreserved();
+    sreserved_ = sreserved;
+  } else {
+    clear_has_sreserved();
+    sreserved_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:RemindEventNotify.sReserved)
+}
+
+// -------------------------------------------------------------------
+
+// RemindEventAck
+
+// required int32 nTokenId = 1;
+inline bool RemindEventAck::has_ntokenid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void RemindEventAck::set_has_ntokenid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void RemindEventAck::clear_has_ntokenid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void RemindEventAck::clear_ntokenid() {
+  ntokenid_ = 0;
+  clear_has_ntokenid();
+}
+inline ::google::protobuf::int32 RemindEventAck::ntokenid() const {
+  // @@protoc_insertion_point(field_get:RemindEventAck.nTokenId)
+  return ntokenid_;
+}
+inline void RemindEventAck::set_ntokenid(::google::protobuf::int32 value) {
+  set_has_ntokenid();
+  ntokenid_ = value;
+  // @@protoc_insertion_point(field_set:RemindEventAck.nTokenId)
+}
+
+// optional int32 nConfirmState = 2;
+inline bool RemindEventAck::has_nconfirmstate() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void RemindEventAck::set_has_nconfirmstate() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void RemindEventAck::clear_has_nconfirmstate() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void RemindEventAck::clear_nconfirmstate() {
+  nconfirmstate_ = 0;
+  clear_has_nconfirmstate();
+}
+inline ::google::protobuf::int32 RemindEventAck::nconfirmstate() const {
+  // @@protoc_insertion_point(field_get:RemindEventAck.nConfirmState)
+  return nconfirmstate_;
+}
+inline void RemindEventAck::set_nconfirmstate(::google::protobuf::int32 value) {
+  set_has_nconfirmstate();
+  nconfirmstate_ = value;
+  // @@protoc_insertion_point(field_set:RemindEventAck.nConfirmState)
+}
+
+// optional string sConfirmUser = 3;
+inline bool RemindEventAck::has_sconfirmuser() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void RemindEventAck::set_has_sconfirmuser() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void RemindEventAck::clear_has_sconfirmuser() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void RemindEventAck::clear_sconfirmuser() {
+  if (sconfirmuser_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sconfirmuser_->clear();
+  }
+  clear_has_sconfirmuser();
+}
+inline const ::std::string& RemindEventAck::sconfirmuser() const {
+  // @@protoc_insertion_point(field_get:RemindEventAck.sConfirmUser)
+  return *sconfirmuser_;
+}
+inline void RemindEventAck::set_sconfirmuser(const ::std::string& value) {
+  set_has_sconfirmuser();
+  if (sconfirmuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sconfirmuser_ = new ::std::string;
+  }
+  sconfirmuser_->assign(value);
+  // @@protoc_insertion_point(field_set:RemindEventAck.sConfirmUser)
+}
+inline void RemindEventAck::set_sconfirmuser(const char* value) {
+  set_has_sconfirmuser();
+  if (sconfirmuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sconfirmuser_ = new ::std::string;
+  }
+  sconfirmuser_->assign(value);
+  // @@protoc_insertion_point(field_set_char:RemindEventAck.sConfirmUser)
+}
+inline void RemindEventAck::set_sconfirmuser(const char* value, size_t size) {
+  set_has_sconfirmuser();
+  if (sconfirmuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sconfirmuser_ = new ::std::string;
+  }
+  sconfirmuser_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:RemindEventAck.sConfirmUser)
+}
+inline ::std::string* RemindEventAck::mutable_sconfirmuser() {
+  set_has_sconfirmuser();
+  if (sconfirmuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sconfirmuser_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:RemindEventAck.sConfirmUser)
+  return sconfirmuser_;
+}
+inline ::std::string* RemindEventAck::release_sconfirmuser() {
+  clear_has_sconfirmuser();
+  if (sconfirmuser_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = sconfirmuser_;
+    sconfirmuser_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void RemindEventAck::set_allocated_sconfirmuser(::std::string* sconfirmuser) {
+  if (sconfirmuser_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sconfirmuser_;
+  }
+  if (sconfirmuser) {
+    set_has_sconfirmuser();
+    sconfirmuser_ = sconfirmuser;
+  } else {
+    clear_has_sconfirmuser();
+    sconfirmuser_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:RemindEventAck.sConfirmUser)
+}
+
+// optional string sConfirmContent = 4;
+inline bool RemindEventAck::has_sconfirmcontent() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void RemindEventAck::set_has_sconfirmcontent() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void RemindEventAck::clear_has_sconfirmcontent() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void RemindEventAck::clear_sconfirmcontent() {
+  if (sconfirmcontent_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sconfirmcontent_->clear();
+  }
+  clear_has_sconfirmcontent();
+}
+inline const ::std::string& RemindEventAck::sconfirmcontent() const {
+  // @@protoc_insertion_point(field_get:RemindEventAck.sConfirmContent)
+  return *sconfirmcontent_;
+}
+inline void RemindEventAck::set_sconfirmcontent(const ::std::string& value) {
+  set_has_sconfirmcontent();
+  if (sconfirmcontent_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sconfirmcontent_ = new ::std::string;
+  }
+  sconfirmcontent_->assign(value);
+  // @@protoc_insertion_point(field_set:RemindEventAck.sConfirmContent)
+}
+inline void RemindEventAck::set_sconfirmcontent(const char* value) {
+  set_has_sconfirmcontent();
+  if (sconfirmcontent_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sconfirmcontent_ = new ::std::string;
+  }
+  sconfirmcontent_->assign(value);
+  // @@protoc_insertion_point(field_set_char:RemindEventAck.sConfirmContent)
+}
+inline void RemindEventAck::set_sconfirmcontent(const char* value, size_t size) {
+  set_has_sconfirmcontent();
+  if (sconfirmcontent_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sconfirmcontent_ = new ::std::string;
+  }
+  sconfirmcontent_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:RemindEventAck.sConfirmContent)
+}
+inline ::std::string* RemindEventAck::mutable_sconfirmcontent() {
+  set_has_sconfirmcontent();
+  if (sconfirmcontent_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sconfirmcontent_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:RemindEventAck.sConfirmContent)
+  return sconfirmcontent_;
+}
+inline ::std::string* RemindEventAck::release_sconfirmcontent() {
+  clear_has_sconfirmcontent();
+  if (sconfirmcontent_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = sconfirmcontent_;
+    sconfirmcontent_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void RemindEventAck::set_allocated_sconfirmcontent(::std::string* sconfirmcontent) {
+  if (sconfirmcontent_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sconfirmcontent_;
+  }
+  if (sconfirmcontent) {
+    set_has_sconfirmcontent();
+    sconfirmcontent_ = sconfirmcontent;
+  } else {
+    clear_has_sconfirmcontent();
+    sconfirmcontent_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:RemindEventAck.sConfirmContent)
+}
+
+// optional string sReserved = 5;
+inline bool RemindEventAck::has_sreserved() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void RemindEventAck::set_has_sreserved() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void RemindEventAck::clear_has_sreserved() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void RemindEventAck::clear_sreserved() {
+  if (sreserved_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sreserved_->clear();
+  }
+  clear_has_sreserved();
+}
+inline const ::std::string& RemindEventAck::sreserved() const {
+  // @@protoc_insertion_point(field_get:RemindEventAck.sReserved)
+  return *sreserved_;
+}
+inline void RemindEventAck::set_sreserved(const ::std::string& value) {
+  set_has_sreserved();
+  if (sreserved_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sreserved_ = new ::std::string;
+  }
+  sreserved_->assign(value);
+  // @@protoc_insertion_point(field_set:RemindEventAck.sReserved)
+}
+inline void RemindEventAck::set_sreserved(const char* value) {
+  set_has_sreserved();
+  if (sreserved_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sreserved_ = new ::std::string;
+  }
+  sreserved_->assign(value);
+  // @@protoc_insertion_point(field_set_char:RemindEventAck.sReserved)
+}
+inline void RemindEventAck::set_sreserved(const char* value, size_t size) {
+  set_has_sreserved();
+  if (sreserved_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sreserved_ = new ::std::string;
+  }
+  sreserved_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:RemindEventAck.sReserved)
+}
+inline ::std::string* RemindEventAck::mutable_sreserved() {
+  set_has_sreserved();
+  if (sreserved_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    sreserved_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:RemindEventAck.sReserved)
+  return sreserved_;
+}
+inline ::std::string* RemindEventAck::release_sreserved() {
+  clear_has_sreserved();
+  if (sreserved_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = sreserved_;
+    sreserved_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void RemindEventAck::set_allocated_sreserved(::std::string* sreserved) {
+  if (sreserved_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete sreserved_;
+  }
+  if (sreserved) {
+    set_has_sreserved();
+    sreserved_ = sreserved;
+  } else {
+    clear_has_sreserved();
+    sreserved_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:RemindEventAck.sReserved)
 }
 
 // -------------------------------------------------------------------

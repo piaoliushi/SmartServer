@@ -61,7 +61,6 @@ namespace hx_net
 	private:
 		boost::shared_ptr<boost::thread> _listenthreadptr;//网络监听线程
         boost::shared_ptr<boost::thread> _workthreadptr;//工作线程
-        //boost::shared_ptr<http_work> _workerptr;//当前用户任务http_work
         boost::shared_ptr<DevClient> _devclientptr;//设备服务对象
 	};
 }

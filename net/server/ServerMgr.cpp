@@ -26,6 +26,7 @@ namespace hx_net
 
         _listenthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunNetListen, this)));
         _workthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunTasks, this)));
+        _ws_threadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunWsServer, this)));
 
         if(GetInst(LocalConfig).http_svc_use()==true){
             _web_handler = new web_handler;
@@ -35,12 +36,13 @@ namespace hx_net
                     .io_service(boost::make_shared<boost::asio::io_service>())
                     .thread_pool(boost::make_shared<boost::network::utils::thread_pool>(2))
                     .reuse_address(true);
+
             _httpserverptr = new hx_http_server(options);
-            _httpthreadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunHttpServer,this)));
+            _httpthreadptr = boost::shared_ptr<boost::thread>(new boost::thread(boost::bind(&ServerMgr::RunHttpServer,this)));
 
         }
 
-        _ws_threadptr.reset(new boost::thread(boost::bind(&ServerMgr::RunWsServer, this)));
+
     }
 
 	ServerMgr::~ServerMgr() 
@@ -75,8 +77,17 @@ namespace hx_net
 
     void ServerMgr::RunHttpServer()
     {
-        if(_httpserverptr)
-            _httpserverptr->run();
+        if(_httpserverptr){
+
+            try
+            {
+                _httpserverptr->run();
+            }
+            catch (boost::exception &e)
+            {
+                cout<<boost::diagnostic_information(e)<<endl;
+            }
+        }
     }
 
     void ServerMgr::RunWsServer(){

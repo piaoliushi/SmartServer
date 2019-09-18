@@ -173,6 +173,7 @@ typedef enum HGPROTOCOL
 	HAERBIN_HG_100kw      = 1,//哈尔滨100KW
     HAERBIN_HG_10kw       = 2,//哈尔滨10KW
     HAERBIN_HGEX_10kw     = 3,//哈尔滨10KW 扩展
+    HAERBIN_HG4_1kw       = 4,//哈尔滨HGMW1KW4
 }HgSubProtocol;
 
 typedef enum ASPROTOCOL
@@ -364,6 +365,7 @@ typedef enum  MEDIASUBPROTOCL_TAG
     MD_740BD_II= 2,//汇鑫MD740两路板卡
     MD_760BD_IV= 3,//汇鑫MD760板卡
     DTMB_BD    = 4,//DTMB板卡
+    MD_761     = 5,//761
 
 }MediaSubProtocol;
 //桂林思奇

@@ -99,8 +99,8 @@ enum e_MsgType
 	MSG_GENERAL_COMMAND_OPR = 45,
 	MSG_GENERAL_COMMAND_ACK = 46,
 
-	MSG_HANDOVER_REQ = 47,//交接班请求
-	MSG_HANDOVER_ACK = 48,//交接班回复
+    MSG_HANDOVER_REQ      = 47,//交接班请求
+    MSG_HANDOVER_ACK      = 48,//交接班回复
 
 	MSG_SIGN_IN_OUT_REQ   = 49,//签到请求
 	MSG_SIGN_IN_OUT_ACK   = 50,//签到回复
@@ -111,16 +111,18 @@ enum e_MsgType
 	MSG_CHECK_WORKING_REQ = 53,//查岗请求
 	MSG_CHECK_WORKING_ACK = 54,//查岗回复
 
-    MSG_DEV_RESET_OPR = 55,//复位指令
-    MSG_DEV_RESET_ACK = 56,//复位响应
+    MSG_DEV_RESET_OPR     = 55,//复位指令
+    MSG_DEV_RESET_ACK     = 56,//复位响应
 
+    MSG_REMIND_NOTIFY     = 57,//提醒通知
+    MSG_REMIND_NOTIFY_ACK = 58,//提醒响应
 };
 
 enum {
     VALUE_TYPE_STRING  = 0,
-    VALUE_TYPE_DOUBLE = 1,
-    VALUE_TYPE_BOOL   = 2,
-    VALUE_TYPE_INT    = 3,
+    VALUE_TYPE_DOUBLE  = 1,
+    VALUE_TYPE_BOOL    = 2,
+    VALUE_TYPE_INT     = 3,
 };
 
 #endif

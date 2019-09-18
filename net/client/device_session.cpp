@@ -784,7 +784,7 @@ void  device_session::query_send_time_event(const boost::system::error_code& err
             }
         }
         else{
-            cout<<"no data returned , query timeout !!!!"<<endl;
+            cout<<"no data returned , query timeout !!!!------"<<cur_dev_id_<<endl;
             if(modleInfos_.mapDevInfo.size()<=1){
                 close_all();
                 start_connect_timer(moxa_config_ptr->connect_timer_interval);
@@ -1167,7 +1167,7 @@ void device_session::http_close_all(){
 
 void device_session::close_all()
 {
-    set_con_state(con_disconnected);
+
     connect_timer_.cancel();
     timeout_timer_.cancel();
     query_timer_.cancel();
@@ -1180,6 +1180,8 @@ void device_session::close_all()
     }
     else
         close_i();   //关闭socket
+
+    set_con_state(con_disconnected);
 
     //等待任务结束，任务里面，必须放在运行状态检测之前
     //状态检测会
@@ -1921,13 +1923,13 @@ void device_session::handle_read_head(const boost::system::error_code& error, si
             start_read_body(nResult);
         else{
             close_all();
-            cout<<"handle_read_head---nResult<=0-----close"<<endl;
+            cout<<"handle_read_head--"<<cur_dev_id_<<"--nResult<=0-----close"<<endl;
             start_connect_timer(moxa_config_ptr->connect_timer_interval);
         }
     }
     else{
         close_all();
-        cout<<"handle_read_head---error!=0-----close"<<endl;
+        cout<<"handle_read_head-"<<cur_dev_id_<<"--error="<<error.message()<<endl;
         start_connect_timer(moxa_config_ptr->connect_timer_interval);
     }
 }
@@ -2088,6 +2090,7 @@ void device_session::handle_read_body(const boost::system::error_code& error, si
     }
     else{
         close_all();
+        cout<<"handle_read_body close all !!!!------"<<cur_dev_id_<<endl;
         start_connect_timer(moxa_config_ptr->connect_timer_interval);
     }
 }
@@ -2138,6 +2141,7 @@ void device_session::handle_read(const boost::system::error_code& error, size_t 
         }
         else if(nResult == RE_HEADERROR){
             close_all();
+            cout<<"handle_read---error!=0-----close"<<endl;
             start_connect_timer();
             return;
         }
@@ -2300,7 +2304,6 @@ void  device_session::parse_item_alarm(string devId,float fValue,DeviceMonitorIt
                 tmp_alarm_info.bNotifyed = false;
                 map<int,CurItemAlarmInfo>  tmTypeAlarm;
                 tmTypeAlarm[iLimittype] = tmp_alarm_info;
-                // boost::recursive_mutex::scoped_lock lock(alarm_state_mutex);
                 mapItemAlarm[devId][ItemInfo.iItemIndex] = tmTypeAlarm;
             }
         }else {

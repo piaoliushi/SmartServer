@@ -489,7 +489,7 @@ bool DataBaseOperation::GetDevProperty(QSqlDatabase &db, string strDevnum,map<st
     }
 
     QSqlQuery itemschquery(db);
-    QString strSql=QString("select a.BasePropertyNumber,a.PropertyValueType,a.PropertyValue,b.PropertyName,a.channelid from Device_Property_Role_Bind a,Base_Property b \
+    QString strSql=QString("select a.BasePropertyNumber,a.PropertyValueType,a.PropertyValue,b.PropertyName,a.channelid,a.propertycompany from Device_Property_Role_Bind a,Base_Property b \
                            where a.DeviceNumber='%1' and a.channelid='%2' and b.BasePropertyNumber=a.BasePropertyNumber").arg(QString::fromStdString(strDevnum)).arg(nChnlId);
     itemschquery.prepare(strSql);
         if(itemschquery.exec()) {
@@ -499,6 +499,7 @@ bool DataBaseOperation::GetDevProperty(QSqlDatabase &db, string strDevnum,map<st
                 dp.property_type = itemschquery.value(1).toInt();
                 dp.property_value = itemschquery.value(2).toString().toStdString();
                 dp.property_name = itemschquery.value(3).toString().toStdString();
+                dp.property_value_unit = itemschquery.value(5).toInt();
                 map_property[dp.property_name] = dp;
             }
         }else{
@@ -1892,8 +1893,6 @@ bool DataBaseOperation::GetRemindInfoByServer(const string sServerNumber,map<str
         return false;
     }
     QSqlQuery remindSchquery(db);
-    //QString strSql=QString("select remindnumber,remindtype,datetype,weekday,time,month,day,agentserver,originator,targetobject,"
-    //                       "remindcontent,needconfirm,confirmtimeout,advanceseconds from remind_notify_scheduler where agentserver='%1' and Enable=1").arg(QString::fromStdString(sServerNumber));
 
     QString strSql=QString("select remindnumber,remindtype,datetype,weekday,time,month,day,agentserver,originator,targetobject"
                             ",remindcontent,needconfirm,confirmtimeout,advanceseconds from remind_notify_scheduler where agentserver='%1' union all"
@@ -1935,7 +1934,7 @@ bool DataBaseOperation::GetRemindInfoByServer(const string sServerNumber,map<str
 
 //添加提醒时间触发日志
 bool DataBaseOperation::AddRemindItemLog(const string sRemindNumber,int remindtype,const string sConfirmUser,string sConfirmMessage,
-                      int nConfirmState,const time_t notifyTime ,const time_t confirmTime ,int &newId)
+                      int nConfirmState,const time_t notifyTime ,int &newId)
 {
     boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
     QSqlDatabase db = ConnectionPool::openConnection();
@@ -1977,6 +1976,38 @@ bool DataBaseOperation::AddRemindItemLog(const string sRemindNumber,int remindty
 
     ConnectionPool::closeConnection(db);
     return true;
+}
+
+//更新提醒时间触发日志
+bool DataBaseOperation::UpdateRemindItemLog(int sRemindRecordId,const string sConfirmUser,
+                                            string sConfirmMessage,int nConfirmState)
+{
+    boost::recursive_mutex::scoped_lock lock(db_connect_mutex_);
+    QSqlDatabase db = ConnectionPool::openConnection();
+    if(!db.isOpen() || !db.isValid()) {
+        std::cout<<"UpdateRemindItemLog error  ------ the database is interrupt"<<std::endl;
+        return false;
+    }
+    QSqlQuery updateRemindQuery(db);
+
+    QString strSql=QString("update remind_notify_record set confirmtime=:time,confirmuser= :user,confirmstate=:state"
+                           ",confirmcontent=:content where id=:id");
+    updateRemindQuery.prepare(strSql);
+    updateRemindQuery.bindValue(":time",QDateTime::currentDateTime());
+    updateRemindQuery.bindValue(":user",QString::fromStdString(sConfirmUser));
+    updateRemindQuery.bindValue(":state",nConfirmState);
+    updateRemindQuery.bindValue(":content",QString::fromStdString(sConfirmMessage));
+    updateRemindQuery.bindValue(":id",sRemindRecordId);
+
+
+    if(!updateRemindQuery.exec()){
+        cout<<updateRemindQuery.lastError().text().toStdString()<<"UpdateRemindItemLog---updateRemindQuery---error!"<<endl;
+        ConnectionPool::closeConnection(db);
+        return false;
+    }
+    ConnectionPool::closeConnection(db);
+
+
 }
 
 

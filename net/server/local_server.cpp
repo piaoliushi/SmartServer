@@ -28,7 +28,7 @@ namespace hx_net
 	{
 		start_accept();
 
-        start_remind_schedules_timer();//启动提醒定时器
+        //start_remind_schedules_timer();//启动提醒定时器
 	}
 
     LocalServer::~LocalServer()
@@ -46,7 +46,7 @@ namespace hx_net
         remove_all();
         acceptor_.close();
 
-        sign_in_users_.clear();
+        //sign_in_users_.clear();
 
 		io_service_pool_.stop();
 
@@ -591,6 +591,38 @@ namespace hx_net
                                                      this,boost::asio::placeholders::error));
     }
 
+    //通知客户端事件(定时提醒)
+    bool LocalServer::send_remind_message(int eventType,int remindType,int nDispatcherType,int needConfirm,
+                             int timeOutLen,int advanceSeconds,string  &sRemindContent,int tokenId,string sHappenTime,string sReserved)
+    {
+        remindEventNotifyPtr remindMsgPtr(new RemindEventNotify);
+        remindMsgPtr->set_eeventtype(eventType);
+        remindMsgPtr->set_eremindtype(remindType);
+        remindMsgPtr->set_sdispatcher(REMIND_ORIGINATOR_TYPE(nDispatcherType));
+        remindMsgPtr->set_nneedconfirm(needConfirm);
+        remindMsgPtr->set_ntimeout(timeOutLen);
+        remindMsgPtr->set_ntokenid(tokenId);
+        remindMsgPtr->set_nadvanceseconds(advanceSeconds);
+        remindMsgPtr->set_scontent(sRemindContent);
+        if(remindType <= REMIND_TYPE_TIME_TRUNOFF){
+            DeviceInfo *curDev =  GetInst(StationConfig).get_devinfo_by_id(sRemindContent);
+            if(curDev==NULL){
+                return false;
+            }else{
+
+                string sContent = curDev->sDevName;
+            }
+        }
+
+
+        remindMsgPtr->set_shappentime(sHappenTime);
+        remindMsgPtr->set_sreserved(sReserved);
+
+        BroadcastMessage(MSG_REMIND_NOTIFY,remindMsgPtr);
+
+        return true;
+    }
+
     //定时提醒任务回调
     void LocalServer::schedules_remind_time_out(const boost::system::error_code& error)
     {
@@ -608,7 +640,7 @@ namespace hx_net
                 //在５秒内
                 tm *pSetTimeS = localtime(&((witer->second).tExecuteTime));
                 unsigned long set_tm_s = pSetTimeS->tm_hour*3600+pSetTimeS->tm_min*60+pSetTimeS->tm_sec;
-                if(cur_tm>=set_tm_s && cur_tm<(set_tm_s+5)){
+                if(cur_tm == set_tm_s){
                     //cout<<"this is a day scheduler!++++++++++++++++"<<str_time<<endl;
 
                 }
@@ -627,17 +659,23 @@ namespace hx_net
                          //通知客户端正在执行
                         cout<<"this is a week scheduler!------------------"<<str_time<<endl;
 
-                        int nConfirmState = -1;//无需确认
+                        int nConfirmState = RMD_S_NONEED_CONFIRM;//无需确认
                         if((witer->second).bNeedConfirm)
-                            nConfirmState = 0;//待确认
+                            nConfirmState = RMD_S_WAIT_CONFIRM;//待确认
 
                         int newId = -1;
                         GetInst(DataBaseOperation).AddRemindItemLog((witer->second).sRemindNumber,(witer->second).iRemindType,"","",
-                                              nConfirmState,curTime,-1,newId);
+                                              nConfirmState,curTime,newId);
 
+                        if(newId>0){
+                            if(!send_remind_message(EVENT_LOCAL_MSG,(witer->second).iRemindType,(witer->second).iOriginator,(witer->second).bNeedConfirm,
+                                                (witer->second).iConfirmTimeout,(witer->second).iAdvanceSeconds,(witer->second).sRemindContent,newId,
+                                                   str_time,"")){
+                               GetInst(DataBaseOperation).UpdateRemindItemLog(newId,"system",REMIND_STATE(RMD_S_SEND_ERROR),RMD_S_SEND_ERROR);
+                            }
 
-                        cout<<"return remind record id = "<<newId<<endl;
-                    }
+                        }
+                     }
                 }
             }
 
