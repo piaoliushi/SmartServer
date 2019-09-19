@@ -295,7 +295,7 @@ namespace hx_net
         }
     }
 
-    bool Tsmt_message::is_step_task_exeok()
+    /*bool Tsmt_message::is_step_task_exeok()
     {
         if(d_curStep<0)
             return false;
@@ -326,7 +326,7 @@ namespace hx_net
             else
                 return false;
         }
-    }
+    }*/
 
     bool Tsmt_message::is_step_all_exeok()
     {
@@ -1230,4 +1230,39 @@ namespace hx_net
              break;
          }
      }
+
+     bool Tsmt_message::is_step_task_exeok()
+    {
+        if(d_curStep<0)
+            return false;
+        if(d_cur_task_!=MSG_TRANSMITTER_TURNOFF_OPR)
+        {
+           // map<int,DataInfo> mValues;
+            if(d_checkData_ptr->mValues.find(d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex)!=d_checkData_ptr->mValues.end())
+            {
+
+                if((d_checkData_ptr->mValues[d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex].bType && d_checkData_ptr->mValues[d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex].fValue==d_step_oc_cmd.mapstepopencmd[d_curStep].fvalue)
+                        || (!d_checkData_ptr->mValues[d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex].bType && d_checkData_ptr->mValues[d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex].fValue>=d_step_oc_cmd.mapstepopencmd[d_curStep].fvalue))
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+        else
+        {
+            if(d_checkData_ptr->mValues.find(d_step_oc_cmd.mapstepclosecmd[d_curStep].checkindex)!=d_checkData_ptr->mValues.end())
+            {
+
+                if((d_checkData_ptr->mValues[d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex].bType && d_checkData_ptr->mValues[d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex].fValue==d_step_oc_cmd.mapstepopencmd[d_curStep].fvalue)
+                        || (!d_checkData_ptr->mValues[d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex].bType && d_checkData_ptr->mValues[d_step_oc_cmd.mapstepopencmd[d_curStep].checkindex].fValue<d_step_oc_cmd.mapstepopencmd[d_curStep].fvalue))
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+    }
 }
