@@ -1531,7 +1531,7 @@ bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
     try
     {
         QSqlQuery userquery(db);
-        QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber from Users where Name='%1'").arg(QString::fromStdString(sName));
+        QString strSql=QString("select Number,Password,controllevel,Headship,JobNumber,rolenumber,rolename from Users,user_role where Users.rolenumber=user_role.roleid and Name='%1'").arg(QString::fromStdString(sName));
         if(!userquery.exec(strSql)){
             cout<<userquery.lastError().text().toStdString()<<"GetUserInfo---userquery---error!"<<endl;
             ConnectionPool::closeConnection(db);
@@ -1544,6 +1544,8 @@ bool DataBaseOperation::GetUserInfo( const string sName,UserInformation &user )
             user.nControlLevel = userquery.value(2).toInt();
             user.sHeadship = userquery.value(3).toString().toStdString();
             user.sJobNumber = userquery.value(4).toString().toStdString();
+            user.sRoleNumber = userquery.value(5).toString().toStdString();
+            user.sRoleName = userquery.value(6).toString().toStdString();
         }
     }catch(...){
         ConnectionPool::closeConnection(db);
@@ -1708,7 +1710,7 @@ bool DataBaseOperation::GetAllUserInfoByStation(const string sStationNumber, Log
 
     QSqlQuery selectquery(db);
     QString strSql;
-    strSql = QString("select number,name,headship,jobnumber,controllevel from users where number in(select objectnumber from station_bind_object where objecttype=1 and stationnumber='%1')").arg(QString::fromStdString(sStationNumber));
+    strSql = QString("select number,name,headship,jobnumber,controllevel,rolenumber,rolename from users,user_role where users.rolenumber=user_role.roleid and number in(select objectnumber from station_bind_object where objecttype=1 and stationnumber='%1')").arg(QString::fromStdString(sStationNumber));
     if(!selectquery.exec(strSql))
     {
         ConnectionPool::closeConnection(db);
@@ -1716,20 +1718,25 @@ bool DataBaseOperation::GetAllUserInfoByStation(const string sStationNumber, Log
     }
     while(selectquery.next())
     {
-        string sNumber,sName,sHeadship,sJobNumber;
+        string sNumber,sName,sHeadship,sJobNumber,sRoleNumber,sRoleName;
         int nLevel;
         sNumber = selectquery.value(0).toString().toStdString();
         sName = selectquery.value(1).toString().toStdString();
         sHeadship = selectquery.value(2).toString().toStdString();
-        nLevel = selectquery.value(3).toInt();
-        sJobNumber = selectquery.value(4).toString().toStdString();
+
+        sJobNumber = selectquery.value(3).toString().toStdString();
+        nLevel = selectquery.value(4).toInt();
+        sRoleNumber = selectquery.value(5).toString().toStdString();
+        sRoleName = selectquery.value(6).toString().toStdString();
 
         UserInfo *pUser = users.add_alluserinfo();
-        pUser->set_usrname(QString::fromLocal8Bit(sName.c_str()).toUtf8().data());
-        pUser->set_usrnumber(QString::fromLocal8Bit(sNumber.c_str()).toUtf8().data());
+        pUser->set_usrname(sName.c_str());
+        pUser->set_usrnumber(sNumber.c_str());
         pUser->set_eusrlevel(nLevel);
-        pUser->set_usrheadship(QString::fromLocal8Bit(sHeadship.c_str()).toUtf8().data());
-        pUser->set_usrjobnumber(QString::fromLocal8Bit(sJobNumber.c_str()).toUtf8().data());
+        pUser->set_usrheadship(sHeadship.c_str());
+        pUser->set_usrjobnumber(sJobNumber.c_str());
+        pUser->set_usrrolenumber(sRoleNumber);
+        pUser->set_usrrolename(sRoleName);
     }
     ConnectionPool::closeConnection(db);
     return true;

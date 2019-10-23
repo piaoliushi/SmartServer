@@ -922,7 +922,7 @@ namespace hx_net
                 }
                 else if(d_onekeyopen_soft)
                 {
-                    if(d_antenna_Agent_ == false){
+                    /*if(d_antenna_Agent_ == false){
 
                         bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
                         if(can_excute == false){
@@ -930,6 +930,26 @@ namespace hx_net
                             eErrCode = EC_NO_ALLOW_SWITCH_ATTENA;
                             nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
                             return ;
+                        }
+                    }*/
+                    //自动倒备机天线防抖，在用户干预天线置位后允许进行开关机操作（未测试）
+                    if(d_antenna_Agent_ == false){
+
+                        dev_run_state nAntennaS = GetInst(SvcMgr).get_dev_run_state(d_relate_antenna_ptr_->sStationNum,
+                                                                                    d_relate_antenna_ptr_->sDevNum);
+                        if((nAntennaS == antenna_host && d_Host_==TRANSMITTER_HOST) ||
+                                (nAntennaS == antenna_backup && d_Host_==TRANSMITTER_BACKUP))
+                       {
+
+                       }
+                        else
+                        {
+                            bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
+                            if(can_excute == false){
+                                eErrCode = EC_NO_ALLOW_SWITCH_ATTENA;
+                                nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
+                                return ;
+                            }
                         }
                     }
 
@@ -1128,14 +1148,34 @@ namespace hx_net
 
             }else{
 
-                if(d_antenna_Agent_ == false){
+                /*if(d_antenna_Agent_ == false){
 
                     bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
                     if(can_excute == false){
-                        //eErrCode = EC_OK;
                         eErrCode = EC_NO_ALLOW_SWITCH_ATTENA_AUTO;
                         nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
                         return ;
+                    }
+                }*/
+                //自动倒备机天线防抖，在用户干预天线置位后允许进行开关机操作
+                if(d_antenna_Agent_ == false){
+
+                    dev_run_state nAntennaS = GetInst(SvcMgr).get_dev_run_state(d_relate_antenna_ptr_->sStationNum,
+                                                                                d_relate_antenna_ptr_->sDevNum);
+                    if((nAntennaS == antenna_host && d_Host_==TRANSMITTER_HOST) ||
+                            (nAntennaS == antenna_backup && d_Host_==TRANSMITTER_BACKUP))
+                    {
+
+                    }
+                    else
+                    {
+                        bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
+                        if(can_excute == false){
+                            //eErrCode = EC_FAILED;//EC_OK
+                            eErrCode = EC_NO_ALLOW_SWITCH_ATTENA;
+                            nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
+                            return ;
+                        }
                     }
                 }
 

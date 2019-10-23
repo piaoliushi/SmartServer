@@ -238,6 +238,25 @@ inline bool e_AlarmMod_Parse(
   return ::google::protobuf::internal::ParseNamedEnum<e_AlarmMod>(
     e_AlarmMod_descriptor(), name, value);
 }
+enum e_LoginAckMod {
+  LOGIN_NORMAL = 0,
+  LOGIN_SWITCH_USER = 1
+};
+bool e_LoginAckMod_IsValid(int value);
+const e_LoginAckMod e_LoginAckMod_MIN = LOGIN_NORMAL;
+const e_LoginAckMod e_LoginAckMod_MAX = LOGIN_SWITCH_USER;
+const int e_LoginAckMod_ARRAYSIZE = e_LoginAckMod_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* e_LoginAckMod_descriptor();
+inline const ::std::string& e_LoginAckMod_Name(e_LoginAckMod value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    e_LoginAckMod_descriptor(), value);
+}
+inline bool e_LoginAckMod_Parse(
+    const ::std::string& name, e_LoginAckMod* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<e_LoginAckMod>(
+    e_LoginAckMod_descriptor(), name, value);
+}
 // ===================================================================
 
 class DevDataNotify_eCellMsg : public ::google::protobuf::Message {
@@ -2076,6 +2095,30 @@ class UserInfo : public ::google::protobuf::Message {
   inline ::std::string* release_usrheadship();
   inline void set_allocated_usrheadship(::std::string* usrheadship);
 
+  // optional string UsrRoleNumber = 6;
+  inline bool has_usrrolenumber() const;
+  inline void clear_usrrolenumber();
+  static const int kUsrRoleNumberFieldNumber = 6;
+  inline const ::std::string& usrrolenumber() const;
+  inline void set_usrrolenumber(const ::std::string& value);
+  inline void set_usrrolenumber(const char* value);
+  inline void set_usrrolenumber(const char* value, size_t size);
+  inline ::std::string* mutable_usrrolenumber();
+  inline ::std::string* release_usrrolenumber();
+  inline void set_allocated_usrrolenumber(::std::string* usrrolenumber);
+
+  // optional string UsrRoleName = 7;
+  inline bool has_usrrolename() const;
+  inline void clear_usrrolename();
+  static const int kUsrRoleNameFieldNumber = 7;
+  inline const ::std::string& usrrolename() const;
+  inline void set_usrrolename(const ::std::string& value);
+  inline void set_usrrolename(const char* value);
+  inline void set_usrrolename(const char* value, size_t size);
+  inline ::std::string* mutable_usrrolename();
+  inline ::std::string* release_usrrolename();
+  inline void set_allocated_usrrolename(::std::string* usrrolename);
+
   // @@protoc_insertion_point(class_scope:UserInfo)
  private:
   inline void set_has_eusrlevel();
@@ -2088,6 +2131,10 @@ class UserInfo : public ::google::protobuf::Message {
   inline void clear_has_usrjobnumber();
   inline void set_has_usrheadship();
   inline void clear_has_usrheadship();
+  inline void set_has_usrrolenumber();
+  inline void clear_has_usrrolenumber();
+  inline void set_has_usrrolename();
+  inline void clear_has_usrrolename();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2097,6 +2144,8 @@ class UserInfo : public ::google::protobuf::Message {
   ::std::string* usrname_;
   ::std::string* usrjobnumber_;
   ::std::string* usrheadship_;
+  ::std::string* usrrolenumber_;
+  ::std::string* usrrolename_;
   ::google::protobuf::int32 eusrlevel_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
@@ -2294,6 +2343,37 @@ class LoginAck : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::UserInfo >*
       mutable_alluserinfo();
 
+  // optional .e_LoginAckMod eLoginMod = 13;
+  inline bool has_eloginmod() const;
+  inline void clear_eloginmod();
+  static const int kELoginModFieldNumber = 13;
+  inline ::e_LoginAckMod eloginmod() const;
+  inline void set_eloginmod(::e_LoginAckMod value);
+
+  // optional string UsrRoleNumber = 14;
+  inline bool has_usrrolenumber() const;
+  inline void clear_usrrolenumber();
+  static const int kUsrRoleNumberFieldNumber = 14;
+  inline const ::std::string& usrrolenumber() const;
+  inline void set_usrrolenumber(const ::std::string& value);
+  inline void set_usrrolenumber(const char* value);
+  inline void set_usrrolenumber(const char* value, size_t size);
+  inline ::std::string* mutable_usrrolenumber();
+  inline ::std::string* release_usrrolenumber();
+  inline void set_allocated_usrrolenumber(::std::string* usrrolenumber);
+
+  // optional string UsrRoleName = 15;
+  inline bool has_usrrolename() const;
+  inline void clear_usrrolename();
+  static const int kUsrRoleNameFieldNumber = 15;
+  inline const ::std::string& usrrolename() const;
+  inline void set_usrrolename(const ::std::string& value);
+  inline void set_usrrolename(const char* value);
+  inline void set_usrrolename(const char* value, size_t size);
+  inline ::std::string* mutable_usrrolename();
+  inline ::std::string* release_usrrolename();
+  inline void set_allocated_usrrolename(::std::string* usrrolename);
+
   // @@protoc_insertion_point(class_scope:LoginAck)
  private:
   inline void set_has_eresult();
@@ -2310,6 +2390,12 @@ class LoginAck : public ::google::protobuf::Message {
   inline void clear_has_usrheadship();
   inline void set_has_usrpsw();
   inline void clear_has_usrpsw();
+  inline void set_has_eloginmod();
+  inline void clear_has_eloginmod();
+  inline void set_has_usrrolenumber();
+  inline void clear_has_usrrolenumber();
+  inline void set_has_usrrolename();
+  inline void clear_has_usrrolename();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2327,6 +2413,9 @@ class LoginAck : public ::google::protobuf::Message {
   ::std::string* usrpsw_;
   ::google::protobuf::RepeatedPtrField< ::UserSigninInfo > signusers_;
   ::google::protobuf::RepeatedPtrField< ::UserInfo > alluserinfo_;
+  ::std::string* usrrolenumber_;
+  ::std::string* usrrolename_;
+  int eloginmod_;
   friend void  protobuf_AddDesc_protocol_2eproto();
   friend void protobuf_AssignDesc_protocol_2eproto();
   friend void protobuf_ShutdownFile_protocol_2eproto();
@@ -7665,6 +7754,158 @@ inline void UserInfo::set_allocated_usrheadship(::std::string* usrheadship) {
   // @@protoc_insertion_point(field_set_allocated:UserInfo.UsrHeadship)
 }
 
+// optional string UsrRoleNumber = 6;
+inline bool UserInfo::has_usrrolenumber() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void UserInfo::set_has_usrrolenumber() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void UserInfo::clear_has_usrrolenumber() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void UserInfo::clear_usrrolenumber() {
+  if (usrrolenumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolenumber_->clear();
+  }
+  clear_has_usrrolenumber();
+}
+inline const ::std::string& UserInfo::usrrolenumber() const {
+  // @@protoc_insertion_point(field_get:UserInfo.UsrRoleNumber)
+  return *usrrolenumber_;
+}
+inline void UserInfo::set_usrrolenumber(const ::std::string& value) {
+  set_has_usrrolenumber();
+  if (usrrolenumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolenumber_ = new ::std::string;
+  }
+  usrrolenumber_->assign(value);
+  // @@protoc_insertion_point(field_set:UserInfo.UsrRoleNumber)
+}
+inline void UserInfo::set_usrrolenumber(const char* value) {
+  set_has_usrrolenumber();
+  if (usrrolenumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolenumber_ = new ::std::string;
+  }
+  usrrolenumber_->assign(value);
+  // @@protoc_insertion_point(field_set_char:UserInfo.UsrRoleNumber)
+}
+inline void UserInfo::set_usrrolenumber(const char* value, size_t size) {
+  set_has_usrrolenumber();
+  if (usrrolenumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolenumber_ = new ::std::string;
+  }
+  usrrolenumber_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:UserInfo.UsrRoleNumber)
+}
+inline ::std::string* UserInfo::mutable_usrrolenumber() {
+  set_has_usrrolenumber();
+  if (usrrolenumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolenumber_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:UserInfo.UsrRoleNumber)
+  return usrrolenumber_;
+}
+inline ::std::string* UserInfo::release_usrrolenumber() {
+  clear_has_usrrolenumber();
+  if (usrrolenumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = usrrolenumber_;
+    usrrolenumber_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void UserInfo::set_allocated_usrrolenumber(::std::string* usrrolenumber) {
+  if (usrrolenumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete usrrolenumber_;
+  }
+  if (usrrolenumber) {
+    set_has_usrrolenumber();
+    usrrolenumber_ = usrrolenumber;
+  } else {
+    clear_has_usrrolenumber();
+    usrrolenumber_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:UserInfo.UsrRoleNumber)
+}
+
+// optional string UsrRoleName = 7;
+inline bool UserInfo::has_usrrolename() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void UserInfo::set_has_usrrolename() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void UserInfo::clear_has_usrrolename() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void UserInfo::clear_usrrolename() {
+  if (usrrolename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolename_->clear();
+  }
+  clear_has_usrrolename();
+}
+inline const ::std::string& UserInfo::usrrolename() const {
+  // @@protoc_insertion_point(field_get:UserInfo.UsrRoleName)
+  return *usrrolename_;
+}
+inline void UserInfo::set_usrrolename(const ::std::string& value) {
+  set_has_usrrolename();
+  if (usrrolename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolename_ = new ::std::string;
+  }
+  usrrolename_->assign(value);
+  // @@protoc_insertion_point(field_set:UserInfo.UsrRoleName)
+}
+inline void UserInfo::set_usrrolename(const char* value) {
+  set_has_usrrolename();
+  if (usrrolename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolename_ = new ::std::string;
+  }
+  usrrolename_->assign(value);
+  // @@protoc_insertion_point(field_set_char:UserInfo.UsrRoleName)
+}
+inline void UserInfo::set_usrrolename(const char* value, size_t size) {
+  set_has_usrrolename();
+  if (usrrolename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolename_ = new ::std::string;
+  }
+  usrrolename_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:UserInfo.UsrRoleName)
+}
+inline ::std::string* UserInfo::mutable_usrrolename() {
+  set_has_usrrolename();
+  if (usrrolename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolename_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:UserInfo.UsrRoleName)
+  return usrrolename_;
+}
+inline ::std::string* UserInfo::release_usrrolename() {
+  clear_has_usrrolename();
+  if (usrrolename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = usrrolename_;
+    usrrolename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void UserInfo::set_allocated_usrrolename(::std::string* usrrolename) {
+  if (usrrolename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete usrrolename_;
+  }
+  if (usrrolename) {
+    set_has_usrrolename();
+    usrrolename_ = usrrolename;
+  } else {
+    clear_has_usrrolename();
+    usrrolename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:UserInfo.UsrRoleName)
+}
+
 // -------------------------------------------------------------------
 
 // LoginAck
@@ -8246,6 +8487,183 @@ inline ::google::protobuf::RepeatedPtrField< ::UserInfo >*
 LoginAck::mutable_alluserinfo() {
   // @@protoc_insertion_point(field_mutable_list:LoginAck.AllUserInfo)
   return &alluserinfo_;
+}
+
+// optional .e_LoginAckMod eLoginMod = 13;
+inline bool LoginAck::has_eloginmod() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void LoginAck::set_has_eloginmod() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void LoginAck::clear_has_eloginmod() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void LoginAck::clear_eloginmod() {
+  eloginmod_ = 0;
+  clear_has_eloginmod();
+}
+inline ::e_LoginAckMod LoginAck::eloginmod() const {
+  // @@protoc_insertion_point(field_get:LoginAck.eLoginMod)
+  return static_cast< ::e_LoginAckMod >(eloginmod_);
+}
+inline void LoginAck::set_eloginmod(::e_LoginAckMod value) {
+  assert(::e_LoginAckMod_IsValid(value));
+  set_has_eloginmod();
+  eloginmod_ = value;
+  // @@protoc_insertion_point(field_set:LoginAck.eLoginMod)
+}
+
+// optional string UsrRoleNumber = 14;
+inline bool LoginAck::has_usrrolenumber() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void LoginAck::set_has_usrrolenumber() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void LoginAck::clear_has_usrrolenumber() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void LoginAck::clear_usrrolenumber() {
+  if (usrrolenumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolenumber_->clear();
+  }
+  clear_has_usrrolenumber();
+}
+inline const ::std::string& LoginAck::usrrolenumber() const {
+  // @@protoc_insertion_point(field_get:LoginAck.UsrRoleNumber)
+  return *usrrolenumber_;
+}
+inline void LoginAck::set_usrrolenumber(const ::std::string& value) {
+  set_has_usrrolenumber();
+  if (usrrolenumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolenumber_ = new ::std::string;
+  }
+  usrrolenumber_->assign(value);
+  // @@protoc_insertion_point(field_set:LoginAck.UsrRoleNumber)
+}
+inline void LoginAck::set_usrrolenumber(const char* value) {
+  set_has_usrrolenumber();
+  if (usrrolenumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolenumber_ = new ::std::string;
+  }
+  usrrolenumber_->assign(value);
+  // @@protoc_insertion_point(field_set_char:LoginAck.UsrRoleNumber)
+}
+inline void LoginAck::set_usrrolenumber(const char* value, size_t size) {
+  set_has_usrrolenumber();
+  if (usrrolenumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolenumber_ = new ::std::string;
+  }
+  usrrolenumber_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:LoginAck.UsrRoleNumber)
+}
+inline ::std::string* LoginAck::mutable_usrrolenumber() {
+  set_has_usrrolenumber();
+  if (usrrolenumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolenumber_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:LoginAck.UsrRoleNumber)
+  return usrrolenumber_;
+}
+inline ::std::string* LoginAck::release_usrrolenumber() {
+  clear_has_usrrolenumber();
+  if (usrrolenumber_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = usrrolenumber_;
+    usrrolenumber_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void LoginAck::set_allocated_usrrolenumber(::std::string* usrrolenumber) {
+  if (usrrolenumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete usrrolenumber_;
+  }
+  if (usrrolenumber) {
+    set_has_usrrolenumber();
+    usrrolenumber_ = usrrolenumber;
+  } else {
+    clear_has_usrrolenumber();
+    usrrolenumber_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:LoginAck.UsrRoleNumber)
+}
+
+// optional string UsrRoleName = 15;
+inline bool LoginAck::has_usrrolename() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void LoginAck::set_has_usrrolename() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void LoginAck::clear_has_usrrolename() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void LoginAck::clear_usrrolename() {
+  if (usrrolename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolename_->clear();
+  }
+  clear_has_usrrolename();
+}
+inline const ::std::string& LoginAck::usrrolename() const {
+  // @@protoc_insertion_point(field_get:LoginAck.UsrRoleName)
+  return *usrrolename_;
+}
+inline void LoginAck::set_usrrolename(const ::std::string& value) {
+  set_has_usrrolename();
+  if (usrrolename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolename_ = new ::std::string;
+  }
+  usrrolename_->assign(value);
+  // @@protoc_insertion_point(field_set:LoginAck.UsrRoleName)
+}
+inline void LoginAck::set_usrrolename(const char* value) {
+  set_has_usrrolename();
+  if (usrrolename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolename_ = new ::std::string;
+  }
+  usrrolename_->assign(value);
+  // @@protoc_insertion_point(field_set_char:LoginAck.UsrRoleName)
+}
+inline void LoginAck::set_usrrolename(const char* value, size_t size) {
+  set_has_usrrolename();
+  if (usrrolename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolename_ = new ::std::string;
+  }
+  usrrolename_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:LoginAck.UsrRoleName)
+}
+inline ::std::string* LoginAck::mutable_usrrolename() {
+  set_has_usrrolename();
+  if (usrrolename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    usrrolename_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:LoginAck.UsrRoleName)
+  return usrrolename_;
+}
+inline ::std::string* LoginAck::release_usrrolename() {
+  clear_has_usrrolename();
+  if (usrrolename_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = usrrolename_;
+    usrrolename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void LoginAck::set_allocated_usrrolename(::std::string* usrrolename) {
+  if (usrrolename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete usrrolename_;
+  }
+  if (usrrolename) {
+    set_has_usrrolename();
+    usrrolename_ = usrrolename;
+  } else {
+    clear_has_usrrolename();
+    usrrolename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:LoginAck.UsrRoleName)
 }
 
 // -------------------------------------------------------------------
@@ -11852,6 +12270,11 @@ template <> struct is_proto_enum< ::e_AlarmMod> : ::google::protobuf::internal::
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::e_AlarmMod>() {
   return ::e_AlarmMod_descriptor();
+}
+template <> struct is_proto_enum< ::e_LoginAckMod> : ::google::protobuf::internal::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::e_LoginAckMod>() {
+  return ::e_LoginAckMod_descriptor();
 }
 
 }  // namespace google

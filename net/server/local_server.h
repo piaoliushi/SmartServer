@@ -17,7 +17,7 @@ struct HandlerKey
     string         usr_number_;//用户编号
     string         client_id_;//客户端编号
 };
-
+#if 0
 struct UserSignInInfo
 {
 public:
@@ -27,6 +27,7 @@ public:
     UserInformation UsrInfo;//用户名
     time_t SignInTime;//签到时间
 };
+#endif
     class LocalServer
 	{
 	public:

@@ -624,7 +624,7 @@ bool Bohui_Protocol::createReportDataMsg(int nReplyId,string sDevId,int nDevType
 
 //创建上报告警消息
 bool Bohui_Protocol::createReportAlarmDataMsg(int nReplyId,int nCmdType,string sDevId,CurItemAlarmInfo &alarmInfo,int nMod,
-                                string &sReason,string &reportBody,int alarmLevel)
+                                string &sReason,string &reportBody)//,int alarmLevel
 {
     xml_document<> xml_reportMsg;
     //本地MsgId暂时固定为2

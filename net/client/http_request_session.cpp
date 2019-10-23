@@ -338,7 +338,7 @@ http_request_session::~http_request_session(void)
  {
      string sReportMsg;
      Bohui_Protocol  bh_ptcl;
-     bh_ptcl.createReportAlarmDataMsg(-1,BH_POTO_CommunicationReport,sDevid,alarmInfo,nMod,reason,sReportMsg,alarmInfo.alarmLevel);
+     bh_ptcl.createReportAlarmDataMsg(-1,BH_POTO_CommunicationReport,sDevid,alarmInfo,nMod,reason,sReportMsg);//,alarmInfo.alarmLevel
      if(sReportMsg.empty()==false)
          putHttpMessage(GetInst(LocalConfig).report_svc_url(),sReportMsg);
  }

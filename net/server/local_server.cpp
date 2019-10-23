@@ -13,12 +13,12 @@ using namespace db;
 namespace hx_net
 {
 
-    UserSignInInfo::UserSignInInfo() {
-        SignInTime = time(0);
-    }
-    UserSignInInfo::~UserSignInInfo() {
+    //UserSignInInfo::UserSignInInfo() {
+    //    SignInTime = time(0);
+    //}
+   // UserSignInInfo::~UserSignInInfo() {
 
-    }
+   // }
 
     LocalServer::LocalServer(short port,TaskQueue<msgPointer>& taskwork,size_t io_service_pool_size/*=4*/)
 		:io_service_pool_(io_service_pool_size)//设置io pool尺寸
@@ -45,8 +45,6 @@ namespace hx_net
 	{
         remove_all();
         acceptor_.close();
-
-        //sign_in_users_.clear();
 
 		io_service_pool_.stop();
 
@@ -146,7 +144,9 @@ namespace hx_net
                     loginAck.set_usrpsw(tmpUser.sPassword.c_str());
 					loginAck.set_usrjobnumber(tmpUser.sJobNumber);
                     loginAck.set_usrheadship(tmpUser.sHeadship.c_str());
-
+                    loginAck.set_eloginmod(LOGIN_NORMAL);//add --2019-10-15
+                    loginAck.set_usrrolenumber(tmpUser.sRoleNumber);
+                    loginAck.set_usrrolename(tmpUser.sRoleName);
 					
                     (*iter).second.usr_= lgUser;//sUser记录当前登陆用户
 					(*iter).second.psw_= tmpUser.sPassword;//记录当前登陆用户密码
@@ -165,10 +165,9 @@ namespace hx_net
                     {
 
                         vector<string>::iterator itersNum = debnumber.begin();
-                        //vector<string> usrTodev;//用户设备列表
+
                         for(;itersNum!=debnumber.end();++itersNum)
                         {
-                            //usrTodev.push_back(*itersNum);
 
                             //判断设备是否属于本地台站或者是上级台站直连下级台站设备
                             DevBaseInfo devBaseInfo;
@@ -272,7 +271,10 @@ namespace hx_net
             {
                 //判断设备是否属于本地台站或者是上级台站直连下级台站设备
                 DevBaseInfo devBaseInfo;
-                GetInst(SvcMgr).dev_base_info(sstationid,devBaseInfo,*itersNum);
+
+                //检查授权到客户端与用户的设备是否具有服务授权
+                if(GetInst(SvcMgr).dev_base_info(sstationid,devBaseInfo,*itersNum) == false)
+                    continue;
 
                 map<int,map<int,CurItemAlarmInfo> > curAlarm;
                 con_state  netState = GetInst(SvcMgr).get_dev_net_state(sstationid,*itersNum);
@@ -348,7 +350,8 @@ namespace hx_net
         loginAck.set_usrpsw(tmpUser.sPassword.c_str());
         loginAck.set_usrjobnumber(tmpUser.sJobNumber);
         loginAck.set_usrheadship(tmpUser.sHeadship.c_str());
-
+        loginAck.set_usrrolenumber(tmpUser.sRoleNumber);
+        loginAck.set_usrrolename(tmpUser.sRoleName);
 
         bool bfindOldUser = false;
         std::map<session_ptr,HandlerKey>::iterator iter = session_pool_.begin();
@@ -390,8 +393,9 @@ namespace hx_net
                      sloginAck->set_usrpsw(tmpUser.sPassword.c_str());
                      sloginAck->set_usrjobnumber(tmpUser.sJobNumber);
                      sloginAck->set_usrheadship(tmpUser.sHeadship.c_str());
-
-
+                     sloginAck->set_eloginmod(LOGIN_SWITCH_USER);//add --2019-10-15
+                     sloginAck->set_usrrolenumber(tmpUser.sRoleNumber);
+                     sloginAck->set_usrrolename(tmpUser.sRoleName);
                      get_authorize_info_by_user(ch_ptr,tmpUser.sNumber,iter->second.client_id_,*sloginAck);
 
                      iter->first->sendMessage(MSG_LOGIN_ACK,sloginAck);

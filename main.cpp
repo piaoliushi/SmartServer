@@ -2,6 +2,8 @@
 #include <QApplication>
 #include <QTextCodec>
 #include <QPalette>
+#include <QDir>
+#include <QSettings>
 #include <QStyleFactory>
 #include <QWSServer>
 #include <QtPlugin>
@@ -42,6 +44,24 @@ void gb2312ToUtf8(std::string& strGb2312)
     QByteArray ByteUtf8= utf8Codec->fromUnicode(strUnicode);
 
     strGb2312= ByteUtf8.data();
+}
+
+void appAutoRun(bool bAutoRun = true)
+{
+    QString appName = "SmartServer";//QApplication::applicationName();//程序名称
+    QString appPath = QDir::toNativeSeparators(QApplication::applicationFilePath());// 程序路径
+    //appPath = appPath.replace("/","\\");
+
+
+    QSettings *reg=new QSettings(
+                    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run",
+                    QSettings::NativeFormat);
+    if (bAutoRun){
+        reg->setValue(appName,appPath);
+    }else{
+        reg->remove(appName);
+    }
+
 }
 
 
@@ -117,6 +137,10 @@ int main(int argc, char *argv[])
     sys_translator.load("qt_zh_CN.qm");
     a.installTranslator(&sys_translator);
 
+    //加入启动项
+#ifdef Q_OS_WIN
+    appAutoRun();
+#endif
     QApplication::setPalette(pal);
     QFont font  = a.font();
 #ifdef Q_OS_WIN
@@ -127,7 +151,7 @@ int main(int argc, char *argv[])
     a.setFont(font);
     //AppDir.append("/ServerLocalConfig.xml");
     std::string sConfigPath = sAppDir+"/ServerLocalConfig.xml";
-    if(!GetInst(LocalConfig).load_local_config(sConfigPath.c_str())){//{AppDir.toLocal8Bit().constData())
+    if(!GetInst(LocalConfig).load_local_config(sConfigPath.c_str())){
         QMessageBox::information(NULL,QObject::tr("error"),QObject::tr("Load local config file error!"));
         return -1;
     }
@@ -149,7 +173,7 @@ int main(int argc, char *argv[])
     YAOLOG_CREATE("info", true, YaoUtil::LOG_TYPE_TEXT);
     YAOLOG_SET_LOG_ATTR(
             "info", true,
-            YaoUtil::OUT_FLAG_STDOUT | YaoUtil::OUT_FLAG_FILE,
+             YaoUtil::OUT_FLAG_FILE,//YaoUtil::OUT_FLAG_STDOUT |
             true, false, true, true, NULL);
     YAOLOG_SET_LOGFILE_ATTR("info", false, true, true,NULL,NULL);
 

@@ -2186,6 +2186,9 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
             string sDesDevId = devId;
             map_dev_ass_parse_ptr_[devId]->get_parent_device_id(sDesDevId);
             if(GetInst(LocalConfig).http_svc_use()){
+
+
+
                 int nDevType = modleInfos_.mapDevInfo[devId].iDevType;
                 //针对烟感水浸设备做id替换
                 if(nDevType==DEVICE_SMOKE || nDevType==DEVICE_WATER){
@@ -2201,7 +2204,7 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
                                      ,modleInfos_.mapDevInfo[devId].iDevType,curAlarm.nLimitId,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size()
                                      ,curAlarm.sReason,curAlarm.alarmLevel);
 
-
+            cout<<"alarm happen ---"<<str_time<<"---DevId="<<sDesDevId<<"---AlarmId = "<<curAlarm.nAlarmId<<endl;
         }
     }else{//1:告警恢复
         time_t curTime = time(0);
@@ -2226,6 +2229,7 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
                                      ,modleInfos_.mapDevInfo[devId].iDevType,RESUME,str_time,mapItemAlarm[devId][ItemInfo.iItemIndex].size()
                                      ,curAlarm.sReason,curAlarm.alarmLevel);
             // 联动.....
+            cout<<"alarm recover ---"<<str_time<<"---DevId="<<sDesDevId<<"---AlarmId = "<<curAlarm.nAlarmId<<endl;
         }
     }
 }

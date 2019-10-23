@@ -23,7 +23,7 @@ public:
 
     //创建上报指标告警消息
     bool createReportAlarmDataMsg(int nReplyId,int nCmdType,string sDevId,CurItemAlarmInfo &alarmInfo,int nMod,
-                                  string &sReason,string &reportBody,int alarmLevel=0);//默认普通
+                                  string &sReason,string &reportBody);//,int alarmLevel=0默认普通
     //创建控制结果上报消息
     bool creatExcutResultReportMsg(int nReplyId,int nCmdType,string sDevId,const string &sTime,
                                     int devState,const string &sDesc,string &reportBody);

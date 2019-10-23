@@ -335,6 +335,8 @@ typedef struct
     string sEducation;
     string sEmail;
     short  nControlLevel;
+    string sRoleNumber;
+    string sRoleName;
     string sNote;
 } UserInformation;
 

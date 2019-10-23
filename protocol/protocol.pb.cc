@@ -120,6 +120,7 @@ const ::google::protobuf::EnumDescriptor* e_ErrorCode_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* e_CellType_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* e_AlarmStatus_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* e_AlarmMod_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* e_LoginAckMod_descriptor_ = NULL;
 
 }  // namespace
 
@@ -382,12 +383,14 @@ void protobuf_AssignDesc_protocol_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(UserSigninInfo));
   UserInfo_descriptor_ = file->message_type(12);
-  static const int UserInfo_offsets_[5] = {
+  static const int UserInfo_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UserInfo, eusrlevel_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UserInfo, usrnumber_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UserInfo, usrname_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UserInfo, usrjobnumber_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UserInfo, usrheadship_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UserInfo, usrrolenumber_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UserInfo, usrrolename_),
   };
   UserInfo_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -401,7 +404,7 @@ void protobuf_AssignDesc_protocol_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(UserInfo));
   LoginAck_descriptor_ = file->message_type(13);
-  static const int LoginAck_offsets_[12] = {
+  static const int LoginAck_offsets_[15] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAck, eresult_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAck, eusrlevel_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAck, usrnumber_),
@@ -414,6 +417,9 @@ void protobuf_AssignDesc_protocol_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAck, usrpsw_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAck, signusers_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAck, alluserinfo_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAck, eloginmod_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAck, usrrolenumber_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LoginAck, usrrolename_),
   };
   LoginAck_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -721,6 +727,7 @@ void protobuf_AssignDesc_protocol_2eproto() {
   e_CellType_descriptor_ = file->enum_type(1);
   e_AlarmStatus_descriptor_ = file->enum_type(2);
   e_AlarmMod_descriptor_ = file->enum_type(3);
+  e_LoginAckMod_descriptor_ = file->enum_type(4);
 }
 
 namespace {
@@ -916,112 +923,117 @@ void protobuf_AddDesc_protocol_2eproto() {
     "\021\n\teUsrLevel\030\001 \001(\005\022\021\n\tUsrNumber\030\002 \001(\t\022\017\n"
     "\007UsrName\030\003 \001(\t\022\024\n\014UsrJobNumber\030\004 \001(\t\022\023\n\013"
     "UsrHeadship\030\005 \001(\t\022\016\n\006UsrPsw\030\006 \001(\t\022\022\n\nSig"
-    "nInTime\030\007 \001(\t\"l\n\010UserInfo\022\021\n\teUsrLevel\030\001"
-    " \001(\005\022\021\n\tUsrNumber\030\002 \001(\t\022\017\n\007UsrName\030\003 \001(\t"
-    "\022\024\n\014UsrJobNumber\030\004 \001(\t\022\023\n\013UsrHeadship\030\005 "
-    "\001(\t\"\340\002\n\010LoginAck\022\035\n\007eResult\030\001 \001(\0162\014.e_Er"
-    "rorCode\022\021\n\teUsrLevel\030\002 \001(\005\022\021\n\tUsrNumber\030"
-    "\003 \001(\t\022\017\n\007UsrName\030\004 \001(\t\022\024\n\014UsrJobNumber\030\005"
-    " \001(\t\022\023\n\013UsrHeadship\030\006 \001(\t\022\'\n\020cDevCurNetS"
-    "tatus\030\007 \003(\0132\r.DevNetStatus\022)\n\021cDevCurWor"
-    "kStatus\030\010 \003(\0132\016.DevWorkStatus\022+\n\022cDevCur"
-    "AlarmStatus\030\t \003(\0132\017.DevAlarmStatus\022\016\n\006Us"
-    "rPsw\030\n \001(\t\022\"\n\tSignUsers\030\013 \003(\0132\017.UserSign"
-    "inInfo\022\036\n\013AllUserInfo\030\014 \003(\0132\t.UserInfo\"I"
-    "\n\014SignInOutReq\022\020\n\010IsSignIn\030\001 \001(\005\022\023\n\013sSig"
-    "nInName\030\002 \001(\t\022\022\n\nsSignInPsw\030\003 \001(\t\"d\n\014Sig"
-    "nInOutAck\022\020\n\010IsSignIn\030\001 \001(\005\022\035\n\007eResult\030\002"
-    " \001(\0162\014.e_ErrorCode\022#\n\ncUsersInfo\030\003 \001(\0132\017"
-    ".UserSigninInfo\"=\n\023StationWorkingState\022\026"
-    "\n\016sStationNumber\030\001 \001(\t\022\016\n\006nState\030\002 \001(\005\"."
-    "\n\026CheckStationWorkingReq\022\024\n\014sChildNumber"
-    "\030\001 \003(\t\")\n\026CheckStationWorkingAck\022\017\n\007nRes"
-    "ult\030\001 \001(\005\"m\n\032CheackStationWorkingNotify\022"
-    "\017\n\007nResult\030\001 \001(\005\022\023\n\013sUserNumber\030\002 \001(\t\022\021\n"
-    "\tsUserName\030\003 \001(\t\022\026\n\016sStationNumber\030\004 \001(\t"
-    "\".\n\tLogoutReq\022\020\n\010sUsrName\030\001 \001(\t\022\017\n\007sUsrP"
-    "sw\030\002 \001(\t\"*\n\tLogoutAck\022\035\n\007eResult\030\001 \001(\0162\014"
-    ".e_ErrorCode\"W\n\014TurnOnDevMsg\022\022\n\nsStation"
-    "Id\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010eDevType\030\003 \001"
-    "(\005\022\021\n\tsOperUser\030\004 \001(\t\"X\n\rTurnOffDevMsg\022\022"
-    "\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010eD"
-    "evType\030\003 \001(\005\022\021\n\tsOperUser\030\004 \001(\t\"7\n\014Comma"
-    "ndParam\022\022\n\nsParamName\030\001 \001(\t\022\023\n\013sParamVal"
-    "ue\030\002 \001(\t\"\215\001\n\020DeviceCommandMsg\022\022\n\nsStatio"
-    "nId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010sDevName\030\003 "
-    "\001(\t\022\020\n\010eDevType\030\004 \001(\005\022\021\n\tsOperUser\030\005 \001(\t"
-    "\022\036\n\007cParams\030\006 \003(\0132\r.CommandParam\"\266\001\n\031Dev"
-    "iceCommandResultNotify\022\022\n\nsStationId\030\001 \002"
-    "(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010eDevType\030\003 \001(\005\022\020\n\010"
-    "sDevName\030\004 \001(\t\022\036\n\010eErrorId\030\005 \001(\0162\014.e_Err"
-    "orCode\022\021\n\tsOperUser\030\006 \001(\t\022\036\n\007cParams\030\007 \003"
-    "(\0132\r.CommandParam\"\336\001\n\021RemindEventNotify\022"
-    "\020\n\010nTokenId\030\001 \002(\004\022\022\n\neEventType\030\002 \001(\005\022\023\n"
-    "\013eRemindType\030\003 \001(\005\022\023\n\013sDispatcher\030\004 \001(\t\022"
-    "\023\n\013sHappenTime\030\005 \001(\t\022\020\n\010sContent\030\006 \001(\t\022\024"
-    "\n\014nNeedConfirm\030\007 \001(\005\022\020\n\010nTimeout\030\010 \001(\005\022\027"
-    "\n\017nAdvanceSeconds\030\t \001(\005\022\021\n\tsReserved\030\n \001"
-    "(\t\"{\n\016RemindEventAck\022\020\n\010nTokenId\030\001 \002(\005\022\025"
-    "\n\rnConfirmState\030\002 \001(\005\022\024\n\014sConfirmUser\030\003 "
-    "\001(\t\022\027\n\017sConfirmContent\030\004 \001(\t\022\021\n\tsReserve"
-    "d\030\005 \001(\t\"\332\003\n\020WebSocketMessage\022\020\n\010nMsgType"
-    "\030\001 \002(\005\022\020\n\010sMsgType\030\002 \002(\t\022\036\n\013msgLoginReq\030"
-    "\003 \001(\0132\t.LoginReq\022\036\n\013msgLoginAck\030\004 \001(\0132\t."
-    "LoginAck\022&\n\016monitorDataNty\030\005 \001(\0132\016.DevDa"
-    "taNotify\022,\n\017devNetStatusNty\030\006 \001(\0132\023.DevN"
-    "etStatusNotify\022.\n\020devWorkStatusNty\030\007 \001(\013"
-    "2\024.DevWorkStatusNotify\0220\n\021devAlarmStatus"
-    "Nty\030\010 \001(\0132\025.DevAlarmStatusNotify\0224\n\020comm"
-    "andResultNty\030\t \001(\0132\032.DeviceCommandResult"
-    "Notify\022#\n\014msgTurnOnReq\030\n \001(\0132\r.TurnOnDev"
-    "Msg\022%\n\rmsgTurnOffNty\030\013 \001(\0132\016.TurnOffDevM"
-    "sg\022(\n\rmsgCommandReq\030\014 \001(\0132\021.DeviceComman"
-    "dMsg*\351\014\n\013e_ErrorCode\022\t\n\005EC_OK\020\000\022\r\n\tEC_FA"
-    "ILED\020\001\022\024\n\020EC_USR_NOT_FOUND\020\002\022\031\n\025EC_USR_N"
-    "OT_PERMISSION\020\003\022\024\n\020EC_USR_PSW_ERROR\020\004\022\027\n"
-    "\023EC_USR_REPEAT_LOGIN\020\005\022\020\n\014EC_NET_ERROR\020\006"
-    "\022\024\n\020EC_LOGOUT_FAILED\020\007\022\027\n\023EC_CONFIGREQ_F"
-    "AILED\020\010\022\024\n\020EC_TURNON_FAILED\020\t\022\025\n\021EC_TURN"
-    "OFF_FAILED\020\n\022\032\n\026EC_ANTENNA_HTOB_FAILED\020\013"
-    "\022\032\n\026EC_ANTENNA_BTOH_FAILED\020\014\022\027\n\023EC_DEVIC"
-    "E_NOT_FOUND\020\r\022\022\n\016EC_OBJECT_NULL\020\016\022\023\n\017EC_"
-    "OPR_ON_GOING\020\017\022\032\n\026EC_SEND_SMS_MSG_FAILED"
-    "\020\020\022\027\n\023EC_DEV_DISCONNECTED\020\021\022\027\n\023EC_CMD_SE"
-    "ND_SUCCEED\020\022\022\016\n\nEC_UNKNOWN\020\023\022\032\n\026EC_MSG_H"
-    "ANDEL_OBJ_NULL\020\024\022\027\n\023EC_ATTENA_POS_ERROR\020"
-    "\025\022\026\n\022EC_NO_ALLOW_EXCUTE\020\026\022\035\n\031EC_NO_ALLOW"
-    "_SWITCH_ATTENA\020\027\022\031\n\025EC_DETECT_WAIT_ATTEN"
-    "A\020\030\022\027\n\023EC_DETECT_RUN_STATE\020\031\022\031\n\025EC_CMD_F"
-    "ILURE_TIMEOUT\020\032\022\027\n\023EC_CMD_HANDOVER_996\020\033"
-    "\022!\n\035EC_DEV_RUN_OK_CANCEL_SEND_CMD\020\034\022\"\n\036E"
-    "C_NO_ALLOW_SWITCH_ATTENA_AUTO\020\035\022\031\n\025EC_CM"
-    "D_CODE_NOT_FOUND\020\036\022\033\n\027EC_UNFINISHED_CMD_"
-    "EXIST\020\037\022\'\n#EC_DEV_RUN_SHUTDOWN_CANCEL_SE"
-    "ND_CMD\020 \022\036\n\032EC_ANTEENA_HOST_CMD_CANCEL\020!"
-    "\022 \n\034EC_ANTEENA_BACKUP_CMD_CANCEL\020\"\022#\n\037EC"
-    "_RELATE_DEV_TURNON_CMD_CANCEL\020#\022$\n EC_RE"
-    "LATE_DEV_TURNOFF_CMD_CANCEL\020$\022.\n*EC_RELA"
-    "TE_DEV_996_ONEKEY_TURNON_CMD_CANCEL\020%\022/\n"
-    "+EC_RELATE_DEV_996_ONEKEY_TURNOFF_CMD_CA"
-    "NCEL\020&\022/\n+EC_RELATE_DEV_SOFT_ONEKEY_TURN"
-    "ON_CMD_CANCEL\020\'\022+\n\'EC_RELATE_DEV_SWITCH_"
-    "ANTTENA_CMD_CANCEL\020(\022/\n+EC_RELATE_DEV_AU"
-    "TO_SWITCH_BACKUP_CMD_CANCEL\020)\022\'\n#EC_UNFI"
-    "NISHED_DEV_TURNON_CMD_CANCEL\020*\022(\n$EC_UNF"
-    "INISHED_DEV_TURNOFF_CMD_CANCEL\020+\0222\n.EC_U"
-    "NFINISHED_DEV_996_ONEKEY_TURNON_CMD_CANC"
-    "EL\020,\0223\n/EC_UNFINISHED_DEV_SOFT_ONEKEY_TU"
-    "RNON_CMD_CANCEL\020-\022/\n+EC_UNFINISHED_DEV_S"
-    "WITCH_ANTTENA_CMD_CANCEL\020.\0223\n/EC_UNFINIS"
-    "HED_DEV_996_ONEKEY_TURNOFF_CMD_CANCEL\020/\022"
-    "/\n+EC_UNFINISHED_AUTO_SWITCH_BACKUP_CMD_"
-    "CANCEL\0200\022%\n!EC_CUR_HOST_RUN_SWITCH_CMD_C"
-    "ANCEL\0201\022\'\n#EC_CUR_BACKUP_RUN_SWITCH_CMD_"
-    "CANCEL\0202*%\n\ne_CellType\022\013\n\007DIGITAL\020\000\022\n\n\006A"
-    "NALOG\020\001*b\n\re_AlarmStatus\022\t\n\005UPPER\020\000\022\t\n\005L"
-    "OWER\020\001\022\n\n\006UPUPER\020\002\022\014\n\010LOWLOWER\020\003\022\t\n\005STAT"
-    "E\020\004\022\n\n\006DEVICE\020\005\022\n\n\006RESUME\020\006*)\n\ne_AlarmMo"
-    "d\022\014\n\010MOD_CELL\020\000\022\r\n\tMOD_OTHER\020\001", 5870);
+    "nInTime\030\007 \001(\t\"\230\001\n\010UserInfo\022\021\n\teUsrLevel\030"
+    "\001 \001(\005\022\021\n\tUsrNumber\030\002 \001(\t\022\017\n\007UsrName\030\003 \001("
+    "\t\022\024\n\014UsrJobNumber\030\004 \001(\t\022\023\n\013UsrHeadship\030\005"
+    " \001(\t\022\025\n\rUsrRoleNumber\030\006 \001(\t\022\023\n\013UsrRoleNa"
+    "me\030\007 \001(\t\"\257\003\n\010LoginAck\022\035\n\007eResult\030\001 \001(\0162\014"
+    ".e_ErrorCode\022\021\n\teUsrLevel\030\002 \001(\005\022\021\n\tUsrNu"
+    "mber\030\003 \001(\t\022\017\n\007UsrName\030\004 \001(\t\022\024\n\014UsrJobNum"
+    "ber\030\005 \001(\t\022\023\n\013UsrHeadship\030\006 \001(\t\022\'\n\020cDevCu"
+    "rNetStatus\030\007 \003(\0132\r.DevNetStatus\022)\n\021cDevC"
+    "urWorkStatus\030\010 \003(\0132\016.DevWorkStatus\022+\n\022cD"
+    "evCurAlarmStatus\030\t \003(\0132\017.DevAlarmStatus\022"
+    "\016\n\006UsrPsw\030\n \001(\t\022\"\n\tSignUsers\030\013 \003(\0132\017.Use"
+    "rSigninInfo\022\036\n\013AllUserInfo\030\014 \003(\0132\t.UserI"
+    "nfo\022!\n\teLoginMod\030\r \001(\0162\016.e_LoginAckMod\022\025"
+    "\n\rUsrRoleNumber\030\016 \001(\t\022\023\n\013UsrRoleName\030\017 \001"
+    "(\t\"I\n\014SignInOutReq\022\020\n\010IsSignIn\030\001 \001(\005\022\023\n\013"
+    "sSignInName\030\002 \001(\t\022\022\n\nsSignInPsw\030\003 \001(\t\"d\n"
+    "\014SignInOutAck\022\020\n\010IsSignIn\030\001 \001(\005\022\035\n\007eResu"
+    "lt\030\002 \001(\0162\014.e_ErrorCode\022#\n\ncUsersInfo\030\003 \001"
+    "(\0132\017.UserSigninInfo\"=\n\023StationWorkingSta"
+    "te\022\026\n\016sStationNumber\030\001 \001(\t\022\016\n\006nState\030\002 \001"
+    "(\005\".\n\026CheckStationWorkingReq\022\024\n\014sChildNu"
+    "mber\030\001 \003(\t\")\n\026CheckStationWorkingAck\022\017\n\007"
+    "nResult\030\001 \001(\005\"m\n\032CheackStationWorkingNot"
+    "ify\022\017\n\007nResult\030\001 \001(\005\022\023\n\013sUserNumber\030\002 \001("
+    "\t\022\021\n\tsUserName\030\003 \001(\t\022\026\n\016sStationNumber\030\004"
+    " \001(\t\".\n\tLogoutReq\022\020\n\010sUsrName\030\001 \001(\t\022\017\n\007s"
+    "UsrPsw\030\002 \001(\t\"*\n\tLogoutAck\022\035\n\007eResult\030\001 \001"
+    "(\0162\014.e_ErrorCode\"W\n\014TurnOnDevMsg\022\022\n\nsSta"
+    "tionId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010eDevType"
+    "\030\003 \001(\005\022\021\n\tsOperUser\030\004 \001(\t\"X\n\rTurnOffDevM"
+    "sg\022\022\n\nsStationId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020"
+    "\n\010eDevType\030\003 \001(\005\022\021\n\tsOperUser\030\004 \001(\t\"7\n\014C"
+    "ommandParam\022\022\n\nsParamName\030\001 \001(\t\022\023\n\013sPara"
+    "mValue\030\002 \001(\t\"\215\001\n\020DeviceCommandMsg\022\022\n\nsSt"
+    "ationId\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010sDevNam"
+    "e\030\003 \001(\t\022\020\n\010eDevType\030\004 \001(\005\022\021\n\tsOperUser\030\005"
+    " \001(\t\022\036\n\007cParams\030\006 \003(\0132\r.CommandParam\"\266\001\n"
+    "\031DeviceCommandResultNotify\022\022\n\nsStationId"
+    "\030\001 \002(\t\022\016\n\006sDevId\030\002 \002(\t\022\020\n\010eDevType\030\003 \001(\005"
+    "\022\020\n\010sDevName\030\004 \001(\t\022\036\n\010eErrorId\030\005 \001(\0162\014.e"
+    "_ErrorCode\022\021\n\tsOperUser\030\006 \001(\t\022\036\n\007cParams"
+    "\030\007 \003(\0132\r.CommandParam\"\336\001\n\021RemindEventNot"
+    "ify\022\020\n\010nTokenId\030\001 \002(\004\022\022\n\neEventType\030\002 \001("
+    "\005\022\023\n\013eRemindType\030\003 \001(\005\022\023\n\013sDispatcher\030\004 "
+    "\001(\t\022\023\n\013sHappenTime\030\005 \001(\t\022\020\n\010sContent\030\006 \001"
+    "(\t\022\024\n\014nNeedConfirm\030\007 \001(\005\022\020\n\010nTimeout\030\010 \001"
+    "(\005\022\027\n\017nAdvanceSeconds\030\t \001(\005\022\021\n\tsReserved"
+    "\030\n \001(\t\"{\n\016RemindEventAck\022\020\n\010nTokenId\030\001 \002"
+    "(\005\022\025\n\rnConfirmState\030\002 \001(\005\022\024\n\014sConfirmUse"
+    "r\030\003 \001(\t\022\027\n\017sConfirmContent\030\004 \001(\t\022\021\n\tsRes"
+    "erved\030\005 \001(\t\"\332\003\n\020WebSocketMessage\022\020\n\010nMsg"
+    "Type\030\001 \002(\005\022\020\n\010sMsgType\030\002 \002(\t\022\036\n\013msgLogin"
+    "Req\030\003 \001(\0132\t.LoginReq\022\036\n\013msgLoginAck\030\004 \001("
+    "\0132\t.LoginAck\022&\n\016monitorDataNty\030\005 \001(\0132\016.D"
+    "evDataNotify\022,\n\017devNetStatusNty\030\006 \001(\0132\023."
+    "DevNetStatusNotify\022.\n\020devWorkStatusNty\030\007"
+    " \001(\0132\024.DevWorkStatusNotify\0220\n\021devAlarmSt"
+    "atusNty\030\010 \001(\0132\025.DevAlarmStatusNotify\0224\n\020"
+    "commandResultNty\030\t \001(\0132\032.DeviceCommandRe"
+    "sultNotify\022#\n\014msgTurnOnReq\030\n \001(\0132\r.TurnO"
+    "nDevMsg\022%\n\rmsgTurnOffNty\030\013 \001(\0132\016.TurnOff"
+    "DevMsg\022(\n\rmsgCommandReq\030\014 \001(\0132\021.DeviceCo"
+    "mmandMsg*\351\014\n\013e_ErrorCode\022\t\n\005EC_OK\020\000\022\r\n\tE"
+    "C_FAILED\020\001\022\024\n\020EC_USR_NOT_FOUND\020\002\022\031\n\025EC_U"
+    "SR_NOT_PERMISSION\020\003\022\024\n\020EC_USR_PSW_ERROR\020"
+    "\004\022\027\n\023EC_USR_REPEAT_LOGIN\020\005\022\020\n\014EC_NET_ERR"
+    "OR\020\006\022\024\n\020EC_LOGOUT_FAILED\020\007\022\027\n\023EC_CONFIGR"
+    "EQ_FAILED\020\010\022\024\n\020EC_TURNON_FAILED\020\t\022\025\n\021EC_"
+    "TURNOFF_FAILED\020\n\022\032\n\026EC_ANTENNA_HTOB_FAIL"
+    "ED\020\013\022\032\n\026EC_ANTENNA_BTOH_FAILED\020\014\022\027\n\023EC_D"
+    "EVICE_NOT_FOUND\020\r\022\022\n\016EC_OBJECT_NULL\020\016\022\023\n"
+    "\017EC_OPR_ON_GOING\020\017\022\032\n\026EC_SEND_SMS_MSG_FA"
+    "ILED\020\020\022\027\n\023EC_DEV_DISCONNECTED\020\021\022\027\n\023EC_CM"
+    "D_SEND_SUCCEED\020\022\022\016\n\nEC_UNKNOWN\020\023\022\032\n\026EC_M"
+    "SG_HANDEL_OBJ_NULL\020\024\022\027\n\023EC_ATTENA_POS_ER"
+    "ROR\020\025\022\026\n\022EC_NO_ALLOW_EXCUTE\020\026\022\035\n\031EC_NO_A"
+    "LLOW_SWITCH_ATTENA\020\027\022\031\n\025EC_DETECT_WAIT_A"
+    "TTENA\020\030\022\027\n\023EC_DETECT_RUN_STATE\020\031\022\031\n\025EC_C"
+    "MD_FILURE_TIMEOUT\020\032\022\027\n\023EC_CMD_HANDOVER_9"
+    "96\020\033\022!\n\035EC_DEV_RUN_OK_CANCEL_SEND_CMD\020\034\022"
+    "\"\n\036EC_NO_ALLOW_SWITCH_ATTENA_AUTO\020\035\022\031\n\025E"
+    "C_CMD_CODE_NOT_FOUND\020\036\022\033\n\027EC_UNFINISHED_"
+    "CMD_EXIST\020\037\022\'\n#EC_DEV_RUN_SHUTDOWN_CANCE"
+    "L_SEND_CMD\020 \022\036\n\032EC_ANTEENA_HOST_CMD_CANC"
+    "EL\020!\022 \n\034EC_ANTEENA_BACKUP_CMD_CANCEL\020\"\022#"
+    "\n\037EC_RELATE_DEV_TURNON_CMD_CANCEL\020#\022$\n E"
+    "C_RELATE_DEV_TURNOFF_CMD_CANCEL\020$\022.\n*EC_"
+    "RELATE_DEV_996_ONEKEY_TURNON_CMD_CANCEL\020"
+    "%\022/\n+EC_RELATE_DEV_996_ONEKEY_TURNOFF_CM"
+    "D_CANCEL\020&\022/\n+EC_RELATE_DEV_SOFT_ONEKEY_"
+    "TURNON_CMD_CANCEL\020\'\022+\n\'EC_RELATE_DEV_SWI"
+    "TCH_ANTTENA_CMD_CANCEL\020(\022/\n+EC_RELATE_DE"
+    "V_AUTO_SWITCH_BACKUP_CMD_CANCEL\020)\022\'\n#EC_"
+    "UNFINISHED_DEV_TURNON_CMD_CANCEL\020*\022(\n$EC"
+    "_UNFINISHED_DEV_TURNOFF_CMD_CANCEL\020+\0222\n."
+    "EC_UNFINISHED_DEV_996_ONEKEY_TURNON_CMD_"
+    "CANCEL\020,\0223\n/EC_UNFINISHED_DEV_SOFT_ONEKE"
+    "Y_TURNON_CMD_CANCEL\020-\022/\n+EC_UNFINISHED_D"
+    "EV_SWITCH_ANTTENA_CMD_CANCEL\020.\0223\n/EC_UNF"
+    "INISHED_DEV_996_ONEKEY_TURNOFF_CMD_CANCE"
+    "L\020/\022/\n+EC_UNFINISHED_AUTO_SWITCH_BACKUP_"
+    "CMD_CANCEL\0200\022%\n!EC_CUR_HOST_RUN_SWITCH_C"
+    "MD_CANCEL\0201\022\'\n#EC_CUR_BACKUP_RUN_SWITCH_"
+    "CMD_CANCEL\0202*%\n\ne_CellType\022\013\n\007DIGITAL\020\000\022"
+    "\n\n\006ANALOG\020\001*b\n\re_AlarmStatus\022\t\n\005UPPER\020\000\022"
+    "\t\n\005LOWER\020\001\022\n\n\006UPUPER\020\002\022\014\n\010LOWLOWER\020\003\022\t\n\005"
+    "STATE\020\004\022\n\n\006DEVICE\020\005\022\n\n\006RESUME\020\006*)\n\ne_Ala"
+    "rmMod\022\014\n\010MOD_CELL\020\000\022\r\n\tMOD_OTHER\020\001*8\n\re_"
+    "LoginAckMod\022\020\n\014LOGIN_NORMAL\020\000\022\025\n\021LOGIN_S"
+    "WITCH_USER\020\001", 6052);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "protocol.proto", &protobuf_RegisterTypes);
   DevDataNotify::default_instance_ = new DevDataNotify();
@@ -1198,6 +1210,20 @@ const ::google::protobuf::EnumDescriptor* e_AlarmMod_descriptor() {
   return e_AlarmMod_descriptor_;
 }
 bool e_AlarmMod_IsValid(int value) {
+  switch(value) {
+    case 0:
+    case 1:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::google::protobuf::EnumDescriptor* e_LoginAckMod_descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return e_LoginAckMod_descriptor_;
+}
+bool e_LoginAckMod_IsValid(int value) {
   switch(value) {
     case 0:
     case 1:
@@ -6652,6 +6678,8 @@ const int UserInfo::kUsrNumberFieldNumber;
 const int UserInfo::kUsrNameFieldNumber;
 const int UserInfo::kUsrJobNumberFieldNumber;
 const int UserInfo::kUsrHeadshipFieldNumber;
+const int UserInfo::kUsrRoleNumberFieldNumber;
+const int UserInfo::kUsrRoleNameFieldNumber;
 #endif  // !_MSC_VER
 
 UserInfo::UserInfo()
@@ -6678,6 +6706,8 @@ void UserInfo::SharedCtor() {
   usrname_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   usrjobnumber_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   usrheadship_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  usrrolenumber_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  usrrolename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -6698,6 +6728,12 @@ void UserInfo::SharedDtor() {
   }
   if (usrheadship_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete usrheadship_;
+  }
+  if (usrrolenumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete usrrolenumber_;
+  }
+  if (usrrolename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete usrrolename_;
   }
   if (this != default_instance_) {
   }
@@ -6725,7 +6761,7 @@ UserInfo* UserInfo::New() const {
 }
 
 void UserInfo::Clear() {
-  if (_has_bits_[0 / 32] & 31) {
+  if (_has_bits_[0 / 32] & 127) {
     eusrlevel_ = 0;
     if (has_usrnumber()) {
       if (usrnumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -6745,6 +6781,16 @@ void UserInfo::Clear() {
     if (has_usrheadship()) {
       if (usrheadship_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
         usrheadship_->clear();
+      }
+    }
+    if (has_usrrolenumber()) {
+      if (usrrolenumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        usrrolenumber_->clear();
+      }
+    }
+    if (has_usrrolename()) {
+      if (usrrolename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        usrrolename_->clear();
       }
     }
   }
@@ -6840,6 +6886,40 @@ bool UserInfo::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(50)) goto parse_UsrRoleNumber;
+        break;
+      }
+
+      // optional string UsrRoleNumber = 6;
+      case 6: {
+        if (tag == 50) {
+         parse_UsrRoleNumber:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_usrrolenumber()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->usrrolenumber().data(), this->usrrolenumber().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "usrrolenumber");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(58)) goto parse_UsrRoleName;
+        break;
+      }
+
+      // optional string UsrRoleName = 7;
+      case 7: {
+        if (tag == 58) {
+         parse_UsrRoleName:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_usrrolename()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->usrrolename().data(), this->usrrolename().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "usrrolename");
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -6914,6 +6994,26 @@ void UserInfo::SerializeWithCachedSizes(
       5, this->usrheadship(), output);
   }
 
+  // optional string UsrRoleNumber = 6;
+  if (has_usrrolenumber()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->usrrolenumber().data(), this->usrrolenumber().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "usrrolenumber");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      6, this->usrrolenumber(), output);
+  }
+
+  // optional string UsrRoleName = 7;
+  if (has_usrrolename()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->usrrolename().data(), this->usrrolename().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "usrrolename");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      7, this->usrrolename(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -6973,6 +7073,28 @@ void UserInfo::SerializeWithCachedSizes(
         5, this->usrheadship(), target);
   }
 
+  // optional string UsrRoleNumber = 6;
+  if (has_usrrolenumber()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->usrrolenumber().data(), this->usrrolenumber().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "usrrolenumber");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        6, this->usrrolenumber(), target);
+  }
+
+  // optional string UsrRoleName = 7;
+  if (has_usrrolename()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->usrrolename().data(), this->usrrolename().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "usrrolename");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        7, this->usrrolename(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -7020,6 +7142,20 @@ int UserInfo::ByteSize() const {
           this->usrheadship());
     }
 
+    // optional string UsrRoleNumber = 6;
+    if (has_usrrolenumber()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->usrrolenumber());
+    }
+
+    // optional string UsrRoleName = 7;
+    if (has_usrrolename()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->usrrolename());
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -7062,6 +7198,12 @@ void UserInfo::MergeFrom(const UserInfo& from) {
     if (from.has_usrheadship()) {
       set_usrheadship(from.usrheadship());
     }
+    if (from.has_usrrolenumber()) {
+      set_usrrolenumber(from.usrrolenumber());
+    }
+    if (from.has_usrrolename()) {
+      set_usrrolename(from.usrrolename());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -7090,6 +7232,8 @@ void UserInfo::Swap(UserInfo* other) {
     std::swap(usrname_, other->usrname_);
     std::swap(usrjobnumber_, other->usrjobnumber_);
     std::swap(usrheadship_, other->usrheadship_);
+    std::swap(usrrolenumber_, other->usrrolenumber_);
+    std::swap(usrrolename_, other->usrrolename_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -7120,6 +7264,9 @@ const int LoginAck::kCDevCurAlarmStatusFieldNumber;
 const int LoginAck::kUsrPswFieldNumber;
 const int LoginAck::kSignUsersFieldNumber;
 const int LoginAck::kAllUserInfoFieldNumber;
+const int LoginAck::kELoginModFieldNumber;
+const int LoginAck::kUsrRoleNumberFieldNumber;
+const int LoginAck::kUsrRoleNameFieldNumber;
 #endif  // !_MSC_VER
 
 LoginAck::LoginAck()
@@ -7148,6 +7295,9 @@ void LoginAck::SharedCtor() {
   usrjobnumber_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   usrheadship_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   usrpsw_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  eloginmod_ = 0;
+  usrrolenumber_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  usrrolename_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -7171,6 +7321,12 @@ void LoginAck::SharedDtor() {
   }
   if (usrpsw_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete usrpsw_;
+  }
+  if (usrrolenumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete usrrolenumber_;
+  }
+  if (usrrolename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete usrrolename_;
   }
   if (this != default_instance_) {
   }
@@ -7231,9 +7387,22 @@ void LoginAck::Clear() {
       }
     }
   }
-  if (has_usrpsw()) {
-    if (usrpsw_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-      usrpsw_->clear();
+  if (_has_bits_[8 / 32] & 29184) {
+    if (has_usrpsw()) {
+      if (usrpsw_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        usrpsw_->clear();
+      }
+    }
+    eloginmod_ = 0;
+    if (has_usrrolenumber()) {
+      if (usrrolenumber_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        usrrolenumber_->clear();
+      }
+    }
+    if (has_usrrolename()) {
+      if (usrrolename_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+        usrrolename_->clear();
+      }
     }
   }
 
@@ -7444,6 +7613,60 @@ bool LoginAck::MergePartialFromCodedStream(
           goto handle_unusual;
         }
         if (input->ExpectTag(98)) goto parse_AllUserInfo;
+        if (input->ExpectTag(104)) goto parse_eLoginMod;
+        break;
+      }
+
+      // optional .e_LoginAckMod eLoginMod = 13;
+      case 13: {
+        if (tag == 104) {
+         parse_eLoginMod:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          if (::e_LoginAckMod_IsValid(value)) {
+            set_eloginmod(static_cast< ::e_LoginAckMod >(value));
+          } else {
+            mutable_unknown_fields()->AddVarint(13, value);
+          }
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(114)) goto parse_UsrRoleNumber;
+        break;
+      }
+
+      // optional string UsrRoleNumber = 14;
+      case 14: {
+        if (tag == 114) {
+         parse_UsrRoleNumber:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_usrrolenumber()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->usrrolenumber().data(), this->usrrolenumber().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "usrrolenumber");
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(122)) goto parse_UsrRoleName;
+        break;
+      }
+
+      // optional string UsrRoleName = 15;
+      case 15: {
+        if (tag == 122) {
+         parse_UsrRoleName:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_usrrolename()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+            this->usrrolename().data(), this->usrrolename().length(),
+            ::google::protobuf::internal::WireFormat::PARSE,
+            "usrrolename");
+        } else {
+          goto handle_unusual;
+        }
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -7564,6 +7787,32 @@ void LoginAck::SerializeWithCachedSizes(
       12, this->alluserinfo(i), output);
   }
 
+  // optional .e_LoginAckMod eLoginMod = 13;
+  if (has_eloginmod()) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      13, this->eloginmod(), output);
+  }
+
+  // optional string UsrRoleNumber = 14;
+  if (has_usrrolenumber()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->usrrolenumber().data(), this->usrrolenumber().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "usrrolenumber");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      14, this->usrrolenumber(), output);
+  }
+
+  // optional string UsrRoleName = 15;
+  if (has_usrrolename()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->usrrolename().data(), this->usrrolename().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "usrrolename");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      15, this->usrrolename(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -7675,6 +7924,34 @@ void LoginAck::SerializeWithCachedSizes(
         12, this->alluserinfo(i), target);
   }
 
+  // optional .e_LoginAckMod eLoginMod = 13;
+  if (has_eloginmod()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      13, this->eloginmod(), target);
+  }
+
+  // optional string UsrRoleNumber = 14;
+  if (has_usrrolenumber()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->usrrolenumber().data(), this->usrrolenumber().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "usrrolenumber");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        14, this->usrrolenumber(), target);
+  }
+
+  // optional string UsrRoleName = 15;
+  if (has_usrrolename()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->usrrolename().data(), this->usrrolename().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE,
+      "usrrolename");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        15, this->usrrolename(), target);
+  }
+
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
@@ -7735,6 +8012,26 @@ int LoginAck::ByteSize() const {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
           this->usrpsw());
+    }
+
+    // optional .e_LoginAckMod eLoginMod = 13;
+    if (has_eloginmod()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::EnumSize(this->eloginmod());
+    }
+
+    // optional string UsrRoleNumber = 14;
+    if (has_usrrolenumber()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->usrrolenumber());
+    }
+
+    // optional string UsrRoleName = 15;
+    if (has_usrrolename()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->usrrolename());
     }
 
   }
@@ -7832,6 +8129,15 @@ void LoginAck::MergeFrom(const LoginAck& from) {
     if (from.has_usrpsw()) {
       set_usrpsw(from.usrpsw());
     }
+    if (from.has_eloginmod()) {
+      set_eloginmod(from.eloginmod());
+    }
+    if (from.has_usrrolenumber()) {
+      set_usrrolenumber(from.usrrolenumber());
+    }
+    if (from.has_usrrolename()) {
+      set_usrrolename(from.usrrolename());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -7870,6 +8176,9 @@ void LoginAck::Swap(LoginAck* other) {
     std::swap(usrpsw_, other->usrpsw_);
     signusers_.Swap(&other->signusers_);
     alluserinfo_.Swap(&other->alluserinfo_);
+    std::swap(eloginmod_, other->eloginmod_);
+    std::swap(usrrolenumber_, other->usrrolenumber_);
+    std::swap(usrrolename_, other->usrrolename_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
