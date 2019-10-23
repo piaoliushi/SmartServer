@@ -506,7 +506,7 @@ namespace hx_net{
                   DataInfo dainfo;
                   dainfo.bType = false;
                   int index=0;
-                  BYTE dhigh,dlow;
+                  unsigned char dhigh,dlow;
                   for(int i=0;i<2;++i)
                   {
                       dhigh = data[16+i*2];
@@ -540,7 +540,7 @@ namespace hx_net{
                   DataInfo dainfo;
                   dainfo.bType = true;
                   int index=15;
-                  BYTE dbyt;
+                  unsigned char dbyt;
                   for(int j=0;j<3;++j)
                   {
                       dbyt = data[16+j];

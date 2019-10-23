@@ -250,7 +250,7 @@ typedef struct
     map<int,vector<Monitoring_Scheduler> >    vMonitorSch;     //监控计划
     vector<Command_Scheduler>                 vCommSch;        //控制计划
     map<string,DevProperty>                   map_DevProperty; //设备属性列表（基本属性配置在0通道）
-    map<int,map<string,DevProperty>>          map_DevChannelPropertyEx;//扩展通道属性（不包括0通道）
+    map<int,map<string,DevProperty> >          map_DevChannelPropertyEx;//扩展通道属性（不包括0通道）
     map<int,Alarm_config >                    map_AlarmConfig; //设备告警配置
     map<int,vector<AssDevChan> >              map_AssDevChan;  //设备关联设置
 }DeviceInfo,*pDeviceInfo;

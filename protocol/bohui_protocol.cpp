@@ -823,7 +823,7 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
                             xml_device_channel->append_attribute(xml_doc.allocate_attribute("unit",xml_doc.allocate_string(boost::lexical_cast<std::string>((*iter_pro).second.property_value_unit).c_str())));
 
                     }
-                    map<int,map<string,DevProperty>>::iterator iter_pro_ex = (*iter).second.map_DevChannelPropertyEx.begin();
+                    map<int,map<string,DevProperty> >::iterator iter_pro_ex = (*iter).second.map_DevChannelPropertyEx.begin();
                     for(;iter_pro_ex!=(*iter).second.map_DevChannelPropertyEx.end();++iter_pro_ex){
 
                         xml_device_channel = xml_doc.allocate_node(node_element,"Channel");
