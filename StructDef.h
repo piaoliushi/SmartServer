@@ -260,6 +260,7 @@ typedef enum EDAPROTOCOL
     PRD_PES_3100         = 24,//普尔顿PES_3100系列
     ZY_MULTI_ELEC        = 25,//杭州逐翌多功能配电柜表头
     YISITE_EA89II        = 26,//易事特UPS-EA89II型
+    YISITE_EA66II        = 27,//易事特UPS-EA66II型
     ABB_104              = 100,//ABB104电表
 }EdaSubProtocol;
 

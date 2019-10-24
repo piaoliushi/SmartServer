@@ -65,6 +65,7 @@ protected:
     int decode_PES3100(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_ZYMULTI_Elec(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     int decode_EA89II(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
+    int decode_EA66II(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
 private:
     int              m_Subprotocol;//设备子协议号
     int              m_mainprotocol;//主协议编号

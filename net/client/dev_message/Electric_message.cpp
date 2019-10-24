@@ -128,6 +128,13 @@ int Electric_message::check_msg_header(unsigned char *data,int nDataLen,CmdType 
             else
                 return RE_HEADERROR;
         }
+        case YISITE_EA66II:
+        {
+            if(data[0]==0xEA && data[3]==0xEA)
+                return data[1]+3;
+            else
+                return RE_HEADERROR;
+        }
         case ABB_104: {
             if(data[0]==START) {
                 int nBodyLen = data[1];
@@ -373,6 +380,11 @@ int Electric_message::decode_msg_body(unsigned char *data,DevMonitorDataPtr data
             m_pSession->start_handler_data(iaddcode,d_curData_ptr);
             return iresult;
         }
+        case YISITE_EA66II:{
+            int iresult = decode_EA66II(data,d_curData_ptr,nDataLen,iaddcode);
+            m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+            return iresult;
+        }
         }
         break;
     }
@@ -411,7 +423,9 @@ bool Electric_message::IsStandardCommand()
         case PRD_PES_3100:
         case ZY_MULTI_ELEC:
         case YISITE_EA89II:
-            return true;
+        case YISITE_EA66II:
+             return true;
+
         }
         return false;
     }
@@ -1078,6 +1092,25 @@ void Electric_message::GetAllCmd( CommandAttribute &cmdAll )
             tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
         }
+            break;
+        case YISITE_EA66II:
+        {
+            CommandUnit tmUnit;
+            tmUnit.ackLen = 4;
+            tmUnit.commandLen = 8;
+            tmUnit.commandId[0] = 0xEA;
+            tmUnit.commandId[1] = 0x02;
+            tmUnit.commandId[2] = 0x02;
+            tmUnit.commandId[3] = 0xEA;
+            tmUnit.commandId[4] = d_devInfo.iAddressCode;
+            tmUnit.commandId[5] = 0x81;
+            tmUnit.commandId[6] = ((d_devInfo.iAddressCode+0x81)&0xFF);
+            tmUnit.commandId[7] = 0x16;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+            tmUnit.commandId[5] = 0x86;
+            tmUnit.commandId[6] = ((d_devInfo.iAddressCode+0x86)&0xFF);
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+         }
             break;
         }
     }
@@ -2440,5 +2473,82 @@ int Electric_message::decode_EA89II(unsigned char *data, DevMonitorDataPtr data_
     return RE_SUCCESS;
 }
 
-
+int Electric_message::decode_EA66II(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{
+    iaddcode = data[4];
+    DataInfo dainfo;
+    int icmdid = data[5];
+    switch(icmdid)
+    {
+    case 0x01:{
+        dainfo.bType = false;
+        int index = 0;
+        int base = 6;
+        for(int i=0;i<9;++i)
+        {
+            dainfo.fValue = data[base+i*2]+data[base+i*2+1]*256;
+            data_ptr->mValues[index++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = (data[base+i*2+18]+data[base+i*2+19]*256)*0.1;
+            data_ptr->mValues[index++] = dainfo;
+        }
+        for(int i=0;i<5;++i)
+        {
+            dainfo.fValue = (data[base+i*2+24]+data[base+i*2+25]*256);
+            data_ptr->mValues[index++] = dainfo;
+        }
+        for(int i=0;i<2;++i)
+        {
+            dainfo.fValue = (data[base+i*2+34]+(data[base+i*2+35]&0x7F)*256)*0.1;
+            data_ptr->mValues[index++] = dainfo;
+        }
+        dainfo.fValue = (data[base+38]+data[base+39]*256)*0.01;
+        data_ptr->mValues[index++] = dainfo;
+        dainfo.fValue = data[base+40];
+        data_ptr->mValues[index++] = dainfo;
+        dainfo.fValue = data[base+41];
+        data_ptr->mValues[index++] = dainfo;
+        dainfo.bType = true;
+        for(int i=0;i<6;++i)
+        {
+            dainfo.fValue = Getbit(data[base+42],i);
+            data_ptr->mValues[index++] = dainfo;
+        }
+        for(int i=0;i<8;++i)
+        {
+            dainfo.fValue = Getbit(data[base+43],i);
+            data_ptr->mValues[index++] = dainfo;
+        }
+        for(int i=0;i<6;++i)
+        {
+            dainfo.fValue = Getbit(data[base+44],i);
+            data_ptr->mValues[index++] = dainfo;
+        }
+    }
+        break;
+    case 0x06:{
+        dainfo.bType = false;
+        int index = 42;
+        int base = 16;
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = (data[base+i])*0.01;
+            data_ptr->mValues[index++] = dainfo;
+        }
+        for(int i=0;i<3;++i)
+        {
+            dainfo.fValue = (data[base+i+3]);
+            data_ptr->mValues[index++] = dainfo;
+        }
+        dainfo.fValue = (data[base+6]);
+        data_ptr->mValues[index++] = dainfo;
+    }
+        break;
+    default:
+        return RE_CMDACK;
+    }
+    return RE_SUCCESS;
+}
 }
