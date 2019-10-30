@@ -1,4 +1,4 @@
-﻿#include "ckangtetransmmit.h"
+#include "ckangtetransmmit.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #pragma execution_character_set("utf-8")
@@ -242,7 +242,8 @@ namespace hx_net{
      {
          std::stringstream ss;
          ss << data;
-         //cout<<data<<endl;
+         //string vswr_const_str = "驻波比  ";
+         //StringTrim(vswr_const_str);
          boost::property_tree::ptree pt,p1,p2;
          //stream << data;
          try
@@ -256,6 +257,7 @@ namespace hx_net{
                  string strKey = p2.get<string>("desc");
 
                  gb2312ToUtf8(strKey);
+
 
                  StringTrim(strKey);
                  if(strKey == "Status"){
@@ -288,7 +290,7 @@ namespace hx_net{
                      dainfo.fValue = atof(strValue.c_str());
                      dainfo.sValue = strValue;
                      data_ptr->mValues[1] = dainfo;
-                 }else if(strKey == "VSWR" || strKey == "驻波比"){//
+                 }else if(strKey == "VSWR" || strKey+" " == "驻波比 "){//|| strKey == vswr_const_str
                      string strValue = p2.get<string>("val");
                      StringTrim(strValue);
                      DataInfo dainfo;
@@ -328,7 +330,7 @@ namespace hx_net{
                      dainfo.fValue = atof(strValue.c_str());
                      dainfo.sValue = strValue;
                      data_ptr->mValues[7] = dainfo;
-                 }else if(strKey == "输出检波"){
+                 }else if(strKey+" " == "输出检波 "){
                      string strValue = p2.get<string>("val");
                      StringTrim(strValue);
                      DataInfo dainfo;
@@ -336,7 +338,7 @@ namespace hx_net{
                      dainfo.fValue = atof(strValue.c_str());
                      dainfo.sValue = strValue;
                      data_ptr->mValues[8] = dainfo;
-                 }else if(strKey == "反射检波"){
+                 }else if(strKey+" " == "反射检波 "){
                      string strValue = p2.get<string>("val");
                      StringTrim(strValue);
                      DataInfo dainfo;
@@ -344,7 +346,7 @@ namespace hx_net{
                      dainfo.fValue = atof(strValue.c_str());
                      dainfo.sValue = strValue;
                      data_ptr->mValues[9] = dainfo;
-                 }/**/
+                 }
              }
 
              return 0;

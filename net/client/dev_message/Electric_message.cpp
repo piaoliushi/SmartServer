@@ -1,4 +1,4 @@
-#include "./net/SvcMgr.h"
+﻿#include "./net/SvcMgr.h"
 #include "Electric_message.h"
 #include "./104/iec104_types.h"
 #include "./104/iec104.h"
@@ -2504,7 +2504,7 @@ int Electric_message::decode_EA66II(unsigned char *data, DevMonitorDataPtr data_
             dainfo.fValue = (data[base+i*2+34]+(data[base+i*2+35]&0x7F)*256)*0.1;
             data_ptr->mValues[index++] = dainfo;
         }
-        dainfo.fValue = (data[base+38]+data[base+39]*256)*0.01;
+        dainfo.fValue = (data[base+38]+data[base+39]*256)*0.1;
         data_ptr->mValues[index++] = dainfo;
         dainfo.fValue = data[base+40];
         data_ptr->mValues[index++] = dainfo;
