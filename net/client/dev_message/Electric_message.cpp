@@ -1,4 +1,4 @@
-﻿#include "./net/SvcMgr.h"
+#include "./net/SvcMgr.h"
 #include "Electric_message.h"
 #include "./104/iec104_types.h"
 #include "./104/iec104.h"
