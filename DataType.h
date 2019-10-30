@@ -536,7 +536,7 @@ enum ActionType
     ACTP_SOUND_LIGHT_ALARM,//声光告警
 };
 
-
+//const char MONITORING_ITEM_NAME[][64] = {"发射功率","反射功率","驻波比"};
 
 
 #endif

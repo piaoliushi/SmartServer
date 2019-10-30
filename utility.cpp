@@ -1,4 +1,5 @@
 #include "utility.h"
+#include <QTextCodec>
 const unsigned short mtab[256] = {
     0x0000,0xc1c0,0x81c1,0x4001,0x01c3,0xc003,0x8002,0x41c2,
     0x01c6,0xc006,0x8007,0x41c7,0x0005,0xc1c5,0x81c4,0x4004,
@@ -490,4 +491,27 @@ unsigned short CRC16_X25(unsigned char *pdest, int usDataLen)
     }
     InvertUint16(&wCRCin,&wCRCin);
     return (wCRCin^0xFFFF) ;
+}
+
+
+void utf8ToGb2312(std::string& strUtf8)
+{
+    QTextCodec* utf8Codec= QTextCodec::codecForName("utf-8");
+    QTextCodec* gb2312Codec = QTextCodec::codecForName("gb2312");
+
+    QString strUnicode= utf8Codec->toUnicode(strUtf8.c_str());
+    QByteArray ByteGb2312= gb2312Codec->fromUnicode(strUnicode);
+
+    strUtf8= ByteGb2312.data();
+}
+void gb2312ToUtf8(std::string& strGb2312)
+{
+
+    QTextCodec* utf8Codec= QTextCodec::codecForName("utf-8");
+    QTextCodec* gb2312Codec = QTextCodec::codecForName("gb2312");
+
+    QString strUnicode= gb2312Codec->toUnicode(strGb2312.c_str());
+    QByteArray ByteUtf8= utf8Codec->fromUnicode(strUnicode);
+
+    strGb2312= ByteUtf8.data();
 }

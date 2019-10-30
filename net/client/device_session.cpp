@@ -10,6 +10,7 @@
 #include "./snmp_pp/snmp_pp.h"
 #include "../server/http/RequestHandlerFactory.h"
 #include "../../utility.h"
+#include <strstream>
 #ifdef SNMP_PP_NAMESPACE
 using namespace Snmp_pp;
 #endif
@@ -997,13 +998,11 @@ void device_session::http_make_request_msg(int cmdType){
 
     devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
     CommandUnit adjustTmCmd;
-    //dev_agent_and_com[cur_dev_id_].second->GetSignalCommand(commandmsg_,adjustTmCmd);
     dev_agent_and_com[cur_dev_id_].second->GetSignalCommand(cmdType,0,adjustTmCmd);
 
-    std::ostream request_stream(&http_request_);
-    request_stream << "GET " << "http://"<<modleInfos_.netMode.strIp<<":"
-                   <<modleInfos_.netMode.iremote_port<<adjustTmCmd.sCommandId<< " HTTP/1.0\r\n";
-    request_stream << "Host: " <<modleInfos_.netMode.strIp << "\r\n";
+    std::ostream  request_stream(&http_request_);
+    request_stream << "GET " <<adjustTmCmd.sCommandId<< " HTTP/1.1\r\n";
+    request_stream << "Host: " <<modleInfos_.netMode.strIp <<":"<<modleInfos_.netMode.iremote_port<<"\r\n";
     request_stream << "Accept: */*\r\n";
     request_stream << "Connection: close\r\n\r\n";
 }
@@ -1028,6 +1027,8 @@ void device_session::http_handle_read_status_line(const boost::system::error_cod
     {
         // Check that response is OK.
         std::istream response_stream(&http_response_);
+
+
         std::string http_version;
         response_stream >> http_version;
         unsigned int status_code;
@@ -1064,7 +1065,6 @@ void device_session::http_handle_read_headers(const boost::system::error_code& e
         std::string header;
         while (std::getline(response_stream, header) && header != "\r");
             std::cout << "\n";
-        //std::cout << "\n";
 
         // Write whatever content we already have to output.
         //if (http_response_.size() > 0)
@@ -1881,7 +1881,7 @@ void device_session::handle_connected(const boost::system::error_code& error)
 
             start_read_head(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);
         }
-        else  if(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen<=0)
+        else  if(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen<=0 && modleInfos_.netMode.inet_type != NET_MOD_HTTP)
             start_read_some();
         else
             start_read(dev_agent_and_com[cur_dev_id_].first->mapCommand[MSG_DEVICE_QUERY][cur_msg_q_id_].ackLen);

@@ -33,4 +33,7 @@ int SF_checkSum(unsigned char* src,int len);
 //subneedstr---功能：原始字符串截取stDes与edDes之间的字符串
 //参数1：原始字符串;参数2：查找的起始字符串;参数3：查找的结束字符串;
 string subneedstr(const string strSrc,const string staDes,const string endDes);
+
+void utf8ToGb2312(std::string& strUtf8);
+void gb2312ToUtf8(std::string& strGb2312);
 #endif // UTILITY_H

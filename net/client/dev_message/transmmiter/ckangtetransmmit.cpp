@@ -1,8 +1,10 @@
-#include "ckangtetransmmit.h"
+﻿#include "ckangtetransmmit.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
 #include <sstream>
+//#pragma execution_character_set("utf-8")
+
 using namespace boost::property_tree;
 using namespace boost::gregorian;
 
@@ -240,6 +242,7 @@ namespace hx_net{
      {
          std::stringstream ss;
          ss << data;
+         //cout<<data<<endl;
          boost::property_tree::ptree pt,p1,p2;
          //stream << data;
          try
@@ -251,6 +254,9 @@ namespace hx_net{
              {
                  p2 = it->second; //first为空
                  string strKey = p2.get<string>("desc");
+
+                 gb2312ToUtf8(strKey);
+
                  StringTrim(strKey);
                  if(strKey == "Status"){
                       string strValue = p2.get<string>("val");
@@ -266,7 +272,7 @@ namespace hx_net{
                           runstate = dev_shutted_down;
                       }
                       data_ptr->mValues[3] = dainfo;
-                 }else if(strKey == "Output Power"){
+                 }else if(strKey == "Output Power" || strKey == "输出功率"){
                      string strValue = p2.get<string>("val");
                      StringTrim(strValue);
                      DataInfo dainfo;
@@ -274,7 +280,7 @@ namespace hx_net{
                      dainfo.fValue = atof(strValue.c_str());
                      dainfo.sValue = strValue;
                      data_ptr->mValues[0] = dainfo;
-                 }else if(strKey == "Reflect Power"){
+                 }else if(strKey == "Reflect Power" || strKey == "反射功率"){
                      string strValue = p2.get<string>("val");
                      StringTrim(strValue);
                      DataInfo dainfo;
@@ -282,7 +288,7 @@ namespace hx_net{
                      dainfo.fValue = atof(strValue.c_str());
                      dainfo.sValue = strValue;
                      data_ptr->mValues[1] = dainfo;
-                 }else if(strKey == "VSWR"){
+                 }else if(strKey == "VSWR" || strKey == "驻波比"){
                      string strValue = p2.get<string>("val");
                      StringTrim(strValue);
                      DataInfo dainfo;
@@ -322,6 +328,22 @@ namespace hx_net{
                      dainfo.fValue = atof(strValue.c_str());
                      dainfo.sValue = strValue;
                      data_ptr->mValues[7] = dainfo;
+                 }else if(strKey == "输出检波"){
+                     string strValue = p2.get<string>("val");
+                     StringTrim(strValue);
+                     DataInfo dainfo;
+                     dainfo.bType = false;
+                     dainfo.fValue = atof(strValue.c_str());
+                     dainfo.sValue = strValue;
+                     data_ptr->mValues[8] = dainfo;
+                 }else if(strKey == "反射检波"){
+                     string strValue = p2.get<string>("val");
+                     StringTrim(strValue);
+                     DataInfo dainfo;
+                     dainfo.bType = false;
+                     dainfo.fValue = atof(strValue.c_str());
+                     dainfo.sValue = strValue;
+                     data_ptr->mValues[9] = dainfo;
                  }
              }
 
