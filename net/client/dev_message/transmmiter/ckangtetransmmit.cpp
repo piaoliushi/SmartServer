@@ -1,9 +1,9 @@
-#include "ckangtetransmmit.h"
+﻿#include "ckangtetransmmit.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-
+#pragma execution_character_set("utf-8")
 #include <sstream>
-//#pragma execution_character_set("utf-8")
+
 
 using namespace boost::property_tree;
 using namespace boost::gregorian;
@@ -288,7 +288,7 @@ namespace hx_net{
                      dainfo.fValue = atof(strValue.c_str());
                      dainfo.sValue = strValue;
                      data_ptr->mValues[1] = dainfo;
-                 }else if(strKey == "VSWR" ){//|| strKey == "驻波比"
+                 }else if(strKey == "VSWR" || strKey == "驻波比"){//
                      string strValue = p2.get<string>("val");
                      StringTrim(strValue);
                      DataInfo dainfo;
@@ -344,7 +344,7 @@ namespace hx_net{
                      dainfo.fValue = atof(strValue.c_str());
                      dainfo.sValue = strValue;
                      data_ptr->mValues[9] = dainfo;
-                 }
+                 }/**/
              }
 
              return 0;
