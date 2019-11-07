@@ -619,16 +619,17 @@ namespace hx_net{
                 dainfo.bType = false;
                 for(int i=0;i<15;i++){
                     dainfo.fValue = (float)((data[34+i*4]<<8)|data[33+i*4]);
-                    data_ptr->mValues[indexpos++] = dainfo;
+
                     if(i==1){
-                        if(data_ptr.get()->mValues[0].fValue!=data_ptr.get()->mValues[1].fValue){
-                            dainfo.fValue = (data_ptr.get()->mValues[0].fValue+data_ptr.get()->mValues[1].fValue)/(data_ptr.get()->mValues[0].fValue-data_ptr.get()->mValues[1].fValue);
+                        if(data_ptr.get()->mValues[0].fValue*1000>data_ptr.get()->mValues[1].fValue){
+                            dainfo.fValue = sqrt((data_ptr.get()->mValues[0].fValue*1000+data_ptr.get()->mValues[1].fValue)/(data_ptr.get()->mValues[0].fValue*1000-data_ptr.get()->mValues[1].fValue));
                         }
                         else{
                             dainfo.fValue = 1.0;
                         }
-                        data_ptr->mValues[1] = dainfo;
+                        data_ptr->mValues[indexpos++] = dainfo;
                     }
+                    data_ptr->mValues[indexpos++] = dainfo;
                 }
 
                 for(int i=0;i<3;++i)

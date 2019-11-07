@@ -105,6 +105,7 @@ typedef enum PROTOCOL
 typedef enum ANTENAPROTOCOL
 {
     HX_MD981 = 0,
+    XG_ANTCTRL = 1,
 }AntennaSubProtocol;
 
 typedef enum GMEPROTOCOL

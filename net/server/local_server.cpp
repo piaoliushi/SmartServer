@@ -396,7 +396,7 @@ namespace hx_net
                      sloginAck->set_eloginmod(LOGIN_SWITCH_USER);//add --2019-10-15
                      sloginAck->set_usrrolenumber(tmpUser.sRoleNumber);
                      sloginAck->set_usrrolename(tmpUser.sRoleName);
-                     get_authorize_info_by_user(ch_ptr,tmpUser.sNumber,iter->second.client_id_,*sloginAck);
+                     get_authorize_info_by_user(iter->first,tmpUser.sNumber,iter->second.client_id_,*sloginAck);//ch_ptr
 
                      iter->first->sendMessage(MSG_LOGIN_ACK,sloginAck);
                 }

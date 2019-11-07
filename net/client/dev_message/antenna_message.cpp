@@ -81,6 +81,13 @@ int Antenna_message::check_msg_header(unsigned char *data, int nDataLen, CmdType
                 return RE_SUCCESS;
             else
                 return RE_HEADERROR;
+        case XG_ANTCTRL:{
+            if(data[0]!=0x01 || data[1] != 0x03){
+
+                return RE_HEADERROR;
+            }
+            return (((data[3]<<8)|data[4])+2);
+        }
         default:
             return RE_NOPROTOCOL;
         }
@@ -101,6 +108,10 @@ int Antenna_message::decode_msg_body(unsigned char *data, DevMonitorDataPtr data
         case HX_MD981:{
             return parse_HX_981(data,d_curData_ptr,nDataLen,iaddcode);
         }
+        case XG_ANTCTRL:
+         {
+             return parse_XG_981(data,d_curData_ptr,nDataLen,iaddcode);
+         }
         default:
             return RE_NOPROTOCOL;
         }
@@ -115,6 +126,8 @@ bool Antenna_message::IsStandardCommand()
     switch (d_devInfo.nDevProtocol) {
     case ANTENNA_CONTROL:{
         switch(d_devInfo.nSubProtocol){
+        case XG_ANTCTRL:
+            return true;
         default:
             return false;
         }
@@ -202,6 +215,43 @@ void Antenna_message::GetAllCmd(CommandAttribute &cmdAll)
 
         }
             break;
+        case XG_ANTCTRL:
+       {//01 02 02 00 06 00 01 00 02 00 09 00 0C
+           CommandUnit tmUnit;
+           tmUnit.ackLen = 5;
+           tmUnit.commandLen = 13;
+           tmUnit.commandId[0] = 0x01;
+           tmUnit.commandId[1] = 0x02;
+           tmUnit.commandId[2] = 0x02;
+           tmUnit.commandId[3] = 0x00;
+           tmUnit.commandId[4] = 0x06;
+           tmUnit.commandId[5] = 0x00;
+           tmUnit.commandId[6] = 0x01;
+           tmUnit.commandId[7] = 0x00;
+           tmUnit.commandId[8] = 0x02;
+           tmUnit.commandId[9] = 0x00;
+           tmUnit.commandId[10] = 0x09;
+           tmUnit.commandId[11] = 0x00;
+           tmUnit.commandId[12] = 0x0C;
+           cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+           //01 02 04 00 0B 00 01 00 02 00 09 00 31 00 01 01 00 51
+           tmUnit.commandId[2]=0x04;
+
+           tmUnit.commandId[4]=0x0B;
+           tmUnit.commandId[12]=0x31;
+           tmUnit.commandId[13]=0x00;
+           tmUnit.commandId[14]=0x01;
+           tmUnit.commandId[15]=0x01;
+           tmUnit.commandId[16]=0x00;
+           tmUnit.commandId[17]=0x51;
+           cmdAll.mapCommand[MSG_ANTENNA_BTOH_OPR].push_back(tmUnit);
+           //01 02 04 00 0B 00 01 00 02 00 09 00 31 00 01 02 00 52
+           tmUnit.commandId[15]=0x02;
+           tmUnit.commandId[17]=0x52;
+           cmdAll.mapCommand[MSG_ANTENNA_HTOB_OPR].push_back(tmUnit);
+
+       }
+           break;
         default:
             break;
         }
@@ -312,6 +362,45 @@ int Antenna_message::parse_HX_981(unsigned char *data, DevMonitorDataPtr data_pt
     return 0;
 }
 
+int Antenna_message::parse_XG_981(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+{//01 02 03 00 17 00 01 00 02 00 09 00 31 00 08 01 01 01 01 01 01 01 01 00 03 00 01 02 00 70
+    if(data[2]!=0x03)
+    {
+        return RE_CMDACK;
+    }
+    int curpos=5;
+    int iparamtype=0;
+    int iparamlen = 0;
+    while((curpos+2)<nDataLen)
+    {
+        iparamtype = ((data[curpos]<<8)|data[curpos+1]);
+        iparamlen = ((data[curpos+2]<<8)|data[curpos+3]);
+        if(iparamtype==0x0031)
+        {
+            DataInfo dainfo;
+            dainfo.bType = true;
+            if(data[curpos+4]==1)
+            {
+                dainfo.fValue = 1;
+                set_run_state(antenna_host);
+            }
+            else if(data[curpos+4]==2)
+            {
+                dainfo.fValue = 0;
+                set_run_state(antenna_backup);
+            }
+            else
+            {
+                dainfo.fValue = -1;
+                set_run_state(dev_unknown);
+            }
+            data_ptr->mValues[0] = dainfo;
+            break;
+        }
+        curpos = curpos+4+iparamlen;
+    }
+    return RE_SUCCESS;
+}
 
 bool  Antenna_message::cmd_excute_is_ok()
 {
