@@ -224,7 +224,7 @@ namespace hx_net
         {
             dev_run_state_=curState;
             GetInst(SvcMgr).get_notify()->OnDevStatus(d_devInfo.sDevNum,dev_run_state_+1);
-            //广播设备状态到在线客户端GetInst(LocalConfig).local_station_id()
+            //广播设备状态到在线客户端
             m_pSession->send_work_state_message(d_devInfo.sStationNum,d_devInfo.sDevNum
                                                 ,d_devInfo.sDevName,DEVICE_TRANSMITTER,(dev_run_state)dev_run_state_);
             //如果天线是代理，且当前机器在运行，则设置当前天线状态为当前设备

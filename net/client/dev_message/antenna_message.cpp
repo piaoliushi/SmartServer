@@ -82,7 +82,7 @@ int Antenna_message::check_msg_header(unsigned char *data, int nDataLen, CmdType
             else
                 return RE_HEADERROR;
         case XG_ANTCTRL:{
-            if(data[0]!=0x01 || data[1] != 0x03){
+            if(data[0]!=0x01 || data[1] != 0x02){
 
                 return RE_HEADERROR;
             }
