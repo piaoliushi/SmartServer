@@ -255,6 +255,14 @@ namespace hx_net{
         {
             return RE_CMDACK;
         }
+
+        if(m_addresscode == 5){
+
+            data_ptr->mValues[0].fValue = data_ptr->mValues[3].fValue;
+            data_ptr->mValues[1].fValue = data_ptr->mValues[4].fValue;
+            data_ptr->mValues[2].fValue=1.0f;
+
+        }
         return RE_SUCCESS;
     }
 }
