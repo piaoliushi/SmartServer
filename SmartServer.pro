@@ -227,6 +227,8 @@ else:{
 
 QMAKE_CXXFLAGS +=-Zm300
 win32:CONFIG(release, debug|release): {
+QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
+QMAKE_LFLAGS_RELEASE = $$QMAKE_LFLAGS_RELEASE_WITH_DEBUGINFO
 #CONFIG += console
 LIBS += -lQtSerialPort
 LIBS += -LD:/ThirdSdk/protobuf-2.6.1/lib/vs2010 -llibprotobuf -llibprotoc -llibprotobuf-lite

@@ -81,18 +81,18 @@ namespace hx_net
         e_ErrorCode start_exec_task(string sDevId,string sUser,int cmdType,map<int,string> &mapParam,int nMode=0);
 
         //更新运行图
-       e_ErrorCode update_monitor_time(string sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
+        e_ErrorCode update_monitor_time(string sDevId,map<int,vector<Monitoring_Scheduler> >& monitorScheduler,
                                  vector<Command_Scheduler> &cmmdScheduler);
-       //更新告警配置
-      e_ErrorCode update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
+        //更新告警配置
+        e_ErrorCode update_dev_alarm_config(string sDevId,DeviceInfo &devInfo);
 
-      //上报http消息
-      e_ErrorCode   response_http_msg(string sUrl,string &sContent,string sRqstType="POST");
+        //上报http消息
+        e_ErrorCode   response_http_msg(string sUrl,string &sContent,string sRqstType="POST");
 
-      //发送短信
-      e_ErrorCode    SendSMSContent(vector<string> &PhoneNumber,string AlarmContent);
-      //发送联动命令
-      e_ErrorCode  SendActionCommand(map<int,vector<ActionParam> > &param,string sUser,int actionType);
+        //发送短信
+        e_ErrorCode    SendSMSContent(vector<string> &PhoneNumber,string AlarmContent);
+        //发送联动命令
+        e_ErrorCode  SendActionCommand(map<int,vector<ActionParam> > &param,string sUser,int actionType);
 
 	private:
 		svc_state svc_state_;

@@ -1329,21 +1329,6 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
 }
 
 
-
-
-void device_session::notify_test_message(string sDevId)
-{
-    time_t  curTm;
-    std::time(&curTm);//循环执行计时开始
-    tm *pCurTime = localtime(&curTm);
-    char str_time[64];
-    strftime(str_time, sizeof(str_time), "%Y-%m-%d %H:%M:%S", pCurTime);
-
-    string sDesc = "TestDevice"+DEV_CMD_OPR_DESC(CMD_EXC_A_ON);
-    sDesc+=DEV_CMD_RESULT_DESC(CMD_EXC_SUCCESS);
-    http_ptr_->send_http_excute_result_messge_to_platform(sDevId,str_time,CMD_EXC_A_ON,sDesc);
-}
-
 void device_session::notify_client_execute_result(string sStationId,string sDevId,string devName,int devType,
                                                   string user,int cmdType, tm *pCurTime,bool bNtfFlash,int eResult)
 {
@@ -1389,7 +1374,7 @@ void device_session::notify_client_execute_result(string sStationId,string sDevI
         if(cmdRlt>-1 && cmdOpr>-1){
             string sDesc = devName+DEV_CMD_OPR_DESC(cmdOpr);
             sDesc+=DEV_CMD_RESULT_DESC(cmdRlt);
-            http_ptr_->send_http_excute_result_messge_to_platform(sDevId,str_time,cmdOpr,sDesc);
+            http_ptr_->send_http_excute_result_messge_to_platform(sDevId,devType,str_time,cmdOpr,sDesc);
         }
 
     }
@@ -1808,8 +1793,8 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 
 
 
-    //动环设备博汇要求收集发送(暂针对动环做单独收集处理...)
-    if(GetInst(LocalConfig).http_svc_use() == true){
+    //动环设备博汇要求收集发送(暂针对动环做单独收集处理...)&& GetInst(LocalConfig).report_use()
+    if(GetInst(LocalConfig).report_use() == true){
 
         string sDesDevId = sDevId;
         map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);

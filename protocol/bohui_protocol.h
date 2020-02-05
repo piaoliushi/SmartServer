@@ -24,11 +24,17 @@ public:
     //创建上报指标告警消息
     bool createReportAlarmDataMsg(int nReplyId,int nCmdType,string sDevId,CurItemAlarmInfo &alarmInfo,int nMod,
                                   string &sReason,string &reportBody);//,int alarmLevel=0默认普通
-    //创建控制结果上报消息
+    //创建发射机控制结果上报消息
     bool creatExcutResultReportMsg(int nReplyId,int nCmdType,string sDevId,const string &sTime,
                                     int devState,const string &sDesc,string &reportBody);
+
+    //创建设备控制结果上报消息
+    bool creatDeviceExcutResultReportMsg(int nReplyId,int nCmdType,string sDevId,int devType,const string &sTime,
+                                    int devState,const string &sDesc,string &reportBody);
+#if 0
     //创建dtmb节目信息查询消息
     bool creatQueryDtmbPrgInfoMsg(string &reportBody);
+#endif
 
     //创建动环消息头
     bool createReportHeadMsg(xml_document<> &xmlMsg,xml_node<>* &pHeadMsg,int ReportType);
@@ -49,6 +55,11 @@ public:
     bool appendLinkReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,string sDevId,
                                  int nDevType,DevMonitorDataPtr &curData,
                                  map<int,DeviceMonitorItem> &mapMonitorItem);
+
+    //创建切换器设备上报消息体(合并多个切换器)
+    bool appendSwtichReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,string sDevId,
+                                                 int nDevType,DevMonitorDataPtr &curData,
+                                                 map<int,DeviceMonitorItem> &mapMonitorItem);
 
 protected:
     //创建xml头信息
@@ -83,11 +94,16 @@ protected:
     //设备手动控制(发射机)
     void _controlDeviceCommand(int nDevType,xml_node<> *rootNode,int &nValue);
 
+    //切换器控制
+    void _controlSwitchCommand(int nDevType,xml_node<> *rootNode,int &nValue);
+
     //从配置数据中获得查询信息
     void _query_devinfo_from_config(xml_document<> &xml_doc,int nCmdType,xml_node<> *rootNode,int  &nValue);
 
+#if 0
     //分析信号告警,数据上报
     bool _parseSignalReportMsg(string sIp,xml_node<> * InfoNode);
+#endif
 
     //检查后添加告警使能
     void _checkAndAppendAlarmSwitch(vector<Alarm_Switch_Set> &vConfig, Alarm_Switch_Set &curConfig);

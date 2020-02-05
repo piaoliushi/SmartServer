@@ -10,7 +10,9 @@ struct web_handler {
     {
         //request_handler_ptr request_handler_ = request_handler_factory::get_mutable_instance().create();
         //request_handler_ptr request_handler_(new request_handler());
-        return request_handler_factory::get_mutable_instance().create()->start(request, connection);
+
+        request_handler_factory::get_mutable_instance().create()->start(request, connection);
+        return ;
     }
 };
 

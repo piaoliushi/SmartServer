@@ -71,6 +71,10 @@ bool Bohui_Protocol::parseDataFromStr(const string &strMsg,string &responseBody,
                     _setAlarmSwitchSetParam(BH_POTO_AlarmSwitchSetD,requestNode,nRsltValue);//链路告警开关设置
                 else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_ManualPowerControl])
                     _controlDeviceCommand(BH_POTO_ManualPowerControl,requestNode,nRsltValue);//发射机控制
+                else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_DeviceControl])
+                    _controlSwitchCommand(BH_POTO_DeviceControl,requestNode,nRsltValue);//切换器控制
+                else if(cmdType == CONST_STR_BOHUI_TYPE[BH_POTO_ManualTrunControl])
+                    _controlDeviceCommand(BH_POTO_ManualTrunControl,requestNode,nRsltValue);//发射机倒机控制
 
 
                 createResponseMsg(nMsgId,nRsltValue,cmdType.c_str(),responseBody);
@@ -78,7 +82,7 @@ bool Bohui_Protocol::parseDataFromStr(const string &strMsg,string &responseBody,
                 //dtmb 专用 ，暂时为使用...
                 xml_node<> *returnNode = rootNode->first_node("ReturnInfo");
                 if(returnNode!=NULL){
-                    return _parseSignalReportMsg(sIp,returnNode);
+                    return true;//_parseSignalReportMsg(sIp,returnNode);
                     //信号上报不用回复xml
                 }else{
                      createResponseMsg(nMsgId,11,CONST_STR_BOHUI_TYPE[BH_POTO_XmlContentError],responseBody);
@@ -193,6 +197,32 @@ bool Bohui_Protocol::creatExcutResultReportMsg(int nReplyId,int nCmdType,string 
     return true;
 }
 
+//创建设备控制结果上报消息
+bool Bohui_Protocol::creatDeviceExcutResultReportMsg(int nReplyId,int nCmdType,string sDevId,int devType,const string &sTime,
+                                int devState,const string &sDesc,string &reportBody)
+{
+    xml_document<> xml_reportMsg;
+    xml_node<> *msgRootNode = _createResponseXmlHeader(xml_reportMsg,2,-1);
+    if(msgRootNode!=NULL){
+        xml_node<> *xml_resps = xml_reportMsg.allocate_node(node_element,"DevControlLog");
+        msgRootNode->append_node(xml_resps);
+
+        xml_node<> *xml_dev_resps = xml_reportMsg.allocate_node(node_element,"Dev");
+        xml_resps->append_node(xml_dev_resps);
+
+        xml_dev_resps->append_attribute(xml_reportMsg.allocate_attribute("ID",xml_reportMsg.allocate_string(sDevId.c_str())));
+        if(devType == 7)
+            xml_dev_resps->append_attribute(xml_reportMsg.allocate_attribute("DevType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(116).c_str())));
+        else
+            xml_dev_resps->append_attribute(xml_reportMsg.allocate_attribute("DevType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(devType).c_str())));
+        xml_dev_resps->append_attribute(xml_reportMsg.allocate_attribute("CmdStatus",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(devState).c_str())));
+        xml_dev_resps->append_attribute(xml_reportMsg.allocate_attribute("Time",xml_reportMsg.allocate_string(sTime.c_str())));
+        xml_dev_resps->append_attribute(xml_reportMsg.allocate_attribute("Desc",xml_reportMsg.allocate_string(sDesc.c_str())));
+    }
+
+   rapidxml::print(std::back_inserter(reportBody), xml_reportMsg, 0);
+   return true;
+}
 
 //创建上报消息头（合并多个同属性设备）
 bool Bohui_Protocol::createReportHeadMsg(xml_document<> &xmlMsg,xml_node<>* &pHeadMsg,int ReportType)
@@ -210,10 +240,11 @@ bool Bohui_Protocol::createReportHeadMsg(xml_document<> &xmlMsg,xml_node<>* &pHe
     return false;
 }
 
-//创建动环ups消息
+//创建动环ups消息(合并多个ups设备)
 bool Bohui_Protocol::appendUpsReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,string sDevId,int nDevType
                                             ,DevMonitorDataPtr &curData,map<int,DeviceMonitorItem> &mapMonitorItem)
 {
+    //return true;
     xml_node<> *xml_Quality = NULL;
     string str_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString();
     xml_Quality = xmlMsg.allocate_node(node_element,"Dev");
@@ -227,6 +258,8 @@ bool Bohui_Protocol::appendUpsReportBodyMsg(xml_document<> &xmlMsg,map<string,xm
 
     map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
     for(;cell_iter!=mapMonitorItem.end();++cell_iter){
+        if(cell_iter->second.bUpload == false)
+           continue;
         if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
             continue;
         if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
@@ -285,6 +318,8 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
         map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
         for(;cell_iter!=mapMonitorItem.end();++cell_iter){
 
+            if(cell_iter->second.bUpload == false)
+               continue;
             if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
                 continue;
             if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
@@ -352,6 +387,8 @@ bool Bohui_Protocol::appendPowerEnvReportBodyMsg(xml_document<> &xmlMsg,map<int,
      map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
      for(;cell_iter!=mapMonitorItem.end();++cell_iter){
 
+         if(cell_iter->second.bUpload == false)
+            continue;
          if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
              continue;
          if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
@@ -420,6 +457,39 @@ bool Bohui_Protocol::appendTransmitterReportBodyMsg(xml_document<> &xmlMsg,map<s
      return true;
 }
 
+
+//创建切换器设备上报消息体(合并多个切换器)
+bool Bohui_Protocol::appendSwtichReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,string sDevId,
+                                             int nDevType,DevMonitorDataPtr &curData,
+                                             map<int,DeviceMonitorItem> &mapMonitorItem)
+{
+    xml_node<> *xml_SwitchDev = NULL;
+    xml_SwitchDev = xmlMsg.allocate_node(node_element,"SwitchDevStatus");
+    xml_SwitchDev->append_attribute(xmlMsg.allocate_attribute("DevID",xmlMsg.allocate_string(sDevId.c_str())));
+    xml_SwitchDev->append_attribute(xmlMsg.allocate_attribute("DevName",xmlMsg.allocate_string(sDevId.c_str())));
+    map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
+    for(;cell_iter!=mapMonitorItem.end();++cell_iter){
+
+        if(cell_iter->second.bUpload == false)
+           continue;
+        if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
+            continue;
+        if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
+            continue;
+        string curValueName = mapTypeToStr[cell_iter->second.iTargetId].second;
+        float curValue = curData->mValues[cell_iter->first].fValue;
+        if(curValueName == "Main" || curValueName == "Stby"|| curValueName == "Aux"){
+            curValue = (curValue>0)?0:1;
+        }
+        string  sValue = str(boost::format("%d")%curValue);
+        xml_SwitchDev->append_attribute(xmlMsg.allocate_attribute(xmlMsg.allocate_string(mapTypeToStr[cell_iter->second.iTargetId].second.c_str()),
+                                         xmlMsg.allocate_string(sValue.c_str())));
+
+    }
+    mXml_Quality[sDevId] = xml_SwitchDev;
+    return true;
+}
+
 //创建链路设备上报消息体(合并多个链路设备)
 bool Bohui_Protocol::appendLinkReportBodyMsg(xml_document<> &xmlMsg,map<string,xml_node<>*> &mXml_Quality,string sDevId,
                                              int nDevType,DevMonitorDataPtr &curData,
@@ -437,6 +507,8 @@ bool Bohui_Protocol::appendLinkReportBodyMsg(xml_document<> &xmlMsg,map<string,x
     map<int,DeviceMonitorItem>::iterator cell_iter = mapMonitorItem.begin();
     for(;cell_iter!=mapMonitorItem.end();++cell_iter){
 
+        if(cell_iter->second.bUpload == false)
+           continue;
         if(mapTypeToStr.find(cell_iter->second.iTargetId) == mapTypeToStr.end())
             continue;
         if(mapTypeToStr[cell_iter->second.iTargetId].second.empty())
@@ -444,13 +516,33 @@ bool Bohui_Protocol::appendLinkReportBodyMsg(xml_document<> &xmlMsg,map<string,x
         xml_node<> *xml_Quality_Index = NULL;
         xml_Quality_Index = xmlMsg.allocate_node(node_element,"Quality");
         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Type",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iTargetId).c_str())));
+
+
         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("QualitySrc",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModTypeId).c_str())));
         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("SrcIndex",xmlMsg.allocate_string(boost::lexical_cast<std::string>(cell_iter->second.iModDevId).c_str())));
         string  sValue = str(boost::format("%.2f")%curData->mValues[cell_iter->first].fValue);
+        float curValue= curData->mValues[cell_iter->first].fValue;
         if(curData->mValues[cell_iter->first].bType==true)
-            sValue = str(boost::format("%d")%curData->mValues[cell_iter->first].fValue);
+            sValue = str(boost::format("%d")%curValue);
+
+        if(nDevType == 116){//博汇切换器类型专用
+            if(cell_iter->second.iTargetId == 241)//捷成切换器专用
+                sValue = str(boost::format("%d")%((curValue>0)?0:1));
+            else if(cell_iter->second.iTargetId == 242)
+                sValue = str(boost::format("%d")%curValue);
+        }
         xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Value",xmlMsg.allocate_string(sValue.c_str())));
-        xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",xmlMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str())));
+        if(nDevType == 116 && cell_iter->second.iTargetId == 242)
+        {
+            int curChannel = (int)curValue;
+            if(curChannel == 0)
+                xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",xmlMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[302].second).c_str())));
+            else if(curChannel == 1)
+                xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",xmlMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[303].second).c_str())));
+            else if(curChannel == 2)
+                xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",xmlMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[304].second).c_str())));
+        }else
+            xml_Quality_Index->append_attribute(xmlMsg.allocate_attribute("Desc",xmlMsg.allocate_string(boost::lexical_cast<std::string>(mapTypeToStr[cell_iter->second.iTargetId].first).c_str())));
         xml_dev_node->append_node(xml_Quality_Index);
     }
 
@@ -770,9 +862,9 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
             xml_device=NULL;
             //类型分类判断
             int temType=(*iter).second.iDevType;
-            if(temType>DEVICE_TRANSMITTER && temType<DEVICE_GS_RECIVE)
+            if(temType>DEVICE_TRANSMITTER && temType<DEVICE_GS_RECIVE && temType!=DEVICE_SWITCH)
                 temType = BH_POTO_EnvMonDevQuery;//动环设备
-            else if(temType>=DEVICE_GS_RECIVE && temType<DEVICE_ANTENNA || temType==DEVICE_MEDIA)
+            else if(temType>=DEVICE_GS_RECIVE && temType<DEVICE_ANTENNA || temType==DEVICE_MEDIA ||temType==DEVICE_SWITCH)
                 temType = BH_POTO_LinkDevQuery;     //链路设备
             else if(temType==DEVICE_TRANSMITTER)
                 temType = BH_POTO_TransmitterQuery;//发射机设备
@@ -808,6 +900,7 @@ void Bohui_Protocol::_query_devinfo_from_config(xml_document<> &xml_doc,int nCmd
                 xml_linkdev_list->append_node(xml_device);
                 xml_device->append_attribute(xml_doc.allocate_attribute("DevID",(*iter).second.sDevNum.c_str()));
                 xml_device->append_attribute(xml_doc.allocate_attribute("DevName",(*iter).second.sDevName.c_str()));
+
 
                 //判断是否是多通道设备，添加通道节点map_DevChannelPropertyEx
                 if((*iter).second.iChanSize>1 && (*iter).second.bMulChannel){
@@ -1366,97 +1459,179 @@ void Bohui_Protocol::_controlDeviceCommand(int nDevType,xml_node<> *rootNode,int
     if(tranNode!=NULL){
         string sDevId;
         int  nSwitch;
-        rapidxml::xml_attribute<char> * attr_devId = tranNode->first_attribute("TransmitterID");
-        if(attr_devId==NULL){
-            nValue = 11;
-            return;
-        }
-        rapidxml::xml_attribute<char> * attr_switch = tranNode->first_attribute("Switch");
-        if(attr_switch==NULL){
-            nValue = 11;
-            return;
-        }
-        sDevId = attr_devId->value();
-        nSwitch = strtol(attr_switch->value(),NULL,10);
-        //--------------发送控制指令------------------------------------//
-        map<int,string> mapParam;//博汇指令暂不携带控制参数
-        if(nSwitch == 0)//关机
-            GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNOFF_OPR,mapParam);
-        else if(nSwitch == 1)//开机
+        if(nDevType == BH_POTO_ManualPowerControl){
+            rapidxml::xml_attribute<char> * attr_devId = tranNode->first_attribute("TransmitterID");
+            if(attr_devId==NULL){
+                nValue = 11;
+                return;
+            }
+            rapidxml::xml_attribute<char> * attr_switch = tranNode->first_attribute("Switch");
+            if(attr_switch==NULL){
+                nValue = 11;
+                return;
+            }
+
+            sDevId = attr_devId->value();
+            nSwitch = strtol(attr_switch->value(),NULL,10);
+            //--------------发送控制指令------------------------------------//
+            map<int,string> mapParam;//博汇指令暂不携带控制参数
+            if(nSwitch == 0)//关机
+                GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNOFF_OPR,mapParam);
+            else if(nSwitch == 1)//开机
+                GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNON_OPR,mapParam);
+
+        }else if(nDevType == BH_POTO_ManualTrunControl){
+            rapidxml::xml_attribute<char> * attr_devId = tranNode->first_attribute("OnTransmitterID");
+            if(attr_devId==NULL){
+                nValue = 11;
+                return;
+            }
+            map<int,string> mapParam;//博汇指令暂不携带控制参数
+            sDevId = attr_devId->value();
             GetInst(hx_net::SvcMgr).start_exec_task(sDevId,Bohui_Protocol::DstCode,MSG_TRANSMITTER_TURNON_OPR,mapParam);
+        }
+
+    }
+}
+//切换器控制
+void Bohui_Protocol::_controlSwitchCommand(int nDevType,xml_node<> *rootNode,int &nValue)
+{
+#if 0
+   rapidxml::xml_node<>* switchDevNode = rootNode->first_node("SwitchDev");
+   for(;switchDevNode!=NULL;switchDevNode=switchDevNode->next_sibling())
+   {
+       rapidxml::xml_attribute<char> * attr_devId = switchDevNode->first_attribute("DevID");
+       if(attr_devId==NULL){
+           nValue = 11;
+           continue;
+       }
+
+       rapidxml::xml_attribute<char> * attr_switch = switchDevNode->first_attribute("SwitchTo");
+       if(attr_switch==NULL){
+           nValue = 11;
+           return;
+       }
+       string sDevId = attr_devId->value();
+       devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
+       commandmsg_->set_sdevid(sDevId);
+       CommandParam* parma = commandmsg_->add_cparams();
+       parma->set_sparamvalue(attr_switch->value());
+       GetInst(SvcMgr).excute_command(sDevId,MSG_0401_SWITCH_OPR,Bohui_Protocol::DstCode,commandmsg_);
+   }
+#endif
+
+    rapidxml::xml_node<>* devNode = rootNode->first_node("Dev");
+    while(devNode!=NULL){
+        rapidxml::xml_node<> *controlNode = devNode->first_node("Control");
+        rapidxml::xml_attribute<char> * attr_DevType= controlNode->first_attribute("Type");
+         rapidxml::xml_attribute<char> * attr_DevID= controlNode->first_attribute("ID");
+        if(attr_DevType!=NULL && attr_DevID!=NULL){
+            string devType = attr_DevType->value();
+            if(devType == "116")//切换器类型
+            {
+                while(controlNode!=NULL){
+
+                    rapidxml::xml_attribute<char> * attr_ControlType = controlNode->first_attribute("Type");
+                    rapidxml::xml_attribute<char> * attr_SwitchToValue = controlNode->first_attribute("Value");
+                    if(attr_ControlType!=NULL && attr_SwitchToValue!=NULL){
+                        string ctrlType = attr_ControlType->value();
+                        if(ctrlType == "1111")//信号切换类型
+                        {
+                            string sDevId = attr_DevID->value();
+                            devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
+                            commandmsg_->set_sdevid(sDevId);
+                            CommandParam* parma = commandmsg_->add_cparams();
+                            parma->set_sparamvalue(attr_SwitchToValue->value());
+                            GetInst(SvcMgr).excute_command(sDevId,MSG_0401_SWITCH_OPR,Bohui_Protocol::DstCode,commandmsg_);
+                        }
+                    }else{
+                        nValue = 11;
+                        return;
+                    }
+
+                    controlNode = controlNode->next_sibling("Control");
+                }
+            }
+
+
+        }
+
+        devNode = devNode->next_sibling("Dev");
     }
 }
 
+#if 0
 //分析信号上报告警,数据上报（DTMB相关）
 bool Bohui_Protocol::_parseSignalReportMsg(string sIp,xml_node<> * InfoNode)
 {
-        rapidxml::xml_node<>* dataNode = InfoNode->first_node("AlarmSearchFSet");
+
+    rapidxml::xml_node<>* dataNode = InfoNode->first_node("AlarmSearchFSet");
+    if(dataNode!=NULL){
+        rapidxml::xml_attribute<char> * attr_FreqId = dataNode->first_attribute("Freq");
+        if(attr_FreqId==NULL)
+            return false;
+        string sPrgFreq = attr_FreqId->value();
+        if(sPrgFreq.empty())
+            return false;
+        rapidxml::xml_node<> *itemNode = dataNode->first_node("AlarmSearchF");
+        while(itemNode!=NULL){
+            rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Type");
+            rapidxml::xml_attribute<char> * attr_prgValue = itemNode->first_attribute("Value");
+            rapidxml::xml_attribute<char> * attr_prgTime = itemNode->first_attribute("Time");
+            if(attr_prgType==NULL || attr_prgValue==NULL || attr_prgTime==NULL)
+                continue;
+            int nTypeId = strtol(attr_prgType->value(),NULL,10);
+            int nState = strtol(attr_prgValue->value(),NULL,10);
+            time_t  curTm;
+            QDateTime qdt=QDateTime::fromString(attr_prgTime->value(),"yyyy-MM-dd hh:mm:ss");
+            if(qdt.isValid())
+                curTm = qdt.toTime_t();
+
+            request_handler_factory::get_mutable_instance().add_new_alarm(sIp,sPrgFreq,nTypeId,nState,curTm);
+            itemNode = itemNode->next_sibling("AlarmSearchF");
+        }
+    }else {
+        dataNode = InfoNode->first_node("GetIndexSet");
         if(dataNode!=NULL){
             rapidxml::xml_attribute<char> * attr_FreqId = dataNode->first_attribute("Freq");
-            if(attr_FreqId==NULL)
+            rapidxml::xml_attribute<char> * attr_ChannelId = dataNode->first_attribute("Index");
+            if(attr_FreqId==NULL || attr_ChannelId==NULL)
                 return false;
             string sPrgFreq = attr_FreqId->value();
-            if(sPrgFreq.empty())
+            int nChannelId = atoi(attr_ChannelId->value());
+            if(sPrgFreq.empty() || nChannelId<0 || nChannelId>100)
                 return false;
-            rapidxml::xml_node<> *itemNode = dataNode->first_node("AlarmSearchF");
-            while(itemNode!=NULL){
-                rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Type");
-                rapidxml::xml_attribute<char> * attr_prgValue = itemNode->first_attribute("Value");
-                rapidxml::xml_attribute<char> * attr_prgTime = itemNode->first_attribute("Time");
-                if(attr_prgType==NULL || attr_prgValue==NULL || attr_prgTime==NULL)
-                    continue;
-                int nTypeId = strtol(attr_prgType->value(),NULL,10);
-                int nState = strtol(attr_prgValue->value(),NULL,10);
-                time_t  curTm;
-                QDateTime qdt=QDateTime::fromString(attr_prgTime->value(),"yyyy-MM-dd hh:mm:ss");
-                if(qdt.isValid())
-                    curTm = qdt.toTime_t();
 
-                request_handler_factory::get_mutable_instance().add_new_alarm(sIp,sPrgFreq,nTypeId,nState,curTm);
-                itemNode = itemNode->next_sibling("AlarmSearchF");
-            }
-        }else {
-            dataNode = InfoNode->first_node("GetIndexSet");
-            if(dataNode!=NULL){
-                rapidxml::xml_attribute<char> * attr_FreqId = dataNode->first_attribute("Freq");
-                rapidxml::xml_attribute<char> * attr_ChannelId = dataNode->first_attribute("Index");
-                if(attr_FreqId==NULL || attr_ChannelId==NULL)
-                    return false;
-                string sPrgFreq = attr_FreqId->value();
-                int nChannelId = atoi(attr_ChannelId->value());
-                if(sPrgFreq.empty() || nChannelId<0 || nChannelId>100)
-                    return false;
-
-                rapidxml::xml_node<> *itemNode = dataNode->first_node("GetIndex");
-                DevMonitorDataPtr  curValues(new Data);
-                DataInfo curFrqInfo;
-                curFrqInfo.bType=0;
-                curFrqInfo.sValue = sPrgFreq;
-                curFrqInfo.fValue = 0.0f;
-                curValues->mValues[0+5*nChannelId] = curFrqInfo;
-                 while(itemNode!=NULL){
-                     DataInfo curItemInfo;
-                     curItemInfo.bType=0;
-                     curItemInfo.fValue = 0.0f;
-                     rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Type");
-                     if(attr_prgType!=NULL){
-                         int nTypeId = atoi(attr_prgType->value());
-                         if(nTypeId>=0 && nTypeId<5){
-                             rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Value");
-                             if(attr_prgType!=NULL){
-                                  curItemInfo.sValue = attr_prgType->value();
-                                  curValues->mValues[nTypeId+5*nChannelId] = curItemInfo;
-                             }
+            rapidxml::xml_node<> *itemNode = dataNode->first_node("GetIndex");
+            DevMonitorDataPtr  curValues(new Data);
+            DataInfo curFrqInfo;
+            curFrqInfo.bType=0;
+            curFrqInfo.sValue = sPrgFreq;
+            curFrqInfo.fValue = 0.0f;
+            curValues->mValues[0+5*nChannelId] = curFrqInfo;
+             while(itemNode!=NULL){
+                 DataInfo curItemInfo;
+                 curItemInfo.bType=0;
+                 curItemInfo.fValue = 0.0f;
+                 rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Type");
+                 if(attr_prgType!=NULL){
+                     int nTypeId = atoi(attr_prgType->value());
+                     if(nTypeId>=0 && nTypeId<5){
+                         rapidxml::xml_attribute<char> * attr_prgType = itemNode->first_attribute("Value");
+                         if(attr_prgType!=NULL){
+                              curItemInfo.sValue = attr_prgType->value();
+                              curValues->mValues[nTypeId+5*nChannelId] = curItemInfo;
                          }
                      }
-
-                     itemNode = itemNode->next_sibling("GetIndex");
                  }
 
-                 if(curValues->mValues.size()>0)
-                      request_handler_factory::get_mutable_instance().add_new_data(sIp,nChannelId,curValues);
-            }
+                 itemNode = itemNode->next_sibling("GetIndex");
+             }
+
+             if(curValues->mValues.size()>0)
+                  request_handler_factory::get_mutable_instance().add_new_data(sIp,nChannelId,curValues);
         }
+    }
    // }
     return true;
 }
@@ -1474,3 +1649,4 @@ bool Bohui_Protocol::creatQueryDtmbPrgInfoMsg(string &reportBody)
     rapidxml::print(std::back_inserter(reportBody), xml_reportMsg, 0);
     return true;
 }
+#endif

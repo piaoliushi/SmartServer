@@ -74,11 +74,14 @@ void request_handler::read_callback(hx_http_server::connection::input_range inpu
         cout<<"content_size:------"<<read_content_length_<<endl;
         if(bohui_protocol_.parseDataFromStr(content_,d_response_body,d_sUrl,sClientIp))
         {
+            cout<<d_response_body.c_str()<<endl;
             connection->set_status(hx_http_server::connection::ok);
             common_headers[2].value = boost::lexical_cast<std::string>(d_response_body.size());//1
             connection->set_headers(boost::make_iterator_range(common_headers, common_headers + 3));
             //string sResp= d_response_body;//" ";
             connection->write(d_response_body, boost::bind(&request_handler::write_callback, this, _1));
+
+
         }
         else{
             //string sResp= d_response_body;//" ";

@@ -34,8 +34,10 @@ typedef enum
     BH_POTO_XmlContentError=20,         //xml内容错误
 
     BH_POTO_EnvQualityReport=21,        //动环扩展指标上报（ups专用）
-    HX_POTO_LocalConfigQuery=22         //服务器本地配置xml文件
-
+    HX_POTO_LocalConfigQuery=22,         //服务器本地配置xml文件
+    BH_POTO_DeviceControl = 23,          //切换器控制命令
+    BH_POTO_ManualTrunControl = 24,       //手动倒机指令
+    BH_POTO_SwitchDevStatusReport = 25,   //链路设备主动上报
 } BH_MSG_ID_DEF;
 
 typedef enum {
@@ -46,11 +48,12 @@ typedef enum {
 }BH_ERROR_CODE;
 
 const char CONST_STR_BOHUI_TYPE[][32] = { "TransmitterQuery","EnvMonDevQuery","LinkDevQuery",
-                                                                    "ManualPowerControl","AlarmTimeSet","AlarmSwitchSet",
+                                          "ManualPowerControl","AlarmTimeSet","AlarmSwitchSet",
                                           "AlarmParamSet","AlarmSwitchSetE","AlarmParamSetE","AlarmSwitchSetD",
                                           "AlarmParamSetD","CmdStatusReport","QualityRealtimeReport","QualityAlarmReport",
                                           "CommunicationReport","EnvQualityRealtimeReport","EnvAlarmReport","LinkDevQualityReport",
-                                          "LinkDevAlarmReport","XmlParseError","XmlContentError","EnvQualityReport","LocalConfigData"};
+                                          "LinkDevAlarmReport","XmlParseError","XmlContentError","EnvQualityReport","LocalConfigData",
+                                          "DeviceControl","ManualTurnControl","SwitchDevStatusReport"};
 
 
 

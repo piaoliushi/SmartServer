@@ -73,8 +73,8 @@ private:
     void DAS_5103_ACK(unsigned char *data);
 private:
     Pdu query_pdu;
-    session_ptr m_pSession;//关联连接对象
-    DeviceInfo           &d_devInfo;//设备信息
+    session_ptr            m_pSession;//关联连接对象
+    DeviceInfo            &d_devInfo;//设备信息
     //boost::recursive_mutex          data_mutex;
     map<string,int>        map_Oid;
     DevMonitorDataPtr      d_curData_ptr;

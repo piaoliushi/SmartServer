@@ -196,7 +196,7 @@ namespace hx_net
         void notify_client_execute_result(string sStationId,string sDevId,string devName,int devType,string user,int cmdType,
                                           tm *pCurTime,bool bNtfFlash,int eResult);
         //发送http测试消息
-        void notify_test_message(string sDevId);
+        //void notify_test_message(string sDevId);
 
         void start_read_some();
 
