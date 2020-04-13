@@ -1,9 +1,11 @@
-#include "http_request_session.h"
+﻿#include "http_request_session.h"
 #include "./protocol/bohui_protocol.h"
 #include "./protocol/bohui_const_define.h"
 #include "LocalConfig.h"
 #include "yaolog.h"
+#include "utility.h"
 #include <QString>
+#include <QTextCodec>
 namespace hx_net {
 
 http_request_session::http_request_session(boost::asio::io_service& io_service,bool bAsycFlag)
@@ -58,6 +60,7 @@ http_request_session::~http_request_session(void)
      d_bExit_ = true;
  }
 
+
   //开始连接
  void http_request_session::openUrl()
  {
@@ -79,7 +82,17 @@ http_request_session::~http_request_session(void)
                //http_stream2_.set_ignore_return_content(true);
               try
               {
-                  cout<<QString::fromStdString(task_.second).toLocal8Bit().data()<<endl;
+
+                    string sCovStr;
+#ifdef Q_OS_WIN
+                  UTF8_to_GB2312_Win(task_.second.c_str(),sCovStr);
+#else
+                    sCovStr= task_.second;
+                    utf8ToGb2312(sCovStr);
+#endif
+
+                 cout<<sCovStr<<endl;
+                 // LOG__("info",task_.second.c_str());
                   if(asycFlag_==true){
                         //http_stream_.async_open(task_.first,boost::bind(&http_request_session::open_handler,
                         //                                                 this,boost::asio::placeholders::error));
@@ -87,7 +100,7 @@ http_request_session::~http_request_session(void)
                       boost::system::error_code ec;
                       //cout<<"http_stream_.open----------start!!!"<<endl;
                       //LOG__("info", "http_stream_.open----------start!!!");
-                      http_stream2_.open_timeout(5000);
+                      http_stream2_.open_timeout(2000);
                       http_stream2_.open(task_.first);
                       if(!http_stream2_){
                           // If the open operation timed out then:

@@ -231,12 +231,25 @@ namespace hx_net
             if(d_relate_antenna_ptr_!=NULL){
                 if(dev_run_state_ == dev_running && d_antenna_Agent_){
 
-                    int nAtennaS = (d_Host_ == 1)?antenna_backup:antenna_host;//GetInst(LocalConfig).local_station_id()
+                    int nAtennaS = (d_Host_ == 1)?antenna_backup:antenna_host;
                     GetInst(SvcMgr).set_dev_run_state(d_devInfo.sStationNum,
                                                       d_relate_antenna_ptr_->sDevNum,nAtennaS);
                 }
             }
 
+
+            //判断当前设备是否在运行图时间内关机,若是,则立刻上报告警到Bohui平台
+            map<int,bool> curDevIsMonitorChl;
+            for(int i=0;i<d_devInfo.iChanSize;++i){
+                curDevIsMonitorChl[i]=true;
+            }
+            if(m_pSession!=NULL){
+                m_pSession->is_monitor_time(d_devInfo.sDevNum,curDevIsMonitorChl);
+                if(curDevIsMonitorChl[0]){
+                    //上报告警
+                    m_pSession->record_unexcept_shutdown_alarm_and_notify(d_devInfo.sDevNum,0);
+                }
+            }
         }
     }
 
@@ -922,16 +935,6 @@ namespace hx_net
                 }
                 else if(d_onekeyopen_soft)
                 {
-                    /*if(d_antenna_Agent_ == false){
-
-                        bool can_excute =  GetInst(SvcMgr).dev_can_excute_cmd(d_relate_antenna_ptr_->sStationNum,d_relate_antenna_ptr_->sDevNum);
-                        if(can_excute == false){
-                            //eErrCode = EC_FAILED;//EC_OK
-                            eErrCode = EC_NO_ALLOW_SWITCH_ATTENA;
-                            nExcutResult = CMD_RT_FAILURE_NO_ALLOW_EXCUTE;//天线防抖
-                            return ;
-                        }
-                    }*/
                     //自动倒备机天线防抖，在用户干预天线置位后允许进行开关机操作（未测试）
                     if(d_antenna_Agent_ == false){
 

@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 
     QString AppDir = QCoreApplication::applicationDirPath();
     std::string sAppDir = AppDir.toStdString();
-    utf8ToGb2312(sAppDir);
+    //utf8ToGb2312(sAppDir);
 
     QTranslator qtTranslator;
     QString sTranspath = AppDir + "/SmartServer_CN.qm";

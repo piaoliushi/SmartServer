@@ -32,10 +32,13 @@ protected:
     int   parse_HX_981(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int &iaddcode);
     int   parse_XG_981(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode);
     bool  cmd_excute_is_ok();
-    void  restart_task_timeout_timer();
+    void  start_can_switch_timeout_timer();
+    void  schedules_can_switch_time_out(const boost::system::error_code& error);
+    void  start_task_timeout_timer();
     void  schedules_task_time_out(const boost::system::error_code& error);
 private:
     dev_session_ptr  m_pSession;
+    boost::asio::deadline_timer     can_switch_timeout_timer_;
     boost::asio::deadline_timer     task_timeout_timer_;
 
     boost::recursive_mutex    can_switch_mutex_;

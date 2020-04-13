@@ -169,6 +169,8 @@ namespace hx_net
         //根据当前操作码返回错误码
         void set_current_errorcode_by_oprtype(int curOprState,e_ErrorCode &opResult);
 
+        //add by lk 2020-4-8
+        void record_unexcept_shutdown_alarm_and_notify(string &devId,bool bMod);
     protected:
         void handle_connected(const boost::system::error_code& error);
         void handle_read_head(const boost::system::error_code& error, size_t bytes_transferred);//通用消息头（分消息head，body）
@@ -203,37 +205,34 @@ namespace hx_net
         void handle_read_some(const boost::system::error_code& error, size_t bytes_transferred);
 
     private:
-        tcp::resolver                    resolver_;
-        udp::resolver                    uresolver_;
+        tcp::resolver                            resolver_;
+        udp::resolver                           uresolver_;
 
-        tcp::endpoint                    endpoint_;
-        udp::endpoint                    uendpoint_;
+        tcp::endpoint                           endpoint_;
+        udp::endpoint                          uendpoint_;
         boost::recursive_mutex           con_state_mutex_;
-        con_state                        othdev_con_state_;
-        othdevMsgPtr                    receive_msg_ptr_;
+        con_state                                  othdev_con_state_;
+
+        othdevMsgPtr                          receive_msg_ptr_;
         boost::asio::deadline_timer     connect_timer_;//连接定时器
         boost::asio::deadline_timer     timeout_timer_;//连接超时定时器
         boost::asio::deadline_timer     query_timer_;//查询定时器
         boost::asio::deadline_timer     schedules_task_timer_;//控制任务执行定时器
 
-        size_t                          query_timeout_count_;//查询命令执行超时次数
-        size_t                          cur_msg_q_id_;//当前发送的消息序号
+        size_t                                        query_timeout_count_;//查询命令执行超时次数
+        size_t                                        cur_msg_q_id_;//当前发送的消息序号
 
         boost::recursive_mutex          data_deal_mutex;
         boost::recursive_mutex          alarm_state_mutex;
-        //devid<itemid<iLimittype,info> > >
         map<string ,map<int,map<int,CurItemAlarmInfo> > > mapItemAlarm;//设备监控量告警信息
 
-        CurItemAlarmInfo                netAlarm;//通讯异常告警
-        map<string,time_t>                               tmLastSaveTime;
-        map<string,time_t>                               tmLastSendHttpTime;
+        CurItemAlarmInfo                   netAlarm;//通讯异常告警
+        map<string,time_t>               tmLastSaveTime;
+        map<string,time_t>               tmLastSendHttpTime;
         map<string,pair<CommandAttrPtr,HMsgHandlePtr> >   dev_agent_and_com;//add by lk 2013-11-26
-        string                                           cur_dev_id_;//当前查询设备id
+        string                                      cur_dev_id_;//当前查询设备id
 
         ModleInfo                           &modleInfos_;
-        //boost::mutex                        task_mutex_;
-        //int									task_count_;
-        //boost::condition                    task_end_conditon_;
 
         map<string,pDevicePropertyExPtr>    run_config_ptr;//moxa下设备配置
         pMoxaPropertyExPtr                  moxa_config_ptr;//moxa配置
@@ -245,8 +244,9 @@ namespace hx_net
         http_request_session_ptr   &http_ptr_;
 
         boost::recursive_mutex                    opr_state_mutex_;
-        map<string,dev_opr_state>                 dev_opr_state_;//设备控制命令发送状态
-        boost::asio::io_service&                  io_service_;
+        map<string,dev_opr_state>            dev_opr_state_;//当前设备控制命令发送状态
+
+        boost::asio::io_service&                   io_service_;
 
         boost::recursive_mutex                    update_time_schedule_mutex_;//更新运行图锁
         boost::recursive_mutex                    update_cmd_schedule_mutex_;//更新运行图锁

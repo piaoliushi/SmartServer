@@ -12,6 +12,7 @@ unsigned char  Cmd_SwitchToSlave[]  ={0xaa,0x22,0x01,0x00,0x01,0x00,0x00,0x00,0x
 Antenna_message::Antenna_message(session_ptr pSession,boost::asio::io_service& io_service,DeviceInfo &devInfo)
     :base_message()
     ,d_devInfo(devInfo)
+    ,can_switch_timeout_timer_(io_service)
     ,task_timeout_timer_(io_service)
     ,d_cur_task_(-1)
     ,dev_run_state_(dev_unknown)
@@ -57,6 +58,7 @@ Antenna_message::Antenna_message(session_ptr pSession,boost::asio::io_service& i
 Antenna_message::~Antenna_message()
 {
      task_timeout_timer_.cancel();
+     can_switch_timeout_timer_.cancel();
 }
 
 void Antenna_message::get_relate_dev_info(string &sStationId,string &sDevId,string &sAttenaId)
@@ -267,16 +269,16 @@ int Antenna_message::get_run_state()
     return dev_run_state_;
 }
 
-void Antenna_message::restart_task_timeout_timer()
+void Antenna_message::start_can_switch_timeout_timer()
 {
 
-    task_timeout_timer_.cancel();
-    task_timeout_timer_.expires_from_now(boost::posix_time::seconds(60));
-    task_timeout_timer_.async_wait(boost::bind(&Antenna_message::schedules_task_time_out,
+    can_switch_timeout_timer_.cancel();
+    can_switch_timeout_timer_.expires_from_now(boost::posix_time::seconds(20));
+    can_switch_timeout_timer_.async_wait(boost::bind(&Antenna_message::schedules_can_switch_time_out,
         this,boost::asio::placeholders::error));
 }
 
-void Antenna_message::schedules_task_time_out(const boost::system::error_code& error)
+void Antenna_message::schedules_can_switch_time_out(const boost::system::error_code& error)
 {
      if(error!= boost::asio::error::operation_aborted){
         boost::recursive_mutex::scoped_lock lock(can_switch_mutex_);
@@ -295,18 +297,38 @@ void Antenna_message::set_run_state(int curState)
     boost::recursive_mutex::scoped_lock llock(run_state_mutex_);
     if(dev_run_state_ != curState)
     {
+        if(dev_run_state_ != dev_unknown)
          {
              boost::recursive_mutex::scoped_lock lock(can_switch_mutex_);
              can_switch_ = false;
+             start_can_switch_timeout_timer();
          }
 
-        restart_task_timeout_timer();
-
         dev_run_state_=curState;
+
+        if(d_cur_task_!=-1){
+            string  sResult = DEV_CMD_RESULT_DESC(CMD_RT_OK);
+            GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
+            d_cur_task_ = -1;
+            d_cur_user_.clear();
+        }else{
+            //如果当前正在执行开关机操作则记录天线倒换日志
+            int relatHostDevOpr = dev_no_opr;
+             int relatBackupDevOpr = dev_no_opr;
+            if(d_relate_host_tsmt_ptr_!=NULL)
+                 relatHostDevOpr = GetInst(SvcMgr).get_dev_opr_state(d_relate_host_tsmt_ptr_->sStationNum,
+                                                                                                             d_relate_host_tsmt_ptr_->sDevNum);
+            if(d_relate_backup_tsmt_ptr_!=NULL)
+                 relatBackupDevOpr = GetInst(SvcMgr).get_dev_opr_state(d_relate_backup_tsmt_ptr_->sStationNum,
+                                                                                                             d_relate_backup_tsmt_ptr_->sDevNum);
+        }
+
         GetInst(SvcMgr).get_notify()->OnDevStatus(d_devInfo.sDevNum,dev_run_state_+1);
-        if(m_pSession!=NULL)//GetInst(LocalConfig).local_station_id()
+        if(m_pSession!=NULL){
+
             m_pSession->send_work_state_message(d_devInfo.sStationNum,d_devInfo.sDevNum
                                             ,d_devInfo.sDevName,DEVICE_ANTENNA,(dev_run_state)dev_run_state_);
+        }
     }
 }
 
@@ -423,12 +445,12 @@ void Antenna_message::switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult
 {
 
     if(is_detecting()){
-        nExcutResult = 5;
+        nExcutResult = CMD_RT_GOING_DETECT_RUN_STATE;
         return;
     }
 
     if(!can_switch_antenna()){
-        eErrCode = EC_NO_ALLOW_SWITCH_ATTENA;//EC_UNKNOWN;
+        eErrCode = EC_NO_ALLOW_SWITCH_ATTENA;
         return;
     }
 
@@ -439,14 +461,14 @@ void Antenna_message::switch_antenna_pos(e_ErrorCode &eErrCode,int &nExcutResult
 
     if(nHostRunS == dev_running && get_run_state()==antenna_host)
     {
-        eErrCode = EC_CUR_HOST_RUN_SWITCH_CMD_CANCEL;//EC_FAILED;
-        nExcutResult = 9;
+        eErrCode = EC_CUR_HOST_RUN_SWITCH_CMD_CANCEL;
+        nExcutResult = CMD_RT_FAILURE_NO_ALLOW_SWITCH_ATTENA;
         return;
     }
     else if(nBackupRunS == dev_running && get_run_state()==antenna_backup)
     {
-        eErrCode = EC_CUR_BACKUP_RUN_SWITCH_CMD_CANCEL;//EC_FAILED;
-        nExcutResult = 9;
+        eErrCode = EC_CUR_BACKUP_RUN_SWITCH_CMD_CANCEL;
+        nExcutResult = CMD_RT_FAILURE_NO_ALLOW_SWITCH_ATTENA;
         return;
     }
 
@@ -466,7 +488,6 @@ void Antenna_message::excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult)
         switch_antenna_pos(eErrCode,nExcutResult);
     }
         break;
-
     }
 
     string  sResult = DEV_CMD_RESULT_DESC(nExcutResult);
@@ -475,14 +496,15 @@ void Antenna_message::excute_task_cmd(e_ErrorCode &eErrCode,int &nExcutResult)
 }
 
 
-void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode,
-                           bool bSnmp,Snmp *snmp,CTarget *target)
+void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,
+                                    map<int,string> &mapParam,int nMode,bool bSnmp,Snmp *snmp,CTarget *target)
 {
     eErrCode = EC_UNKNOWN;
      if(m_pSession ==NULL)
          return;
-    d_cur_task_ = icmdType;
-    d_cur_user_ = sUser;
+     d_cur_task_ = icmdType;
+     d_cur_user_ = sUser;
+
     if(cmd_excute_is_ok()){
         if(nMode)
             eErrCode = EC_OK;
@@ -498,17 +520,45 @@ void Antenna_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrC
         return;
     }
 
-    int nResult = 2;
+
+    int nResult = CMD_RT_GOING;
     excute_task_cmd(eErrCode,nResult);
 
     time_t   d_OprStartTime;
     std::time(&d_OprStartTime);
     tm *pCurTime = localtime(&d_OprStartTime);
-    m_pSession-> notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,d_devInfo.sDevName,d_devInfo.iDevType,sUser,
-                              d_cur_task_,pCurTime,false,eErrCode);
-
+    m_pSession-> notify_client_execute_result(d_devInfo.sStationNum,d_devInfo.sDevNum,d_devInfo.sDevName,
+                                                                      d_devInfo.iDevType,sUser,d_cur_task_,pCurTime,false,eErrCode);
+    //如果命令没有正常发送则将当前任务清除
+    if(eErrCode!=EC_CMD_SEND_SUCCEED)
+        d_cur_task_ = -1;
+    else{
+        //启动超时定时器检查状态是否反转
+         start_task_timeout_timer();
+    }
     m_pSession->set_opr_state(d_devInfo.sDevNum,dev_no_opr);
 }
 
+//启动任务定时器
+void Antenna_message::start_task_timeout_timer()
+{
+    task_timeout_timer_.expires_from_now(boost::posix_time::seconds(5));
+    task_timeout_timer_.async_wait(boost::bind(&Antenna_message::schedules_task_time_out,
+                                               this,boost::asio::placeholders::error));
+}
+
+//任务超时回调
+void Antenna_message::schedules_task_time_out(const boost::system::error_code& error)
+{
+    if(error!= boost::asio::error::operation_aborted)
+    {
+        if(d_cur_task_!=-1){
+            string  sResult = DEV_CMD_RESULT_DESC(CMD_RT_FILURE_TIMEOUT);//4：失败（超时）
+            GetInst(DataBaseOperation).AddExcuteCommandLog(d_devInfo.sDevNum,d_cur_task_,sResult,d_cur_user_);
+            d_cur_task_ = -1;
+            d_cur_user_.clear();
+        }
+    }
+ }
 
 }

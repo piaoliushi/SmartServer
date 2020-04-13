@@ -1,5 +1,9 @@
-#include "utility.h"
+﻿#include "utility.h"
 #include <QTextCodec>
+#ifdef Q_OS_WIN
+#include <Windows.h>
+#endif
+
 const unsigned short mtab[256] = {
     0x0000,0xc1c0,0x81c1,0x4001,0x01c3,0xc003,0x8002,0x41c2,
     0x01c6,0xc006,0x8007,0x41c7,0x0005,0xc1c5,0x81c4,0x4004,
@@ -500,10 +504,23 @@ void utf8ToGb2312(std::string& strUtf8)
     QTextCodec* gb2312Codec = QTextCodec::codecForName("gb2312");
 
     QString strUnicode= utf8Codec->toUnicode(strUtf8.c_str());
-    QByteArray ByteGb2312= gb2312Codec->fromUnicode(strUnicode);
+    QByteArray ByteGb2312= gb2312Codec->fromUnicode(strUtf8.c_str());
 
     strUtf8= ByteGb2312.data();
 }
+
+QString utf8ToGb2312(const char *strUtf8)
+{
+    QTextCodec* utf8Codec= QTextCodec::codecForName("utf-8");
+    QTextCodec* gb2312Codec = QTextCodec::codecForName("gb2312");
+
+    QString strUnicode= utf8Codec ->toUnicode(strUtf8);
+    QByteArray ByteGb2312= gb2312Codec ->fromUnicode(strUnicode);
+
+    strUtf8= ByteGb2312.data();
+    return QString::fromLocal8Bit(strUtf8);
+}
+
 void gb2312ToUtf8(std::string& strGb2312)
 {
 
@@ -515,3 +532,36 @@ void gb2312ToUtf8(std::string& strGb2312)
 
     strGb2312= ByteUtf8.data();
 }
+#ifdef Q_OS_WIN
+void UTF8_to_GB2312_Win(const char* utf8, string &gb2312_str)
+{
+    int len = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);
+    wchar_t* wstr = new wchar_t[len+1];
+    memset(wstr, 0, len+1);
+    MultiByteToWideChar(CP_UTF8, 0, utf8, -1, wstr, len);
+    len = WideCharToMultiByte(CP_ACP, 0, wstr, -1, NULL, 0, NULL, NULL);
+    char* str = new char[len+1];
+    memset(str, 0, len+1);
+    WideCharToMultiByte(CP_ACP, 0, wstr, -1, str, len, NULL, NULL);
+    delete[] wstr;
+    gb2312_str = str;
+    delete[] str;
+    return;
+}
+
+void GB2312_to_UTF8_Win(const char* gb2312, string& utf8_str)
+{
+    int len = MultiByteToWideChar(CP_ACP, 0, gb2312, -1, NULL, 0);
+    wchar_t* wstr = new wchar_t[len+1];
+    memset(wstr, 0, len+1);
+    MultiByteToWideChar(CP_ACP, 0, gb2312, -1, wstr, len);
+    len = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, NULL, 0, NULL, NULL);
+    char* str = new char[len+1];
+    memset(str, 0, len+1);
+    WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str, len, NULL, NULL);
+    delete[] wstr;
+    utf8_str = str;
+    delete[] str;
+    return;
+}
+#endif

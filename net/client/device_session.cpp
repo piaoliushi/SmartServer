@@ -884,9 +884,6 @@ void device_session::send_cmd_to_dev(CommandUnit cmdUnit,e_ErrorCode &eErrCode)
 //发送命令到设备
 void device_session::send_cmd_to_dev(string sDevId,int cmdType,int childId,e_ErrorCode &eErrCode)
 {
-    //同步等待
-    //boost::asio::deadline_timer delay_send_timer(io_service_, boost::posix_time::milliseconds(2));
-    //    delay_send_timer.wait();
 
     eErrCode = EC_CMD_CODE_NOT_FOUND;
     if(modleInfos_.netMode.inet_type == NET_MOD_HTTP){
@@ -1115,36 +1112,6 @@ void device_session::http_handle_read_content(const boost::system::error_code& e
         start_connect_timer(moxa_config_ptr->connect_timer_interval);
     }
 }
-
-
-//等待任务结束
-//void device_session::wait_task_end()
-//{
-//    boost::mutex::scoped_lock lock(task_mutex_);
-//    while(task_count_>0){
-//        task_end_conditon_.wait(task_mutex_);
-//    }
-//}
-
-//提交任务
-//void device_session::task_count_increase()
-//{
-//    boost::mutex::scoped_lock lock(task_mutex_);
-//    ++task_count_;
-//}
-////任务递减
-//void device_session::task_count_decrease()
-//{
-//    boost::mutex::scoped_lock lock(task_mutex_);
-//    --task_count_;
-//    task_end_conditon_.notify_all();
-//}
-
-//int device_session::task_count()
-//{
-//    boost::mutex::scoped_lock lock(task_mutex_);
-//    return task_count_;
-//}
 
 void device_session::http_close_all(){
 
@@ -1383,7 +1350,7 @@ void device_session::notify_client_execute_result(string sStationId,string sDevI
 
         send_command_execute_result_message(sStationId,sDevId,
                                             devType,devName,user,(e_MsgType)cmdAckMsgType,
-                                            (e_ErrorCode)eResult);//DEVICE_TRANSMITTER
+                                            (e_ErrorCode)eResult);
     }
 }
 
@@ -1541,7 +1508,7 @@ bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opR
 {
 
     //关联机器是否有命令正在执行
-    if(relate_device_exec_now(sDevId,opResult,cmdType)){
+    if(relate_device_exec_now(sDevId,opResult,cmdType) && nMode<1){
         return false;
     }
 
@@ -1559,8 +1526,6 @@ bool device_session::start_exec_task(string sDevId,string sUser,e_ErrorCode &opR
     if(curOprState==dev_no_opr){
 
         set_current_opr_type(sDevId,sUser,cmdType);
-
-        //set_opr_state(sDevId,dev_opr_excuting);//设置正在执行任务标志
     }
     else{
         opResult = EC_UNFINISHED_CMD_EXIST;//存在未完成的控制命令
@@ -2215,6 +2180,37 @@ void  device_session::record_alarm_and_notify(string &devId,float fValue,const f
                                      ,curAlarm.sReason,curAlarm.alarmLevel);
             // 联动.....
             cout<<"alarm recover ---"<<str_time<<"---DevId="<<sDesDevId<<"---AlarmId = "<<curAlarm.nAlarmId<<endl;
+        }
+    }
+}
+
+//add by lk 2020-4-8
+void device_session::record_unexcept_shutdown_alarm_and_notify(string &devId,bool bMod)
+{
+
+    //存储告警到数据库---0:告警产生
+    if(!bMod){
+
+        CurItemAlarmInfo  curAlarm;
+        curAlarm.alarmLevel = 2;
+        curAlarm.nLimitId = 4;
+        curAlarm.nModuleId = 0;
+        curAlarm.nModuleType = 0;
+        curAlarm.nAlarmId = -1;
+        curAlarm.nType = 512;
+        curAlarm.startTime = time(0);//记录时间
+        curAlarm.sReason = str(boost::format("提前关机%1%")%CONST_STR_ALARM_CONTENT(curAlarm.nLimitId));
+
+        bool bRslt = GetInst(DataBaseOperation).AddItemAlarmRecord(devId,curAlarm.startTime, 512,4,512, 1,curAlarm. sReason,curAlarm.nAlarmId,2);
+        if(bRslt==true){
+            string sDesDevId = devId;
+            map_dev_ass_parse_ptr_[devId]->get_parent_device_id(sDesDevId);
+            if(GetInst(LocalConfig).http_svc_use()){
+
+                http_ptr_->send_http_alarm_messge_to_platform(sDesDevId,modleInfos_.mapDevInfo[devId].iDevType,
+                                                              bMod,curAlarm,curAlarm.sReason);
+            }
+
         }
     }
 }

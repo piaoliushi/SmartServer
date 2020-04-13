@@ -2,6 +2,7 @@
 #define UTILITY_H
 
 #include <string>
+#include <QString>
 using namespace std;
 
 #define  Getbit(x,n)  ((x>>n) & 0x01)
@@ -35,5 +36,11 @@ int SF_checkSum(unsigned char* src,int len);
 string subneedstr(const string strSrc,const string staDes,const string endDes);
 
 void utf8ToGb2312(std::string& strUtf8);
+QString utf8ToGb2312(const char *strUtf8);
 void gb2312ToUtf8(std::string& strGb2312);
+#ifdef Q_OS_WIN
+void UTF8_to_GB2312_Win(const char* utf8, string & gb2312_str);
+void GB2312_to_UTF8_Win(const char* gb2312, string & utf8_str);
+#endif
+
 #endif // UTILITY_H
