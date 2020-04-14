@@ -509,7 +509,7 @@ void utf8ToGb2312(std::string& strUtf8)
     strUtf8= ByteGb2312.data();
 }
 
-QString utf8ToGb2312(const char *strUtf8)
+/*QString utf8ToGb2312(const char *strUtf8)
 {
     QTextCodec* utf8Codec= QTextCodec::codecForName("utf-8");
     QTextCodec* gb2312Codec = QTextCodec::codecForName("gb2312");
@@ -519,7 +519,7 @@ QString utf8ToGb2312(const char *strUtf8)
 
     strUtf8= ByteGb2312.data();
     return QString::fromLocal8Bit(strUtf8);
-}
+}*/
 
 void gb2312ToUtf8(std::string& strGb2312)
 {
