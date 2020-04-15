@@ -211,7 +211,7 @@ bool Bohui_Protocol::creatDeviceExcutResultReportMsg(int nReplyId,int nCmdType,s
         xml_resps->append_node(xml_dev_resps);
 
         xml_dev_resps->append_attribute(xml_reportMsg.allocate_attribute("ID",xml_reportMsg.allocate_string(sDevId.c_str())));
-        if(devType == 7)
+        if(devType == 7)//切换器
             xml_dev_resps->append_attribute(xml_reportMsg.allocate_attribute("DevType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(116).c_str())));
         else
             xml_dev_resps->append_attribute(xml_reportMsg.allocate_attribute("DevType",xml_reportMsg.allocate_string(boost::lexical_cast<std::string>(devType).c_str())));
@@ -1522,9 +1522,11 @@ void Bohui_Protocol::_controlSwitchCommand(int nDevType,xml_node<> *rootNode,int
 
     rapidxml::xml_node<>* devNode = rootNode->first_node("Dev");
     while(devNode!=NULL){
+
+        rapidxml::xml_attribute<char> * attr_DevType= devNode->first_attribute("Type");
+        rapidxml::xml_attribute<char> * attr_DevID= devNode->first_attribute("ID");
+
         rapidxml::xml_node<> *controlNode = devNode->first_node("Control");
-        rapidxml::xml_attribute<char> * attr_DevType= controlNode->first_attribute("Type");
-         rapidxml::xml_attribute<char> * attr_DevID= controlNode->first_attribute("ID");
         if(attr_DevType!=NULL && attr_DevID!=NULL){
             string devType = attr_DevType->value();
             if(devType == "116")//切换器类型
@@ -1541,7 +1543,9 @@ void Bohui_Protocol::_controlSwitchCommand(int nDevType,xml_node<> *rootNode,int
                             devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
                             commandmsg_->set_sdevid(sDevId);
                             CommandParam* parma = commandmsg_->add_cparams();
-                            parma->set_sparamvalue(attr_SwitchToValue->value());
+                            int curValue = (atoi(attr_SwitchToValue->value()) +2)%3;
+                            string  sValue = str(boost::format("%d")%curValue);
+                            parma->set_sparamvalue(sValue.c_str());
                             GetInst(SvcMgr).excute_command(sDevId,MSG_0401_SWITCH_OPR,Bohui_Protocol::DstCode,commandmsg_);
                         }
                     }else{

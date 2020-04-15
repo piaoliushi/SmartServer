@@ -53,7 +53,7 @@ const char CONST_STR_BOHUI_TYPE[][32] = { "TransmitterQuery","EnvMonDevQuery","L
                                           "AlarmParamSetD","CmdStatusReport","QualityRealtimeReport","QualityAlarmReport",
                                           "CommunicationReport","EnvQualityRealtimeReport","EnvAlarmReport","LinkDevQualityReport",
                                           "LinkDevAlarmReport","XmlParseError","XmlContentError","EnvQualityReport","LocalConfigData",
-                                          "DeviceControl","ManualTurnControl","SwitchDevStatusReport"};
+                                          "DevControl","ManualTurnControl","SwitchDevStatusReport"};
 
 
 
