@@ -195,7 +195,6 @@ con_state device_session::get_data_return_state(string sDevId)
 void device_session::set_data_return_state(string sDevId,bool nState)
 {
      boost::recursive_mutex::scoped_lock llock(data_return_state_mutex_);
-
      map<string,DeviceInfo>::iterator iter = modleInfos_.mapDevInfo.find(sDevId);
      if(iter!= modleInfos_.mapDevInfo.end()){
          if(has_data_return_[sDevId]!=nState){
@@ -1191,18 +1190,11 @@ void device_session::schedules_task_time_out(const boost::system::error_code& er
     map<string,DeviceInfo>::iterator witer = modleInfos_.mapDevInfo.begin();
     for(;witer!=modleInfos_.mapDevInfo.end();++witer)
     {
-
-
-        //notify_test_message(witer->second.sDevName);
-
-
-
         boost::recursive_mutex::scoped_lock lock(update_cmd_schedule_mutex_);//增加锁防止读写竞争
         vector<Command_Scheduler>::iterator cmd_iter = witer->second.vCommSch.begin();
         for(;cmd_iter!=witer->second.vCommSch.end();++cmd_iter)
         {
 
-            Remind_Scheduler* curRemindItem = GetInst(StationConfig).get_device_remind_info((*cmd_iter).remindnumber);
             //控制参数提取
             map<int,string> mapParam;//保存参数
             //携带参数
@@ -1568,8 +1560,6 @@ void device_session::save_monitor_record(string sDevId,DevMonitorDataPtr curData
 
     //amend by lk at 2017-7-12 无论是否记录成功都更新保存时间
     tmLastSaveTime[sDevId] = tmCurTime;
-
-
 }
 
 //判断当前时间是否需要保存监控数据
@@ -1763,8 +1753,7 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
 
         string sDesDevId = sDevId;
         map_dev_ass_parse_ptr_[sDevId]->get_parent_device_id(sDesDevId);
-        http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,
-                                                     curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
+        http_ptr_->send_http_data_messge_to_platform(sDesDevId,nDevType,curDataPtr,modleInfos_.mapDevInfo[sDevId].map_MonitorItem);
     }
 
     //检测当前报警状态(设备运行状态需准备好)

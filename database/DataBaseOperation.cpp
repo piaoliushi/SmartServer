@@ -135,7 +135,7 @@ bool DataBaseOperation::GetDeviceDataDictionary(map<string,map<int,string> >& ma
 
     QSqlQuery query(db);
     QString strSql=QString("select type,code,name,remark from data_dictionary where type in('DeviceType','CommandType','s_tsmt_target_desc','s_sh_tsmt_rf_mod','s_sh_tsmt_gps_s',\
-                           's_sh_tsmt_cpilot','s_sh_tsmt_chpn','s_rsps_result_desc','s_dtmb_mod','s_dtmb_base','s_cmd_result_desc','s_cmd_opr_desc','s_base','s_alarm_event','s_cmd_excute_mode') order by type,code");
+                           's_sh_tsmt_cpilot','s_sh_tsmt_chpn','s_rsps_result_desc','s_dtmb_mod','s_dtmb_base','remind_notify_originator','s_cmd_result_desc','s_cmd_opr_desc','s_base','s_alarm_event','s_cmd_excute_mode') order by type,code");
             query.prepare(strSql);
     if(!query.exec()){
         cout<<query.lastError().text().toStdString()<<"GetDataDictionary---query---error!"<<endl;

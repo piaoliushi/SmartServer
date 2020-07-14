@@ -32,6 +32,7 @@ namespace hx_net
 
         if(GetInst(LocalConfig).http_svc_use()==true){
             _web_handler = new web_handler;
+            string httpPort = GetInst(LocalConfig).http_svc_port();
             http::async_server<web_handler>::options options(*_web_handler);
             options.address(GetInst(LocalConfig).http_svc_ip())
                     .port(GetInst(LocalConfig).http_svc_port())

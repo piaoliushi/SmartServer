@@ -29,8 +29,8 @@ namespace hx_net
 		if(IsStarted())
 			return true;
 
-		if(!m_pClientMgrPtr)
-			m_pClientMgrPtr = boost::shared_ptr<ServerMgr>(new ServerMgr(GetInst(LocalConfig).local_port()));
+        if(!m_pClientMgrPtr)
+            m_pClientMgrPtr = boost::shared_ptr<ServerMgr>(new ServerMgr(GetInst(LocalConfig).local_port()));
 
 		if(!m_pDevMgrPtr)
 			m_pDevMgrPtr = boost::shared_ptr<DevClientMgr>(new DevClientMgr); 
@@ -39,7 +39,7 @@ namespace hx_net
 		//启动boost线程池，尺寸2
 		GetInst(boost::threadpool::pool).size_controller().resize(2);
 		//连接设备
-		m_pDevMgrPtr->connect();
+        m_pDevMgrPtr->connect();
 
 		svc_state_ = DEVSVC_RUNNING;
 		return true;

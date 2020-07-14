@@ -157,13 +157,7 @@ namespace hx_net
                 //设置运行状态
                 set_run_state(irunstate);
             }
-            //不再运行的发射机将三大指标置零
-            if(get_run_state()==dev_shutted_down)
-            {
-                d_curData_ptr->mValues[0].fValue=0;
-                d_curData_ptr->mValues[1].fValue=0;
-                d_curData_ptr->mValues[2].fValue=0;
-            }
+
 
             d_checkData_ptr = d_curData_ptr;
             if(d_ptransmmit->IsStandardCommand()){
@@ -219,10 +213,21 @@ namespace hx_net
     //设置运行状态
     void Tsmt_message::set_run_state(int curState)
     {
+
+        //不再运行的发射机将三大指标置零
+        if(curState==dev_shutted_down)
+        {
+            d_curData_ptr->mValues[0].fValue=0;
+            d_curData_ptr->mValues[1].fValue=0;
+            d_curData_ptr->mValues[2].fValue=1;
+        }
+
         boost::recursive_mutex::scoped_lock llock(run_state_mutex_);
         if(dev_run_state_ != curState)
         {
             dev_run_state_=curState;
+
+
             GetInst(SvcMgr).get_notify()->OnDevStatus(d_devInfo.sDevNum,dev_run_state_+1);
             //广播设备状态到在线客户端
             m_pSession->send_work_state_message(d_devInfo.sStationNum,d_devInfo.sDevNum
@@ -248,6 +253,14 @@ namespace hx_net
                 if(curDevIsMonitorChl[0]){
                     //上报告警
                     m_pSession->record_unexcept_shutdown_alarm_and_notify(d_devInfo.sDevNum,0);
+
+
+                    //在 监测时段发射机开关机状态出现改变时记录一次监测数据
+                    time_t tmCurTime;
+                    time(&tmCurTime);
+                    GetInst(DataBaseOperation).AddItemMonitorRecord(d_devInfo.sDevNum,tmCurTime,
+                                                                    d_curData_ptr,d_devInfo.map_MonitorItem);
+
                 }
             }
         }

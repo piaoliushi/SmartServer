@@ -26,9 +26,9 @@ namespace hx_net
         ,acceptor_(io_service_pool_.get_io_service(),tcp::endpoint(tcp::v4(),port))
         ,schedules_remind_timer_(io_service_pool_.get_io_service())
 	{
-		start_accept();
+        start_accept();
 
-        //start_remind_schedules_timer();//启动提醒定时器
+        start_remind_schedules_timer();//启动提醒定时器
 	}
 
     LocalServer::~LocalServer()
@@ -602,7 +602,8 @@ namespace hx_net
         remindEventNotifyPtr remindMsgPtr(new RemindEventNotify);
         remindMsgPtr->set_eeventtype(eventType);
         remindMsgPtr->set_eremindtype(remindType);
-        remindMsgPtr->set_sdispatcher(REMIND_ORIGINATOR_TYPE(nDispatcherType));
+        string curOri = REMIND_ORIGINATOR_TYPE(nDispatcherType);
+        remindMsgPtr->set_sdispatcher(curOri);
         remindMsgPtr->set_nneedconfirm(needConfirm);
         remindMsgPtr->set_ntimeout(timeOutLen);
         remindMsgPtr->set_ntokenid(tokenId);
@@ -613,11 +614,11 @@ namespace hx_net
             if(curDev==NULL){
                 return false;
             }else{
-
+                //REMIND_TYPE(REMIND_TYPE_TIME_TRUNOFF);
                 string sContent = curDev->sDevName;
+                remindMsgPtr->set_scontent(sContent);
             }
         }
-
 
         remindMsgPtr->set_shappentime(sHappenTime);
         remindMsgPtr->set_sreserved(sReserved);

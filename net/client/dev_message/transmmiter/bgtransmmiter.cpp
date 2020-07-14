@@ -109,15 +109,21 @@ namespace hx_net
        }
        case BEIGUANG_AM_1KW:
        {
-           if(data[0] == 0x06 && data[1] == 0x02)
+           //if(data[0] == 0x06 && data[1] == 0x02)
+           if(data[0] == m_addresscode && data[1] == 0x02)
                return 0;
            else
            {
                unsigned char cDes[2]={0};
                cDes[0] = 0x06;
                cDes[1] = 0x02;
-               return kmp(data,number,cDes,2);
+               return kmp(data,nDataLen,cDes,2);
            }
+       }
+       case BEIGUANG_AM_ZF50C:
+       {
+           if(data[0]==0x7E && data[1]==0xE7)
+               return data[2];
        }
        default:
            return RE_NOPROTOCOL;
@@ -170,6 +176,8 @@ namespace hx_net
        {
            return BeiguangCDR1KwData(data,data_ptr,nDataLen,runstate);
        }
+       case BEIGUANG_AM_ZF50C:
+           return BeiguangZF50CKwData(data,data_ptr,nDataLen,runstate);
        default:
            return RE_NOPROTOCOL;
        }
@@ -183,6 +191,7 @@ namespace hx_net
        case BEIGUANG_FM_3KW:
        case BEIGUANG_FM_5KW:
        case BEIGUANG_FM_10KW:
+       case BEIGUANG_AM_ZF50C:
            return true;
        default:
            break;
@@ -192,7 +201,24 @@ namespace hx_net
 
    void BgTransmmiter::GetSignalCommand(devCommdMsgPtr lpParam, CommandUnit &cmdUnit)
    {
-
+       switch(m_subprotocol)
+       {
+       case BEIGUANG_AM_ZF50C:
+       {
+           if(lpParam->cparams_size()<0)
+               break;
+           cmdUnit.commandLen = 6;
+           cmdUnit.commandId[0] = 0x7E;
+           cmdUnit.commandId[1] = 0xE7;
+           cmdUnit.commandId[2] = 0x02;
+           cmdUnit.commandId[3] = m_addresscode;
+           cmdUnit.commandId[4] = atoi(lpParam->cparams(0).sparamvalue().c_str());
+           cmdUnit.commandId[5] = 0xFF;
+       }
+       break;
+       default:
+           break;
+       }
    }
 
    void BgTransmmiter::GetAllCmd(CommandAttribute &cmdAll)
@@ -328,6 +354,30 @@ namespace hx_net
            cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
            tmUnit.commandId[1] = 0x09;
            cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
+       }
+           break;
+       case BEIGUANG_AM_ZF50C:
+       {
+           tmUnit.ackLen = 3;
+           tmUnit.commandId[0] = 0x7E;
+           tmUnit.commandId[1] = 0xE7;
+           tmUnit.commandId[2] = 0x02;
+           tmUnit.commandId[3] = m_addresscode;
+           tmUnit.commandId[4] = 0x03;
+           tmUnit.commandId[5] = 0xFF;
+           tmUnit.commandLen = 6;
+           cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+           tmUnit.ackLen = 0;
+           tmUnit.commandId[4] = 0x09;
+           cmdAll.mapCommand[MSG_TRANSMITTER_TURNOFF_OPR].push_back(tmUnit);
+           tmUnit.commandId[4] = 0x0C;
+           cmdAll.mapCommand[MSG_TRANSMITTER_TURNON_OPR].push_back(tmUnit);
+           tmUnit.commandId[4] = 0x0A;
+           cmdAll.mapCommand[MSG_TRANSMITTER_MIDDLE_POWER_TURNON_OPR].push_back(tmUnit);
+           tmUnit.commandId[4] = 0x0B;
+           cmdAll.mapCommand[MSG_TRANSMITTER_LOW_POWER_TURNON_OPR].push_back(tmUnit);
+           tmUnit.commandId[4] = 0x0F;
+           cmdAll.mapCommand[MSG_DEV_RESET_OPR].push_back(tmUnit);
        }
            break;
        case BEIGUANG_CDR_1KW:{
@@ -1131,6 +1181,65 @@ namespace hx_net
        {
            dtinfo.fValue = Getbit(data[41],i);
            data_ptr->mValues[86+i] = dtinfo;
+       }
+       return RE_SUCCESS;
+   }
+
+   int BgTransmmiter::BeiguangZF50CKwData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &runstate)
+   {
+       if(data[4]!=0x03)
+           return RE_CMDACK;
+       int indexpos=0;
+       DataInfo dtinfo;
+       dtinfo.bType = false;
+       unsigned char *Analog = data+11;
+       dtinfo.fValue = Analog[0]*Analog[0]/2550.00;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = Analog[1]*Analog[1]/2550.00;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = 1;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = Analog[3]/255.00;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.fValue = Analog[2]/255.00;
+       data_ptr->mValues[indexpos++] = dtinfo;
+       for(int i=0;i<8;++i)
+       {
+           dtinfo.fValue = Analog[4+i]/255.00;
+           data_ptr->mValues[indexpos++] = dtinfo;
+       }
+       dtinfo.fValue = Analog[12]*256+Analog[13];
+       data_ptr->mValues[indexpos++] = dtinfo;
+       dtinfo.bType = true;
+       for(int i=0;i<8;++i)
+       {
+           dtinfo.fValue = Getbit(data[5],i);
+           data_ptr->mValues[indexpos++] = dtinfo;
+       }
+       for(int i=0;i<8;++i)
+       {
+           dtinfo.fValue = Getbit(data[6],i);
+           data_ptr->mValues[indexpos++] = dtinfo;
+       }
+       for(int i=0;i<4;++i)
+       {
+           dtinfo.fValue = Getbit(data[7],i);
+           data_ptr->mValues[indexpos++] = dtinfo;
+       }
+       for(int i=0;i<8;++i)
+       {
+           dtinfo.fValue = Getbit(data[8],i);
+           data_ptr->mValues[indexpos++] = dtinfo;
+       }
+       for(int i=0;i<3;++i)
+       {
+           dtinfo.fValue = Getbit(data[9],i);
+           data_ptr->mValues[indexpos++] = dtinfo;
+       }
+       for(int i=0;i<8;++i)
+       {
+           dtinfo.fValue = Getbit(data[10],i);
+           data_ptr->mValues[indexpos++] = dtinfo;
        }
        return RE_SUCCESS;
    }

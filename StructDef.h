@@ -129,16 +129,17 @@ typedef enum GMEPROTOCOL
 typedef enum BGPROTOCOL
 {
 	BEIJING_BEIGUANG_300W = 0,
-	BEIGUANG_FM_3KW       = 1,
-	BEIGUANG_TV_1KW       = 2,
-	BEIGUANG_FM_1KW       = 3,
-	BEIGUANG_AM_10KW      = 4,
+    BEIGUANG_FM_3KW         = 1,
+    BEIGUANG_TV_1KW          = 2,
+    BEIGUANG_FM_1KW         = 3,
+    BEIGUANG_AM_10KW       = 4,
 	BEIJING_BEIGUANG_100W = 5,
-	BEIGUANG_FM_5KW       = 6,
-	BEIGUANG_FM_10KW      = 7,
-	BEIGUANG_AM_1KW       = 8,
-    BEIGUANG_FM_618B      = 10,
-    BEIGUANG_CDR_1KW      = 11,
+    BEIGUANG_FM_5KW          = 6,
+    BEIGUANG_FM_10KW        = 7,
+    BEIGUANG_AM_1KW         = 8,
+    BEIGUANG_AM_ZF50C       = 9,
+    BEIGUANG_FM_618B         = 10,
+    BEIGUANG_CDR_1KW        = 11,
 }BgSubProtocol,*pBgSubProtocol;
 
 typedef enum CDPROTOCOL

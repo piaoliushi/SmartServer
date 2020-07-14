@@ -25,10 +25,10 @@ namespace hx_net
 {
 
     Link_message::Link_message(session_ptr pSession,DeviceInfo &devInfo)
-        :m_pSession(pSession)
-        ,d_devInfo(devInfo)
+        :d_devInfo(devInfo)
         ,curRoute_(-1)
     {
+        m_pSession = boost::dynamic_pointer_cast<device_session>(pSession);
         initOid();
         if(IsStandardCommand())
             d_curData_ptr = DevMonitorDataPtr(new Data);

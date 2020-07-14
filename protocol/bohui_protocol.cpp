@@ -1543,7 +1543,7 @@ void Bohui_Protocol::_controlSwitchCommand(int nDevType,xml_node<> *rootNode,int
                             devCommdMsgPtr commandmsg_(new DeviceCommandMsg);
                             commandmsg_->set_sdevid(sDevId);
                             CommandParam* parma = commandmsg_->add_cparams();
-                            int curValue = (atoi(attr_SwitchToValue->value()) +2)%3;
+                            int curValue = atoi(attr_SwitchToValue->value());
                             string  sValue = str(boost::format("%d")%curValue);
                             parma->set_sparamvalue(sValue.c_str());
                             GetInst(SvcMgr).excute_command(sDevId,MSG_0401_SWITCH_OPR,Bohui_Protocol::DstCode,commandmsg_);

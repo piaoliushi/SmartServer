@@ -169,7 +169,7 @@ namespace hx_net
        dtinfo.bType = true;
        dtinfo.fValue = data[25]==1 ? dev_running:dev_shutted_down;
        data_ptr->mValues[10] = dtinfo;
-       runstate = data[25]==1 ? dev_running:dev_shutted_down;
+       //runstate = data[25]==1 ? dev_running:dev_shutted_down;
        dtinfo.fValue = 0;
        for(int i=11;i<26;++i)
        {
