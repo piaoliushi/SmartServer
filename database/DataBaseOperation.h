@@ -22,7 +22,7 @@ public:
 
     //打开数据库
     bool OpenDb(const std::string& serveraddress,const std::string& database,const std::string& uid,
-        const std::string& pwd,int timeout=0,std::string link_driver="QODBC",std::string driverName="SQL Native Client");
+        const std::string& pwd,int timeout=0,std::string link_driver="QPSQL",std::string driverName="SQL Native Client");
 
     //关闭数据库
     bool CloseDb();

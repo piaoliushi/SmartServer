@@ -99,8 +99,15 @@ typedef enum PROTOCOL
     RVR                   = 30, //RVR系列
     ZHENGTAI              = 31, //正泰
     WUXI_HUAKANG          = 32,//无锡华康
+    XUN_TIAN              = 33,//循天
+
 
 }Protocol,*pProtocol;
+//循天
+typedef enum XTPROTOCOL
+{
+    XT_DM = 0,
+}XtSubProtocol;
 
 typedef enum ANTENAPROTOCOL
 {

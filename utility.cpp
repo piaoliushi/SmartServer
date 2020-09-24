@@ -1,4 +1,4 @@
-﻿#include "utility.h"
+#include "utility.h"
 #include <QTextCodec>
 #ifdef Q_OS_WIN
 #include <Windows.h>
@@ -119,7 +119,7 @@ int HexChar( char src )
         return 0x10;
 }
 
-int Dec2Hex(int input) //10进制转换成相同数字的进制
+int Dec2Hex(int input)
     {
         int hi = (input / 10);
         int low = input % 10;

@@ -261,7 +261,7 @@ bool DataBaseOperation::GetAllDevInfo( vector<ModleInfo>& v_Linkinfo,string sSta
                     //获得设备配置信息,且判断该设备是否授权
                     GetDevInfo(db,net1query.value(0).toString().toStdString(),dev,sServerId);
                     if(dev.sDevNum.length()>0)
-                    info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
+                        info.mapDevInfo[net1query.value(0).toString().toStdString()]=dev;
                 }
             }
 

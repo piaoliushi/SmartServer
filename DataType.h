@@ -77,26 +77,26 @@ enum dev_opr_state
 {
     dev_no_opr = -1,
     dev_opr_excuting,
-	dev_opr_turn_on, //正在开机
+    dev_opr_turn_on,                    //正在开机
     dev_opr_soft_onekey_turn_on, //正在服务器一键开机
     dev_opr_996_onekey_turn_on, //正在996一键开机
-    dev_opr_auto_switch_backup,//正在自动倒备机
-	dev_opr_turn_off,//正在关机
-    dev_opr_switch_attena,//正在切换天线
+    dev_opr_auto_switch_backup,  //正在自动倒备机
+    dev_opr_turn_off,                    //正在关机
+    dev_opr_switch_attena,           //正在切换天线
     dev_opr_996_onekey_turn_off, //正在996关机
     dev_opr_other_task,// 正在执行其他任务
 };
 
 enum Dev_Type
 {
-	DEV_TRANSMITTER = 0,//发射机
-	DEV_ANTENNA     ,   //天线
-	DEV_OTHER       ,   //其他设备
-	DEV_ELCPOWER    ,   //电力设备
-	DEV_ENVIR       ,   //环境设备
-	DEV_TRANSMITTER_AGENT,//发射机代理
-	DEV_MEDIA       ,     //媒体设备
-	DEV_NODEFIN     ,
+    DEV_TRANSMITTER = 0,//发射机
+    DEV_ANTENNA     ,   //天线
+    DEV_OTHER       ,   //其他设备
+    DEV_ELCPOWER    ,   //电力设备
+    DEV_ENVIR       ,   //环境设备
+    DEV_TRANSMITTER_AGENT,//发射机代理
+    DEV_MEDIA       ,     //媒体设备
+    DEV_NODEFIN     ,
 };
 
 //开机等级，适用于中波发射机，默认高功率
@@ -116,107 +116,6 @@ enum Alarm_Level
 	SMSANDTEL,//短信加电话
 };
 
-typedef struct 
-{
-	string sAddr;		// 数据库地址
-	string sName;		// 数据库名称
-	string sUser;		// 用户名
-	string sPass;		// 密码
-	int	   nTimeout;	// 连接超时时间
-} DatabaseParameters;
-
-//台站信息
-typedef struct 
-{
-	string sNumber;         //编号
-	string sName;           //名称
-	string sAddress;        //地址
-	string sAdmin;          //负责人
-	string sTelephone;      //电话
-	string sMobileTelephone;//手机
-	string sEmail;          //E-mail
-	string sNote;           //备注
-} StationInformation;
-
-
-
-
-//发射机协议
-typedef struct 
-{
-	int    nNumber;             //发射机协议
-	int    nProtocolMainNumber; //主协议
-	string sProtocolMainName;   //主协议名称
-	int    nProtocolSubNumber;  //子协议号
-	string sProtocolSubName;    //子协议名称
-	int    nAckLength;          //查询命令响应长度
-} TransmitterProtocol;
-
-//天线信息
-typedef struct 
-{
-	string sStationNumber;          //台站编号
-	string sNumber;                 //编号
-	string sName;                   //名称
-	string sAddress;                //ip地址
-	int    nPort;                   //端口
-	int    nAddrCode;               //地址码
-	bool   bUseAgent;               //是否使用代理
-	bool   bAutoSwitch;             //是否设置自动倒备机
-	bool   bHostToBackup;           //true：主->备，false:备->主
-} AntennaInformation;
-
-//天线与发射机关联信息
-typedef struct 
-{
-	string sStationNumber;
-	string sHostNumber;
-	string sBackupNumber;
-	string sAntennaNumber;
-}AssociateInfo;
-
-typedef struct
-{
-	string sStationNumber;//台站编号
-	string sServerNumber; //服务编号
-	string sServerName;   //服务名称
-	int    iServerType;   //服务类型
-	string sServerAddress;//服务地址
-	int    iServerPort;   //服务端口
-	int    iVideoPort;    //视频端口
-	string sProxyAddress; //代理地址
-	string sNote;         //备注
-}ServerInfo;
-
-//监控项信息
-typedef struct 
-{
-	int    nMonitoringIndex;        //监测项编号
-	string sMonitoringName;         //监测项名称
-	double dRatio;                  //比例系数
-	int    nMonitoringType;         //监控类型
-	double dLowerLimit;             //下限
-	double dUpperLimit;             //上限
-	bool   bAlarmEnable;            //是否报警
-	int    nAlarmLevel;             //报警等级
-	bool   bIsUpload;               //是否上传
-} DevParamerMonitorItem;
-
-
-//定时开关机计划
-typedef struct 
-{
-	string sGuid;                  //guid
-	string sStationNumber;         //台站编号
-	string sTransmitterNumber;     //发射机编号
-	bool   bOpenEnable;            //开机开启
-	int    nOpenDay;               //星期(开)
-	tm     tmOpenTime;             //开机时间
-	bool   bCloseEnable;           //关机开启
-	int    nCloseDay;              //星期(关)
-	tm     tmCloseTime;            //关机时间
-} TransmitterSchedule;
-
 //监控时间计划(非监控时间段不进行报警检测)----2012.3.15 added by lk
 typedef struct 
 {
@@ -228,89 +127,6 @@ typedef struct
 	tm      tmStartTime;            //开始时间
 	tm      tmCloseTime;            //结束时间
 }MonitorScheduler;
-
-
-//发射机信息
-typedef struct 
-{
-	string    sStationNumber;       //台站编号
-	string    sNumber;              //编号
-	string    sTransmitterName;     //发射机名
-	string    sProgramName;         //节目名
-	int       nProgramType;         //节目类型
-	int       nAddressCode;         //地址码
-	double    dPower;               //功率
-	//string  sPower;               //功率(2012.3.15启用)
-	int          nPowerUnit;           //功率单位
-	string    sFrequency;           //频率
-	TransmitterProtocol Protocol;   //协议
-	string      sAddress;             //ip地址
-	int            nPort;                //端口
-	bool        IsBackup;             //是否为备机
-	bool        IsUsed;               //使用标志
-	int            nHxOpenChannel;       //开机通道
-	int            nHxCloseChannel;      //关机通道
-	int            nHxChannelType;       //通道类型
-	int            nMsLength;            //消息长度
-	int            nMsLength2;           //消息长度2(保留)
-	bool         bUseAgent;            //是否采用代理
-	double    dSwtichPower;         //倒机门限
-
-	map<int,DevParamerMonitorItem> mapMonitorItem;//发射机对应的监控项信息
-	vector<TransmitterSchedule> vecSchedules;//发射机对应定时开关机计划
-	vector<MonitorScheduler> vecMonitorScheduler;//发射机监控计划表 add by ws at 2012-12-10
-} TransmitterInformation;
-
-
-
-typedef struct
-{
-	string sStationNumber;//台站编号
-	string sDevNum;       //设备编号
-	string sDevName;      //设备名称
-	int    nDevType;      //设备类型
-	int    nAlarmCount;   
-	int    nCommType;     //主、被动
-	int    nConnectType;  //tcp/udp/com
-	string sIP;
-	int    nPort;
-	int    nCom;
-	int    nDevAddr;      //设备地址
-	int    nBaudrate;    
-	int    nDatabit;
-	int    nStopbit;
-	int    nParity;
-	int    nDevProtocol; //设备协议号
-	int    nSubProtocol; //设备子协议号
-	map<int,DevParamerMonitorItem> mapMonitorItem;//对应的监控项信息
-	vector<MonitorScheduler> vecMonitorScheduler;//设备监控计划表 add by ws at 2012-12-10
-}DevParamerInfo;
-
-//所有设备通用
-/*typedef struct
-{
-	string sStationNumber;//台站编号
-	string sDevNum;       //设备编号
-	string sDevName;      //设备名称
-	int    nDevType;      //设备类型
-	int    nConnectType;  //连接类型
-	int    nCommType;//通信方式
-	map<int,DevParamerMonitorItem> mapMonitorItem;//对应的监控项信息
-}DevBaseInfo;*/
-
-/*typedef struct
-{
-	string sStationNumber;//台站编号
-	string sModleNumber;//
-	string sModName;//模块名称
-	int    nType;
-	string sModIP;//模块IP地址
-	int    nModPort;//模块端口
-	int    nCommType;//通信方式
-	int    nConnectType;//连接属性
-	string sNote;
-	map<string,DevParamerInfo> mapDevInfo;//模块对应设备信息
-}ModleInfo;*/
 
 
 struct DevicePropertyEx
@@ -429,22 +245,6 @@ typedef struct
 }SendMSInfo;
 
 
-typedef struct  tagTsmtAgent
-{
-    tagTsmtAgent():trsmt_data_ptr(new Data)
-	{
-		antenaS = dev_unknown;//默认没有备机
-		nCmdType = -1;
-	}
-	int            nCmdType;   //当前命令类型
-	string         sDevId;     //当前设备ID
-	bool           bHost;      //当前是否是主机
-	dev_run_state  antenaS;    //天线当前状态   
-	int            nResult;    //命令执行结果
-	DevMonitorDataPtr           trsmt_data_ptr; //发射机监控量数据
-}TsmtAgentMsg;
-typedef boost::shared_ptr<TsmtAgentMsg> pTsmtAgentMsgPtr;
-
 typedef struct
 {
 	string sPhone;       //呼叫电话号码
@@ -459,28 +259,6 @@ typedef struct
 	int    iSms_count;   //短信发送次数
 }CallTask;
 
-
-enum linkage_event_type
-{
-	e_dev_start,//设备开启
-	e_dev_stop, //设备关闭
-	e_antenna_switch,//天线倒换
-	e_dev_net_error,//设备网络错误
-};
-
-typedef struct _tagLinkage
-{
-    _tagLinkage()
-		:vParams(3)
-	{
-
-	}
-	string sStationId;//台站id
-	string sLinkageId;//联动id
-	int    nEventType;//事件类型
-	vector<string> vParams;//参数
-}LinkageInfo;
-
 typedef struct
 {
 	string sPrgNum;
@@ -491,37 +269,6 @@ typedef struct
 	vector<MonitorScheduler> vecMonitorScheduler;
 	vector<MonitorScheduler> vecRecoringScheduler;
 }PrgInfo;
-
-typedef struct
-{
-	string sStation;
-	string sDevnember;
-	map<int,PrgInfo> map_Info;
-}DeviceEncoderInfo;
-
-typedef struct
-{
-	string sStationNumber;//台站编号
-	string sDevNum;       //设备编号
-	string sDevName;      //设备名称
-	int    nDevType;      //设备类型
-	int    nAlarmCount;
-	int    nConnectType;
-	int    nCommType;
-	string sIP;
-	int    nPort;
-	int    nCom;
-	int    nDevAddr;      //设备地址
-	int    nBaudrate;    
-	int    nDatabit;
-	int    nStopbit;
-	int    nParity;
-	int    nDevProtocol; //设备协议号
-	int    nSubProtocol; //设备子协议号
-	map<int,DevParamerMonitorItem> mapMonitorItem;//对应的监控项信息
-	DeviceEncoderInfo  devForEncoderInfo;//760，730+对应编码器配置
-}MediaDeviceParamInfo;
-
 
 const char CONST_STR_ITEM_UNIT[][8] = {"W","Kw","Mw"};
 
@@ -535,8 +282,5 @@ enum ActionType
     ACTP_SWITCH_ANTTEN,//天线切换
     ACTP_SOUND_LIGHT_ALARM,//声光告警
 };
-
-//const char MONITORING_ITEM_NAME[][64] = {"发射功率","反射功率","驻波比"};
-
 
 #endif

@@ -31,8 +31,7 @@ int BCD2OCT(unsigned char src);
 unsigned char AsciiToInt(unsigned char src);
 void IntToAscii(int src,unsigned char * cDsc);
 int SF_checkSum(unsigned char* src,int len);
-//subneedstr---功能：原始字符串截取stDes与edDes之间的字符串
-//参数1：原始字符串;参数2：查找的起始字符串;参数3：查找的结束字符串;
+
 string subneedstr(const string strSrc,const string staDes,const string endDes);
 
 void utf8ToGb2312(std::string& strUtf8);

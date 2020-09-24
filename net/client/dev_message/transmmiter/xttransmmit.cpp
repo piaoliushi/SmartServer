@@ -14,7 +14,7 @@ int XtTransmmit::check_msg_header(unsigned char *data, int nDataLen, CmdType cmd
     {
     case XT_DM:{
         if(data[0] == 0x7E && data[1]==0xE7)
-            return pHeader[2];
+            return data[2];
         return -1;
     }
         break;

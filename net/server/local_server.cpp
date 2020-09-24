@@ -361,6 +361,7 @@ namespace hx_net
             if(iter->second.usr_ == sCurUsr){
 
                 bfindOldUser = true;
+                 std::string oldUsrId = (*iter).second.usr_number_;//记录当前登陆用户id
                 //更新当前用户信息
                 iter->second.usr_= sNewUser;//sUser记录当前登陆用户
                 iter->second.psw_= sNewPassword;//记录当前登陆用户密码
@@ -403,7 +404,7 @@ namespace hx_net
 
                 //更新授权信息
                 time_t curTm = time(0);
-                std::string oldUsrId = (*iter).second.usr_number_;//记录当前登陆用户id
+
                 if(!GetInst(DataBaseOperation).AddHandove(oldUsrId,tmpUser.sNumber,sContents,curTm))
                    return;
 
