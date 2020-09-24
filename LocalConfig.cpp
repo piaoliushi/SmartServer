@@ -22,6 +22,7 @@ LocalConfig::LocalConfig(void)
     ,ntp_mod_(1)
     ,ntp_mod_value_(2)
     ,ntp_time_("1900-1-1 15:01:01")
+    ,db_name_("smartweb")
 {
     //load_local_config("config.xml");
 }
@@ -57,6 +58,10 @@ bool LocalConfig::load_local_config(const char* sFileName)
             db_ip_ = xml_database->first_attribute("ip")->value();
             db_usr_ = xml_database->first_attribute("user")->value();
             db_psw_ = xml_database->first_attribute("password")->value();
+
+            xml_attribute<char> *db_name_attr = xml_database->first_attribute("name");//->value();
+            if(db_name_attr!=nullptr)
+                db_name_ = db_name_attr->value();
         }
         else
             return false;

@@ -150,7 +150,7 @@ void QSvcStatePage::StartSvc()
     {
         GetInst(DataBaseOperation).set_notify(&m_Notify);
         if(GetInst(DataBaseOperation).OpenDb(GetInst(LocalConfig).database_ip(),
-                                             "smartweb",
+                                             GetInst(LocalConfig).database_name(),
                                              GetInst(LocalConfig).database_user(),
                                              GetInst(LocalConfig).database_password()))
         {

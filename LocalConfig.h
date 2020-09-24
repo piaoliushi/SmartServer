@@ -22,6 +22,8 @@ public:
 	string database_user()const{return db_usr_;}
 	string database_password()const{return db_psw_;}
 	string database_drivername()const{return db_driver_;}
+    string database_name()const{return db_name_;}
+
 	unsigned short local_port()const{return local_port_;}
 	int            heartbeat_interval()const{return hb_interval_;}
 	int            heartbeat_timeout()const{return hb_timeout_;}
@@ -66,6 +68,7 @@ private:
 	string db_usr_;     //数据库用户名
 	string db_psw_;     //数据库密码
 	string db_driver_;//数据库驱动名称
+    string db_name_;//数据库名称
 	int    hb_interval_;//心跳间隔
 	int    hb_timeout_; //心跳超时时间
 
