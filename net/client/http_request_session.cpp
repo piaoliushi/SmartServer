@@ -1,4 +1,4 @@
-﻿#include "http_request_session.h"
+#include "http_request_session.h"
 #include "./protocol/bohui_protocol.h"
 #include "./protocol/bohui_const_define.h"
 #include "LocalConfig.h"
