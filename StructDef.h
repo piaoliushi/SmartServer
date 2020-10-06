@@ -107,6 +107,7 @@ typedef enum PROTOCOL
 typedef enum XTPROTOCOL
 {
     XT_DM = 0,
+    XT_DM_1KW = 1,
 }XtSubProtocol;
 
 typedef enum ANTENAPROTOCOL

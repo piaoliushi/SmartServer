@@ -59,7 +59,7 @@ bool LocalConfig::load_local_config(const char* sFileName)
             db_usr_ = xml_database->first_attribute("user")->value();
             db_psw_ = xml_database->first_attribute("password")->value();
 
-            xml_attribute<char> *db_name_attr = xml_database->first_attribute("name");//->value();
+            xml_attribute<char> *db_name_attr = xml_database->first_attribute("name");
             if(db_name_attr!=NULL)
                 db_name_ = db_name_attr->value();
         }
