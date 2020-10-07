@@ -1,4 +1,4 @@
-#include "bgtransmmiter.h"
+﻿#include "bgtransmmiter.h"
 namespace hx_net
 {
    BgTransmmiter::BgTransmmiter(int subprotocol,int addresscode)
