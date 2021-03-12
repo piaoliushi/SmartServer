@@ -1238,16 +1238,25 @@ namespace hx_net
         if(reason != SNMP_CLASS_ASYNC_RESPONSE && reason != SNMP_CLASS_NOTIFICATION){
             cout << "Failed to issue SNMP aysnc_callback: (" << reason  << ") "
                    << session->error_msg(reason) << endl;
+            if (cd)
+                ((Link_message*)cd)->Link_TimeoutCallback(false);
             return;
         }
 
         if (cd){
 
             //cout << "Succeed to issue SNMP aysnc_callback!!";
+             ((Link_message*)cd)->Link_TimeoutCallback(true);
             ((Link_message*)cd)->Link_Callback(reason, session, pdu, target);
         }
     }
 
+
+    void Link_message::Link_TimeoutCallback(bool bState)
+    {
+        if(m_pSession)
+            m_pSession->set_data_return_state(d_devInfo.sDevNum,bState);
+    }
 
     void Link_message::Link_Callback(int reason, Snmp *session,Pdu &pdu, SnmpTarget &target)
     {

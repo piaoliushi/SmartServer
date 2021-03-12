@@ -122,6 +122,7 @@ namespace hx_net
                     }
                     break;
                 case C2000_SDD8020_BB3:
+                case C2000_A2_SAX0800_FX3:
                 {
                     if(data[0]!=0x00 || data[1]!=0x01)
                         return RE_HEADERROR;
@@ -140,6 +141,29 @@ namespace hx_net
                     if(data[0]!=d_devInfo.iAddressCode || data[1]!=0x03)
                         return RE_HEADERROR;
                     return data[2]+2;
+                }
+                case ZGT_AC485T:
+                {
+                    if(data[0]!=d_devInfo.iAddressCode)
+                        return -1;
+                    else if(data[1]==0x44)
+                        return (((data[2]<<8)|data[3])+2);
+                    else if(data[1]==0x46)
+                        return 4;
+                    else
+                        return 1;
+                }
+                case PAIGU_AC360:
+                {
+                    if(data[0]!=d_devInfo.iAddressCode)
+                        return RE_HEADERROR;
+                    else
+                    {
+                        if(data[1]==0x03)
+                            return data[2]+2;
+                        else
+                            return 5;
+                    }
                 }
                 default:
                     return RE_NOPROTOCOL;
@@ -195,6 +219,12 @@ namespace hx_net
                     m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                     return iresult;
                 }
+                case C2000_A2_SAX0800_FX3:
+                {
+                    int iresult = C2000_SAXFX3_Data(data,d_curData_ptr,nDataLen,iaddcode);
+                    m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                    return iresult;
+                }
                 case NT511_AD:
                 {
                     int iresult = NT511_AD_Data(data,d_curData_ptr,nDataLen,iaddcode);
@@ -204,6 +234,18 @@ namespace hx_net
                 case C2000_D2_DCTZ02:
                 {
                     int iresult = C2000_D2_DSRZ_Data(data,d_curData_ptr,nDataLen,iaddcode);
+                    m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                    return iresult;
+                }
+                case ZGT_AC485T:
+                {
+                    int iresult = ZGT_AC485T_Data(data,d_curData_ptr,nDataLen,iaddcode);
+                    m_pSession->start_handler_data(iaddcode,d_curData_ptr);
+                    return iresult;
+                }
+                case PAIGU_AC360:
+                {
+                    int iresult = PG_AC360_Data(data,d_curData_ptr,nDataLen,iaddcode);
                     m_pSession->start_handler_data(iaddcode,d_curData_ptr);
                     return iresult;
                 }
@@ -247,6 +289,9 @@ namespace hx_net
         case C2000_SDD8020_BB3:
         case NT511_AD:
         case C2000_D2_DCTZ02:
+        case ZGT_AC485T:
+        case PAIGU_AC360:
+        case C2000_A2_SAX0800_FX3:
             return true;
 
 
@@ -256,7 +301,48 @@ namespace hx_net
 	
 	void Envir_message::GetSignalCommand(devCommdMsgPtr lpParam,CommandUnit &cmdUnit)
 	{
-
+        switch(d_devInfo.nSubProtocol)
+        {
+        case ZGT_AC485T:
+        {//{0x01,0x46,0x10,0xF5,0x00,0x01,0x00,0x02,0x00,0x00,0xFF,0xFF};
+            if(lpParam->cparams().size()<1)
+                return;
+            cmdUnit.commandLen = 12;
+            cmdUnit.commandId[0] = d_devInfo.iAddressCode;
+            cmdUnit.commandId[1] = 0x46;
+            cmdUnit.commandId[2] = 0x10;
+            cmdUnit.commandId[3] = 0xF5;
+            cmdUnit.commandId[4] = 0x00;
+            cmdUnit.commandId[5] = 0x01;
+            cmdUnit.commandId[6] = 0x00;
+            cmdUnit.commandId[7] = 0x02;
+            cmdUnit.commandId[8] = atoi(lpParam->cparams(0).sparamvalue().c_str());
+            if(lpParam->cparams().size()>1)
+                cmdUnit.commandId[9] = atoi(lpParam->cparams(1).sparamvalue().c_str());
+            else
+                cmdUnit.commandId[9] = 0x00;
+            unsigned short uscrc = CRC16_A001(cmdUnit.commandId,10);
+            cmdUnit.commandId[10] = (uscrc&0x00FF);
+            cmdUnit.commandId[11] = ((uscrc & 0xFF00)>>8);
+        }
+            break;
+        case PAIGU_AC360:
+        {
+            if(lpParam->cparams().size()<1)
+                return;
+            cmdUnit.commandLen = 8;
+            cmdUnit.commandId[0] = d_devInfo.iAddressCode;
+            cmdUnit.commandId[1] = 0x06;
+            cmdUnit.commandId[2] = 0x00;
+            cmdUnit.commandId[3] = 0x66;
+            cmdUnit.commandId[4] = ((atoi(lpParam->cparams(0).sparamvalue().c_str())&0xFF00)>>8);
+            cmdUnit.commandId[5] = (atoi(lpParam->cparams(0).sparamvalue().c_str())&0xFF);
+            unsigned short uscrc = CRC16_A001(cmdUnit.commandId,6);
+            cmdUnit.commandId[6] = (uscrc&0x00FF);
+            cmdUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+        }
+            break;
+        }
 	}
 
 	void Envir_message::GetAllCmd( CommandAttribute &cmdAll )
@@ -506,6 +592,27 @@ namespace hx_net
 
                 }
                     break;
+                case C2000_A2_SAX0800_FX3:
+                {
+                    //00 01 00 00 00 06 FF 03 02 58 00 10
+                    CommandUnit tmUnit;
+                    tmUnit.commandId[0] = 0x00;
+                    tmUnit.commandId[1] = 0x01;
+                    tmUnit.commandId[2] = 0x00;
+                    tmUnit.commandId[3] = 0x00;
+                    tmUnit.commandId[4] = 0x00;
+                    tmUnit.commandId[5] = 0x06;
+                    tmUnit.commandId[6] = 0xFF;
+                    tmUnit.commandId[7] = 0x03;
+                    tmUnit.commandId[8] = 0x02;
+                    tmUnit.commandId[9] = 0x58;
+                    tmUnit.commandId[10] = 0x00;
+                    tmUnit.commandId[11] = 0x10;
+                    tmUnit.ackLen = 6;
+                    tmUnit.commandLen = 12;
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                }
+                    break;
                 case NT511_AD:{
                     CommandUnit tmUnit;
                     tmUnit.ackLen = 3;
@@ -516,6 +623,40 @@ namespace hx_net
                     tmUnit.commandId[3] = 0x00;
                     tmUnit.commandId[4] = 0x00;
                     tmUnit.commandId[5] = 0x08;
+                    unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                }
+                    break;
+                case ZGT_AC485T:
+                {
+                    CommandUnit tmUnit;
+                    tmUnit.ackLen = 4;
+                    tmUnit.commandLen = 8;
+                    tmUnit.commandId[0] = d_devInfo.iAddressCode;
+                    tmUnit.commandId[1] = 0x44;
+                    tmUnit.commandId[2] = 0x10;
+                    tmUnit.commandId[3] = 0x00;
+                    tmUnit.commandId[4] = 0x00;
+                    tmUnit.commandId[5] = 0x08;
+                    unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
+                    tmUnit.commandId[6] = (uscrc&0x00FF);
+                    tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
+                    cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+                }
+                    break;
+                case PAIGU_AC360:
+                {
+                    CommandUnit tmUnit;
+                    tmUnit.ackLen = 3;
+                    tmUnit.commandLen = 8;
+                    tmUnit.commandId[0] = d_devInfo.iAddressCode;
+                    tmUnit.commandId[1] = 0x03;
+                    tmUnit.commandId[2] = 0x00;
+                    tmUnit.commandId[3] = 0x01;
+                    tmUnit.commandId[4] = 0x00;
+                    tmUnit.commandId[5] = 0x19;
                     unsigned short uscrc = CRC16_A001(tmUnit.commandId,6);
                     tmUnit.commandId[6] = (uscrc&0x00FF);
                     tmUnit.commandId[7] = ((uscrc & 0xFF00)>>8);
@@ -799,6 +940,25 @@ namespace hx_net
         return RE_SUCCESS;
     }
 
+    int Envir_message::C2000_SAXFX3_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        iaddcode = d_devInfo.iAddressCode;
+        int num = data[8]/4;
+        float fdat=0;
+        DataInfo dainfo;
+        dainfo.bType = false;
+        for(int i=0;i<num;++i)
+        {
+            *(((char*)(&fdat) + 0)) = data[10+i*4];
+            *(((char*)(&fdat) + 1)) = data[9+i*4];
+            *(((char*)(&fdat) + 2)) = data[12+i*4];
+            *(((char*)(&fdat) + 3)) = data[11+i*4];
+            dainfo.fValue = fdat*0.001;
+            data_ptr->mValues[i] = dainfo;
+        }
+        return RE_SUCCESS;
+    }
+
     //执行任务
     void Envir_message::exec_task_now(int icmdType,string sUser,e_ErrorCode &eErrCode,map<int,string> &mapParam,int nMode,
                                      bool bSnmp,Snmp *snmp,CTarget *target)
@@ -812,12 +972,26 @@ namespace hx_net
             switch (icmdType) {
             case MSG_TRANSMITTER_TURNOFF_OPR:
             case MSG_DEV_TURNOFF_OPR:{
-            if(m_pSession!=NULL)
-
-                m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,0,eErrCode);
-
+                if(m_pSession!=NULL)
+                {
+                    if(mapParam.size()<1)
+                        m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,0,eErrCode);
+                    else
+                        m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,atoi(mapParam[0].c_str()),eErrCode);
+                }
             }
                 break;
+            case MSG_TRANSMITTER_TURNON_OPR:
+            case MSG_DEV_TURNON_OPR:
+            {
+                if(m_pSession!=NULL)
+                {
+                    if(mapParam.size()<1)
+                        m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNON_OPR,0,eErrCode);
+                    else
+                        m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNON_OPR,atoi(mapParam[0].c_str()),eErrCode);
+                }
+            }
             default:
                 break;
             }
@@ -842,6 +1016,16 @@ namespace hx_net
                 cout<<"send MSG_DEV_TURNOFF_OPR---"<<"param:"<<param_2<<endl;
                 m_pSession->send_cmd_to_dev(d_devInfo.sDevNum,MSG_DEV_TURNOFF_OPR,param_2,eErrCode);
             }
+        }
+            break;
+        case MSG_GENERAL_COMMAND_OPR:
+        {
+            CommandUnit adjustTmCmd;
+            GetSignalCommand(lpParam,adjustTmCmd);
+            if(adjustTmCmd.commandLen>0)
+                m_pSession->send_cmd_to_dev(adjustTmCmd,eErrCode);
+            else
+                eErrCode = EC_UNKNOWN;
         }
             break;
         default:
@@ -919,6 +1103,78 @@ namespace hx_net
             dainfo.fValue = fdat;
             data_ptr->mValues[i] = dainfo;
         }
+        return RE_SUCCESS;
+    }
+
+    int Envir_message::ZGT_AC485T_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        if(data[1]!=0x44)
+            return RE_CMDACK;
+        iaddcode = data[0];
+        DataInfo dainfo;
+        dainfo.bType = false;
+        for(int i=0;i<4;++i)
+        {
+            dainfo.fValue = (data[4+2*i]*256+data[5+2*i])*0.1;
+            data_ptr->mValues[i] = dainfo;
+        }
+        dainfo.fValue = (data[12]*256+data[13])*300;
+        data_ptr->mValues[4] = dainfo;
+        dainfo.bType = true;
+        dainfo.fValue = (data[16]*256+data[17]);
+        data_ptr->mValues[5] = dainfo;
+        int ialarm = (data[18]*256+data[19]);
+        dainfo.fValue = 0;
+        for(int i=0;i<4;++i)
+        {
+            data_ptr->mValues[6+i] = dainfo;
+        }
+        switch(ialarm)
+        {
+        case 1:
+            data_ptr->mValues[6].fValue = 1;
+            break;
+        case 2:
+            data_ptr->mValues[7].fValue = 1;
+            break;
+        case 3:
+            data_ptr->mValues[8].fValue = 1;
+            break;
+        case 4:
+            data_ptr->mValues[9].fValue = 1;
+            break;
+        default:
+            break;
+        }
+        return RE_SUCCESS;
+    }
+
+    int Envir_message::PG_AC360_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        if(data[1]!=0x03)
+            return RE_CMDACK;
+        iaddcode = data[0];
+        DataInfo dainfo;
+        dainfo.bType = false;
+        for(int i=0;i<5;++i)
+        {
+            dainfo.fValue = (data[3+2*i]*256+data[4+2*i])*0.1;
+            data_ptr->mValues[i] = dainfo;
+        }
+        dainfo.fValue = (data[13]*256+data[14])*0.1;
+        data_ptr->mValues[5] = dainfo;
+        dainfo.bType = true;
+        dainfo.fValue = data[16];
+        data_ptr->mValues[6] = dainfo;
+        dainfo.bType = false;
+        for(int i=0;i<6;++i)
+        {
+            dainfo.fValue = (data[27+2*i]*256+data[28+2*i])*0.1;
+            data_ptr->mValues[7+i] = dainfo;
+        }
+        dainfo.bType = true;
+        dainfo.fValue = data[48];
+        data_ptr->mValues[13] = dainfo;
         return RE_SUCCESS;
     }
 

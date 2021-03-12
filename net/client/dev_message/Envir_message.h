@@ -34,10 +34,15 @@ protected:
                                      int nDataLen, int &iaddcode);
     int C2000_BB3_Data(unsigned char *data, DevMonitorDataPtr data_ptr,
                        int nDataLen, int &iaddcode);
-
+    int C2000_SAXFX3_Data(unsigned char *data, DevMonitorDataPtr data_ptr,
+                       int nDataLen, int &iaddcode);
     int NT511_AD_Data(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen,
                       int &iaddcode);
     int C2000_D2_DSRZ_Data(unsigned char *data, DevMonitorDataPtr data_ptr,
+                       int nDataLen, int &iaddcode);
+    int ZGT_AC485T_Data(unsigned char *data, DevMonitorDataPtr data_ptr,
+                       int nDataLen, int &iaddcode);
+    int PG_AC360_Data(unsigned char *data, DevMonitorDataPtr data_ptr,
                        int nDataLen, int &iaddcode);
 private:
     dev_session_ptr       m_pSession;//关联连接对象

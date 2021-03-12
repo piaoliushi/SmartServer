@@ -289,7 +289,9 @@ typedef enum WSPROTOCOL
     C2000_SDD8020_BB3   = 7,
     NT511_AD            = 8,
     C2000_D2_DCTZ02     = 9,
-
+    ZGT_AC485T          = 10,
+    PAIGU_AC360         = 11,
+    C2000_A2_SAX0800_FX3= 12,
 }WsSubProtocol;
 
 //康特
@@ -377,7 +379,7 @@ typedef enum  MEDIASUBPROTOCL_TAG
     MD_760BD_IV= 3,//汇鑫MD760板卡
     DTMB_BD    = 4,//DTMB板卡
     MD_761     = 5,//761
-
+    MD_761_II  = 6,
 }MediaSubProtocol;
 //桂林思奇
 typedef enum GLSQ_TAG

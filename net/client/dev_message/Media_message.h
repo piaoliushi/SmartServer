@@ -31,6 +31,7 @@ private:
     int Md760BDData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
     int DtmbBDData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
     int Md761Data(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
+    int Md761IIData(unsigned char *data,DevMonitorDataPtr data_ptr,int nDataLen,int& iaddcode);
 private:
     session_ptr         m_pSession;//关联连接对象
     DeviceInfo           &d_devInfo;//设备信息

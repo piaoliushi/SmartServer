@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
 
     //加入启动项
 #ifdef Q_OS_WIN
-    appAutoRun();
+    //appAutoRun();
 #endif
     QApplication::setPalette(pal);
     QFont font  = a.font();

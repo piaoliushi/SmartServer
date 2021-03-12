@@ -28,6 +28,7 @@ public:
                                            e_ErrorCode &eErrCode);
 
     int getBelongChannelIdFromMonitorItem(int monitorItemId);
+    void Link_TimeoutCallback(bool bState);
 protected:
     int  parse_SatelliteReceive_data(Snmp *snmp,DevMonitorDataPtr data_ptr,CTarget *target);
     void parse_Satellite_data_(Pdu &pdu, SnmpTarget &target);

@@ -1705,6 +1705,7 @@ void device_session::handler_data(string sDevId,DevMonitorDataPtr curDataPtr)
     boost::recursive_mutex::scoped_lock lock(data_deal_mutex);
     if(curDataPtr->mValues.size()<=0)
         return;
+
     //是否在运行图时间
     //初始化监测标志（默认都监测）
     map<int,bool> curDevIsMonitorChl;

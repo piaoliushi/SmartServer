@@ -65,6 +65,15 @@ namespace hx_net
                 return int((data[6]<<8)|data[5]);
             }
         }
+        case MD_761_II:
+        {
+            if(data[0]!=0x7E || data[1]!=0x22)
+                return RE_HEADERROR;
+            else
+            {
+                return int((data[3]<<8)|data[2]);
+            }
+        }
         case DTMB_BD:{
             if(data[0]!=0x7E)
                 return RE_HEADERROR;
@@ -99,6 +108,9 @@ namespace hx_net
             break;
         case MD_761:
             idecresult = Md761Data(data,d_curData_ptr,nDataLen,iaddcode);
+            break;
+        case MD_761_II:
+            idecresult = Md761IIData(data,d_curData_ptr,nDataLen,iaddcode);
             break;
         }
 
@@ -144,6 +156,7 @@ namespace hx_net
         case MD_760BD_IV:
         case DTMB_BD:
         case MD_761:
+        case MD_761_II:
 			return true;
 		}
 		return false;
@@ -217,6 +230,23 @@ namespace hx_net
             tmUnit.commandId[4] = ((d_devInfo.iAddressCode&0xFF00)>>8);
             tmUnit.commandId[5] = 0x02;
             tmUnit.commandId[6] = 0x00;
+            tmUnit.commandId[7] = 0x22;
+            tmUnit.commandId[8] = 0x55;
+            cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
+        }
+            break;
+        case MD_761_II:
+        {
+            CommandUnit tmUnit;
+            tmUnit.commandLen = 9;
+            tmUnit.ackLen = 4;
+            tmUnit.commandId[0] = 0x7E;
+            tmUnit.commandId[1] = 0x22;
+            tmUnit.commandId[2] = 0x05;
+            tmUnit.commandId[3] = 0x00;
+            tmUnit.commandId[4] = 0x26;
+            tmUnit.commandId[5] = (d_devInfo.iAddressCode&0x00FF);
+            tmUnit.commandId[6] = ((d_devInfo.iAddressCode&0xFF00)>>8);
             tmUnit.commandId[7] = 0x22;
             tmUnit.commandId[8] = 0x55;
             cmdAll.mapCommand[MSG_DEVICE_QUERY].push_back(tmUnit);
@@ -590,6 +620,52 @@ namespace hx_net
        return RE_SUCCESS;
     }
 
+    int Media_message::Md761IIData(unsigned char *data, DevMonitorDataPtr data_ptr, int nDataLen, int &iaddcode)
+    {
+        if(data[1]!=0x22)
+            return RE_CMDACK;
+        int index = 0;
+        iaddcode = data[5]+data[6]*256;
+        DataInfo dtinfo;
+        for(int i=0;i<6;++i)
+        {
+            dtinfo.bType = false;
+            dtinfo.fValue = data[12*i+7];
+            data_ptr->mValues[index++] = dtinfo;
+            int nfreq = data[12*i+8]+data[12*i+9]*256;
+            dtinfo.fValue = (data[12*i+7]==0x01 ? nfreq*0.01 : nfreq);
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.fValue = data[12*i+10];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.fValue = data[12*i+11];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.bType = true;
+            dtinfo.fValue = data[12*i+12];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.fValue = data[12*i+13];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.bType = false;
+            dtinfo.fValue = data[12*i+14];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.fValue = data[12*i+15];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.fValue = data[12*i+16];
+            data_ptr->mValues[index++] = dtinfo;
+            dtinfo.bType = true;
+            for(int j=0;j<7;++j)
+            {
+                dtinfo.fValue = Getbit(data[12*i+17],j);
+                data_ptr->mValues[index++] = dtinfo;
+            }
+            for(int k=0;k<4;++k)
+            {
+                dtinfo.fValue = Getbit(data[12*i+18],k);
+                data_ptr->mValues[index++] = dtinfo;
+            }
+        }
+        return RE_SUCCESS;
+    }
+
     //添加数据(http消息)
     bool  Media_message::add_new_data(string sIp,int nChannel,DevMonitorDataPtr &mapData)
     {
@@ -621,6 +697,9 @@ namespace hx_net
         }
         case MD_761:{
             return (monitorItemId>77 ? (monitorItemId-78)/2 : monitorItemId/13);
+        }
+        case MD_761_II:{
+            return monitorItemId/20;
         }
         }
     }

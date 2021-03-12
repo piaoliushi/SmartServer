@@ -32,7 +32,7 @@
 #include <boost/asio/serial_port.hpp>
 #include <boost/threadpool.hpp>
 #include <boost/smart_ptr/detail/atomic_count.hpp>
-#include <boost/network/include/http/server.hpp>
+/*#include <boost/network/include/http/server.hpp>
 #include <boost/network/protocol/http/response.hpp>
 #include <boost/network/tags.hpp>
 #include <boost/network/message_fwd.hpp>
@@ -43,7 +43,7 @@
 #include <boost/network/protocol/http/request.hpp>
 #include <boost/network/protocol/http/server/sync_server.hpp>
 #include <boost/network/protocol/http/server/async_server.hpp>
-#include <boost/network/utils/thread_pool.hpp>
+#include <boost/network/utils/thread_pool.hpp>*/
 #include <boost/websocketpp/config/asio_no_tls.hpp>
 #include <boost/websocketpp/server.hpp>
 #include "./net/config.h"
